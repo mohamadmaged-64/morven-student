@@ -16,6 +16,7 @@ import {
   ProgressBar,
 } from '@/components/UI';
 import { useAppStore } from '@/store/useAppStore';
+import { Notebook } from 'lucide-react';
 import { useLanguageStore } from '@/store/useLanguageStore';
 import {
   summarizeText,
@@ -58,7 +59,7 @@ interface LabValue {
 interface FlashcardDeck {
   id: string;
   name: string;
-  icon: string;
+  icon: React.ReactNode;
   cards: { front: string; back: string }[];
 }
 
@@ -906,7 +907,7 @@ function MedicalFlashcards() {
     const customDeck: FlashcardDeck = {
       id: 'custom',
       name: 'Custom',
-      icon: '📝',
+      icon: <Notebook className="w-8 h-8 text-blue-500" />,
       cards: customCards.map((c) => ({ front: c.front, back: c.back })),
     };
     return [...BUILT_IN_DECKS, customDeck];

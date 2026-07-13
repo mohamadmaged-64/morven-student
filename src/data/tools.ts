@@ -8,15 +8,14 @@ export interface CategoryMeta {
   icon: LucideIcon;
 }
 import {
-  FileText,
-  Brain,
-  Presentation,
-  Video,
-  Mic,
-  Image as ImageIcon,
-  QrCode,
-  GraduationCap,
-  HeartPulse,
+  FileText, Brain, Presentation, Video, Mic, Image as ImageIcon, QrCode, 
+  GraduationCap, HeartPulse, File, FileSpreadsheet, Paperclip, Scissors, 
+  Minimize2, Trash2, Shuffle, RotateCw, Lock, Unlock, Droplet, PenTool, 
+  Search, Printer, ArrowLeftRight, FileSearch, ClipboardList, PlaySquare, 
+  Music, Lightbulb, Pen, CheckCircle, Globe, List, Newspaper, Key, 
+  HelpCircle, Zap, Layers, BookOpenCheck, CalendarDays, BrainCircuit, 
+  Book, Type, ScrollText, Microscope, Sparkles, Smartphone, Timer, 
+  ListTodo, Calendar, ClipboardPlus, Stethoscope, Scale, Pill, FlaskConical, FileHeart
 } from "lucide-react";
 
 export const tools: Tool[] = [
