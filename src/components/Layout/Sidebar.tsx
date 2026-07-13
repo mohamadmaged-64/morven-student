@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
@@ -16,22 +16,25 @@ import {
   Presentation,
   Video,
   Music,
-  Image,
+  Image as ImageIcon,
   QrCode,
   GraduationCap,
   HeartPulse,
+  FileIcon
 } from 'lucide-react';
- const iconMap = {
-               FileText,
-               Brain,
-               Presentation,
-               Video,
-               Music,
-               Image,
-               QrCode,
-               GraduationCap,
-               HeartPulse,
+
+const iconMap = {
+  FileText,
+  Brain,
+  Presentation,
+  Video,
+  Music,
+  Image: ImageIcon,
+  QrCode,
+  GraduationCap,
+  HeartPulse,
 };
+
 const sidebarVariants = {
   open: { x: 0, transition: { type: 'spring', stiffness: 300, damping: 30 } },
   closed: { x: '-100%', transition: { type: 'spring', stiffness: 300, damping: 30 } },
@@ -46,9 +49,9 @@ const itemVariants = {
   }),
 };
 
-const favoriteTools = tools.filter((t) => useAppStore.getState().favoriteTools.includes(t.id));
-
-function SidebarContent() {
+// Removed fixed const collapsed = true;
+// Passed isMobile to control the text display based on screen size or hover state
+function SidebarContent({ isMobile, isHovered }: { isMobile: boolean; isHovered: boolean }) {
   const { t } = useTranslation();
   const favoriteToolsIds = useAppStore((s) => s.favoriteTools);
   const sidebarOpen = useAppStore((s) => s.sidebarOpen);
@@ -56,38 +59,49 @@ function SidebarContent() {
   const location = useLocation();
 
   const favTools = tools.filter((t) => favoriteToolsIds.includes(t.id));
-  const collapsed = true;
+  
+  // Text will show if it's on Mobile (Drawer mode) OR if the desktop sidebar is hovered
+  const showText = isMobile || isHovered;
+
   return (
     <nav className="flex flex-col h-full">
       {/* Logo */}
       <div className="flex items-center gap-3 px-5 py-5">
-       <div className="w-10 h-10 rounded-2xl bg-primary-500 flex items-center justify-center shadow-glow">
-  <span className="text-white text-lg font-bold">M</span>
-</div>
-    {!collapsed && (
-  <div className="flex flex-col">
-    <span className="text-sm font-bold text-gray-900 dark:text-white leading-tight">
-      {t('app.name')}
-    </span>
-
-    <span className="text-[10px] text-gray-400 dark:text-gray-500 leading-tight">
-      {t('app.subtitle')}
-    </span>
-  </div>
-)}
+        <div className="w-10 h-10 rounded-2xl bg-primary-500 flex items-center justify-center shadow-glow shrink-0">
+          <span className="text-white text-lg font-bold">M</span>
+        </div>
+        
+        {/* Animate text appearance */}
+        <AnimatePresence>
+          {showText && (
+            <motion.div
+              initial={{ opacity: 0, width: 0 }}
+              animate={{ opacity: 1, width: 'auto' }}
+              exit={{ opacity: 0, width: 0 }}
+              className="flex flex-col overflow-hidden whitespace-nowrap"
+            >
+              <span className="text-sm font-bold text-gray-900 dark:text-white leading-tight">
+                {t('app.name')}
+              </span>
+              <span className="text-[10px] text-gray-400 dark:text-gray-500 leading-tight">
+                {t('app.subtitle')}
+              </span>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Navigation */}
-      <div className="flex-1 overflow-y-auto px-3 pb-4 scrollbar-thin">
+      <div className="flex-1 overflow-y-auto px-3 pb-4 scrollbar-thin overflow-x-hidden">
         {/* Dashboard */}
         <div className="mb-3">
           <NavLink
             to="/"
             end
-            onClick={() => setSidebarOpen(false)}
+            onClick={() => isMobile && setSidebarOpen(false)}
             className={({ isActive }) =>
               [
-                'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200',
+                'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 w-full',
                 isActive
                   ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-400'
                   : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-dark-hover hover:text-gray-900 dark:hover:text-gray-200',
@@ -95,74 +109,109 @@ function SidebarContent() {
             }
           >
             <House size={18} className="shrink-0" />
-            {!collapsed && <span>{t('nav.dashboard')}</span>}
+            <AnimatePresence>
+              {showText && (
+                <motion.span 
+                  initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                  className="whitespace-nowrap"
+                >
+                  {t('nav.dashboard')}
+                </motion.span>
+              )}
+            </AnimatePresence>
           </NavLink>
         </div>
 
         {/* Categories */}
-        <div className="px-3 mb-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400">
-  {t('nav.tools')}
-</div>
-        <div className="space-y-0.5">
-          
+        <div className="px-3 mb-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400 h-4">
+           {showText ? t('nav.tools') : ''}
+        </div>
+        <div className="space-y-0.5 w-full">
           {categoryOrder.map((cat, i) => {
             const meta = categories[cat];
             const count = tools.filter((t) => t.category === cat).length;
-            const Icon = iconMap[meta.icon as keyof typeof iconMap];
+            const Icon = typeof meta.icon === 'string' 
+              ? (iconMap[meta.icon as keyof typeof iconMap] || FileIcon) 
+              : meta.icon;
+
             return (
-              <>
-    {cat === 'student' && (
-      <div className="mt-5 px-3 mb-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400">
-        {t('nav.studentSection')}
-      </div>
-    )}
-              <motion.div key={cat} custom={i} initial="hidden" animate="visible" variants={itemVariants}>
-                <NavLink
-                  to={`/category/${cat}`}
-                  onClick={() => setSidebarOpen(false)}
-                  className={({ isActive }) =>
-                    [
-                      'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group',
-                      isActive
-  ? 'bg-primary-50 dark:bg-primary-500/10 text-primary-600 dark:text-primary-400 border-r-2 border-primary-600'
-  : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-dark-hover hover:text-gray-900 dark:hover:text-gray-200'
-                    ].join(' ')
-                  }
-                >
-                  <Icon size={18} className="shrink-0" />
-                  <span className="flex-1 truncate">{t(`nav.${cat}`)}</span>
-                </NavLink>
-              </motion.div>
-              </>
+              <div key={cat}>
+                {cat === 'student' && (
+                  <div className="mt-5 px-3 mb-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400 h-4">
+                    {showText ? t('nav.studentSection') : ''}
+                  </div>
+                )}
+                <motion.div custom={i} initial="hidden" animate="visible" variants={itemVariants}>
+                  <NavLink
+                    to={`/category/${cat}`}
+                    onClick={() => isMobile && setSidebarOpen(false)}
+                    className={({ isActive }) =>
+                      [
+                        'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group w-full',
+                        isActive
+                          ? 'bg-primary-50 dark:bg-primary-500/10 text-primary-600 dark:text-primary-400 border-r-2 border-primary-600'
+                          : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-dark-hover hover:text-gray-900 dark:hover:text-gray-200'
+                      ].join(' ')
+                    }
+                  >
+                    <Icon size={18} className="shrink-0" />
+                    <AnimatePresence>
+                      {showText && (
+                        <motion.span 
+                          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                          className="flex-1 truncate whitespace-nowrap text-left"
+                        >
+                          {t(`nav.${cat}`)}
+                        </motion.span>
+                      )}
+                    </AnimatePresence>
+                  </NavLink>
+                </motion.div>
+              </div>
             );
           })}
         </div>
 
         {/* Favorites */}
         {favTools.length > 0 && (
-          <div className="mt-5 pt-4 border-t border-light-border dark:border-dark-border">
-            <div className="px-3 mb-2 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
-              {t('nav.favorites')}
+          <div className="mt-5 pt-4 border-t border-light-border dark:border-dark-border w-full">
+            <div className="px-3 mb-2 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 h-4">
+              {showText ? t('nav.favorites') : ''}
             </div>
-            <div className="space-y-0.5">
-              {favTools.slice(0, 5).map((tool) => (
-                <NavLink
-                  key={tool.id}
-                  to={`/tool/${tool.id}`}
-                  onClick={() => setSidebarOpen(false)}
-                  className={({ isActive }) =>
-                    [
-                      'flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200',
-                      isActive
-                        ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400'
-                        : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-dark-hover',
-                    ].join(' ')
-                  }
-                >
-                  <span className="text-base shrink-0">{tool.icon}</span>
-                  <span className="truncate">{tool.name}</span>
-                </NavLink>
-              ))}
+            <div className="space-y-0.5 w-full">
+              {favTools.slice(0, 5).map((tool) => {
+                 const ToolIcon = typeof tool.icon === 'string' 
+                   ? (iconMap[tool.icon as keyof typeof iconMap] || FileIcon) 
+                   : (tool.icon as React.ElementType);
+
+                return (
+                  <NavLink
+                    key={tool.id}
+                    to={`/tool/${tool.id}`}
+                    onClick={() => isMobile && setSidebarOpen(false)}
+                    className={({ isActive }) =>
+                      [
+                        'flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 w-full',
+                        isActive
+                          ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400'
+                          : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-dark-hover',
+                      ].join(' ')
+                    }
+                  >
+                    <ToolIcon className="w-4 h-4 shrink-0" />
+                    <AnimatePresence>
+                      {showText && (
+                        <motion.span 
+                          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                          className="truncate whitespace-nowrap"
+                        >
+                          {tool.name}
+                        </motion.span>
+                      )}
+                    </AnimatePresence>
+                  </NavLink>
+                );
+              })}
             </div>
           </div>
         )}
@@ -170,7 +219,7 @@ function SidebarContent() {
 
       {/* Bottom controls */}
       <div className="px-3 py-3 border-t border-light-border dark:border-dark-border">
-        <div className="flex items-center justify-between px-2">
+        <div className={`flex items-center ${showText ? 'justify-between' : 'justify-center'} px-2`}>
           <LanguageSwitcher />
         </div>
       </div>
@@ -183,30 +232,40 @@ export function Sidebar() {
   const setSidebarOpen = useAppStore((s) => s.setSidebarOpen);
   const direction = useLanguageStore((s) => s.direction);
   const overlayRef = useRef<HTMLDivElement>(null);
+  
+  // Track hover state for desktop and screen width for mobile detection
+  const [isHovered, setIsHovered] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
 
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth >= 1024) {
-        setSidebarOpen(true);
+      const mobile = window.innerWidth < 1024;
+      setIsMobile(mobile);
+      if (!mobile) {
+        setSidebarOpen(true); // Always open on desktop
+      } else {
+        setSidebarOpen(false); // Default closed on mobile resize
       }
     };
+    
     window.addEventListener('resize', handleResize);
+    // Initial check
+    handleResize(); 
     return () => window.removeEventListener('resize', handleResize);
   }, [setSidebarOpen]);
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && sidebarOpen && window.innerWidth < 1024) {
+      if (e.key === 'Escape' && sidebarOpen && isMobile) {
         setSidebarOpen(false);
       }
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [sidebarOpen, setSidebarOpen]);
+  }, [sidebarOpen, setSidebarOpen, isMobile]);
 
   return (
     <>
-      {/* Desktop sidebar */}
       <AnimatePresence initial={false}>
         {sidebarOpen && (
           <>
@@ -229,14 +288,17 @@ export function Sidebar() {
               initial="closed"
               animate="open"
               exit="closed"
+              onMouseEnter={() => !isMobile && setIsHovered(true)}
+              onMouseLeave={() => !isMobile && setIsHovered(false)}
+              // Changed styling: w-64 on mobile ALWAYS, hover effect ONLY on lg screens
               className={[
-                'fixed top-0 z-50 h-full w-20 hover:w-64 transition-all duration-300 bg-white dark:bg-dark-card border-r border-light-border dark:border-dark-border shadow-xl',
+                'fixed top-0 z-50 h-full transition-all duration-300 bg-white dark:bg-dark-card border-light-border dark:border-dark-border shadow-xl overflow-hidden',
+                isMobile ? 'w-64' : (isHovered ? 'w-64' : 'w-20'),
                 'lg:static lg:z-auto lg:translate-x-0',
-                direction === 'rtl' ? 'right-0 border-r-0 border-l' : 'left-0',
+                direction === 'rtl' ? 'right-0 border-l' : 'left-0 border-r',
               ].join(' ')}
             >
-             
-              <SidebarContent />
+              <SidebarContent isMobile={isMobile} isHovered={isHovered} />
             </motion.aside>
           </>
         )}

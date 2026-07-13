@@ -13,6 +13,7 @@ import { getToolById, tools } from '@/data/tools';
 import { categoryOrder } from '@/data/navigation';
 import { file } from 'jszip';
 import {
+  Folder,
   House,
   Brain,
   FileText,
@@ -24,6 +25,17 @@ import {
   GraduationCap,
   HeartPulse,
   FileTextIcon,
+  Zap,
+  Clock,
+  Star,
+  Paperclip,
+  FileArchive,
+  FileIcon,
+  Globe,
+  Timer,
+  Scissors,
+  Inbox,
+  Pill
 } from 'lucide-react';
  const iconMap = {
                FileText,
@@ -35,6 +47,18 @@ import {
                QrCode,
                GraduationCap,
                HeartPulse,
+               Zap,
+               Clock,
+               Star,
+               Paperclip,
+               FileArchive,
+               FileIcon,
+               FileTextIcon,
+               Globe,
+               Timer,
+                Scissors,
+                Inbox,
+                Pill
 };
 
 const containerVariants = {
@@ -114,7 +138,7 @@ function ToolCardGrid({ items, emptyTitle, emptyHint }: { items: typeof tools; e
   if (items.length === 0) {
     return (
       <EmptyState
-        icon={<span className="text-4xl">📭</span>}
+        icon={<Inbox className="w-12 h-12 text-gray-400 dark:text-gray-500" />}
         title={emptyTitle}
         description={emptyHint}
       />
@@ -142,7 +166,12 @@ function ToolCardGrid({ items, emptyTitle, emptyHint }: { items: typeof tools; e
               }}
             >
               <div className="flex flex-col items-center text-center gap-2 py-2">
-                <span className="text-3xl">{tool.icon}</span>
+                <div className="text-gray-700 dark:text-gray-300">
+  {(() => {
+    const ToolIcon = iconMap[tool.icon as keyof typeof iconMap] || FileIcon;
+    return <ToolIcon className="w-8 h-8" />;
+  })()}
+</div>
                 <span className="text-xs font-medium text-gray-700 dark:text-gray-300 leading-tight line-clamp-2">
                   {language === 'ar' ? tool.nameAr : tool.name}
                 </span>
@@ -175,7 +204,7 @@ function ToolCardGrid({ items, emptyTitle, emptyHint }: { items: typeof tools; e
   );
 }
 
-function QuickAction({ icon, label, to }: { icon: string; label: string; to: string }) {
+function QuickAction({ icon, label, to }: { icon: React.ReactNode; label: string; to: string }) {
   const addRecentTool = useAppStore((s) => s.addRecentTool);
   return (
     <Link
@@ -214,15 +243,15 @@ export default function Dashboard() {
 
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
 
-  const quickActions = [
-    { icon: '📎', label: 'Merge PDF', to: '/tool/merge-pdf' },
-    { icon: '🗜️', label: 'Compress PDF', to: '/tool/compress-pdf' },
-    { icon: '📝', label: 'Summarize', to: '/tool/summarize-text' },
-    { icon: '🌐', label: 'Translate', to: '/tool/translate' },
-    { icon: '📱', label: 'QR Code', to: '/tool/qr-generator' },
-    { icon: '⏱️', label: 'Pomodoro', to: '/tool/pomodoro' },
-    { icon: '✂️', label: 'BG Remover', to: '/tool/bg-remove' },
-    { icon: '💊', label: 'Drug Info', to: '/tool/drug-summary' },
+ const quickActions = [
+    { icon: Paperclip, label: 'Merge PDF', to: '/tool/merge-pdf' },
+    { icon: FileArchive, label: 'Compress PDF', to: '/tool/compress-pdf' },
+    { icon: FileText, label: 'Summarize', to: '/tool/summarize-text' },
+    { icon: Globe, label: 'Translate', to: '/tool/translate' },
+    { icon: QrCode, label: 'QR Code', to: '/tool/qr-generator' },
+    { icon: Timer, label: 'Pomodoro', to: '/tool/pomodoro' },
+    { icon: Scissors, label: 'BG Remover', to: '/tool/bg-remove' },
+    { icon: Pill, label: 'Drug Info', to: '/tool/drug-summary' },
   ];
 
   return (
@@ -285,17 +314,25 @@ export default function Dashboard() {
         animate="visible"
       >
         <div className="flex items-center gap-2 mb-4">
-          <span className="text-lg">⚡</span>
+          <Zap className="w-5 h-5 text-yellow-500" />
           <h2 className="text-sm font-semibold text-gray-800 dark:text-gray-200 uppercase tracking-wider">
             {t('dashboard.quickActions')}
           </h2>
         </div>
         <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
-          {quickActions.map((action, i) => (
-            <motion.div key={action.to} variants={itemVariants}>
-              <QuickAction icon={action.icon} label={action.label} to={action.to} />
-            </motion.div>
-          ))}
+          {quickActions.map((action, i) => {
+            const ActionIcon = action.icon;
+            
+            return (
+              <motion.div key={action.to} variants={itemVariants}>
+                <QuickAction 
+                  icon={<ActionIcon className="w-6 h-6 text-gray-700 dark:text-gray-300" />} 
+                  label={action.label} 
+                  to={action.to} 
+                />
+              </motion.div>
+            );
+          })}
         </div>
       </motion.section>
 
@@ -306,7 +343,7 @@ export default function Dashboard() {
         animate="visible"
       >
         <div className="flex items-center gap-2 mb-4">
-          <span className="text-lg">🕐</span>
+          <Clock className="w-5 h-5 text-blue-500" />
           <h2 className="text-sm font-semibold text-gray-800 dark:text-gray-200 uppercase tracking-wider">
             {t('dashboard.recentTools')}
           </h2>
@@ -325,7 +362,7 @@ export default function Dashboard() {
         animate="visible"
       >
         <div className="flex items-center gap-2 mb-4">
-          <span className="text-lg">⭐</span>
+          <Star className="w-5 h-5 text-yellow-500" />
           <h2 className="text-sm font-semibold text-gray-800 dark:text-gray-200 uppercase tracking-wider">
             {t('dashboard.favoriteTools')}
           </h2>
@@ -344,7 +381,7 @@ export default function Dashboard() {
         animate="visible"
       >
         <div className="flex items-center gap-2 mb-4">
-          <span className="text-lg">📂</span>
+          <Folder className="w-5 h-5 text-gray-500 dark:text-gray-400" />
           <h2 className="text-sm font-semibold text-gray-800 dark:text-gray-200 uppercase tracking-wider">
             Categories
           </h2>
@@ -352,6 +389,7 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {categoryOrder.map((cat) => {
             const meta = categories[cat];
+            const IconComponent = typeof meta.icon === 'string' ? (iconMap[meta.icon as keyof typeof iconMap] || FileIcon) : meta.icon;
             const catTools = tools.filter((t) => t.category === cat);
             const isExpanded = expandedCategory === cat;
             return (
@@ -364,10 +402,8 @@ export default function Dashboard() {
                 >
                   <div className="flex items-start gap-4">
                     <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-900/20 dark:to-primary-900/30 flex items-center justify-center text-2xl shrink-0 shadow-sm">
-                      {meta.icon}
+                      <IconComponent className="w-6 h-6 text-gray-800 dark:text-gray-200" />
                     </div>
-                        <span className="text-xl">📁</span>
-                      )
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-0.5">
                         <h3 className="font-semibold text-sm text-gray-900 dark:text-white">
@@ -406,17 +442,22 @@ export default function Dashboard() {
                       className="mt-4 pt-3 border-t border-light-border dark:border-dark-border overflow-hidden"
                     >
                       <div className="grid grid-cols-2 gap-1.5">
-                        {catTools.map((tool) => (
+                        {catTools.map((tool) => { 
+                          const ToolExpandedIcon = iconMap[tool.icon as keyof typeof iconMap] || FileIcon; 
+                          return (
                           <Link
                             key={tool.id}
                             to={`/tool/${tool.id}`}
                             onClick={() => addRecentTool(tool.id)}
                             className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-xs font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-dark-surface hover:text-gray-900 dark:hover:text-gray-200 transition-colors"
                           >
-                            <span className="text-base">{tool.icon}</span>
+                            <span className="text-gray-500 dark:text-gray-400">
+                                <ToolExpandedIcon className="w-4 h-4" />
+                              </span>
                             <span className="truncate">{language === 'ar' ? tool.nameAr : tool.name}</span>
                           </Link>
-                        ))}
+                          );
+          })}
                       </div>
                       <Link
                         to={`/category/${cat}`}

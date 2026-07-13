@@ -13,7 +13,7 @@ import {
   Presentation,
   Video,
   Mic,
-  Image,
+  Image as ImageIcon,
   QrCode,
   GraduationCap,
   HeartPulse,
@@ -159,7 +159,7 @@ export const categories: Record<ToolCategory, CategoryMeta> = {
   images: {
     name: "Images",
     nameAr: "الصور",
-    icon: Image,
+    icon: ImageIcon,
   },
   qrcode: {
     name: "QR Code",
