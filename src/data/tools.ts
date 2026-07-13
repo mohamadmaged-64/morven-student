@@ -1,4 +1,23 @@
 import type { Tool, ToolCategory } from '@/types';
+import type { LucideIcon } from "lucide-react";
+
+
+export interface CategoryMeta {
+  name: string;
+  nameAr: string;
+  icon: LucideIcon;
+}
+import {
+  FileText,
+  Brain,
+  Presentation,
+  Video,
+  Mic,
+  Image,
+  QrCode,
+  GraduationCap,
+  HeartPulse,
+} from "lucide-react";
 
 export const tools: Tool[] = [
   // OFFICE
@@ -111,7 +130,64 @@ export function searchTools(query: string): Tool[] {
       t.descriptionAr.includes(q),
   );
 }
-
+export const categories: Record<ToolCategory, CategoryMeta> = {
+  office: {
+    name: "Office & PDF",
+    nameAr: "Office و PDF",
+    icon: FileText,
+  },
+  ai: {
+    name: "AI Study Tools",
+    nameAr: "أدوات الذكاء الاصطناعي",
+    icon: Brain,
+  },
+  powerpoint: {
+    name: "PowerPoint",
+    nameAr: "PowerPoint",
+    icon: Presentation,
+  },
+  video: {
+    name: "Video",
+    nameAr: "الفيديو",
+    icon: Video,
+  },
+  audio: {
+    name: "Audio",
+    nameAr: "الصوت",
+    icon: Mic,
+  },
+  images: {
+    name: "Images",
+    nameAr: "الصور",
+    icon: Image,
+  },
+  qrcode: {
+    name: "QR Code",
+    nameAr: "QR Code",
+    icon: QrCode,
+  },
+  student: {
+    name: "Student Tools",
+    nameAr: "أدوات الطالب",
+    icon: GraduationCap,
+  },
+  medical: {
+    name: "Medical Student",
+    nameAr: "طالب الطب",
+    icon: HeartPulse,
+  },
+};
+export const categoryOrder: ToolCategory[] = [
+  'office',
+  'ai',
+  'powerpoint',
+  'video',
+  'audio',
+  'images',
+  'qrcode',
+  'student',
+  'medical',
+];
 export function getCategoryInfo(category: ToolCategory): CategoryMeta {
   return categories[category];
 }

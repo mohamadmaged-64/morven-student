@@ -1,6 +1,6 @@
 import type { ToolCategory } from '@/types';
 
-interface CategoryMeta {
+export interface CategoryMeta {
   name: string;
   nameAr: string;
   icon: string;

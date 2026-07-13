@@ -1,12 +1,14 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { tools, categories, categoryOrder, searchTools } from '@/data/tools';
+import { tools, categoryOrder, searchTools } from '@/data/tools';
 import { Card } from '@/components/UI/Card';
 import { Badge } from '@/components/UI/Badge';
 import { useAppStore } from '@/store/useAppStore';
 import { useLanguageStore } from '@/store/useLanguageStore';
 import type { ToolCategory, Tool } from '@/types';
+import { categories } from '@/data/categories';
+import { CategoryMeta } from '@/data/categories';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -169,7 +171,7 @@ export function AllToolsPage() {
                     : 'bg-white dark:bg-dark-card text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-dark-border hover:border-primary-300 dark:hover:border-primary-700'
                 }`}
               >
-                <span>{meta.icon}</span>
+                const Icon = meta.icon;
                 <span>{language === 'ar' ? meta.nameAr : meta.name}</span>
               </button>
             );
@@ -207,7 +209,7 @@ export function AllToolsPage() {
                 transition={{ duration: 0.4 }}
               >
                 <div className="flex items-center gap-3 mb-4">
-                  <span className="text-2xl">{meta.icon}</span>
+                   
                   <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200">
                     {language === 'ar' ? meta.nameAr : meta.name}
                   </h2>
