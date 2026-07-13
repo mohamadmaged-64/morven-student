@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "Morven Student",
+    "name": "Morven for Student",
     "subtitle": "Your All-in-One Student Toolkit"
   },
   "nav": {
@@ -37,7 +37,7 @@
     "tryAgain": "Try a different search term"
   },
   "dashboard": {
-    "welcome": "Welcome to Morven Student",
+    "welcome": "Welcome to Morven for Student",
     "welcomeMessage": "Your all-in-one toolkit for productivity and study.",
     "recentTools": "Recent Tools",
     "favoriteTools": "Favorite Tools",
