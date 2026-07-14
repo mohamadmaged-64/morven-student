@@ -37,7 +37,7 @@ import {
   Inbox,
   Pill
 } from 'lucide-react';
- const iconMap = {
+ const icon = {
                FileText,
                Brain,
                Presentation,
@@ -168,8 +168,9 @@ function ToolCardGrid({ items, emptyTitle, emptyHint }: { items: typeof tools; e
               <div className="flex flex-col items-center text-center gap-2 py-2">
                 <div className="text-gray-700 dark:text-gray-300">
   {(() => {
-    const ToolIcon = iconMap[tool.icon as keyof typeof iconMap] || FileIcon;
-    return <ToolIcon className="w-8 h-8" />;
+   const ToolIcon = tool.icon;
+
+return <ToolIcon className="w-8 h-8" />;
   })()}
 </div>
                 <span className="text-xs font-medium text-gray-700 dark:text-gray-300 leading-tight line-clamp-2">
@@ -389,7 +390,7 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {categoryOrder.map((cat) => {
             const meta = categories[cat];
-            const IconComponent = typeof meta.icon === 'string' ? (iconMap[meta.icon as keyof typeof iconMap] || FileIcon) : meta.icon;
+            const IconComponent = meta.icon;
             const catTools = tools.filter((t) => t.category === cat);
             const isExpanded = expandedCategory === cat;
             return (
@@ -443,8 +444,8 @@ export default function Dashboard() {
                     >
                       <div className="grid grid-cols-2 gap-1.5">
                         {catTools.map((tool) => { 
-                          const ToolExpandedIcon = iconMap[tool.icon as keyof typeof iconMap] || FileIcon; 
-                          return (
+                         const ToolExpandedIcon = tool.icon;
+                         return (
                           <Link
                             key={tool.id}
                             to={`/tool/${tool.id}`}

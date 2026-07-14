@@ -34,18 +34,9 @@ export function MainLayout() {
             'transition-all duration-300',
           ].join(' ')}
         >
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={location.pathname}
-              variants={pageVariants}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              className="p-4 md:p-6 lg:p-8"
-            >
-              <Outlet />
-            </motion.div>
-          </AnimatePresence>
+          <div className="p-4 md:p-6 lg:p-8">
+  <Outlet />
+</div>
         </main>
       </div>
     </div>

@@ -225,6 +225,7 @@ export function AllToolsPage() {
                   className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
                 >
                   {catTools.map((tool) => {
+                    const ToolIcon = tool.icon;
                     const isFavorite = favoriteTools.includes(tool.id);
                     return (
                       <motion.div key={tool.id} variants={itemVariants}>
@@ -234,10 +235,11 @@ export function AllToolsPage() {
                           className="h-full cursor-pointer group"
                         >
                           <div className="flex flex-col h-full">
+                                   <span className="group-hover:scale-110 transition-transform duration-200">
+        <ToolIcon className="w-9 h-9" />
+      </span>
                             <div className="flex items-start justify-between mb-3">
-                              <span className="text-3xl group-hover:scale-110 transition-transform duration-200">
-                                {tool.icon}
-                              </span>
+                             
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -291,6 +293,7 @@ export function AllToolsPage() {
         >
           {filteredTools.map((tool) => {
             const isFavorite = favoriteTools.includes(tool.id);
+            const ToolIcon = tool.icon;
             return (
               <motion.div key={tool.id} variants={itemVariants}>
                 <Card
@@ -300,9 +303,9 @@ export function AllToolsPage() {
                 >
                   <div className="flex flex-col h-full">
                     <div className="flex items-start justify-between mb-3">
-                      <span className="text-3xl group-hover:scale-110 transition-transform duration-200">
-                        {tool.icon}
-                      </span>
+                      <span className="group-hover:scale-110 transition-transform duration-200">
+        <ToolIcon className="w-9 h-9" />
+      </span>
                       <button
                         onClick={(e) => {
                           e.stopPropagation();

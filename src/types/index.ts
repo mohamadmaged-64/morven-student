@@ -1,3 +1,5 @@
+import { LucideIcon } from "lucide-react";
+
 export type Theme = 'light' | 'dark';
 export type Language = 'en' | 'ar';
 export type Direction = 'ltr' | 'rtl';
@@ -8,7 +10,7 @@ export interface Tool {
   nameAr: string;
   description: string;
   descriptionAr: string;
-  icon: string;
+  icon: LucideIcon;
   category: ToolCategory;
   isFavorite?: boolean;
   lastUsed?: number;

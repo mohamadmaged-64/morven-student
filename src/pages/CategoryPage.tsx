@@ -74,6 +74,7 @@ export function CategoryPage() {
 
   const catMeta = categories[category];
   const tools = getToolsByCategory(category);
+  const CategoryIcon = catMeta.icon;
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-6" dir={direction}>
@@ -107,7 +108,7 @@ export function CategoryPage() {
         className="mb-8"
       >
         <div className="flex items-center gap-4 mb-2">
-          <span className="text-4xl">{catMeta.icon}</span>
+          <CategoryIcon className="w-10 h-10" />
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
               {language === 'ar' ? catMeta.nameAr : catMeta.name}
@@ -130,7 +131,9 @@ export function CategoryPage() {
           animate={{ opacity: 1 }}
           className="text-center py-16"
         >
-          <div className="text-5xl mb-4">{catMeta.icon}</div>
+          <div className="mb-4">
+  <CategoryIcon className="w-12 h-12 mx-auto" />
+</div>
           <p className="text-gray-400 dark:text-gray-500">
             {language === 'ar' ? 'لا توجد أدوات في هذه الفئة بعد' : 'No tools in this category yet'}
           </p>
@@ -153,9 +156,7 @@ export function CategoryPage() {
                 >
                   <div className="flex flex-col h-full">
                     <div className="flex items-start justify-between mb-3">
-                      <span className="text-3xl group-hover:scale-110 transition-transform duration-200">
-                        {tool.icon}
-                      </span>
+                      <tool.icon className="w-8 h-8 group-hover:scale-110 transition-transform duration-200" />
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
