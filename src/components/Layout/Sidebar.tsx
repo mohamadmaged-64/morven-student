@@ -39,18 +39,18 @@ const sidebarVariants = {
   open: {
     x: 0,
     transition: {
-      type: 'spring',
-      stiffness: 300,
-      damping: 30,
+      type: 'tween',
+      duration: 0.28,
+      ease: [0.22, 1, 0.36, 1],
     },
   },
 
   closed: (direction: 'ltr' | 'rtl') => ({
     x: direction === 'rtl' ? '100%' : '-100%',
     transition: {
-      type: 'spring',
-      stiffness: 300,
-      damping: 30,
+      type: 'tween',
+     duration: 0.25,
+      ease: [0.4, 0, 0.2, 1],
     },
   }),
 };
@@ -313,11 +313,6 @@ export function Sidebar() {
     const handleResize = () => {
       const mobile = window.innerWidth < 1024;
       setIsMobile(mobile);
-      if (!mobile) {
-        setSidebarOpen(true); // Always open on desktop
-      } else {
-        setSidebarOpen(false); // Default closed on mobile resize
-      }
     };
     
     window.addEventListener('resize', handleResize);
