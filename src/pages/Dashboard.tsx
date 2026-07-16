@@ -10,6 +10,7 @@ import { EmptyState } from '@/components/UI/EmptyState';
 import { SearchBar } from '@/components/UI/SearchBar';
 import { categories } from '@/data/categories';
 import { getToolById, tools } from '@/data/tools';
+type Tool = (typeof tools)[number];
 import { categoryOrder } from '@/data/navigation';
 import { file } from 'jszip';
 import {
@@ -35,7 +36,8 @@ import {
   Timer,
   Scissors,
   Inbox,
-  Pill
+  Pill,
+  ListTodo
 } from 'lucide-react';
  const icon = {
                FileText,
@@ -159,10 +161,16 @@ function ToolCardGrid({ items, emptyTitle, emptyHint }: { items: typeof tools; e
             <Card
               hoverable
               padding="sm"
-              className="relative group h-full"
+              className={`relative group h-full ${
+  tool.comingSoon
+    ? 'cursor-not-allowed opacity-75'
+    : 'cursor-pointer'
+}`}
               onClick={() => {
-                addRecentTool(tool.id);
-                navigate(`/tool/${tool.id}`);
+                if (!tool.comingSoon) {
+                  addRecentTool(tool.id);
+                  navigate(`/tool/${tool.id}`);
+                }
               }}
             >
               <div className="flex flex-col items-center text-center gap-2 py-2">
@@ -177,26 +185,38 @@ return <ToolIcon className="w-8 h-8" />;
                   {language === 'ar' ? tool.nameAr : tool.name}
                 </span>
               </div>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  toggleFavorite(tool.id);
-                }}
-                className="absolute top-1.5 end-1.5 p-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-gray-100 dark:hover:bg-dark-hover"
-                aria-label={isFav ? 'Remove from favorites' : 'Add to favorites'}
-              >
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill={isFav ? 'currentColor' : 'none'}
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  className={isFav ? 'text-amber-400' : 'text-gray-400'}
-                >
-                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                </svg>
+              <div className="absolute top-1.5 end-1.5 flex items-center gap-1">
+
+  {tool.comingSoon && (
+    <Badge
+      variant="warning"
+      size="sm"
+    >
+      {language === 'ar' ? 'قريبًا' : 'Coming Soon'}
+    </Badge>
+  )}
+
+  <button
+    onClick={(e) => {
+      e.stopPropagation();
+      toggleFavorite(tool.id);
+    }}
+    className="p-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-gray-100 dark:hover:bg-dark-hover"
+    aria-label={isFav ? 'Remove from favorites' : 'Add to favorites'}
+  >
+    <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill={isFav ? 'currentColor' : 'none'}
+    stroke="currentColor"
+    strokeWidth="2"
+    className={isFav ? 'text-amber-400' : 'text-gray-400'}
+  >
+    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+  </svg>
               </button>
+              </div>
             </Card>
           </motion.div>
         );
@@ -251,19 +271,15 @@ export default function Dashboard() {
     to: '/tool/merge-pdf',
   },
   {
-    icon: FileArchive,
-    label: t('tools.office.pdfCompress.name'),
-    to: '/tool/compress-pdf',
+    icon: Scissors,
+    label: t('tools.office.pdfSplit.name'),
+    to: '/tool/split-pdf',
   },
+ 
   {
-    icon: FileText,
-    label: t('tools.ai.smartNotes.name'),
-    to: '/tool/summarize-text',
-  },
-  {
-    icon: Globe,
-    label: t('tools.ai.translator.name'),
-    to: '/tool/translate',
+    icon: Timer,
+    label: t('tools.pomodoro'),
+    to: '/tool/pomodoro',
   },
   {
     icon: QrCode,
@@ -271,20 +287,20 @@ export default function Dashboard() {
     to: '/tool/qr-generator',
   },
   {
-    icon: Timer,
-    label: t('tools.pomodoro'),
-    to: '/tool/pomodoro',
+    icon: ListTodo,
+    label: t('tools.student.taskManager.name'),
+    to: '/tool/task-manager',
+  },
+   {
+    icon: Music,
+    label: t('tools.audio.speechToText.name'),
+    to: '/tool/speech-to-text',
   },
   {
-    icon: Scissors,
-    label: t('tools.images.backgroundRemover.name'),
-    to: '/tool/bg-remove',
-  },
-  {
-    icon: Pill,
-    label: t('tools.medical.drugReference.name'),
-    to: '/tool/drug-summary',
-  },
+    icon: Music,
+    label: t('tools.video.videoToaudio.name'),
+    to: '/tool/video-to-audio',
+  }
 ];
 
   return (
@@ -479,22 +495,42 @@ export default function Dashboard() {
                          const ToolExpandedIcon = tool.icon;
                          return (
                           <Link
-                            key={tool.id}
-                            to={`/tool/${tool.id}`}
-                            onClick={() => addRecentTool(tool.id)}
-                            className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-xs font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-dark-surface hover:text-gray-900 dark:hover:text-gray-200 transition-colors"
-                          >
+  key={tool.id}
+  to={tool.comingSoon ? '#' : `/tool/${tool.id}`}
+  onClick={(e) => {
+    if (tool.comingSoon) {
+      e.preventDefault();
+      return;
+    }
+    addRecentTool(tool.id);
+  }}
+  className={`flex items-center gap-2 px-2.5 py-2 rounded-lg text-xs font-medium transition-colors ${
+    tool.comingSoon
+      ? 'opacity-60 cursor-not-allowed'
+      : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-dark-surface hover:text-gray-900 dark:hover:text-gray-200'
+  }`}
+>
+                          
                             <span className="text-gray-500 dark:text-gray-400">
                                 <ToolExpandedIcon className="w-4 h-4" />
                               </span>
-                            <span className="truncate">{language === 'ar' ? tool.nameAr : tool.name}</span>
+                           <div className="flex items-center gap-2 min-w-0">
+  <span className="truncate">
+    {language === 'ar' ? tool.nameAr : tool.name}
+  </span>
+
+  {tool.comingSoon && (
+    <Badge variant="warning" size="sm">
+      {language === 'ar' ? 'قريبًا' : 'Coming Soon'}
+    </Badge>
+  )}
+</div>
                           </Link>
                           );
           })}
                       </div>
                       <Link
                         to={`/category/${cat}`}
-                        onClick={() => addRecentTool(catTools[0]?.id || '')}
                         className="block mt-2 text-center text-xs font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 py-1.5 rounded-lg hover:bg-primary-50 dark:hover:bg-primary-900/10 transition-colors"
                       >
                         {t('nav.allTools')} →

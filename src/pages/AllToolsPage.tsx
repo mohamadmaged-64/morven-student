@@ -40,6 +40,7 @@ const badgeVariantMap: Record<string, 'primary' | 'success' | 'warning' | 'info'
 };
 
 export function AllToolsPage() {
+  console.log("🔥 ALL TOOLS PAGE LOADED");
   const navigate = useNavigate();
   const { language, direction } = useLanguageStore();
   const { favoriteTools, toggleFavorite } = useAppStore();
@@ -160,6 +161,7 @@ export function AllToolsPage() {
           </button>
           {categoryOrder.map((cat) => {
             const meta = categories[cat];
+            const Icon = meta.icon;
             const isActive = activeCategory === cat && !query.trim();
             return (
               <button
@@ -171,7 +173,7 @@ export function AllToolsPage() {
                     : 'bg-white dark:bg-dark-card text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-dark-border hover:border-primary-300 dark:hover:border-primary-700'
                 }`}
               >
-                const Icon = meta.icon;
+                
                 <span>{language === 'ar' ? meta.nameAr : meta.name}</span>
               </button>
             );
@@ -227,55 +229,75 @@ export function AllToolsPage() {
                   {catTools.map((tool) => {
                     const ToolIcon = tool.icon;
                     const isFavorite = favoriteTools.includes(tool.id);
+                    const isComingSoon = tool.comingSoon === true;
                     return (
                       <motion.div key={tool.id} variants={itemVariants}>
                         <Card
-                          hoverable
-                          onClick={() => navigate(`/tool/${tool.id}`)}
-                          className="h-full cursor-pointer group"
-                        >
-                          <div className="flex flex-col h-full">
-                                   <span className="group-hover:scale-110 transition-transform duration-200">
-        <ToolIcon className="w-9 h-9" />
-      </span>
-                            <div className="flex items-start justify-between mb-3">
-                             
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  toggleFavorite(tool.id);
-                                }}
-                                className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-surface transition-colors"
-                                aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
-                              >
-                                <svg
-                                  className={`w-5 h-5 transition-colors ${
-                                    isFavorite
-                                      ? 'text-amber-500 fill-amber-500'
-                                      : 'text-gray-300 dark:text-gray-600 hover:text-amber-400'
-                                  }`}
-                                  viewBox="0 0 24 24"
-                                  stroke="currentColor"
-                                  strokeWidth={2}
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
-                                  />
-                                </svg>
-                              </button>
-                            </div>
+  hoverable
+onClick={() => {
+  if (!tool.comingSoon) {
+    navigate(`/tool/${tool.id}`);
+  }
+}}
+  className={`h-full group ${
+    tool.comingSoon
+      ? 'cursor-not-allowed opacity-75'
+      : 'cursor-pointer'
+  }`}
+>
+  <div className="flex flex-col h-full">
 
-                            <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-1 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
-                              {language === 'ar' ? tool.nameAr : tool.name}
-                            </h3>
+    <div className="flex items-start justify-between mb-3">
+      <ToolIcon className="w-9 h-9 group-hover:scale-110 transition-transform duration-200" />
 
-                            <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 flex-1">
-                              {language === 'ar' ? tool.descriptionAr : tool.description}
-                            </p>
-                          </div>
-                        </Card>
+      <div className="flex items-center gap-2">
+
+        {tool.comingSoon && (
+          <Badge variant="warning" size="sm">
+            {language === 'ar' ? 'قريبًا' : 'Coming Soon'}
+          </Badge>
+        )}
+
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleFavorite(tool.id);
+          }}
+          className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-surface transition-colors"
+        >
+          <svg
+            className={`w-5 h-5 ${
+              isFavorite
+                ? 'text-amber-500 fill-amber-500'
+                : 'text-gray-300 dark:text-gray-600 hover:text-amber-400'
+            }`}
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
+            />
+          </svg>
+        </button>
+
+      </div>
+    </div>
+
+    <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-1 group-hover:text-primary-600 transition-colors">
+      {language === 'ar' ? tool.nameAr : tool.name}
+    </h3>
+
+    <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 flex-1">
+      {language === 'ar'
+        ? tool.descriptionAr
+        : tool.description}
+    </p>
+
+  </div>
+</Card>
                       </motion.div>
                     );
                   })}
@@ -285,6 +307,7 @@ export function AllToolsPage() {
           })}
         </div>
       ) : (
+        
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -298,18 +321,24 @@ export function AllToolsPage() {
               <motion.div key={tool.id} variants={itemVariants}>
                 <Card
                   hoverable
-                  onClick={() => navigate(`/tool/${tool.id}`)}
+                  onClick={() => {
+  if (!tool.comingSoon) {
+    navigate(`/tool/${tool.id}`);
+  }
+}}
                   className="h-full cursor-pointer group"
                 >
                   <div className="flex flex-col h-full">
+                    
                     <div className="flex items-start justify-between mb-3">
                       <span className="group-hover:scale-110 transition-transform duration-200">
         <ToolIcon className="w-9 h-9" />
       </span>
                       <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleFavorite(tool.id);
+                        onClick={() => {
+                          if (!tool.comingSoon) {
+                            navigate(`/tool/${tool.id}`);
+                          }
                         }}
                         className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-surface transition-colors"
                         aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}

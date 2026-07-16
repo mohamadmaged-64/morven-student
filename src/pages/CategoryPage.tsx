@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { getToolsByCategory } from '@/data/tools';
 import { Card } from '@/components/UI/Card';
 import { Badge } from '@/components/UI/Badge';
-import type { ToolCategory } from '@/types';
+import type { Tool, ToolCategory } from '@/types';
 import { useAppStore } from '@/store/useAppStore';
 import { useLanguageStore } from '@/store/useLanguageStore';
 import { categories } from '@/data/categories'
@@ -145,26 +145,43 @@ export function CategoryPage() {
           animate="visible"
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
         >
-          {tools.map((tool) => {
-            const isFavorite = favoriteTools.includes(tool.id);
-            return (
-              <motion.div key={tool.id} variants={itemVariants}>
-                <Card
-                  hoverable
-                  onClick={() => navigate(`/tool/${tool.id}`)}
-                  className="h-full cursor-pointer group"
-                >
-                  <div className="flex flex-col h-full">
+    {tools.map((tool) => {
+  const isFavorite = favoriteTools.includes(tool.id);
+  const isComingSoon = tool.comingSoon === true;
+
+  return (
+    <motion.div key={tool.id} variants={itemVariants}>
+      <Card
+        hoverable
+        onClick={() => {
+          if (!isComingSoon) {
+            navigate(`/tool/${tool.id}`);
+          }
+        }}
+        className={`h-full group ${
+          isComingSoon
+            ? 'opacity-70 cursor-not-allowed'
+            : 'cursor-pointer'
+        }`}
+      >
+                 <div className="flex flex-col h-full">
                     <div className="flex items-start justify-between mb-3">
                       <tool.icon className="w-8 h-8 group-hover:scale-110 transition-transform duration-200" />
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleFavorite(tool.id);
-                        }}
-                        className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-surface transition-colors"
-                        aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
-                      >
+                    <div className="flex items-center gap-2">
+    {tool.comingSoon && (
+      <Badge variant="warning" size="sm">
+        {language === 'ar' ? 'قريبًا' : 'Coming Soon'}
+      </Badge>
+    )}
+
+    <button
+      onClick={(e) => {
+        e.stopPropagation();
+        toggleFavorite(tool.id);
+      }}
+      className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-surface transition-colors"
+    >
+      
                         <svg
                           className={`w-5 h-5 transition-colors ${
                             isFavorite
@@ -181,17 +198,19 @@ export function CategoryPage() {
                             d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
                           />
                         </svg>
-                      </button>
-                    </div>
+                      
+  </button>
+  </div>
+  </div>
+  <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-1 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+  {language === 'ar' ? tool.nameAr : tool.name}
+</h3>
 
-                    <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-1 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
-                      {language === 'ar' ? tool.nameAr : tool.name}
-                    </h3>
+<p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 flex-1">
+  {language === 'ar' ? tool.descriptionAr : tool.description}
+</p>
 
-                    <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 flex-1">
-                      {language === 'ar' ? tool.descriptionAr : tool.description}
-                    </p>
-                  </div>
+</div>
                 </Card>
               </motion.div>
             );

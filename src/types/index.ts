@@ -14,6 +14,7 @@ export interface Tool {
   category: ToolCategory;
   isFavorite?: boolean;
   lastUsed?: number;
+  comingSoon?: boolean;
 }
 
 export type ToolCategory =
