@@ -269,7 +269,7 @@ export default function Dashboard() {
   {
     icon: Paperclip,
     label: t('tools.office.pdfMerge.name'),
-    to: '/tool/merge-pdf',
+    to: '/tool/merge-pdfs',
   },
   {
     icon: Scissors,
