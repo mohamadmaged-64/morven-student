@@ -1,19 +1,34 @@
 import { useTranslation } from 'react-i18next';
 import { useAppStore } from '@/store/useAppStore';
-import { SearchBar } from '@/components/UI/SearchBar';
 import { ThemeToggle } from '@/components/UI/ThemeToggle';
-import { LanguageSwitcher } from '@/components/UI/LanguageSwitcher';
 
 interface HeaderProps {
   title?: string;
 }
 
 export function Header({ title }: HeaderProps) {
-  const { t } = useTranslation();
+ const { t, i18n } = useTranslation();
   const toggleSidebar = useAppStore((s) => s.toggleSidebar);
-  const searchQuery = useAppStore((s) => s.searchQuery);
-  const setSearchQuery = useAppStore((s) => s.setSearchQuery);
+ const now = new Date();
 
+const gregorianDate = new Intl.DateTimeFormat(
+  i18n.language === 'ar' ? 'ar-EG' : 'en-US',
+  {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  }
+).format(now);
+
+const hijriDate = new Intl.DateTimeFormat(
+  i18n.language === 'ar' ? 'ar-SA-u-ca-islamic' : 'en-US-u-ca-islamic',
+  {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  }
+).format(now);
   return (
     <header
       className={[
@@ -46,19 +61,20 @@ export function Header({ title }: HeaderProps) {
         {/* Spacer */}
         <div className="flex-1" />
 
-        {/* Search */}
-        <div className="hidden md:block w-72 lg:w-80">
-          <SearchBar
-            value={searchQuery}
-            onChange={setSearchQuery}
-            placeholder={t('search.placeholder')}
-          />
-        </div>
+       <div className="hidden md:flex flex-col text-right">
+  <span className="text-sm font-semibold text-gray-900 dark:text-white">
+    {gregorianDate}
+  </span>
+
+  <span className="text-xs text-gray-500 dark:text-gray-400">
+    {hijriDate}
+  </span>
+</div>
 
         {/* Actions */}
         <div className="flex items-center gap-1">
           <ThemeToggle />
-          <LanguageSwitcher />
+          
         </div>
       </div>
     </header>

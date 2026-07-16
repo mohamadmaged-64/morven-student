@@ -99,7 +99,7 @@ const renderCategory = (cat: string, index: number) => {
         onClick={() => isMobile && setSidebarOpen(false)}
         className={({ isActive }) =>
           [
-            `flex items-center rounded-xl text-sm font-medium transition-all duration-200 group w-full ${showText ? 'gap-3 px-3 py-2.5' : 'justify-center px-2 py-1.5'}`,
+            'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group w-full',
             isActive
               ? 'bg-primary-50 dark:bg-primary-500/10 text-primary-600 dark:text-primary-400 border-r-2 border-primary-600'
               : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-dark-hover hover:text-gray-900 dark:hover:text-gray-200',
@@ -114,7 +114,7 @@ const renderCategory = (cat: string, index: number) => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="flex-1 truncate whitespace-nowrap text-left"
+              className="flex-1 truncate whitespace-nowrap text-start"
             >
               {t(`nav.${cat}`)}
             </motion.span>
@@ -239,15 +239,13 @@ const renderCategory = (cat: string, index: number) => {
                     to={`/tool/${tool.id}`}
                     onClick={() => isMobile && setSidebarOpen(false)}
                     className={({ isActive }) =>
-  [
-    `flex items-center gap-3 rounded-xl text-sm font-medium transition-all duration-200 group w-full ${
-      showText ? 'px-3 py-2.5' : 'px-2 py-1.5 justify-center'
-    }`,
-    isActive
-      ? 'bg-primary-50 dark:bg-primary-500/10 text-primary-600 dark:text-primary-400 border-r-2 border-primary-600'
-      : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-dark-hover hover:text-gray-900 dark:hover:text-gray-200',
-  ].join(' ')
-}
+                      [
+                        'flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 w-full',
+                        isActive
+                          ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400'
+                          : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-dark-hover',
+                      ].join(' ')
+                    }
                   >
                     <ToolIcon className="w-4 h-4 shrink-0" />
                     <AnimatePresence>
