@@ -5,6 +5,7 @@
   },
   "nav": {
     "dashboard": "لوحة التحكم",
+    "categories": "الفئات",
     "office": "أدوات الPDF",
     "ai": "أدوات الذكاء الاصطناعي",
     "powerpoint": "أدوات الPowerPoint",
@@ -40,10 +41,11 @@
   },
   "dashboard": {
     "welcome": "مرحباً بك في مورفن للطلاب",
-    "welcomeMessage": " أدواتك الشاملة للإنتاجية والدراسة.",
+    "welcomeMessage": " أدواتك الشاملة للدراسة والإنتاجية.",
     "recentTools": "الأدوات الأخيرة",
     "favoriteTools": "الأدوات المفضلة",
     "quickActions": "إجراءات سريعة",
+    "categories": "الفئات",
     "stats": "الإحصائيات",
     "tasksOverview": "نظرة عامة على المهام",
     "upcomingExams": "الامتحانات القادمة",
@@ -53,7 +55,9 @@
     "noRecent": "لا توجد أدوات حديثة",
     "noRecentHint": "ابدأ في استخدام الأدوات وسيظهروا هنا"
   },
+  
   "tools": {
+    "pomodoro": "مؤقت بومودورو",
     "office": {
       "pdfMerge": {
         "name": "دمج PDF",
@@ -216,11 +220,11 @@
         "description": "دمج ملفات صوتية متعددة في واحد"
       },
       "textToSpeech": {
-        "name": "نص إلى كلام",
-        "description": "تحويل النص إلى كلام طبيعي الصوت"
+        "name": "نص إلى صوت",
+        "description": "تحويل النص إلى صوت طبيعي الصوت"
       },
       "speechToText": {
-        "name": "كلام إلى نص",
+        "name": "صوت إلى نص",
         "description": "تحويل التسجيلات الصوتية إلى نص"
       },
       "audioCompressor": {
@@ -276,7 +280,7 @@
     },
     "qrcode": {
       "qrGenerate": {
-        "name": "مولود QR",
+        "name": "مولد QR",
         "description": "إنشاء رموز QR من نص أو روابط أو بيانات"
       },
       "qrScanner": {
@@ -284,7 +288,7 @@
         "description": "مسح وفك رموز QR من الصور"
       },
       "barcodeGenerator": {
-        "name": "مولود الباركود",
+        "name": "مولد الباركود",
         "description": "إنشاء أنواع مختلفة من الباركود"
       },
       "wifiQr": {
@@ -488,6 +492,7 @@
     "clipboardCleared": "تم مسح سجل الحافظة",
     "allFilesCleared": "تم مسح جميع الملفات"
   },
+
   "pomodoro": {
     "work": "عمل",
     "break": "استراحة",
@@ -603,15 +608,15 @@
     "resetProgress": "إعادة تعيين التقدم"
   },
   "categories": {
-    "office": "المكتب و PDF",
+    "office": "أدوات الPDF",
     "ai": "أدوات الذكاء الاصطناعي",
-    "powerpoint": "باوربوينت",
+    "powerpoint": "أدوات الPowerPoint",
     "video": "أدوات الفيديو",
-    "audio": "الصوت",
-    "images": "الصور",
+    "audio": "أدوات الصوت",
+    "images": "أدوات الصور",
     "qrcode": "رمز QR",
-    "student": "أدوات الطالب",
-    "medical": "الطالب الطبي"
+    "student": "عام",
+    "medical": "القسم الطبي"
   },
   "emptyStates": {
     "office": "لم تتم استخدام أدوات المكتب بعد. جرب دمج أو تقسيم ملفات PDF!",

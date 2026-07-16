@@ -163,7 +163,7 @@ export const tools: Tool[] = [
 { id: 'video-to-audio', name: 'Video to Audio', nameAr: 'فيديو إلى صوت', description: 'Convert video files to audio formats', descriptionAr: 'تحويل ملفات الفيديو إلى صيغ صوتية', icon: Mic, category: 'video' },
 
 // AUDIO
-{ id: 'speech-to-text', name: 'Speech to Text', nameAr: 'كلام إلى نص', description: 'Transcribe audio recordings to text', descriptionAr: 'تحويل التسجيلات الصوتية إلى نص', icon: Mic, category: 'audio' },
+{ id: 'speech-to-text', name: 'Speech to Text', nameAr: 'صوت إلى نص', description: 'Transcribe audio recordings to text', descriptionAr: 'تحويل التسجيلات الصوتية إلى نص', icon: Mic, category: 'audio' },
 
 // IMAGES
 { id: 'bg-remove', name: 'Background Remover', nameAr: 'إزالة الخلفية', description: 'Remove background from images automatically', descriptionAr: 'إزالة الخلفية من الصور تلقائياً', icon: Scissors, category: 'images' },
@@ -185,7 +185,7 @@ export const tools: Tool[] = [
 { id: 'medical-mcq', name: 'Medical MCQ', nameAr: 'أسئلة طبية اختيار', description: 'Generate medical multiple choice questions', descriptionAr: 'إنشاء أسئلة اختيار من متعدد طبية', icon: HelpCircle, category: 'medical' },
 { id: 'disease-explain', name: 'Disease Explainer', nameAr: 'شرح الأمراض', description: 'Get simple explanations of diseases and conditions', descriptionAr: 'الحصول على شروحات بسيطة للأمراض والحالات', icon: Stethoscope, category: 'medical' },
 { id: 'disease-compare', name: 'Disease Comparator', nameAr: 'مقارنة الأمراض', description: 'Compare different diseases side by side', descriptionAr: 'مقارنة الأمراض المختلفة جنباً إلى جنب', icon: Scale, category: 'medical' },
-{ id: 'drug-summary', name: 'Drug Summary', nameAr: 'ملخص الأدوية', description: 'Quick access to drug information and interactions', descriptionAr: 'وصول سريع لمعلومات الأدوية والتفاعلات', icon: Pill, category: 'medical' },
+{ id: 'drug-summary', name: 'Drug Summary', nameAr: 'مرجع الأدوية', description: 'Quick access to drug information and interactions', descriptionAr: 'وصول سريع لمعلومات الأدوية والتفاعلات', icon: Pill, category: 'medical' },
 { id: 'lab-values', name: 'Lab Values', nameAr: 'قيم المختبر', description: 'Reference for normal lab values and ranges', descriptionAr: 'مرجع للقيم المختبرية الطبيعية ونطاقاتها', icon: FlaskConical, category: 'medical' },
 { id: 'medical-notes', name: 'Medical Notes', nameAr: 'ملاحظات طبية', description: 'Template-based clinical note taking', descriptionAr: 'تدوين الملاحظات السريرية بالقوالب', icon: ClipboardPlus, category: 'medical' },
 ]

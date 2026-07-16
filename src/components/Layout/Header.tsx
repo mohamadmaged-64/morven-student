@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppStore } from '@/store/useAppStore';
 import { ThemeToggle } from '@/components/UI/ThemeToggle';
@@ -7,28 +8,48 @@ interface HeaderProps {
 }
 
 export function Header({ title }: HeaderProps) {
- const { t, i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const toggleSidebar = useAppStore((s) => s.toggleSidebar);
- const now = new Date();
 
-const gregorianDate = new Intl.DateTimeFormat(
-  i18n.language === 'ar' ? 'ar-EG' : 'en-US',
-  {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  }
-).format(now);
+  const [now, setNow] = useState(new Date());
 
-const hijriDate = new Intl.DateTimeFormat(
-  i18n.language === 'ar' ? 'ar-SA-u-ca-islamic' : 'en-US-u-ca-islamic',
-  {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  }
-).format(now);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setNow(new Date());
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const gregorianDate = new Intl.DateTimeFormat(
+    i18n.language === 'ar' ? 'ar-EG' : 'en-US',
+    {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    }
+  ).format(now);
+
+  const hijriDate = new Intl.DateTimeFormat(
+    i18n.language === 'ar'
+      ? 'ar-SA-u-ca-islamic'
+      : 'en-US-u-ca-islamic',
+    {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    }
+  ).format(now);
+
+  const time = new Intl.DateTimeFormat(
+    i18n.language === 'ar' ? 'ar-EG' : 'en-US',
+    {
+      hour: '2-digit',
+      minute: '2-digit',
+    }
+  ).format(now);
+
   return (
     <header
       className={[
@@ -38,13 +59,22 @@ const hijriDate = new Intl.DateTimeFormat(
       ].join(' ')}
     >
       <div className="flex items-center gap-3 px-4 h-16">
-        {/* Hamburger for mobile */}
+        {/* Mobile Menu */}
         <button
           onClick={toggleSidebar}
           className="lg:hidden p-2 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-dark-hover transition-colors"
           aria-label={t('sidebar.collapse')}
         >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <line x1="3" y1="6" x2="21" y2="6" />
             <line x1="3" y1="12" x2="21" y2="12" />
             <line x1="3" y1="18" x2="21" y2="18" />
@@ -61,20 +91,26 @@ const hijriDate = new Intl.DateTimeFormat(
         {/* Spacer */}
         <div className="flex-1" />
 
-       <div className="hidden md:flex flex-col text-right">
-  <span className="text-sm font-semibold text-gray-900 dark:text-white">
-    {gregorianDate}
-  </span>
+        {/* Date & Time */}
+        <div className="flex flex flex-col items-right gap-0.5 text-right mr-4">
+          <span className="text-sm font-semibold text-gray-900 dark:text-white">
+            {gregorianDate}
+          </span>
 
-  <span className="text-xs text-gray-500 dark:text-gray-400">
-    {hijriDate}
-  </span>
-</div>
+          <div className="flex flex-col items-right gap-0.5">
+            <span className="text-xs text-gray-500 dark:text-gray-400">
+              {hijriDate}
+            </span>
 
-        {/* Actions */}
+            <span className="text-xs font-semibold text-primary-600 dark:text-primary-400">
+              {time}
+            </span>
+          </div>
+        </div>
+
+        {/* Theme Toggle */}
         <div className="flex items-center gap-1">
           <ThemeToggle />
-          
         </div>
       </div>
     </header>

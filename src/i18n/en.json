@@ -5,6 +5,7 @@
   },
   "nav": {
     "dashboard": "Dashboard",
+    "categories": "Categories",
     "office": "Office & PDF",
     "ai": "AI Study Tools",
     "powerpoint": "PowerPoint",
@@ -39,6 +40,7 @@
     "tryAgain": "Try a different search term"
   },
   "dashboard": {
+    "categories": "Categories",
     "welcome": "Welcome to Morven for Students",
     "welcomeMessage": "Your all-in-one toolkit for productivity and study.",
     "recentTools": "Recent Tools",

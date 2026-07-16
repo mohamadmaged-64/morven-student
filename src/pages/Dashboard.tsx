@@ -245,15 +245,47 @@ export default function Dashboard() {
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
 
  const quickActions = [
-    { icon: Paperclip, label: 'Merge PDF', to: '/tool/merge-pdf' },
-    { icon: FileArchive, label: 'Compress PDF', to: '/tool/compress-pdf' },
-    { icon: FileText, label: 'Summarize', to: '/tool/summarize-text' },
-    { icon: Globe, label: 'Translate', to: '/tool/translate' },
-    { icon: QrCode, label: 'QR Code', to: '/tool/qr-generator' },
-    { icon: Timer, label: 'Pomodoro', to: '/tool/pomodoro' },
-    { icon: Scissors, label: 'BG Remover', to: '/tool/bg-remove' },
-    { icon: Pill, label: 'Drug Info', to: '/tool/drug-summary' },
-  ];
+  {
+    icon: Paperclip,
+    label: t('tools.office.pdfMerge.name'),
+    to: '/tool/merge-pdf',
+  },
+  {
+    icon: FileArchive,
+    label: t('tools.office.pdfCompress.name'),
+    to: '/tool/compress-pdf',
+  },
+  {
+    icon: FileText,
+    label: t('tools.ai.smartNotes.name'),
+    to: '/tool/summarize-text',
+  },
+  {
+    icon: Globe,
+    label: t('tools.ai.translator.name'),
+    to: '/tool/translate',
+  },
+  {
+    icon: QrCode,
+    label: t('tools.qrcode.qrGenerate.name'),
+    to: '/tool/qr-generator',
+  },
+  {
+    icon: Timer,
+    label: t('tools.pomodoro'),
+    to: '/tool/pomodoro',
+  },
+  {
+    icon: Scissors,
+    label: t('tools.images.backgroundRemover.name'),
+    to: '/tool/bg-remove',
+  },
+  {
+    icon: Pill,
+    label: t('tools.medical.drugReference.name'),
+    to: '/tool/drug-summary',
+  },
+];
 
   return (
     <div className="max-w-7xl mx-auto space-y-8">
@@ -384,7 +416,7 @@ export default function Dashboard() {
         <div className="flex items-center gap-2 mb-4">
           <Folder className="w-5 h-5 text-gray-500 dark:text-gray-400" />
           <h2 className="text-sm font-semibold text-gray-800 dark:text-gray-200 uppercase tracking-wider">
-            Categories
+            {t('dashboard.categories')}
           </h2>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

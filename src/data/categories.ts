@@ -37,7 +37,7 @@ export const categories: Record<ToolCategory, CategoryMeta> = {
   },
   powerpoint: {
     name: 'PowerPoint',
-    nameAr: 'باوربوينت',
+    nameAr: 'أدوات الPowerPoint',
     icon: Presentation,
     description: 'Create, edit, convert, and enhance PowerPoint presentations',
     descriptionAr: 'إنشاء وتحرير وتحويل وتحسين عروض PowerPoint التقديمية',
@@ -51,14 +51,14 @@ export const categories: Record<ToolCategory, CategoryMeta> = {
   },
   audio: {
     name: 'Audio',
-    nameAr: 'الصوت',
+    nameAr: 'أدوات الصوت',
     icon: Music,
     description: 'Convert audio formats and transcribe speech to text',
-    descriptionAr: 'تحويل صيغ الصوت ونسخ الكلام إلى نص',
+    descriptionAr: 'تحويل صيغ الصوت ونسخ الصوت إلى نص',
   },
   images: {
     name: 'Images',
-    nameAr: 'الصور',
+    nameAr: 'أدوات الصور',
     icon: ImageIcon,
     description: 'Remove backgrounds, rotate, blur, and convert images',
     descriptionAr: 'إزالة الخلفيات وتدوير وتغيير الحجم وتحويل الصور',
@@ -72,14 +72,14 @@ export const categories: Record<ToolCategory, CategoryMeta> = {
   },
   student: {
     name: 'Student Tools',
-    nameAr: 'أدوات الطالب',
+    nameAr: 'عام',
     icon: GraduationCap,
     description: 'Pomodoro timer, task manager, exam countdown, and more',
     descriptionAr: 'مؤقت بومودورو ومدير المهام وعد تنازلي للامتحانات والمزيد',
   },
   medical: {
     name: 'Medical Student',
-    nameAr: 'الطالب الطبي',
+    nameAr: 'القسم الطبي',
     icon: HeartPulse,
     description: 'Medical summarizers, flashcards, drug references, and lab values',
     descriptionAr: 'ملخصات طبية وبطاقات تعليمية ومراجع الأدوية وقيم المختبر',
