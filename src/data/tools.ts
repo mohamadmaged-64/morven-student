@@ -27,7 +27,8 @@ import {
   Music, Lightbulb, Pen, CheckCircle, Globe, List, Newspaper, Key, 
   HelpCircle, Zap, Layers, BookOpenCheck, CalendarDays, BrainCircuit, 
   Book, Type, ScrollText, Microscope, Sparkles, Smartphone, Timer, 
-  ListTodo, Calendar, ClipboardPlus, FileArchive,  ArrowUpDown, Droplets, Signature, ScanSearch, ScanText, GitCompare, Stethoscope, Scale, Pill, FlaskConical, FileHeart
+  ListTodo, Calendar, ClipboardPlus, FileArchive,  ArrowUpDown, Droplets, Signature, ScanSearch, ScanText, GitCompare, Stethoscope, Scale, Pill, FlaskConical, FileHeart,
+  Cog
 } from "lucide-react";
 
 export const icon = {
@@ -271,6 +272,11 @@ export const categories: Record<ToolCategory, CategoryMeta> = {
     name: "Medical Student",
     nameAr: "طالب الطب",
     icon: HeartPulse,
+  },
+  engineering: {
+    name: "Engineering Tools",
+    nameAr: "أدوات الهندسة",
+    icon: Cog,
   },
 };
 export const categoryOrder: ToolCategory[] = [

@@ -15,6 +15,7 @@
     "qrcode": "رمز QR",
     "student": "عام",
     "medical": "القسم الطبي",
+    "engineering": "القسم الهندسي",
     "favorites": "المفضلة",
     "recent": "الأدوات الأخيرة",
     "allTools": "جميع الأدوات",
@@ -33,6 +34,7 @@
     "lightMode": "الوضع الفاتح",
     "english": "الإنجليزية",
     "arabic": "العربية"
+    
   },
   "search": {
     "placeholder": "البحث عن أدوات...",

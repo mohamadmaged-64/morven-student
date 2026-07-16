@@ -26,7 +26,8 @@ export type ToolCategory =
   | 'images'
   | 'qrcode'
   | 'student'
-  | 'medical';
+  | 'medical'
+  | 'engineering';
 
 export interface FileItem {
   id: string;

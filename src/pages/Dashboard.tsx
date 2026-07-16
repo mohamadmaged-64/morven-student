@@ -90,6 +90,7 @@ const badgeVariantMap: Record<string, 'primary' | 'success' | 'warning' | 'info'
   qrcode: 'primary',
   student: 'info',
   medical: 'danger',
+  engineering: 'success',
 };
 
 {/* Premium Hero Section */}
@@ -298,8 +299,8 @@ export default function Dashboard() {
   },
   {
     icon: Music,
-    label: t('tools.video.videoToaudio.name'),
-    to: '/tool/video-to-audio',
+    label: t('tools.video.videoAudioExtractor.name'),
+    to: '/tool/extract-audio-video',
   }
 ];
 

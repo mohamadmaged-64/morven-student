@@ -35,6 +35,7 @@ const ALL_CATEGORIES: ToolCategory[] = [
   'qrcode',
   'student',
   'medical',
+  'engineering',
 ];
 
 export function CategoryPage() {

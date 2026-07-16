@@ -1,4 +1,5 @@
 import type { ToolCategory } from '@/types';
+
 import { 
   FileText, 
   Brain, 
@@ -9,7 +10,8 @@ import {
   QrCode, 
   GraduationCap, 
   HeartPulse,
-  type LucideIcon 
+  type LucideIcon, 
+  Cog
 } from 'lucide-react';
 
 export interface CategoryMeta {
@@ -83,5 +85,12 @@ export const categories: Record<ToolCategory, CategoryMeta> = {
     icon: HeartPulse,
     description: 'Medical summarizers, flashcards, drug references, and lab values',
     descriptionAr: 'ملخصات طبية وبطاقات تعليمية ومراجع الأدوية وقيم المختبر',
+  },
+  engineering: {
+    name: 'Engineering Tools',
+    nameAr: 'أدوات الهندسة',
+    icon: Cog,
+    description: 'Engineering calculators, diagrams, and design tools',
+    descriptionAr: 'حاسبات هندسية ورسومات وأدوات تصميم',
   },
 };

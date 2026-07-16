@@ -10,4 +10,5 @@ export const categoryOrder: ToolCategory[] = [
   'qrcode',
   'student',
   'medical',
+  'engineering',
 ];
