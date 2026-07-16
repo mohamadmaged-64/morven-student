@@ -36,16 +36,39 @@ const iconMap = {
 };
 
 const sidebarVariants = {
-  open: { x: 0, transition: { type: 'spring', stiffness: 300, damping: 30 } },
-  closed: { x: '-100%', transition: { type: 'spring', stiffness: 300, damping: 30 } },
-};
+  open: {
+    x: 0,
+    transition: {
+      type: 'spring',
+      stiffness: 300,
+      damping: 30,
+    },
+  },
 
+  closed: (direction: 'ltr' | 'rtl') => ({
+    x: direction === 'rtl' ? '100%' : '-100%',
+    transition: {
+      type: 'spring',
+      stiffness: 300,
+      damping: 30,
+    },
+  }),
+};
 const itemVariants = {
-  hidden: { opacity: 0, x: -16 },
+  hidden: (direction: 'ltr' | 'rtl') => ({
+    opacity: 0,
+    x: direction === 'rtl' ? 16 : -16,
+  }),
+
   visible: (i: number) => ({
     opacity: 1,
     x: 0,
-    transition: { delay: i * 0.04, type: 'spring', stiffness: 300, damping: 24 },
+    transition: {
+      delay: i * 0.04,
+      type: 'spring',
+      stiffness: 300,
+      damping: 24,
+    },
   }),
 };
 
