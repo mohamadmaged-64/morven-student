@@ -16,6 +16,7 @@ import { Modal } from '@/components/UI/Modal';
 import { useAppStore } from '@/store/useAppStore';
 import { useThemeStore } from '@/store/useThemeStore';
 import { useLanguageStore } from '@/store/useLanguageStore';
+import { useNavigate } from 'react-router-dom';
 import {
   fileToArrayBuffer,
   fileToDataURL,
@@ -35,11 +36,31 @@ import {
   extractPDFImages,
   ocrPDF,
   comparePDFs,
-  wordToPDF,
-  excelToPDF,
-  pptToPDF,
   addSignaturePDF,
 } from '@/utils/file';
+
+import {
+  FileText,
+  File,
+  FileSpreadsheet,
+  Presentation,
+  Files,
+  Scissors,
+  Archive,
+  Trash2,
+  ArrowUpDown,
+  RotateCw,
+  Lock,
+  LockOpen,
+  Droplets,
+  PenTool,
+  Image,
+  ScanSearch,
+  ArrowLeft,
+  Scale,
+} from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
+
 
 // ─── Tool Configuration ─────────────────────────────────────────────
 
@@ -49,33 +70,26 @@ interface ToolConfig {
   nameAr: string;
   description: string;
   descriptionAr: string;
-  icon: string;
+  icon: LucideIcon;
   accepts: string[];
   multiple?: boolean;
   maxFiles?: number;
   category: string;
+  section: string;
 }
 
 const TOOLS: Record<string, ToolConfig> = {
-  'pdf-to-word': {
-    id: 'pdf-to-word',
-    name: 'PDF to Word',
-    nameAr: 'PDF إلى Word',
-    description: 'Convert PDF documents to editable Word files',
-    descriptionAr: 'تحويل مستندات PDF إلى ملفات Word قابلة للتعديل',
-    icon: '📝',
-    accepts: ['.pdf'],
-    category: 'conversion',
-  },
+ 
   'word-to-pdf': {
     id: 'word-to-pdf',
     name: 'Word to PDF',
     nameAr: 'Word إلى PDF',
     description: 'Convert Word documents to PDF format',
     descriptionAr: 'تحويل مستندات Word إلى تنسيق PDF',
-    icon: '📄',
+    icon: File,
     accepts: ['.docx', '.doc'],
     category: 'conversion',
+    section: 'office',
   },
   'excel-to-pdf': {
     id: 'excel-to-pdf',
@@ -83,9 +97,10 @@ const TOOLS: Record<string, ToolConfig> = {
     nameAr: 'Excel إلى PDF',
     description: 'Convert Excel spreadsheets to PDF format',
     descriptionAr: 'تحويل جداول Excel إلى تنسيق PDF',
-    icon: '📊',
+    icon: FileSpreadsheet,
     accepts: ['.xlsx', '.xls', '.csv'],
     category: 'conversion',
+    section: 'office',
   },
   'ppt-to-pdf': {
     id: 'ppt-to-pdf',
@@ -93,9 +108,10 @@ const TOOLS: Record<string, ToolConfig> = {
     nameAr: 'PowerPoint إلى PDF',
     description: 'Convert PowerPoint presentations to PDF',
     descriptionAr: 'تحويل عروض PowerPoint إلى PDF',
-    icon: '📽️',
+    icon: Presentation,
     accepts: ['.pptx', '.ppt'],
     category: 'conversion',
+    section: 'office',
   },
   'merge-pdfs': {
     id: 'merge-pdfs',
@@ -103,11 +119,12 @@ const TOOLS: Record<string, ToolConfig> = {
     nameAr: 'دمج ملفات PDF',
     description: 'Combine multiple PDF files into one document',
     descriptionAr: 'دمج ملفات PDF متعددة في مستند واحد',
-    icon: '🔗',
+    icon: Files,
     accepts: ['.pdf'],
     multiple: true,
     maxFiles: 20,
     category: 'pdf',
+    section: 'office',
   },
   'split-pdf': {
     id: 'split-pdf',
@@ -115,9 +132,10 @@ const TOOLS: Record<string, ToolConfig> = {
     nameAr: 'تقسيم PDF',
     description: 'Extract specific pages from a PDF document',
     descriptionAr: 'استخراج صفحات محددة من مستند PDF',
-    icon: '✂️',
+    icon: Scissors,
     accepts: ['.pdf'],
     category: 'pdf',
+    section: 'office',
   },
   'compress-pdf': {
     id: 'compress-pdf',
@@ -125,9 +143,10 @@ const TOOLS: Record<string, ToolConfig> = {
     nameAr: 'ضغط PDF',
     description: 'Reduce PDF file size while maintaining quality',
     descriptionAr: 'تقليل حجم ملف PDF مع الحفاظ على الجودة',
-    icon: '📦',
+    icon: Archive,
     accepts: ['.pdf'],
     category: 'pdf',
+    section: 'office',
   },
   'delete-pages': {
     id: 'delete-pages',
@@ -135,9 +154,10 @@ const TOOLS: Record<string, ToolConfig> = {
     nameAr: 'حذف صفحات PDF',
     description: 'Remove unwanted pages from a PDF document',
     descriptionAr: 'إزالة الصفحات غير المرغوب فيها من مستند PDF',
-    icon: '🗑️',
+    icon: Trash2,
     accepts: ['.pdf'],
     category: 'pdf',
+    section: 'office',
   },
   'reorder-pages': {
     id: 'reorder-pages',
@@ -145,9 +165,10 @@ const TOOLS: Record<string, ToolConfig> = {
     nameAr: 'إعادة ترتيب صفحات PDF',
     description: 'Change the order of pages in a PDF document',
     descriptionAr: 'تغيير ترتيب الصفحات في مستند PDF',
-    icon: '🔀',
+    icon: ArrowUpDown,
     accepts: ['.pdf'],
     category: 'pdf',
+    section: 'office',
   },
   'rotate-pages': {
     id: 'rotate-pages',
@@ -155,9 +176,10 @@ const TOOLS: Record<string, ToolConfig> = {
     nameAr: 'تدوير صفحات PDF',
     description: 'Rotate specific pages in a PDF document',
     descriptionAr: 'تدوير صفحات محددة في مستند PDF',
-    icon: '🔄',
+    icon: RotateCw,
     accepts: ['.pdf'],
     category: 'pdf',
+    section: 'office',
   },
   'password-protect': {
     id: 'password-protect',
@@ -165,9 +187,10 @@ const TOOLS: Record<string, ToolConfig> = {
     nameAr: 'حماية PDF بكلمة مرور',
     description: 'Add password protection to a PDF document',
     descriptionAr: 'إضافة حماية بكلمة مرور لمستند PDF',
-    icon: '🔒',
+    icon: Lock,
     accepts: ['.pdf'],
     category: 'pdf',
+    section: 'office',
   },
   'remove-password': {
     id: 'remove-password',
@@ -175,9 +198,10 @@ const TOOLS: Record<string, ToolConfig> = {
     nameAr: 'إزالة كلمة مرور PDF',
     description: 'Remove password protection from a PDF',
     descriptionAr: 'إزالة الحماية بكلمة مرور من ملف PDF',
-    icon: '🔓',
+    icon: LockOpen,
     accepts: ['.pdf'],
     category: 'pdf',
+    section: 'office',
   },
   'add-watermark': {
     id: 'add-watermark',
@@ -185,9 +209,10 @@ const TOOLS: Record<string, ToolConfig> = {
     nameAr: 'إضافة علامة مائية',
     description: 'Add a text watermark to all pages of a PDF',
     descriptionAr: 'إضافة علامة مائية نصية لجميع صفحات PDF',
-    icon: '💧',
+    icon: Droplets,
     accepts: ['.pdf'],
     category: 'pdf',
+    section: 'office',
   },
   'add-signature': {
     id: 'add-signature',
@@ -195,9 +220,10 @@ const TOOLS: Record<string, ToolConfig> = {
     nameAr: 'إضافة توقيع',
     description: 'Draw and place a signature on a PDF page',
     descriptionAr: 'رسم ووضع توقيع على صفحة PDF',
-    icon: '✍️',
+    icon: PenTool,
     accepts: ['.pdf'],
     category: 'pdf',
+    section: 'office',
   },
   'extract-images': {
     id: 'extract-images',
@@ -205,9 +231,10 @@ const TOOLS: Record<string, ToolConfig> = {
     nameAr: 'استخراج الصور',
     description: 'Extract all images from a PDF document',
     descriptionAr: 'استخراج جميع الصور من مستند PDF',
-    icon: '🖼️',
+    icon: Image,
     accepts: ['.pdf'],
     category: 'pdf',
+    section: 'office',
   },
   'ocr': {
     id: 'ocr',
@@ -215,9 +242,10 @@ const TOOLS: Record<string, ToolConfig> = {
     nameAr: 'OCR - التعرف على النص',
     description: 'Extract text from scanned PDFs using OCR',
     descriptionAr: 'استخراج النص من PDFات الممسوحة باستخدام OCR',
-    icon: '🔍',
+    icon: ScanSearch,
     accepts: ['.pdf'],
     category: 'pdf',
+    section: 'office',
   },
   'compare-pdfs': {
     id: 'compare-pdfs',
@@ -225,11 +253,12 @@ const TOOLS: Record<string, ToolConfig> = {
     nameAr: 'مقارنة ملفات PDF',
     description: 'Compare two PDF documents and find differences',
     descriptionAr: 'مقارنة مستندين PDF وإيجاد الفروقات',
-    icon: '⚖️',
+    icon: Scale,
     accepts: ['.pdf'],
     multiple: true,
     maxFiles: 2,
     category: 'pdf',
+    section: 'office',
   },
 };
 
@@ -243,17 +272,46 @@ interface UploadedFileData {
 }
 
 // ─── Utility Sub-Components ─────────────────────────────────────────
-
+ 
 function ToolHeader({ tool, isDark, isRtl }: { tool: ToolConfig; isDark: boolean; isRtl: boolean }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const Icon = tool.icon;
   return (
+    <>
+<button
+  onClick={() => navigate('/category/office')}
+  className="flex items-center gap-2 text-gray-500 hover:text-primary-500 dark:text-gray-400 dark:hover:text-primary-400 transition-colors mb-6 group"
+>
+  <svg
+    className={`w-5 h-5 transition-transform ${
+      isRtl ? 'rotate-180' : ''
+    } group-hover:-translate-x-1`}
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M15 19l-7-7 7-7"
+    />
+  </svg>
+
+  <span className="text-sm font-medium">
+    {isRtl ? 'العودة لأدوات الPDF' : 'Back to PDF Tools'}
+  </span>
+</button>
     <motion.div
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       className="mb-8"
     >
       <div className="flex items-center gap-4 mb-3">
-        <div className="text-4xl">{tool.icon}</div>
+       <div className="w-16 h-16 rounded-2xl bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
+  <Icon className="w-8 h-8 text-primary-600 dark:text-primary-400" />
+</div>
         <div className={isRtl ? 'text-right' : ''}>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
             {isRtl ? tool.nameAr : tool.name}
@@ -264,6 +322,7 @@ function ToolHeader({ tool, isDark, isRtl }: { tool: ToolConfig; isDark: boolean
         </div>
       </div>
     </motion.div>
+    </>
   );
 }
 
@@ -353,10 +412,10 @@ function SuccessResult({
 
         <div className="flex gap-2">
           {!isText && result instanceof Blob && (
-            <Button
-              variant="primary"
-              onClick={() => downloadBlob(result, toolName + '.pdf')}
-              icon={
+          <Button
+  variant="primary"
+  onClick={() => downloadBlob(result, toolName + '.pdf')}
+  icon={
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
                   <polyline points="7 10 12 15 17 10" />
@@ -668,6 +727,7 @@ function CompareResult({
 type Step = 'upload' | 'configure' | 'result';
 
 export default function OfficeToolPage({ toolId: propToolId }: { toolId?: string }) {
+  const navigate = useNavigate();
   const { toolId: routeToolId } = useParams<{ toolId: string }>();
   const toolId = propToolId || routeToolId || '';
   const tool = TOOLS[toolId];
@@ -768,39 +828,7 @@ export default function OfficeToolPage({ toolId: propToolId }: { toolId?: string
       const firstFile = files[0].file;
 
       switch (tool.id) {
-        case 'pdf-to-word': {
-          const buffer = await firstFile.arrayBuffer();
-          const pdfjsLib = await import('pdfjs-dist');
-          const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
-          let text = '';
-          for (let i = 1; i <= pdf.numPages; i++) {
-            setProgress(10 + (i / pdf.numPages) * 40);
-            const page = await pdf.getPage(i);
-            const content = await page.getTextContent();
-            text += content.items
-              .filter((item) => 'str' in item)
-              .map((item) => (item as { str: string }).str)
-              .join(' ') + '\n\n';
-          }
-          const blob = new Blob([text], { type: 'text/plain' });
-          output = blob;
-          break;
-        }
-
-        case 'word-to-pdf':
-          setProgress(30);
-          output = await wordToPDF(firstFile);
-          break;
-
-        case 'excel-to-pdf':
-          setProgress(30);
-          output = await excelToPDF(firstFile);
-          break;
-
-        case 'ppt-to-pdf':
-          setProgress(30);
-          output = await pptToPDF(firstFile);
-          break;
+        
 
         case 'merge-pdfs': {
           if (files.length < 2) throw new Error('At least 2 files required');
@@ -895,7 +923,10 @@ export default function OfficeToolPage({ toolId: propToolId }: { toolId?: string
           setProcessState('done');
           addNotification(t('Comparison complete', 'Comparison complete'), 'success');
           return;
-
+        case 'word-to-pdf':
+        case 'excel-to-pdf':
+        case 'ppt-to-pdf':
+        throw new Error('This tool is cooming soon. Please check back later.');
         default:
           throw new Error('Unknown tool');
       }

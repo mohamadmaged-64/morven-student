@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import {
   Button,
   Card,
@@ -26,15 +27,25 @@ import type { Task, ExamCountdown } from '@/types';
 interface StudentToolPageProps {
   toolId: string;
 }
-
 export function StudentToolPage({ toolId }: StudentToolPageProps) {
+  const navigate = useNavigate();
+  const { direction } = useLanguageStore();
+
+  let content: React.ReactNode;
+
   switch (toolId) {
     case 'pomodoro':
-      return <PomodoroTimer />;
+      content = <PomodoroTimer />;
+      break;
+
     case 'task-manager':
-      return <TaskManager />;
+      content = <TaskManager />;
+      break;
+
     case 'exam-countdown':
-      return <ExamCountdownPage />;
+      content = <ExamCountdownPage />;
+      break;
+
     default:
       return (
         <EmptyState
@@ -44,7 +55,46 @@ export function StudentToolPage({ toolId }: StudentToolPageProps) {
         />
       );
   }
+
+  return (
+    <div className="max-w-6xl mx-auto space-y-6">
+      <button
+        onClick={() => navigate('/category/student')}
+        className="flex items-center gap-2 text-gray-500 hover:text-primary-500 dark:text-gray-400 dark:hover:text-primary-400 transition-colors group"
+      >
+        <svg
+          className={`w-5 h-5 transition-transform ${
+            direction === 'rtl'
+              ? 'rotate-180 group-hover:translate-x-1'
+              : 'group-hover:-translate-x-1'
+          }`}
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M15 19l-7-7 7-7"
+          />
+        </svg>
+
+        <span className="text-sm font-medium">
+          {direction === 'rtl'
+            ? 'العودة للأدوات الطلابية'
+            : 'Back to Student Tools'}
+        </span>
+      </button>
+
+      {content}
+    </div>
+  );
 }
+
+ 
+
+
 
 // =============================================================================
 // 1. POMODORO TIMER

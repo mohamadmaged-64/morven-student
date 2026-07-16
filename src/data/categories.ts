@@ -22,8 +22,8 @@ export interface CategoryMeta {
 
 export const categories: Record<ToolCategory, CategoryMeta> = {
   office: {
-    name: 'Office & PDF',
-    nameAr: 'المكتب و PDF',
+    name: 'PDF Tools',
+    nameAr: 'أدوات الPDF',
     icon: FileText,
     description: 'Convert, merge, split, compress, and edit PDF documents',
     descriptionAr: 'تحويل ودمج وتقسيم وضغط وتحرير مستندات PDF',

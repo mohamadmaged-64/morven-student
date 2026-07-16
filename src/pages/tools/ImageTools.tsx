@@ -10,6 +10,7 @@ import { EmptyState } from '@/components/UI/EmptyState';
 import { Slider } from '@/components/UI/Slider';
 import { useAppStore } from '@/store/useAppStore';
 import { useLanguageStore } from '@/store/useLanguageStore';
+import { useNavigate } from 'react-router-dom';
 
 type ToolId = 'background-remover' | 'rotate-image' | 'blur-image' | 'images-to-pdf';
 
@@ -462,7 +463,7 @@ function ImagesToPdfTool() {
 
 function ImageToolPage({ toolId }: { toolId: string }) {
   const { direction } = useLanguageStore();
-
+  const navigate = useNavigate();
   const configs: Record<ToolId, { title: string; description: string; icon: JSX.Element; component: JSX.Element }> = {
     'background-remover': {
       title: 'Background Remover',
@@ -502,24 +503,72 @@ function ImageToolPage({ toolId }: { toolId: string }) {
     );
   }
 
-  return (
-    <div className="max-w-4xl mx-auto space-y-6" dir={direction}>
-      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
-        <Card>
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center text-violet-600 dark:text-violet-400">{config.icon}</div>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{config.title}</h1>
-              <p className="text-sm text-gray-500 dark:text-gray-400">{config.description}</p>
-            </div>
+return (
+  <div className="max-w-4xl mx-auto space-y-6" dir={direction}>
+    <motion.div
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+    >
+      <button
+        onClick={() => navigate('/category/images')}
+        className="flex items-center gap-2 text-gray-500 hover:text-primary-500 dark:text-gray-400 dark:hover:text-primary-400 transition-colors mb-6 group"
+      >
+        <svg
+          className={`w-5 h-5 transition-transform ${
+            direction === 'rtl'
+              ? 'rotate-180 group-hover:translate-x-1'
+              : 'group-hover:-translate-x-1'
+          }`}
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M15 19l-7-7 7-7"
+          />
+        </svg>
+
+        <span className="text-sm font-medium">
+          {direction === 'rtl'
+            ? 'العودة لأدوات الصور'
+            : 'Back to Image Tools'}
+        </span>
+      </button>
+
+      <Card>
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+            {config.icon}
           </div>
-        </Card>
-      </motion.div>
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.1 }}>
-        <Card>{config.component}</Card>
-      </motion.div>
-    </div>
-  );
+
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+              {config.title}
+            </h1>
+
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              {config.description}
+            </p>
+          </div>
+        </div>
+      </Card>
+    </motion.div>
+
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, delay: 0.1 }}
+    >
+      <Card>
+        {config.component}
+      </Card>
+    </motion.div>
+  </div>
+);
 }
 
 export default ImageToolPage;

@@ -49,6 +49,21 @@ const itemVariants = {
   }),
 };
 
+const studentCategories = ['student', 'medical', 'engineering'];
+
+const studyCategories = [
+  'ai',
+  'office',
+  'powerpoint',
+];
+
+const productivityCategories = [
+  'video',
+  'images',
+  'audio',
+  'qrcode',
+];
+
 // Removed fixed const collapsed = true;
 // Passed isMobile to control the text display based on screen size or hover state
 function SidebarContent({ isMobile, isHovered }: { isMobile: boolean; isHovered: boolean }) {
@@ -62,7 +77,53 @@ function SidebarContent({ isMobile, isHovered }: { isMobile: boolean; isHovered:
   
   // Text will show if it's on Mobile (Drawer mode) OR if the desktop sidebar is hovered
   const showText = isMobile || isHovered;
+const renderCategory = (cat: string, index: number) => {
+  const meta = categories[cat as keyof typeof categories];
+  if (!meta) return null;
 
+  const Icon =
+    typeof meta.icon === 'string'
+      ? (iconMap[meta.icon as keyof typeof iconMap] || FileIcon)
+      : meta.icon;
+
+  return (
+    <motion.div
+      key={cat}
+      custom={index}
+      initial="hidden"
+      animate="visible"
+      variants={itemVariants}
+    >
+      <NavLink
+        to={`/category/${cat}`}
+        onClick={() => isMobile && setSidebarOpen(false)}
+        className={({ isActive }) =>
+          [
+            `flex items-center rounded-xl text-sm font-medium transition-all duration-200 group w-full ${showText ? 'gap-3 px-3 py-2.5' : 'justify-center px-2 py-1.5'}`,
+            isActive
+              ? 'bg-primary-50 dark:bg-primary-500/10 text-primary-600 dark:text-primary-400 border-r-2 border-primary-600'
+              : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-dark-hover hover:text-gray-900 dark:hover:text-gray-200',
+          ].join(' ')
+        }
+      >
+        <Icon size={18} className="shrink-0" />
+
+        <AnimatePresence>
+          {showText && (
+            <motion.span
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="flex-1 truncate whitespace-nowrap text-left"
+            >
+              {t(`nav.${cat}`)}
+            </motion.span>
+          )}
+        </AnimatePresence>
+      </NavLink>
+    </motion.div>
+  );
+};
   return (
     <nav className="flex flex-col h-full">
       {/* Logo */}
@@ -123,54 +184,42 @@ function SidebarContent({ isMobile, isHovered }: { isMobile: boolean; isHovered:
         </div>
 
         {/* Categories */}
-        <div className="px-3 mb-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400 h-4">
-           {showText ? t('nav.tools') : ''}
-        </div>
-        <div className="space-y-0.5 w-full">
-          {categoryOrder.map((cat, i) => {
-            const meta = categories[cat];
-            const count = tools.filter((t) => t.category === cat).length;
-            const Icon = typeof meta.icon === 'string' 
-              ? (iconMap[meta.icon as keyof typeof iconMap] || FileIcon) 
-              : meta.icon;
+        <div className={showText ? "space-y-5" : "space-y-2"}>
 
-            return (
-              <div key={cat}>
-                {cat === 'student' && (
-                  <div className="mt-5 px-3 mb-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400 h-4">
-                    {showText ? t('nav.studentSection') : ''}
-                  </div>
-                )}
-                <motion.div custom={i} initial="hidden" animate="visible" variants={itemVariants}>
-                  <NavLink
-                    to={`/category/${cat}`}
-                    onClick={() => isMobile && setSidebarOpen(false)}
-                    className={({ isActive }) =>
-                      [
-                        'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group w-full',
-                        isActive
-                          ? 'bg-primary-50 dark:bg-primary-500/10 text-primary-600 dark:text-primary-400 border-r-2 border-primary-600'
-                          : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-dark-hover hover:text-gray-900 dark:hover:text-gray-200'
-                      ].join(' ')
-                    }
-                  >
-                    <Icon size={18} className="shrink-0" />
-                    <AnimatePresence>
-                      {showText && (
-                        <motion.span 
-                          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                          className="flex-1 truncate whitespace-nowrap text-left"
-                        >
-                          {t(`nav.${cat}`)}
-                        </motion.span>
-                      )}
-                    </AnimatePresence>
-                  </NavLink>
-                </motion.div>
-              </div>
-            );
-          })}
-        </div>
+  {/* Student Section */}
+  <div className={showText ? "" : "mb-1"}>
+    <div className="px-3 mb-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400 h-4">
+     {showText ? t('nav.studentSection') : ''}
+    </div>
+
+    <div className={showText ? "space-y-0.5" : "space-y-0"}>
+      {studentCategories.map((cat, i) => renderCategory(cat, i))}
+    </div>
+  </div>
+
+  {/* Studying Section */}
+  <div className={showText ? "" : "mb-1"}>
+    <div className="px-3 mb-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400 h-4">
+      {showText ? t('nav.studyTools') : ''}
+    </div>
+
+    <div className={showText ? "space-y-0.5" : "space-y-0"}>
+      {studyCategories.map((cat, i) => renderCategory(cat, i))}
+    </div>
+  </div>
+
+  {/* Productivity */}
+  <div className={showText ? "" : "mb-1"}>
+    <div className="px-3 mb-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400 h-4">
+      {showText ? t('nav.productivityTools') : ''}
+    </div>
+
+    <div className={showText ? "space-y-0.5" : "space-y-0"}>
+      {productivityCategories.map((cat, i) => renderCategory(cat, i))}
+    </div>
+  </div>
+
+</div>
 
         {/* Favorites */}
         {favTools.length > 0 && (
@@ -190,13 +239,15 @@ function SidebarContent({ isMobile, isHovered }: { isMobile: boolean; isHovered:
                     to={`/tool/${tool.id}`}
                     onClick={() => isMobile && setSidebarOpen(false)}
                     className={({ isActive }) =>
-                      [
-                        'flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 w-full',
-                        isActive
-                          ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400'
-                          : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-dark-hover',
-                      ].join(' ')
-                    }
+  [
+    `flex items-center gap-3 rounded-xl text-sm font-medium transition-all duration-200 group w-full ${
+      showText ? 'px-3 py-2.5' : 'px-2 py-1.5 justify-center'
+    }`,
+    isActive
+      ? 'bg-primary-50 dark:bg-primary-500/10 text-primary-600 dark:text-primary-400 border-r-2 border-primary-600'
+      : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-dark-hover hover:text-gray-900 dark:hover:text-gray-200',
+  ].join(' ')
+}
                   >
                     <ToolIcon className="w-4 h-4 shrink-0" />
                     <AnimatePresence>
@@ -298,6 +349,7 @@ export function Sidebar() {
                 direction === 'rtl' ? 'right-0 border-l' : 'left-0 border-r',
               ].join(' ')}
             >
+
               <SidebarContent isMobile={isMobile} isHovered={isHovered} />
             </motion.aside>
           </>

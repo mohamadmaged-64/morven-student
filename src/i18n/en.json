@@ -17,8 +17,10 @@
     "favorites": "Favorites",
     "recent": "Recent Tools",
     "allTools": "All Tools",
-    "studentSection": "Student",
-    "tools": "Tools"
+    "studentSection": "Students Section",
+    "tools": "Tools",
+    "studyTools": "Studying Section",
+    "productivityTools": "Productivity Section"
     },
   "sidebar": {
     "collapse": "Collapse Sidebar",

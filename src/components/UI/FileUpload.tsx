@@ -37,8 +37,8 @@ function formatSize(bytes: number): string {
 function FileUpload({
   accept = [],
   multiple = false,
-  maxSize = 10 * 1024 * 1024,
-  maxFiles = 10,
+  maxSize = 200 * 1024 * 1024,
+  maxFiles = 200,
   onFilesSelected,
   onFileRemove,
   className = '',

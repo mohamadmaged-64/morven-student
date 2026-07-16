@@ -17,8 +17,10 @@
     "favorites": "المفضلة",
     "recent": "الأدوات الأخيرة",
     "allTools": "جميع الأدوات",
-    "studentSection": "الطالب",
-    "tools": "الأدوات"
+    "studentSection": "القسم الطلابي",
+    "tools": "الأدوات",
+    "studyTools": "القسم الدراسي",
+    "productivityTools": "القسم الانتاجي"
   },
   "sidebar": {
     "collapse": "طي الشريط الجانبي",

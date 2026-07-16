@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import {
   Button,
   Card,
@@ -62,22 +63,26 @@ type ToolId =
 
 interface AIToolPageProps {
   toolId: string;
+  
 }
 
 interface Flashcard {
   front: string;
   back: string;
+  
 }
 
 interface MCQQuestion {
   question: string;
   options: string[];
   correct: number;
+  
 }
 
 interface TFQuestion {
   statement: string;
   answer: boolean;
+  
 }
 
 interface QuizQuestion {
@@ -86,6 +91,7 @@ interface QuizQuestion {
   options?: string[];
   correct?: number;
   answer?: boolean;
+  
 }
 
 function useToolInfo(toolId: string): { name: string; nameAr: string; description: string; descriptionAr: string; icon: string } {
@@ -802,6 +808,7 @@ function ComparisonView({ original, modified }: { original: string; modified: st
 }
 
 export function AIToolPage({ toolId }: AIToolPageProps) {
+  const navigate = useNavigate();
   const effectiveToolId = toolId as ToolId;
   const toolInfo = useToolInfo(toolId);
   const { language, direction } = useLanguageStore();
@@ -862,6 +869,7 @@ export function AIToolPage({ toolId }: AIToolPageProps) {
         language === 'ar' ? 'يرجى إدخال نص أولاً' : 'Please enter some text first',
         'warning'
       );
+      
       return;
     }
 
@@ -1251,23 +1259,59 @@ export function AIToolPage({ toolId }: AIToolPageProps) {
   };
 
   return (
+    
     <div className={`min-h-screen bg-light-bg dark:bg-dark-bg ${direction === 'rtl' ? 'font-arabic' : ''}`}>
       <div className="max-w-4xl mx-auto px-4 py-8">
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
-          <div className="flex items-center gap-3 mb-2">
-            <span className="text-3xl">{toolInfo.icon}</span>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              {language === 'ar' ? toolInfo.nameAr : toolInfo.name}
-            </h1>
-          </div>
-          <p className="text-gray-500 dark:text-gray-400">
-            {language === 'ar' ? toolInfo.descriptionAr : toolInfo.description}
-          </p>
-        </motion.div>
+       <motion.div
+  initial={{ opacity: 0, y: -10 }}
+  animate={{ opacity: 1, y: 0 }}
+  className="mb-8"
+>
+  <button
+    onClick={() => navigate('/category/ai')}
+    className="flex items-center gap-2 text-gray-500 hover:text-primary-500 dark:text-gray-400 dark:hover:text-primary-400 transition-colors mb-6 group"
+  >
+    <svg
+      className={`w-5 h-5 transition-transform ${
+        direction === 'rtl'
+          ? 'rotate-180 group-hover:translate-x-1'
+          : 'group-hover:-translate-x-1'
+      }`}
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M15 19l-7-7 7-7"
+      />
+    </svg>
+
+    <span className="text-sm font-medium">
+      {language === 'ar'
+        ? 'العودة لأدوات الذكاء الاصطناعي'
+        : 'Back to AI Tools'}
+    </span>
+  </button>
+
+  <div className="flex items-center gap-3 mb-2">
+    <span className="text-3xl">{toolInfo.icon}</span>
+
+    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+      {language === 'ar'
+        ? toolInfo.nameAr
+        : toolInfo.name}
+    </h1>
+  </div>
+
+  <p className="text-gray-500 dark:text-gray-400">
+    {language === 'ar'
+      ? toolInfo.descriptionAr
+      : toolInfo.description}
+  </p>
+</motion.div>
 
         <div className="space-y-6">
           {(isTextInput || isTerminologyInput) && !isStudyPlan && (

@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "docx": "^9.7.1",
     "dompurify": "^3.1.0",
     "file-saver": "^2.0.5",
     "framer-motion": "^11.3.8",

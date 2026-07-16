@@ -1,6 +1,7 @@
 ﻿import { useState, useCallback, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import {
   Button,
   Card,
@@ -706,24 +707,46 @@ interface MedicalToolPageProps {
   toolId: string;
 }
 
+
 export function MedicalToolPage({ toolId }: MedicalToolPageProps) {
+  const navigate = useNavigate();
+  const { direction } = useLanguageStore();
+
+  let content: JSX.Element;
+
   switch (toolId) {
     case 'medical-summarizer':
-      return <MedicalSummarizer />;
+      content = <MedicalSummarizer />;
+      break;
+
     case 'medical-flashcards':
-      return <MedicalFlashcards />;
+      content = <MedicalFlashcards />;
+      break;
+
     case 'medical-mcq':
-      return <MedicalMCQ />;
+      content = <MedicalMCQ />;
+      break;
+
     case 'disease-explain':
-      return <DiseaseExplain />;
+      content = <DiseaseExplain />;
+      break;
+
     case 'disease-compare':
-      return <DiseaseCompare />;
+      content = <DiseaseCompare />;
+      break;
+
     case 'drug-summary':
-      return <DrugSummary />;
+      content = <DrugSummary />;
+      break;
+
     case 'lab-values':
-      return <LabValuesTool />;
+      content = <LabValuesTool />;
+      break;
+
     case 'medical-notes':
-      return <MedicalNotesTool />;
+      content = <MedicalNotesTool />;
+      break;
+
     default:
       return (
         <EmptyState
@@ -733,7 +756,43 @@ export function MedicalToolPage({ toolId }: MedicalToolPageProps) {
         />
       );
   }
+
+  return (
+    <div className="max-w-6xl mx-auto space-y-6">
+      <button
+        onClick={() => navigate('/category/medical')}
+        className="flex items-center gap-2 text-gray-500 hover:text-primary-500 dark:text-gray-400 dark:hover:text-primary-400 transition-colors group"
+      >
+        <svg
+          className={`w-5 h-5 transition-transform ${
+            direction === 'rtl'
+              ? 'rotate-180 group-hover:translate-x-1'
+              : 'group-hover:-translate-x-1'
+          }`}
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M15 19l-7-7 7-7"
+          />
+        </svg>
+
+        <span className="text-sm font-medium">
+          {direction === 'rtl'
+            ? 'العودة للأدوات الطبية'
+            : 'Back to Medical Tools'}
+        </span>
+      </button>
+
+      {content}
+    </div>
+  );
 }
+
 
 // =============================================================================
 // 1. Medical Summarizer

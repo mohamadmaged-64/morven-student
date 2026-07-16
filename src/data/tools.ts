@@ -33,11 +33,10 @@ export const icon = {
 
 export const tools: Tool[] = [
   // OFFICE
-{ id: 'pdf-to-word', name: 'PDF to Word', nameAr: 'PDF إلى Word', description: 'Convert PDF files to editable Word documents', descriptionAr: 'تحويل ملفات PDF إلى مستندات Word قابلة للتعديل', icon: FileText, category: 'office' },
 { id: 'word-to-pdf', name: 'Word to PDF', nameAr: 'Word إلى PDF', description: 'Convert Word documents to PDF format', descriptionAr: 'تحويل مستندات Word إلى صيغة PDF', icon: FileText, category: 'office' },
 { id: 'excel-to-pdf', name: 'Excel to PDF', nameAr: 'Excel إلى PDF', description: 'Convert Excel spreadsheets to PDF', descriptionAr: 'تحويل جداول Excel إلى PDF', icon: FileSpreadsheet, category: 'office' },
 { id: 'ppt-to-pdf', name: 'PPT to PDF', nameAr: 'PPT إلى PDF', description: 'Convert PowerPoint presentations to PDF', descriptionAr: 'تحويل عروض PowerPoint إلى PDF', icon: Presentation, category: 'office' },
-{ id: 'merge-pdf', name: 'Merge PDF', nameAr: 'دمج PDF', description: 'Combine multiple PDF files into a single document', descriptionAr: 'دمج ملفات PDF متعددة في مستند واحد', icon: Paperclip, category: 'office' },
+{ id: 'merge-pdfs', name: 'Merge PDF', nameAr: 'دمج PDF', description: 'Combine multiple PDF files into a single document', descriptionAr: 'دمج ملفات PDF متعددة في مستند واحد', icon: Paperclip, category: 'office' },
 { id: 'split-pdf', name: 'Split PDF', nameAr: 'تقسيم PDF', description: 'Split a PDF file into separate pages or ranges', descriptionAr: 'تقسيم ملف PDF إلى صفحات أو نطاقات منفصلة', icon: Scissors, category: 'office' },
 { id: 'compress-pdf', name: 'Compress PDF', nameAr: 'ضغط PDF', description: 'Reduce PDF file size without losing quality', descriptionAr: 'تقليل حجم ملف PDF دون فقدان الجودة', icon: FileArchive, category: 'office' },
 { id: 'delete-pages', name: 'Delete Pages', nameAr: 'حذف صفحات', description: 'Remove unwanted pages from a PDF document', descriptionAr: 'إزالة الصفحات غير المرغوب فيها من مستند PDF', icon: Trash2, category: 'office' },
