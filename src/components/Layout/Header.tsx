@@ -88,25 +88,24 @@ export function Header({ title }: HeaderProps) {
           </h1>
         )}
 
-        {/* Spacer */}
-        <div className="flex-1" />
+       
+      <div className="flex-1 flex justify-center md:justify-end">
+  <div className="flex flex-col items-center md:items-end text-center md:text-right">
+    <span className="text-sm font-semibold text-gray-900 dark:text-white">
+      {gregorianDate}
+    </span>
 
-        {/* Date & Time */}
-        <div className="flex flex flex-col items-right gap-0.5 text-right mr-4">
-          <span className="text-sm font-semibold text-gray-900 dark:text-white">
-            {gregorianDate}
-          </span>
+    <div className="flex items-center gap-3">
+      <span className="text-xs text-gray-500 dark:text-gray-400">
+        {hijriDate}
+      </span>
 
-          <div className="flex flex-col items-right gap-0.5">
-            <span className="text-xs text-gray-500 dark:text-gray-400">
-              {hijriDate}
-            </span>
-
-            <span className="text-xs font-semibold text-primary-600 dark:text-primary-400">
-              {time}
-            </span>
-          </div>
-        </div>
+      <span className="text-xs font-semibold text-primary-600 dark:text-primary-400">
+        {time}
+      </span>
+    </div>
+  </div>
+</div>
 
         {/* Theme Toggle */}
         <div className="flex items-center gap-1">
