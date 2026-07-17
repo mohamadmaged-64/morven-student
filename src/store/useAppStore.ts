@@ -77,7 +77,7 @@ const saveState = (key: string, value: unknown) => {
 };
 
 export const useAppStore = create<AppStore>((set, get) => ({
-  sidebarOpen: false,
+  sidebarOpen: true,
   toggleSidebar: () => set((s) => ({ sidebarOpen: !s.sidebarOpen })),
   setSidebarOpen: (open) => set({ sidebarOpen: open }),
 

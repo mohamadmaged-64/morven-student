@@ -309,17 +309,24 @@ export function Sidebar() {
   const [isHovered, setIsHovered] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
 
-  useEffect(() => {
-    const handleResize = () => {
-      const mobile = window.innerWidth < 1024;
-      setIsMobile(mobile);
-    };
-    
-    window.addEventListener('resize', handleResize);
-    // Initial check
-    handleResize(); 
-    return () => window.removeEventListener('resize', handleResize);
-  }, [setSidebarOpen]);
+ useEffect(() => {
+  const handleResize = () => {
+    const mobile = window.innerWidth < 1024;
+
+    setIsMobile(mobile);
+
+    if (mobile) {
+      setSidebarOpen(false); // الموبايل يبدأ مغلق
+    } else {
+      setSidebarOpen(true); // اللاب يبدأ مفتوح
+    }
+  };
+
+  handleResize();
+  window.addEventListener('resize', handleResize);
+
+  return () => window.removeEventListener('resize', handleResize);
+}, [setSidebarOpen]);
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
