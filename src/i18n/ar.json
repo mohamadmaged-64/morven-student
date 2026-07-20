@@ -3,6 +3,7 @@
     "name": "مورفن للطلاب",
     "subtitle": "أدواتك الشاملة للدراسة والإنتاجية"
   },
+  
   "nav": {
     "dashboard": "لوحة التحكم",
     "categories": "الفئات",
@@ -142,6 +143,10 @@
       "paraphraser": {
         "name": "إعادة الصياغة",
         "description": "إعادة كتابة النص مع الحفاظ على المعنى الأصلي"
+      },
+      "pdfSummarizer": {
+        "name": "تلخيص PDF",
+        "description": "تلخيص محتوى ملفات PDF"
       }
     },
     "powerpoint": {
@@ -297,7 +302,9 @@
         "name": "QR للفايبر",
         "description": "إنشاء رموز QR لمشاركة شبكة الفايبر"
       }
+      
     },
+    
     "student": {
       "pomodoro": {
         "name": "مؤقت بومودورو",
@@ -459,6 +466,7 @@
     "retry": "إعادة المحاولة",
     "addToFavorites": "إضافة إلى المفضلة",
     "removeFromFavorites": "إزالة من المفضلة"
+    
   },
   "upload": {
     "dropHere": "أسقط ملفاتك هنا",
@@ -492,11 +500,140 @@
     "noFilesToProcess": "لا توجد ملفات للمعالجة",
     "operationCancelled": "تم إلغاء العملية",
     "clipboardCleared": "تم مسح سجل الحافظة",
-    "allFilesCleared": "تم مسح جميع الملفات"
+    "allFilesCleared": "تم مسح جميع الملفات",
+    "enterContent": "يرجى إدخال محتوى لإنشاء رمز QR",
+  "generated": "تم إنشاء رمز QR بنجاح",
+  "generateError": "حدث خطأ أثناء إنشاء رمز QR",
+  "svgDownloaded": "تم تنزيل ملف SVG",
+  "pngDownloaded": "تم تنزيل ملف PNG",
+  "copyFailed": "فشل النسخ، جرّب تنزيل الرمز بدلاً من ذلك"
+  
   },
 
+ "fileUpload": {
+  "dropLabel": "اسحب الملفات هنا أو اضغط للتصفح",
+  "uploadVideo": "ارفع ملف الفيديو"
+},
+
+"Upload video file": "ارفع ملف فيديو",
+"Supports MP4, WebM, OGG, and other video formats": "يدعم MP4 وWebM وOGG وغيرها من صيغ الفيديو",
+
+"Extracting audio...": "جارٍ استخراج الصوت...",
+"Extract Audio from Video": "استخراج الصوت من الفيديو",
+
+"Upload video to compress": "ارفع فيديو لضغطه",
+"Videos will be re-encoded at lower resolution (640x360)": "سيتم إعادة ترميز الفيديو بدقة أقل (640×360)",
+"Original size:": "الحجم الأصلي:",
+"Format:": "الصيغة:",
+"unknown": "غير معروف",
+"Compressing video...": "جارٍ ضغط الفيديو...",
+"Compress Video": "ضغط الفيديو",
+"Compression uses Canvas API to re-encode at 640x360 and 15fps. For higher quality or more advanced compression, a server-side solution with ffmpeg would be needed.": "يستخدم الضغط واجهة Canvas API لإعادة ترميز الفيديو بدقة 640×360 وبمعدل 15 إطارًا في الثانية. للحصول على جودة أعلى أو ضغط متقدم، يلزم استخدام ffmpeg على الخادم.",
+
+"Upload video to convert": "ارفع فيديو لتحويله",
+"Select a video file to convert": "اختر ملف فيديو لتحويله",
+"Current Format": "الصيغة الحالية",
+"Target Format": "الصيغة المطلوبة",
+"Converting...": "جارٍ التحويل...",
+"Convert to": "تحويل إلى",
+"Browser-based conversion uses MediaRecorder with Canvas re-encoding. True MP4 output requires server-side processing. Output will be WebM format.": "يعتمد التحويل داخل المتصفح على MediaRecorder مع إعادة الترميز باستخدام Canvas. للحصول على ملف MP4 حقيقي يلزم المعالجة على الخادم. سيكون الناتج بصيغة WebM.",
+
+"Upload video to extract audio": "ارفع فيديو لاستخراج الصوت",
+"Convert video audio track to a standalone audio file": "حوّل المسار الصوتي للفيديو إلى ملف صوتي مستقل",
+"Convert Video to Audio": "تحويل الفيديو إلى صوت",
+
+"This extracts the audio track from the video. The output format is WebM audio. For MP3 conversion, a server-side solution would be needed.": "تستخرج هذه الأداة المسار الصوتي من الفيديو. سيكون الناتج بصيغة WebM Audio. وللحصول على MP3 يلزم استخدام معالجة على الخادم.",
+"Audio file loaded. Click \"Transcribe Uploaded Audio\" to begin.": "تم تحميل الملف الصوتي. اضغط على \"تفريغ الصوت المرفوع\" للبدء.",
+"Speech Recognition is not supported in your browser. Try Chrome or Edge.": "التعرف على الكلام غير مدعوم في متصفحك. جرّب Chrome أو Edge.",
+"Recognition error:": "خطأ في التعرف:",
+"Recording started. Speak clearly into the microphone.": "بدأ التسجيل. تحدث بوضوح في الميكروفون.",
+"Micro access denied. Please allow microphone access.": "تم رفض الوصول إلى الميكروفون. يرجى السماح بالوصول.",
+"Recording stopped.": "تم إيقاف التسجيل.",
+"Speech Recognition is not supported. Try Chrome or Edge.": "ميزة التعرف على الكلام غير مدعومة. جرّب Chrome أو Edge.",
+"Transcription via browser Speech API requires playing the audio. The audio will play in the background.": "يتطلب التفريغ عبر واجهة Speech API تشغيل الملف الصوتي، وسيتم تشغيله في الخلفية.",
+"Speech Recognition not supported": "ميزة التعرف على الكلام غير مدعومة",
+"Transcription complete!": "اكتمل تفريغ النص!",
+"Error transcribing audio": "حدث خطأ أثناء تفريغ الصوت.",
+"Transcription copied to clipboard": "تم نسخ النص إلى الحافظة.",
+"Transcription downloaded": "تم تنزيل النص.",
+
+"Browser not supported.": "المتصفح غير مدعوم.",
+"Speech Recognition requires Chrome, Edge, or Safari. Firefox and some mobile browsers may not support this feature.": "تتطلب ميزة التعرف على الكلام متصفح Chrome أو Edge أو Safari. قد لا تدعم Firefox وبعض متصفحات الهواتف هذه الميزة.",
+
+"Language": "اللغة",
+"Recording": "جارٍ التسجيل",
+"Ready": "جاهز",
+"Recognizing...": "جارٍ التعرف...",
+"Click the button to stop recording": "اضغط الزر لإيقاف التسجيل.",
+"Click the button to start recording": "اضغط الزر لبدء التسجيل.",
+
+"Or upload an audio file:": "أو ارفع ملفًا صوتيًا:",
+"Upload audio file": "ارفع ملفًا صوتيًا",
+"Supports MP3, WAV, OGG, WebM, and other audio formats": "يدعم MP3 وWAV وOGG وWebM وغيرها من صيغ الصوت.",
+"Transcribe Uploaded Audio": "تفريغ الصوت المرفوع",
+
+"Processing...": "جارٍ المعالجة...",
+"Transcription": "النص المفرغ",
+"words": "كلمة",
+"Transcription will appear here...": "سيظهر النص المفرغ هنا...",
+"Copy": "نسخ",
+"Download TXT": "تنزيل TXT",
+"Speech to Text": "تحويل الكلام إلى نص",
+"Convert speech and audio files to text transcription": "حوّل الكلام والملفات الصوتية إلى نص مكتوب.",
+"The requested audio tool could not be found.": "تعذر العثور على أداة الصوت المطلوبة.",
+"Back to Audio Tools": "العودة إلى أدوات الصوت",
+"qr": {
+  "inputTypes": {
+    "text": "نص",
+    "url": "رابط",
+    "email": "ايميل",
+    "phone": "رقم هاتف",
+    "wifi": "شبكة WiFi "
+  },
+  "errorLevels": {
+    "low": "قليل (7%)",
+    "medium": "متوسط (15%)",
+    "high": "عالي (30%)"
+  },
+  "inputType": "نوع الإدخال",
+  "textContent": "المحتوى النصي",
+  "enterText": "أدخل أي نص...",
+  "url": "الرابط",
+  "emailAddress": " البريد الالكتروني",
+  "emailSubject": "الموضوع (اختياري)",
+  "emailAddressPlaceholder": "عنوان  البريد الالكتروني ",
+  "emailSubjectPlaceholder": "موضوع البريد",
+  "emailBody": "المحتوى (اختياري)",
+  "emailBodyPlaceholder": "اكتب محتوى البريد...",
+  "phoneNumber": "رقم الهاتف",
+  "networkName": "اسم الشبكة (SSID)",
+  "password": "كلمة المرور",
+  "encryption": "نوع التشفير",
+  "wpa": "WPA/WPA2",
+  "wep": "WEP",
+  "none": "بدون",
+  "customization": "التخصيص",
+  "foregroundColor": "لون المقدمة",
+  "backgroundColor": "لون الخلفية",
+  "size": "الحجم",
+  "format": "الصيغة",
+  "generate": "إنشاء رمز QR",
+  "preview": "معاينة رمز QR",
+  "previewDescription": "أدخل المحتوى على اليسار ثم اضغط على «إنشاء رمز QR».",
+  "alt": "رمز QR",
+  "characters": "حرف",
+  "download": "تنزيل",
+  "copy": "نسخ",
+  "title": "منشئ رموز QR",
+"description": "أنشئ رموز QR مخصصة للنصوص والروابط والبريد الإلكتروني وشبكات WiFi وغيرها.",
+"toolNotFound": "الأداة غير موجودة",
+"toolNotFoundDescription": "تعذر العثور على أداة رمز QR المطلوبة.",
+"backToTools": "العودة إلى أدوات QR"
+},
+
+
   "pomodoro": {
-    "work": "عمل",
+    "work": "تركيز",
     "break": "استراحة",
     "longBreak": "استراحة طويلة",
     "start": "بدء",
@@ -506,18 +643,19 @@
     "sessions": "الجلسات",
     "sessionCount": "الجلسة {{current}} من {{total}}",
     "timeUp": "انتهى الوقت!",
-    "workTime": "وقت العمل",
+    "workTime": "وقت التركيز",
     "breakTime": "وقت الاستراحة",
     "longBreakTime": "وقت الاستراحة الطويلة",
     "settings": "إعدادات بومودورو",
-    "workDuration": "مدة العمل (دقائق)",
+    "workDuration": "مدة التركيز (دقائق)",
     "breakDuration": "مدة الاستراحة (دقائق)",
     "longBreakDuration": "مدة الاستراحة الطويلة (دقائق)",
     "sessionsUntilLongBreak": "الجلسات حتى الاستراحة الطويلة",
     "totalSessions": "إجمالي الجلسات",
-    "totalWorkTime": "إجمالي وقت العمل",
+    "totalWorkTime": "إجمالي وقت التركيز",
     "totalBreakTime": "إجمالي وقت الاستراحة",
-    "completed": "مكتمل"
+    "completed": "مكتمل",
+    "m": "د"
   },
   "tasks": {
     "title": "مدير المهام",

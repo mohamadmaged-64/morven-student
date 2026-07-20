@@ -87,8 +87,6 @@ const productivityCategories = [
   'qrcode',
 ];
 
-// Removed fixed const collapsed = true;
-// Passed isMobile to control the text display based on screen size or hover state
 function SidebarContent({ isMobile, isHovered }: { isMobile: boolean; isHovered: boolean }) {
   const { t } = useTranslation();
   const favoriteToolsIds = useAppStore((s) => s.favoriteTools);
@@ -98,7 +96,6 @@ function SidebarContent({ isMobile, isHovered }: { isMobile: boolean; isHovered:
 
   const favTools = tools.filter((t) => favoriteToolsIds.includes(t.id));
   
-  // Text will show if it's on Mobile (Drawer mode) OR if the desktop sidebar is hovered
   const showText = isMobile || isHovered;
 const renderCategory = (cat: string, index: number) => {
   const meta = categories[cat as keyof typeof categories];

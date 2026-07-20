@@ -82,7 +82,7 @@ export function StudentToolPage({ toolId }: StudentToolPageProps) {
 
         <span className="text-sm font-medium">
           {direction === 'rtl'
-            ? 'العودة للأدوات الطلابية'
+            ? 'العودة لعام '
             : 'Back to Student Tools'}
         </span>
       </button>
@@ -330,11 +330,17 @@ function PomodoroTimer() {
   const strokeDashoffset = circumference - (progress / 100) * circumference;
 
   const formatTotalTime = (totalSecs: number) => {
-    const h = Math.floor(totalSecs / 3600);
-    const m = Math.floor((totalSecs % 3600) / 60);
-    if (h > 0) return `${h}h ${m}m`;
-    return `${m}m`;
-  };
+  const h = Math.floor(totalSecs / 3600);
+  const m = Math.floor((totalSecs % 3600) / 60);
+
+  if (language === 'ar') {
+    if (h > 0) return `${h}س ${m}د`;
+    return `${m}د`;
+  }
+
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m}m`;
+};
 
   const modeLabel = (() => {
     switch (currentMode) {

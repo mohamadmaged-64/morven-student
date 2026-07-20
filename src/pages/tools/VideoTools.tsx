@@ -10,6 +10,7 @@ import { Badge } from '@/components/UI/Badge';
 import { useAppStore } from '@/store/useAppStore';
 import { useLanguageStore } from '@/store/useLanguageStore';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 type ToolId = 'extract-audio-video' | 'compress-video' | 'convert-video-formats' | 'video-to-audio';
 
@@ -59,6 +60,7 @@ function VideoPreview({ file, videoRef }: { file: File; videoRef: React.RefObjec
 function ExtractAudioFromVideo() {
   const { addNotification } = useAppStore();
   const { direction } = useLanguageStore();
+  const { t } = useTranslation();
   const [file, setFile] = useState<File | null>(null);
   const [processing, setProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -127,19 +129,20 @@ function ExtractAudioFromVideo() {
 
   return (
     <div className="space-y-4" dir={direction}>
-      <FileUpload accept={['video/*']} onFilesSelected={handleFile} label="Upload video file" description="Supports MP4, WebM, OGG, and other video formats" />
-      {file && <VideoPreview file={file} videoRef={videoRef} />}
-      {processing && <ProgressBar value={progress} color="gradient" label="Extracting audio..." showLabel />}
+      <FileUpload accept={['video/*']} onFilesSelected={handleFile}
+      label={t('Upload video file', 'Upload video file')}
+description={t(
+  'Supports MP4, WebM, OGG, and other video formats',
+  'Supports MP4, WebM, OGG, and other video formats'
+)}
+/>
+{file && <VideoPreview file={file} videoRef={videoRef} />}
+      {processing && <ProgressBar value={progress} color="gradient" label={t('Extracting audio...', 'Extracting audio...')} showLabel />}
       {file && (
         <Button onClick={handleExtract} loading={processing} className="w-full" icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>}>
-          Extract Audio from Video
+          {t('Extract Audio from Video', 'Extract Audio from Video')}
         </Button>
       )}
-      <Card padding="sm" className="bg-primary-50 dark:bg-primary-900/20 border-primary-200 dark:border-primary-800">
-        <p className="text-sm text-primary-700 dark:text-primary-300">
-          <strong>Note:</strong> Full audio extraction works best in Chrome/Edge. The tool uses the MediaRecorder API to capture audio from the video's audio track. If your browser doesn't support captureStream(), the file will be provided for download as-is.
-        </p>
-      </Card>
     </div>
   );
 }
@@ -147,6 +150,7 @@ function ExtractAudioFromVideo() {
 function CompressVideo() {
   const { addNotification } = useAppStore();
   const { direction } = useLanguageStore();
+  const { t } = useTranslation();
   const [file, setFile] = useState<File | null>(null);
   const [processing, setProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -226,27 +230,29 @@ function CompressVideo() {
 
   return (
     <div className="space-y-4" dir={direction}>
-      <FileUpload accept={['video/*']} onFilesSelected={handleFile} label="Upload video to compress" description="Videos will be re-encoded at lower resolution (640x360)" />
-      {file && <VideoPreview file={file} videoRef={videoRef} />}
+      <FileUpload accept={['video/*']} onFilesSelected={handleFile}
+       label={t('Upload video to compress', 'Upload video to compress')}
+       description={t(
+         'Videos will be re-encoded at lower resolution (640x360)',
+         'Videos will be re-encoded at lower resolution (640x360)'
+    )}
+    />
+{file && <VideoPreview file={file} videoRef={videoRef} />}
       {file && (
         <Card padding="sm" className="bg-gray-50 dark:bg-dark-surface">
           <div className="grid grid-cols-2 gap-3 text-sm">
-            <div><span className="text-gray-500 dark:text-gray-400">Original size:</span> <span className="font-semibold text-gray-800 dark:text-gray-200">{formatBytes(file.size)}</span></div>
-            <div><span className="text-gray-500 dark:text-gray-400">Format:</span> <span className="font-semibold text-gray-800 dark:text-gray-200">{file.type || 'unknown'}</span></div>
+            <div><span className="text-gray-500 dark:text-gray-400">{t('Original size:', 'Original size:')}:</span> <span className="font-semibold text-gray-800 dark:text-gray-200">{formatBytes(file.size)}</span></div>
+            <div><span className="text-gray-500 dark:text-gray-400">{t('Format:', 'Format:')}:</span> <span className="font-semibold text-gray-800 dark:text-gray-200">{file.type ||  t('unknown', 'unknown')}</span></div>
           </div>
         </Card>
       )}
-      {processing && <ProgressBar value={progress} color="gradient" label="Compressing video..." showLabel />}
+      
+      {processing && <ProgressBar value={progress} color="gradient" label={t('Compressing video...', 'Compressing video...')} showLabel />}
       {file && (
         <Button onClick={handleCompress} loading={processing} className="w-full" icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg>}>
-          Compress Video
+         {t('Compress Video', 'Compress Video')}
         </Button>
       )}
-      <Card padding="sm" className="bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800">
-        <p className="text-sm text-amber-700 dark:text-amber-300">
-          <strong>Note:</strong> Compression uses Canvas API to re-encode at 640x360 and 15fps. For higher quality or more advanced compression, a server-side solution with ffmpeg would be needed.
-        </p>
-      </Card>
     </div>
   );
 }
@@ -254,6 +260,7 @@ function CompressVideo() {
 function ConvertVideoFormats() {
   const { addNotification } = useAppStore();
   const { direction } = useLanguageStore();
+  const { t } = useTranslation();
   const [file, setFile] = useState<File | null>(null);
   const [targetFormat, setTargetFormat] = useState('webm');
   const [processing, setProcessing] = useState(false);
@@ -346,7 +353,7 @@ function ConvertVideoFormats() {
             <p className="text-lg font-bold text-gray-800 dark:text-gray-200">{currentExt}</p>
           </Card>
           <Select
-            label="Target Format"
+           label={t('Target Format', 'Target Format')}
             options={[
               { value: 'webm', label: 'WebM' },
               { value: 'mp4', label: 'MP4 (WebM container)' },
@@ -357,7 +364,7 @@ function ConvertVideoFormats() {
           />
         </div>
       )}
-      {processing && <ProgressBar value={progress} color="gradient" label="Converting..." showLabel />}
+      {processing && <ProgressBar value={progress} color="gradient" label={t('Converting...', 'Converting...')} showLabel />}
       {file && (
         <Button onClick={handleConvert} loading={processing} className="w-full" icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>}>
           Convert to {targetFormat.toUpperCase()}
@@ -375,6 +382,7 @@ function ConvertVideoFormats() {
 function VideoToAudio() {
   const { addNotification } = useAppStore();
   const { direction } = useLanguageStore();
+  const { t } = useTranslation();
   const [file, setFile] = useState<File | null>(null);
   const [processing, setProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -436,25 +444,28 @@ function VideoToAudio() {
 
   return (
     <div className="space-y-4" dir={direction}>
-      <FileUpload accept={['video/*']} onFilesSelected={handleFile} label="Upload video to extract audio" description="Convert video audio track to a standalone audio file" />
+      <FileUpload accept={['video/*']} onFilesSelected={handleFile}
+       label={t('Upload video to extract audio', 'Upload video to extract audio')}
+       description={t(
+         'Convert video audio track to a standalone audio file',
+         'Convert video audio track to a standalone audio file'
+    )}
+    />
       {file && <VideoPreview file={file} videoRef={videoRef} />}
-      {processing && <ProgressBar value={progress} color="gradient" label="Converting..." showLabel />}
+      {processing && <ProgressBar value={progress} color="gradient" label={t('Converting...', 'Converting...')} showLabel />}
       {file && (
         <Button onClick={handleConvert} loading={processing} className="w-full" icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>}>
-          Convert Video to Audio
+          {t('Convert Video to Audio', 'Convert Video to Audio')}
         </Button>
       )}
-      <Card padding="sm" className="bg-primary-50 dark:bg-primary-900/20 border-primary-200 dark:border-primary-800">
-        <p className="text-sm text-primary-700 dark:text-primary-300">
-          <strong>Note:</strong> This extracts the audio track from the video. The output format is WebM audio. For MP3 conversion, a server-side solution would be needed.
-        </p>
-      </Card>
+     
     </div>
   );
 }
 
 function VideoToolPage({ toolId }: { toolId: string }) {
   const { direction } = useLanguageStore();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const configs: Record<ToolId, { title: string; description: string; icon: JSX.Element; component: JSX.Element }> = {
     'extract-audio-video': {

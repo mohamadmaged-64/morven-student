@@ -1,6 +1,8 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+
+import type { LucideIcon } from "lucide-react";
 import {
   Button,
   Card,
@@ -16,6 +18,69 @@ import {
   Tooltip,
   Chip,
 } from '@/components/UI';
+import {
+  Folder,
+  House,
+  Brain,
+  FileText,
+  Presentation,
+  Video,
+  Music,
+  Image,
+  QrCode,
+  GraduationCap,
+  HeartPulse,
+  FileTextIcon,
+  Zap,
+  Clock,
+  Star,
+  Paperclip,
+  FileArchive,
+  FileIcon,
+  Globe,
+  Timer,
+  Scissors,
+  Inbox,
+  Pill,
+  ListTodo,
+  Lightbulb,
+  PenSquare,
+  SpellCheck,
+  Newspaper,
+  KeyRound,
+  CircleHelp,
+  ListCheck,
+  Layers,
+  Calendar,
+  BookOpen,
+  BookCopy,
+  Cog
+} from 'lucide-react';
+ const icon = {
+               FileText,
+               Brain,
+               Presentation,
+               Video,
+               Music,
+               Image,
+               QrCode,
+               GraduationCap,
+               HeartPulse,
+               Zap,
+               Clock,
+               Star,
+               Paperclip,
+               FileArchive,
+               FileIcon,
+               FileTextIcon,
+               Globe,
+               Timer,
+                Scissors,
+              ListTodo,
+              Cog,
+                Inbox,
+                Pill
+};
 import { useAppStore } from '@/store/useAppStore';
 import { useLanguageStore } from '@/store/useLanguageStore';
 import {
@@ -63,12 +128,14 @@ type ToolId =
 
 interface AIToolPageProps {
   toolId: string;
+  icon?: LucideIcon;
   
 }
 
 interface Flashcard {
   front: string;
   back: string;
+  icon?: LucideIcon;
   
 }
 
@@ -76,12 +143,14 @@ interface MCQQuestion {
   question: string;
   options: string[];
   correct: number;
+  icon?: LucideIcon;
   
 }
 
 interface TFQuestion {
   statement: string;
   answer: boolean;
+  icon?: LucideIcon;
   
 }
 
@@ -91,34 +160,37 @@ interface QuizQuestion {
   options?: string[];
   correct?: number;
   answer?: boolean;
+  icon?: LucideIcon;
   
 }
 
-function useToolInfo(toolId: string): { name: string; nameAr: string; description: string; descriptionAr: string; icon: string } {
-  const tools: Record<string, { name: string; nameAr: string; description: string; descriptionAr: string; icon: string }> = {
-    'summarize-text': { name: 'Summarize Text', nameAr: 'تلخيص النص', description: 'Extract key points and create a concise summary of any text', descriptionAr: 'استخراج النقاط الرئيسية وإنشاء ملخص مختصر لأي نص', icon: '📝' },
-    'summarize-file': { name: 'Summarize Document', nameAr: 'تلخيص المستند', description: 'Upload and summarize PDF, Word, or PowerPoint files', descriptionAr: 'رفع وملخص ملفات PDF أو Word أو PowerPoint', icon: '📄' },
-    'summarize-image': { name: 'Summarize Image', nameAr: 'تلخيص الصورة', description: 'Extract and summarize text content from images', descriptionAr: 'استخراج وملخص محتوى النص من الصور', icon: '🖼️' },
-    'summarize-youtube': { name: 'Summarize YouTube', nameAr: 'تلخيص يوتيوب', description: 'Get a summary from YouTube video content', descriptionAr: 'الحصول على ملخص من محتوى فيديو يوتيوب', icon: '🎬' },
-    'summarize-audio': { name: 'Summarize Audio', nameAr: 'تلخيص الصوت', description: 'Summarize audio file content or transcribed text', descriptionAr: 'تلخيص محتوى ملف الصوت أو النص المنسوخ', icon: '🎵' },
-    'explain-simply': { name: 'Explain Simply', nameAr: 'شرح بسيط', description: 'Simplify complex text and explain it in easy terms', descriptionAr: 'تبسيط النص المعقد وشرحه بعبارات سهلة', icon: '💡' },
-    'rewrite-text': { name: 'Rewrite Text', nameAr: 'إعادة كتابة النص', description: 'Paraphrase and improve your text while keeping the meaning', descriptionAr: 'إعادة صياغة النص وتحسينه مع الحفاظ على المعنى', icon: '✍️' },
-    'grammar-check': { name: 'Grammar Check', nameAr: 'تحقق من القواعد', description: 'Find and fix grammar, spelling, and punctuation errors', descriptionAr: 'البحث وإصلاح أخطاء القواعد والإملاء والترقيم', icon: '✅' },
-    'translation': { name: 'Translation', nameAr: 'الترجمة', description: 'Translate text between English and Arabic', descriptionAr: 'ترجمة النص بين الإنجليزية والعربية', icon: '🌐' },
-    'paragraph-to-bullets': { name: 'Paragraph to Bullets', nameAr: 'فقرة إلى نقاط', description: 'Convert paragraphs into organized bullet points', descriptionAr: 'تحويل الفقرات إلى نقاط منظمة', icon: '📋' },
-    'bullets-to-article': { name: 'Bullets to Article', nameAr: 'نقاط إلى مقال', description: 'Convert bullet points into a flowing article', descriptionAr: 'تحويل النقاط إلى مقال سلس', icon: '📰' },
-    'extract-key-ideas': { name: 'Extract Key Ideas', nameAr: 'استخراج الأفكار الرئيسية', description: 'Identify and extract the most important ideas from text', descriptionAr: 'تحديد واستخراج أهم الأفكار من النص', icon: '🔑' },
-    'generate-mcq': { name: 'Generate MCQs', nameAr: 'إنشاء أسئلة اختيار من متعدد', description: 'Auto-generate multiple choice questions from text', descriptionAr: 'إنشاء تلقائي لأسئلة الاختيار من متعدد من النص', icon: '❓' },
-    'generate-tf': { name: 'True/False Questions', nameAr: 'أسئلة صح أو خطأ', description: 'Generate true or false questions from your content', descriptionAr: 'إنشاء أسئلة صح أو خطأ من المحتوى', icon: '⚖️' },
-    'generate-flashcards': { name: 'Generate Flashcards', nameAr: 'إنشاء بطاقات تعليمية', description: 'Create interactive flashcards for effective studying', descriptionAr: 'إنشاء بطاقات تعليمية تفاعلية للدراسة الفعالة', icon: '🗂️' },
-    'generate-quiz': { name: 'Generate Quiz', nameAr: 'إنشاء اختبار', description: 'Create a mixed quiz with MCQ and True/False questions', descriptionAr: 'إنشاء اختبار متنوع بأسئلة اختيار متعدد وصح/خطأ', icon: '📝' },
-    'generate-study-plan': { name: 'Study Plan', nameAr: 'خطة الدراسة', description: 'Create a personalized study plan based on your topics', descriptionAr: 'إنشاء خطة دراسة مخصصة بناءً على مواضيعك', icon: '📅' },
-    'generate-mindmap': { name: 'Mind Map', nameAr: 'خريطة ذهنية', description: 'Visualize text structure as an interactive mind map', descriptionAr: 'تصور هيكل النص كخريطة ذهنية تفاعلية', icon: '🧠' },
-    'extract-terminology': { name: 'Extract Terminology', nameAr: 'استخراج المصطلحات', description: 'Extract key terms and definitions from text', descriptionAr: 'استخراج المصطلحات والتعريفات الرئيسية من النص', icon: '📚' },
-    'explain-terminology': { name: 'Explain Terminology', nameAr: 'شرح المصطلحات', description: 'Get a detailed explanation of any term or concept', descriptionAr: 'الحصول على شرح مفصل لأي مصطلح أو مفهوم', icon: '📖' },
-    'simplify-paper': { name: 'Simplify Paper', nameAr: 'تبسيط الورقة', description: 'Simplify an academic paper or research article', descriptionAr: 'تبسيط ورقة بحثية أو مقال أكاديمي', icon: '🎓' },
+function useToolInfo(toolId: string): { name: string; nameAr: string; description: string; descriptionAr: string; icon: LucideIcon } {
+  const tools: Record<string, { name: string; nameAr: string; description: string; descriptionAr: string; icon: LucideIcon }> = {
+    'summarize-text': { name: 'Summarize Text', nameAr: 'تلخيص النص', description: 'Extract key points and create a concise summary of any text', descriptionAr: 'استخراج النقاط الرئيسية وإنشاء ملخص مختصر لأي نص', icon: FileText  },
+    'summarize-pdf': { name: 'Summarize PDF', nameAr: 'تلخيص ملف PDF', description: 'Extract key points and create a concise summary of any pdf file', descriptionAr: 'استخراج النقاط الرئيسية وإنشاء ملخص مختصر لأي ملف pdf', icon: FileText  },
+    'summarize-word': { name: 'Summarize Word', nameAr: 'تلخيص ملف Word', description: 'Extract key points and create a concise summary of any word file', descriptionAr: 'استخراج النقاط الرئيسية وإنشاء ملخص مختصر لأي ملف word', icon: FileText  },
+    'summarize-ppt': { name: 'Summarize PowerPoint', nameAr: 'تلخيص ملف PowerPoint', description: 'Extract key points and create a concise summary of any PowerPoint file', descriptionAr: 'استخراج النقاط الرئيسية وإنشاء ملخص مختصر لأي ملف PowerPoint', icon: FileText  },
+    'summarize-image': { name: 'Summarize Image', nameAr: 'تلخيص الصورة', description: 'Extract and summarize text content from images', descriptionAr: 'استخراج وملخص محتوى النص من الصور', icon: Image },
+    'summarize-youtube': { name: 'Summarize YouTube video', nameAr: 'تلخيص فيديو يوتيوب', description: 'Get a summary from YouTube video content', descriptionAr: 'الحصول على ملخص من محتوى فيديو يوتيوب', icon: Video },
+    'summarize-audio': { name: 'Summarize Audio', nameAr: 'تلخيص الصوت', description: 'Summarize audio file content or transcribed text', descriptionAr: 'تلخيص محتوى ملف الصوت أو النص المنسوخ', icon: Music },
+    'explain-simply': { name: 'Explain Simply', nameAr: 'شرح بسيط', description: 'Simplify complex text and explain it in easy terms', descriptionAr: 'تبسيط النص المعقد وشرحه بعبارات سهلة', icon: Lightbulb },
+    'rewrite-text': { name: 'Rewrite Text', nameAr: 'إعادة كتابة النص', description: 'Paraphrase and improve your text while keeping the meaning', descriptionAr: 'إعادة صياغة النص وتحسينه مع الحفاظ على المعنى', icon: PenSquare },
+    'grammar-check': { name: 'Grammar Check', nameAr: 'تحقق من القواعد', description: 'Find and fix grammar, spelling, and punctuation errors', descriptionAr: 'البحث وإصلاح أخطاء القواعد والإملاء والترقيم', icon: SpellCheck },
+    'translation': { name: 'Translation', nameAr: 'الترجمة', description: 'Translate text between English and Arabic', descriptionAr: 'ترجمة النص بين الإنجليزية والعربية', icon: Globe },
+    'paragraph-to-bullets': { name: 'Paragraph to Bullets', nameAr: 'فقرة إلى نقاط', description: 'Convert paragraphs into organized bullet points', descriptionAr: 'تحويل الفقرات إلى نقاط منظمة', icon: ListTodo },
+    'bullets-to-article': { name: 'Bullets to Article', nameAr: 'نقاط إلى مقال', description: 'Convert bullet points into a flowing article', descriptionAr: 'تحويل النقاط إلى مقال سلس', icon: Newspaper },
+    'extract-key-ideas': { name: 'Extract Key Ideas', nameAr: 'استخراج الأفكار الرئيسية', description: 'Identify and extract the most important ideas from text', descriptionAr: 'تحديد واستخراج أهم الأفكار من النص', icon: KeyRound },
+    'generate-mcq': { name: 'Generate MCQs', nameAr: 'إنشاء أسئلة اختيار من متعدد', description: 'Auto-generate multiple choice questions from text', descriptionAr: 'إنشاء تلقائي لأسئلة الاختيار من متعدد من النص', icon: CircleHelp },
+    'generate-tf': { name: 'True/False Questions', nameAr: 'أسئلة صح أو خطأ', description: 'Generate true or false questions from your content', descriptionAr: 'إنشاء أسئلة صح أو خطأ من المحتوى', icon: ListCheck },
+    'generate-flashcards': { name: 'Generate Flashcards', nameAr: 'إنشاء بطاقات تعليمية', description: 'Create interactive flashcards for effective studying', descriptionAr: 'إنشاء بطاقات تعليمية تفاعلية للدراسة الفعالة', icon: Layers },
+    'generate-quiz': { name: 'Generate Quiz', nameAr: 'إنشاء اختبار', description: 'Create a mixed quiz with MCQ and True/False questions', descriptionAr: 'إنشاء اختبار متنوع بأسئلة اختيار متعدد وصح/خطأ', icon: ListCheck },
+    'generate-study-plan': { name: 'Study Plan', nameAr: 'خطة الدراسة', description: 'Create a personalized study plan based on your topics', descriptionAr: 'إنشاء خطة دراسة مخصصة بناءً على مواضيعك', icon: Calendar },
+    'generate-mindmap': { name: 'Mind Map', nameAr: 'خريطة ذهنية', description: 'Visualize text structure as an interactive mind map', descriptionAr: 'تصور هيكل النص كخريطة ذهنية تفاعلية', icon: Brain },
+    'extract-terminology': { name: 'Extract Terminology', nameAr: 'استخراج المصطلحات', description: 'Extract key terms and definitions from text', descriptionAr: 'استخراج المصطلحات والتعريفات الرئيسية من النص', icon: BookOpen },
+    'explain-terminology': { name: 'Explain Terminology', nameAr: 'شرح المصطلحات', description: 'Get a detailed explanation of any term or concept', descriptionAr: 'الحصول على شرح مفصل لأي مصطلح أو مفهوم', icon: BookCopy },
+    'simplify-paper': { name: 'Simplify Paper', nameAr: 'تبسيط الورقة', description: 'Simplify an academic paper or research article', descriptionAr: 'تبسيط ورقة بحثية أو مقال أكاديمي', icon: GraduationCap },
   };
-  return tools[toolId] || { name: toolId, nameAr: toolId, description: '', descriptionAr: '', icon: '🔧' };
+  return tools[toolId] || { name: toolId, nameAr: toolId, description: '', descriptionAr: '', icon: Cog };
 }
 
 function ResultActions({ text, onCopy, onDownload, onSave }: { text: string; onCopy?: () => void; onDownload?: () => void; onSave?: () => void }) {
@@ -1258,6 +1330,8 @@ export function AIToolPage({ toolId }: AIToolPageProps) {
     'simplify-paper': language === 'ar' ? 'الصق نص الورقة البحثية...' : 'Paste the academic paper text...',
   };
 
+  const Icon = toolInfo.icon;
+
   return (
     
     <div className={`min-h-screen bg-light-bg dark:bg-dark-bg ${direction === 'rtl' ? 'font-arabic' : ''}`}>
@@ -1295,16 +1369,13 @@ export function AIToolPage({ toolId }: AIToolPageProps) {
         : 'Back to AI Tools'}
     </span>
   </button>
+<div className="flex items-center gap-3 mb-2">
+  <Icon className="w-8 h-8 text-primary-500" />
 
-  <div className="flex items-center gap-3 mb-2">
-    <span className="text-3xl">{toolInfo.icon}</span>
-
-    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-      {language === 'ar'
-        ? toolInfo.nameAr
-        : toolInfo.name}
-    </h1>
-  </div>
+  <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+    {language === 'ar' ? toolInfo.nameAr : toolInfo.name}
+  </h1>
+</div>
 
   <p className="text-gray-500 dark:text-gray-400">
     {language === 'ar'
@@ -1674,7 +1745,7 @@ export function AIToolPage({ toolId }: AIToolPageProps) {
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
               <Card>
                 <EmptyState
-                  icon={<span className="text-4xl">{toolInfo.icon}</span>}
+                  
                   title={language === 'ar' ? `جاهز لـ ${toolInfo.nameAr}` : `Ready to ${toolInfo.name}`}
                   description={
                     isStudyPlan

@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, type DragEvent, type ChangeEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useLanguageStore } from '@/store/useLanguageStore';
 
 type UploadedFile = {
   id: string;
@@ -8,6 +9,7 @@ type UploadedFile = {
   preview?: string;
   status: 'pending' | 'reading' | 'done' | 'error';
   result?: ArrayBuffer | string;
+  
 };
 
 type FileUploadProps = {
@@ -35,6 +37,7 @@ function formatSize(bytes: number): string {
 }
 
 function FileUpload({
+ 
   accept = [],
   multiple = false,
   maxSize = 200 * 1024 * 1024,
@@ -42,14 +45,21 @@ function FileUpload({
   onFilesSelected,
   onFileRemove,
   className = '',
-  label = 'Drop files here or click to browse',
+  label,
   description,
   readAs = 'ArrayBuffer',
 }: FileUploadProps) {
+  const { language } = useLanguageStore();
+  console.log("Received label:", label);
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+   const Label =
+    label ??
+    (language === 'ar'
+      ? 'اسحب الملفات هنا أو اضغط للتصفح'
+      : 'Drop files here or click to browse');
 
   const processFiles = useCallback(
     (fileList: FileList) => {
@@ -220,7 +230,7 @@ function FileUpload({
             </svg>
           </div>
           <div>
-            <p className="text-sm font-medium text-gray-700 dark:text-gray-300">{label}</p>
+            <p className="text-sm font-medium text-gray-700 dark:text-gray-300">{Label}</p>
             {description && (
               <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{description}</p>
             )}

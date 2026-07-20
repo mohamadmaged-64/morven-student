@@ -63,7 +63,7 @@ export const tools: Tool[] = [
 { id: 'scan-to-text', name: 'Scan to Text', nameAr: 'مسح إلى نص', description: 'Convert scanned documents and images to editable text', descriptionAr: 'تحويل المستندات والصور الممسوحة ضوئياً إلى نص قابل للتعديل', icon: ScanText,comingSoon: true,  category: 'office' },
 { id: 'compare-pdfs', name: 'Compare PDFs', nameAr: 'مقارنة PDF', description: 'Compare two PDF files and highlight differences', descriptionAr: 'مقارنة ملفي PDF وإبراز الاختلافات', icon: GitCompare, comingSoon: true, category: 'office' },
  // AI
-{ id: 'summarize-text', name: 'Summarize Text', nameAr: 'تلخيص نص', description: 'AI-powered text summarization', descriptionAr: 'تلخيص النصوص بالذكاء الاصطناعي', icon: ScrollText, comingSoon: true, category: 'ai' },
+{ id: 'summarize-text', name: 'Summarize Text', nameAr: 'تلخيص نص', description: 'AI-powered text summarization', descriptionAr: 'تلخيص النصوص بالذكاء الاصطناعي', icon: ScrollText, category: 'ai' },
 { id: 'summarize-pdf', name: 'Summarize PDF', nameAr: 'تلخيص PDF', description: 'Summarize PDF documents with AI', descriptionAr: 'تلخيص مستندات PDF بالذكاء الاصطناعي', icon: FileText, category: 'ai' },
 { id: 'summarize-word', name: 'Summarize Word', nameAr: 'تلخيص Word', description: 'Summarize Word documents with AI', descriptionAr: 'تلخيص مستندات Word بالذكاء الاصطناعي', icon: FileText, category: 'ai' },
 { id: 'summarize-ppt', name: 'Summarize PPT', nameAr: 'تلخيص PPT', description: 'Summarize PowerPoint presentations with AI', descriptionAr: 'تلخيص عروض PowerPoint بالذكاء الاصطناعي', icon: Presentation, category: 'ai' },
@@ -79,7 +79,7 @@ export const tools: Tool[] = [
 { id: 'extract-key-ideas', name: 'Extract Key Ideas', nameAr: 'استخراج الأفكار الرئيسية', description: 'Identify and extract key ideas from text', descriptionAr: 'تحديد واستخراج الأفكار الرئيسية من النص', icon: Key, comingSoon: true, category: 'ai' },
 { id: 'generate-mcqs', name: 'Generate MCQs', nameAr: 'إنشاء أسئلة اختيار', description: 'Generate multiple choice questions from content', descriptionAr: 'إنشاء أسئلة اختيار من متعدد من المحتوى', icon: HelpCircle, comingSoon: true, category: 'ai' },
 { id: 'generate-tf', name: 'Generate True/False', nameAr: 'إنشاء صح/خطأ', description: 'Generate true/false questions from content', descriptionAr: 'إنشاء أسئلة صح أو خطأ من المحتوى', icon: Zap, comingSoon: true, category: 'ai' },
-{ id: 'generate-flashcards', name: 'Generate Flashcards', nameAr: 'إنشاء بطاقات تعليمية', description: 'Auto-generate flashcards from your study material', descriptionAr: 'إنشاء بطاقات تعليمية تلقائياً من مواد دراستك', icon: Layers, category: 'ai' },
+{ id: 'generate-flashcards', name: 'Generate Flashcards', nameAr: 'إنشاء بطاقات تعليمية', description: 'Auto-generate flashcards from your study material', descriptionAr: 'إنشاء بطاقات تعليمية تلقائياً من مواد دراستك', icon: Layers, comingSoon: true, category: 'ai' },
 { id: 'generate-quiz', name: 'Generate Quiz', nameAr: 'إنشاء اختبار', description: 'Create a complete quiz from any content', descriptionAr: 'إنشاء اختبار كامل من أي محتوى', icon: BookOpenCheck, comingSoon: true, category: 'ai' },
 { id: 'generate-study-plan', name: 'Generate Study Plan', nameAr: 'إنشاء خطة دراسة', description: 'Create a personalized study plan', descriptionAr: 'إنشاء خطة دراسة مخصصة', icon: CalendarDays, comingSoon: true, category: 'ai' },
 { id: 'generate-mindmap', name: 'Generate Mind Map', nameAr: 'إنشاء خريطة ذهنية', description: 'Create visual mind maps from text content', descriptionAr: 'إنشاء خرائط ذهنية مرئية من المحتوى النصي', icon: BrainCircuit, comingSoon: true, category: 'ai' },
@@ -94,7 +94,8 @@ export const tools: Tool[] = [
   description: 'Create a presentation from text content',
   descriptionAr: 'إنشاء عرض تقديمي من محتوى نصي',
   icon: Presentation,
-  category: 'powerpoint'
+  category: 'powerpoint',
+  comingSoon: true
 },
 {
   id: 'generate-ppt-pdf',
@@ -103,7 +104,8 @@ export const tools: Tool[] = [
   description: 'Convert PDF to a PowerPoint presentation',
   descriptionAr: 'تحويل PDF إلى عرض PowerPoint',
   icon: FileText,
-  category: 'powerpoint'
+  category: 'powerpoint',
+  comingSoon: true
 },
 {
   id: 'generate-ppt-word',
@@ -112,7 +114,8 @@ export const tools: Tool[] = [
   description: 'Create a presentation from a Word document',
   descriptionAr: 'إنشاء عرض تقديمي من مستند Word',
   icon: FileText,
-  category: 'powerpoint'
+  category: 'powerpoint',
+  comingSoon: true
 },
 {
   id: 'generate-ppt-research',

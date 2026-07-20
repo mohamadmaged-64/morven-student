@@ -986,7 +986,7 @@ export default function OfficeToolPage({ toolId: propToolId }: { toolId?: string
                   maxFiles={tool.maxFiles || 10}
                   onFilesSelected={onFilesSelected}
                   onFileRemove={handleRemoveFile}
-                  label={t('Drop files here or click to browse', 'Drop files here or click to browse')}
+                  label={t('fileUpload.dropLabel', 'Drop files here or click to browse')}
                   description={tool.accepts.map((a) => a.toUpperCase()).join(', ')}
                 />
               </Card>

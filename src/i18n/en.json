@@ -491,6 +491,10 @@
     "clipboardCleared": "Clipboard history cleared",
     "allFilesCleared": "All files cleared"
   },
+  "fileUpload": {
+    "dropLabel": "Drop files here or click to browse",
+    "uploadVideo": "Upload video file"
+  },
   "pomodoro": {
     "work": "Work",
     "break": "Break",

@@ -10,6 +10,7 @@ import { Badge } from '@/components/UI/Badge';
 import { useAppStore } from '@/store/useAppStore';
 import { useLanguageStore } from '@/store/useLanguageStore';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 type ToolId = 'speech-to-text';
 
@@ -37,6 +38,7 @@ function isSpeechRecognitionSupported(): boolean {
 function SpeechToTextTool() {
   const { addNotification } = useAppStore();
   const { direction } = useLanguageStore();
+  const { t } = useTranslation();
   const [language, setLanguage] = useState('en-US');
   const [transcription, setTranscription] = useState('');
   const [isRecording, setIsRecording] = useState(false);
@@ -65,13 +67,13 @@ function SpeechToTextTool() {
       const file = files[0].file;
       const url = URL.createObjectURL(file);
       setUploadedAudio({ file, url });
-      addNotification('Audio file loaded. Click "Transcribe Uploaded Audio" to begin.', 'info');
+     addNotification(t('Audio file loaded. Click "Transcribe Uploaded Audio" to begin.', 'Audio file loaded. Click "Transcribe Uploaded Audio" to begin.'), 'info');
     }
   }, [addNotification]);
 
   const startRecording = useCallback(async () => {
     if (!supported) {
-      addNotification('Speech Recognition is not supported in your browser. Try Chrome or Edge.', 'error');
+      addNotification(t('Speech Recognition is not supported in your browser. Try Chrome or Edge.', 'Speech Recognition is not supported in your browser. Try Chrome or Edge.'), 'error');
       return;
     }
     try {
@@ -116,7 +118,7 @@ function SpeechToTextTool() {
 
         recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
           if (event.error !== 'aborted') {
-            addNotification('Recognition error: ' + event.error, 'error');
+            addNotification(t('Recognition error:', 'Recognition error:') + ' ' + event.error, 'error');
           }
           setIsRecognizing(false);
         };
@@ -133,9 +135,9 @@ function SpeechToTextTool() {
       setIsRecording(true);
       setRecordTime(0);
       timerRef.current = setInterval(() => setRecordTime((t) => t + 1), 1000);
-      addNotification('Recording started. Speak clearly into the microphone.', 'info');
+      addNotification(t('Recording started. Speak clearly into the microphone.', 'Recording started. Speak clearly into the microphone.'), 'info');
     } catch {
-      addNotification('Micro access denied. Please allow microphone access.', 'error');
+      addNotification(t('Micro access denied. Please allow microphone access.', 'Micro access denied. Please allow microphone access.'), 'error');
     }
   }, [language, supported, addNotification]);
 
@@ -153,13 +155,13 @@ function SpeechToTextTool() {
     }
     setIsRecording(false);
     setIsRecognizing(false);
-    addNotification('Recording stopped.', 'success');
+    addNotification(t('Recording stopped.', 'Recording stopped.'), 'success');
   }, [addNotification]);
 
   const transcribeUpload = useCallback(async () => {
     if (!uploadedAudio) return;
     if (!supported) {
-      addNotification('Speech Recognition is not supported. Try Chrome or Edge.', 'error');
+      addNotification(t('Speech Recognition is not supported. Try Chrome or Edge.', 'Speech Recognition is not supported. Try Chrome or Edge.'), 'error');
       return;
     }
 
@@ -172,11 +174,11 @@ function SpeechToTextTool() {
       });
       setProgress(30);
 
-      addNotification('Transcription via browser Speech API requires playing the audio. The audio will play in the background.', 'info');
+      addNotification(t('Transcription via browser Speech API requires playing the audio. The audio will play in the background.', 'Transcription via browser Speech API requires playing the audio. The audio will play in the background.'), 'info');
 
       const SpeechRecognitionAPI2 = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
       if (!SpeechRecognitionAPI2) {
-        addNotification('Speech Recognition not supported', 'error');
+        addNotification(t('Speech Recognition not supported', 'Speech Recognition not supported'), 'error');
         setProgress(0);
         return;
       }
@@ -204,7 +206,7 @@ function SpeechToTextTool() {
       recognition.onend = () => {
         setTranscription(finalText);
         setProgress(100);
-        addNotification('Transcription complete!', 'success');
+        addNotification(t('Transcription complete!', 'Transcription complete!'), 'success');
         setTimeout(() => setProgress(0), 2000);
       };
 
@@ -225,7 +227,7 @@ function SpeechToTextTool() {
 
       setProgress(50);
     } catch {
-      addNotification('Error transcribing audio', 'error');
+      addNotification(t('Error transcribing audio', 'Error transcribing audio'), 'error');
       setProgress(0);
     }
   }, [uploadedAudio, language, supported, addNotification]);
@@ -233,7 +235,7 @@ function SpeechToTextTool() {
   const handleCopy = useCallback(() => {
     const cleanText = transcription.replace(/\[.*?\]/g, '').trim();
     navigator.clipboard.writeText(cleanText);
-    addNotification('Transcription copied to clipboard', 'success');
+    addNotification(t('Transcription copied to clipboard', 'Transcription copied to clipboard'), 'success');
   }, [transcription, addNotification]);
 
   const handleDownload = useCallback(() => {
@@ -244,7 +246,7 @@ function SpeechToTextTool() {
     a.href = url; a.download = 'transcription.txt';
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    addNotification('Transcription downloaded', 'success');
+    addNotification(t('Transcription downloaded', 'Transcription downloaded'), 'success');
   }, [transcription, addNotification]);
 
   const cleanTranscription = transcription.replace(/\[.*?\]/g, '').trim();
@@ -254,18 +256,18 @@ function SpeechToTextTool() {
       {!supported && (
         <Card padding="md" className="bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
           <p className="text-sm text-red-700 dark:text-red-300">
-            <strong>Browser not supported.</strong> Speech Recognition requires Chrome, Edge, or Safari. Firefox and some mobile browsers may not support this feature.
-          </p>
+            <strong>{t('Browser not supported.', 'Browser not supported.')}</strong>
+            </p>
         </Card>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Select label="Language" options={LANGUAGES} value={language} onChange={(e) => setLanguage(e.target.value)} />
+        <Select  label={t('Language', 'Language')} options={LANGUAGES} value={language} onChange={(e) => setLanguage(e.target.value)} />
         <div className="flex items-end">
           <Badge variant={isRecording ? 'danger' : 'secondary'} dot={isRecording}>
-            {isRecording ? `Recording ${formatTime(recordTime)}` : 'Ready'}
+            {isRecording ? `${t('Recording', 'Recording')} ${formatTime(recordTime)}` : t('Ready', 'Ready')}
           </Badge>
-          {isRecognizing && <Badge variant="success" className="ms-2">Recognizing...</Badge>}
+          {isRecognizing && <Badge variant="success" className="ms-2">{t('Recognizing...', 'Recognizing...')}</Badge>}
         </div>
       </div>
 
@@ -306,18 +308,23 @@ function SpeechToTextTool() {
 
       <div className="text-center">
         <p className="text-sm text-gray-500 dark:text-gray-400">
-          {isRecording ? 'Click the button to stop recording' : 'Click the button to start recording'}
-        </p>
+          {isRecording
+  ? t('Click the button to stop recording', 'Click the button to stop recording')
+  : t('Click the button to start recording', 'Click the button to start recording')}
+  </p>
       </div>
 
       <div className="border-t border-light-border dark:border-dark-border pt-4">
-        <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Or upload an audio file:</p>
+        <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('Or upload an audio file:', 'Or upload an audio file:')}:</p>
         <FileUpload
           accept={['audio/*']}
           onFilesSelected={handleFileUpload}
-          label="Upload audio file"
-          description="Supports MP3, WAV, OGG, WebM, and other audio formats"
-          maxFiles={1}
+         label={t('Upload audio file', 'Upload audio file')}
+        description={t(
+           'Supports MP3, WAV, OGG, WebM, and other audio formats',
+          'Supports MP3, WAV, OGG, WebM, and other audio formats'
+       )}
+        maxFiles={1}
         />
       </div>
 
@@ -325,54 +332,55 @@ function SpeechToTextTool() {
         <div className="space-y-3">
           <audio src={uploadedAudio.url} controls className="w-full" />
           <div className="flex gap-2">
-            <Button onClick={transcribeUpload} loading={isRecognizing} variant="secondary" className="flex-1">Transcribe Uploaded Audio</Button>
+            <Button onClick={transcribeUpload} loading={isRecognizing} variant="secondary" className="flex-1">{t('Transcribe Uploaded Audio', 'Transcribe Uploaded Audio')}</Button>
           </div>
         </div>
       )}
 
-      {progress > 0 && <ProgressBar value={progress} color="gradient" label="Processing..." showLabel />}
+      {progress > 0 && <ProgressBar value={progress} color="gradient" label={t('Processing...', 'Processing...')} showLabel />}
 
       {transcription && (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
           <div className="flex items-center justify-between">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Transcription</label>
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('Transcription', 'Transcription')}</label>
             <div className="flex gap-2">
-              <Badge variant="info">{cleanTranscription.split(/\s+/).filter(Boolean).length} words</Badge>
+              <Badge variant="info">{cleanTranscription.split(/\s+/).filter(Boolean).length} {t('words', 'words')}
+              </Badge>
             </div>
           </div>
           <TextArea
             value={transcription}
             onChange={(e) => setTranscription(e.target.value)}
             className="min-h-[200px]"
-            placeholder="Transcription will appear here..."
+            placeholder={t('Transcription will appear here...', 'Transcription will appear here...')}
           />
           <div className="flex gap-2">
             <Button onClick={handleCopy} variant="secondary" className="flex-1" icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>}>
-              Copy
+              {t('Copy', 'Copy')}
             </Button>
             <Button onClick={handleDownload} variant="secondary" className="flex-1" icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>}>
-              Download TXT
+              {t('Download TXT', 'Download TXT')}
             </Button>
           </div>
         </motion.div>
       )}
 
-      <Card padding="sm" className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
-        <p className="text-sm text-blue-700 dark:text-blue-300">
-          <strong>How it works:</strong> Uses the Web Speech API (SpeechRecognition) built into modern browsers. Best results with Chrome/Edge. Speak clearly for 5-30 seconds per sentence. Text in [brackets] is interim (not yet finalized).
-        </p>
-      </Card>
+
     </div>
   );
 }
 
 function AudioToolPage({ toolId }: { toolId: string }) {
   const { direction } = useLanguageStore();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const configs: Record<ToolId, { title: string; description: string; icon: JSX.Element; component: JSX.Element }> = {
     'speech-to-text': {
-      title: 'Speech to Text',
-      description: 'Convert speech and audio files to text transcription',
+      title: t('Speech to Text', 'Speech to Text'),
+      description: t(
+  'Convert speech and audio files to text transcription',
+  'Convert speech and audio files to text transcription'
+      ),
       icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>,
       component: <SpeechToTextTool />,
     },
@@ -384,9 +392,9 @@ function AudioToolPage({ toolId }: { toolId: string }) {
     return (
       <EmptyState
         icon={<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>}
-        title="Tool not found"
-        description="The requested audio tool could not be found."
-      />
+       title={t('Tool not found', 'Tool not found')}
+       description={t('The requested audio tool could not be found.', 'The requested audio tool could not be found.')}
+       />
     );
   }
 
@@ -415,9 +423,9 @@ function AudioToolPage({ toolId }: { toolId: string }) {
       />
     </svg>
     <span className="text-sm font-medium">
-      {direction === 'rtl'
+  {direction === 'rtl'
   ? 'العودة لأدوات الصوت'
-  : 'Back to Audio Tools'}
+  : t('Back to Audio Tools', 'Back to Audio Tools')}
     </span>
   </button>
 
