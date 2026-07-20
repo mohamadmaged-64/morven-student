@@ -544,6 +544,15 @@ export default function Dashboard() {
           })}
         </div>
       </motion.section>
+      <footer className="mt-12 border-t border-light-border dark:border-dark-border py-6">
+    <p className="text-center text-sm text-gray-500 dark:text-gray-400">
+      {t(
+        'footer.copyright',
+        '© 2026 Morven Company. All rights reserved.'
+      )}
+    </p>
+  </footer>
     </div>
+    
   );
 }
