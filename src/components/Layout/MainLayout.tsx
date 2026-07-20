@@ -3,6 +3,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '@/store/useAppStore';
 import { useLanguageStore } from '@/store/useLanguageStore';
+import { useTranslation } from 'react-i18next';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
 
@@ -14,6 +15,7 @@ const pageVariants = {
 
 export function MainLayout() {
   const direction = useLanguageStore((s) => s.direction);
+  const { t } = useTranslation();
   const sidebarOpen = useAppStore((s) => s.sidebarOpen);
   const location = useLocation();
 
@@ -37,6 +39,14 @@ export function MainLayout() {
           <div className="p-4 md:p-6 lg:p-8">
   <Outlet />
 </div>
+ <footer className="mt-12 border-t border-light-border dark:border-dark-border py-6">
+    <p className="text-center text-sm text-gray-500 dark:text-gray-400">
+      {t(
+        'footer.copyright',
+        '© 2026 Morven Company. All rights reserved.'
+      )}
+    </p>
+  </footer>
         </main>
       </div>
     </div>
