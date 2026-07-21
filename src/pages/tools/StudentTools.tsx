@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -18,6 +18,7 @@ import {
 } from '@/components/UI';
 import { useAppStore } from '@/store/useAppStore';
 import { useLanguageStore } from '@/store/useLanguageStore';
+import { usePomodoroStore, type PomodoroMode, type PomodoroSettings } from '@/store/usePomodoroStore';
 import type { Task, ExamCountdown } from '@/types';
 
 // =============================================================================
@@ -83,7 +84,7 @@ export function StudentToolPage({ toolId }: StudentToolPageProps) {
         <span className="text-sm font-medium">
           {direction === 'rtl'
             ? 'العودة لعام '
-            : 'Back to Student Tools'}
+            : 'Back to General'}
         </span>
       </button>
 
@@ -100,60 +101,6 @@ export function StudentToolPage({ toolId }: StudentToolPageProps) {
 // 1. POMODORO TIMER
 // =============================================================================
 
-type PomodoroMode = 'work' | 'break' | 'longBreak';
-
-interface PomodoroSettings {
-  workDuration: number;
-  breakDuration: number;
-  longBreakDuration: number;
-  sessionsUntilLongBreak: number;
-}
-
-const DEFAULT_SETTINGS: PomodoroSettings = {
-  workDuration: 25,
-  breakDuration: 5,
-  longBreakDuration: 15,
-  sessionsUntilLongBreak: 4,
-};
-
-const POMODORO_STORAGE_KEY = 'morven-pomodoro-settings';
-
-function loadPomodoroSettings(): PomodoroSettings {
-  try {
-    const saved = localStorage.getItem(POMODORO_STORAGE_KEY);
-    if (saved) return { ...DEFAULT_SETTINGS, ...JSON.parse(saved) };
-  } catch {}
-  return DEFAULT_SETTINGS;
-}
-
-function savePomodoroSettings(settings: PomodoroSettings) {
-  try {
-    localStorage.setItem(POMODORO_STORAGE_KEY, JSON.stringify(settings));
-  } catch {}
-}
-
-function playNotificationSound() {
-  try {
-    const ctx = new AudioContext();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.frequency.value = 800;
-    osc.type = 'sine';
-    gain.gain.setValueAtTime(0.3, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
-    osc.start(ctx.currentTime);
-    osc.stop(ctx.currentTime + 0.5);
-  } catch {}
-}
-
-function requestNotificationPermission() {
-  if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
-    Notification.requestPermission();
-  }
-}
-
 function sendBrowserNotification(title: string, body: string) {
   if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
     new Notification(title, { body, icon: '🍅' });
@@ -161,12 +108,12 @@ function sendBrowserNotification(title: string, body: string) {
 }
 
 const modeColors: Record<PomodoroMode, { ring: string; bg: string; text: string; glow: string; label: string }> = {
-  work: {
+  focus: {
     ring: 'stroke-blue-500',
     bg: 'from-blue-500 to-blue-600',
     text: 'text-blue-600 dark:text-blue-400',
     glow: 'shadow-blue-500/30',
-    label: 'Work',
+    label: 'focus',
   },
   break: {
     ring: 'stroke-emerald-500',
@@ -187,138 +134,27 @@ const modeColors: Record<PomodoroMode, { ring: string; bg: string; text: string;
 function PomodoroTimer() {
   const { t } = useTranslation();
   const { language } = useLanguageStore();
-  const { addNotification } = useAppStore();
-
-  const [settings, setSettings] = useState<PomodoroSettings>(loadPomodoroSettings);
   const [showSettings, setShowSettings] = useState(false);
-  const [currentMode, setCurrentMode] = useState<PomodoroMode>('work');
-  const [sessionCount, setSessionCount] = useState(0);
-  const [totalWorkSeconds, setTotalWorkSeconds] = useState(0);
-
-  const totalDuration = (() => {
-    switch (currentMode) {
-      case 'work': return settings.workDuration * 60;
-      case 'break': return settings.breakDuration * 60;
-      case 'longBreak': return settings.longBreakDuration * 60;
-    }
-  })();
-
-  const [timeRemaining, setTimeRemaining] = useState(totalDuration);
-  const [isRunning, setIsRunning] = useState(false);
-
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const modeRef = useRef<PomodoroMode>(currentMode);
-
-  useEffect(() => { modeRef.current = currentMode; }, [currentMode]);
-
-  useEffect(() => {
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
-  }, []);
-
-  const switchMode = useCallback((mode: PomodoroMode, resetTimer = true) => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
-    setIsRunning(false);
-    setCurrentMode(mode);
-    if (resetTimer) {
-      switch (mode) {
-        case 'work': setTimeRemaining(settings.workDuration * 60); break;
-        case 'break': setTimeRemaining(settings.breakDuration * 60); break;
-        case 'longBreak': setTimeRemaining(settings.longBreakDuration * 60); break;
-      }
-    }
-  }, [settings]);
-
-  useEffect(() => {
-    if (!isRunning) {
-      if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; }
-      return;
-    }
-
-    intervalRef.current = setInterval(() => {
-      setTimeRemaining(prev => {
-        if (prev <= 1) {
-          clearInterval(intervalRef.current!);
-          intervalRef.current = null;
-          setIsRunning(false);
-          playNotificationSound();
-          const mode = modeRef.current;
-
-          if (mode === 'work') {
-            const newCount = sessionCount + 1;
-            setSessionCount(newCount);
-            setTotalWorkSeconds(prev => prev + settings.workDuration * 60);
-            sendBrowserNotification(t('pomodoro.timeUp'), t('pomodoro.breakTime'));
-
-            if (newCount >= settings.sessionsUntilLongBreak) {
-              setSessionCount(0);
-              switchMode('longBreak', true);
-            } else {
-              switchMode('break', true);
-            }
-          } else {
-            sendBrowserNotification(t('pomodoro.timeUp'), t('pomodoro.workTime'));
-            switchMode('work', true);
-          }
-
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
-  }, [isRunning, sessionCount, settings, switchMode, t]);
-
-  useEffect(() => {
-    setTimeRemaining(totalDuration);
-  }, [totalDuration]);
-
-  const handleStart = () => {
-    requestNotificationPermission();
-    setIsRunning(true);
-  };
-  const handlePause = () => setIsRunning(false);
-  const handleResume = () => { requestNotificationPermission(); setIsRunning(true); };
-  const handleReset = () => {
-    if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; }
-    setIsRunning(false);
-    setTimeRemaining(totalDuration);
-  };
-  const handleSkip = () => {
-    if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; }
-    setIsRunning(false);
-    if (currentMode === 'work') {
-      const newCount = sessionCount + 1;
-      setSessionCount(newCount);
-      setTotalWorkSeconds(prev => prev + timeRemaining);
-      if (newCount >= settings.sessionsUntilLongBreak) {
-        setSessionCount(0);
-        switchMode('longBreak');
-      } else {
-        switchMode('break');
-      }
-    } else {
-      switchMode('work');
-    }
-  };
+  const mode = usePomodoroStore((s) => s.mode);
+  const timeRemaining = usePomodoroStore((s) => s.timeRemaining);
+  const isRunning = usePomodoroStore((s) => s.isRunning);
+  const currentSession = usePomodoroStore((s) => s.currentSession);
+  const completedSessions = usePomodoroStore((s) => s.completedSessions);
+  const totalFocusSeconds = usePomodoroStore((s) => s.totalFocusSeconds);
+  const settings = usePomodoroStore((s) => s.settings);
+  const start = usePomodoroStore((s) => s.start);
+  const pause = usePomodoroStore((s) => s.pause);
+  const resume = usePomodoroStore((s) => s.resume);
+  const reset = usePomodoroStore((s) => s.reset);
+  const skip = usePomodoroStore((s) => s.skip);
+  const setMode = usePomodoroStore((s) => s.setMode);
+  const setSettings = usePomodoroStore((s) => s.setSettings);
+  const addNotification = useAppStore((s) => s.addNotification);
+  const currentMode = mode;
+  const totalDuration = currentMode === 'focus' ? settings.focusDuration * 60 : currentMode === 'break' ? settings.breakDuration * 60 : settings.longBreakDuration * 60;
 
   const handleSaveSettings = (newSettings: PomodoroSettings) => {
     setSettings(newSettings);
-    savePomodoroSettings(newSettings);
-    if (!isRunning) {
-      switch (currentMode) {
-        case 'work': setTimeRemaining(newSettings.workDuration * 60); break;
-        case 'break': setTimeRemaining(newSettings.breakDuration * 60); break;
-        case 'longBreak': setTimeRemaining(newSettings.longBreakDuration * 60); break;
-      }
-    }
     addNotification(t('ui.saved'), 'success');
   };
 
@@ -344,7 +180,7 @@ function PomodoroTimer() {
 
   const modeLabel = (() => {
     switch (currentMode) {
-      case 'work': return t('pomodoro.work');
+      case 'focus': return t('pomodoro.focus');
       case 'break': return t('pomodoro.break');
       case 'longBreak': return t('pomodoro.longBreak');
     }
@@ -383,7 +219,7 @@ function PomodoroTimer() {
 
           <motion.div
             className={`absolute inset-4 rounded-full flex flex-col items-center justify-center bg-white dark:bg-dark-card shadow-lg ${isRunning ? `shadow-xl ${modeColor.glow}` : ''}`}
-            animate={isRunning ? { boxShadow: [`0 0 20px 0px rgba(0,0,0,0.1)`, `0 0 40px 4px ${currentMode === 'work' ? 'rgba(59,130,246,0.2)' : currentMode === 'break' ? 'rgba(16,185,129,0.2)' : 'rgba(168,85,247,0.2)'}`, `0 0 20px 0px rgba(0,0,0,0.1)`] } : {}}
+            animate={isRunning ? { boxShadow: [`0 0 20px 0px rgba(0,0,0,0.1)`, `0 0 40px 4px ${currentMode === 'focus' ? 'rgba(59,130,246,0.2)' : currentMode === 'break' ? 'rgba(16,185,129,0.2)' : 'rgba(168,85,247,0.2)'}`, `0 0 20px 0px rgba(0,0,0,0.1)`] } : {}}
             transition={isRunning ? { duration: 2, repeat: Infinity, ease: 'easeInOut' } : {}}
           >
             <AnimatePresence mode="wait">
@@ -403,7 +239,7 @@ function PomodoroTimer() {
             </span>
 
             <span className="text-xs text-gray-400 dark:text-gray-500 mt-2">
-              {t('pomodoro.sessionCount', { current: Math.min(sessionCount + 1, settings.sessionsUntilLongBreak), total: settings.sessionsUntilLongBreak })}
+              {t('pomodoro.sessionCount', { current: Math.min(currentSession + 1, settings.sessionsUntilLongBreak), total: settings.sessionsUntilLongBreak })}
             </span>
           </motion.div>
         </div>
@@ -417,24 +253,24 @@ function PomodoroTimer() {
         transition={{ delay: 0.2 }}
       >
         {!isRunning && timeRemaining === totalDuration && (
-          <Button size="lg" onClick={handleStart}>
+          <Button size="lg" onClick={start}>
             {t('pomodoro.start')}
           </Button>
         )}
         {isRunning && (
-          <Button size="lg" variant="secondary" onClick={handlePause}>
+          <Button size="lg" variant="secondary" onClick={pause}>
             {t('pomodoro.pause')}
           </Button>
         )}
         {!isRunning && timeRemaining < totalDuration && timeRemaining > 0 && (
-          <Button size="lg" onClick={handleResume}>
+          <Button size="lg" onClick={resume}>
             {t('ui.resume')}
           </Button>
         )}
-        <Button size="lg" variant="ghost" onClick={handleReset}>
+        <Button size="lg" variant="ghost" onClick={reset}>
           {t('pomodoro.reset')}
         </Button>
-        <Button size="lg" variant="ghost" onClick={handleSkip}>
+        <Button size="lg" variant="ghost" onClick={skip}>
           {t('pomodoro.skip')}
         </Button>
         <Button size="lg" variant="ghost" onClick={() => setShowSettings(true)}>
@@ -453,22 +289,22 @@ function PomodoroTimer() {
         transition={{ delay: 0.3 }}
       >
         <div>
-          <p className="text-2xl font-bold text-gray-800 dark:text-white">{sessionCount}</p>
+          <p className="text-2xl font-bold text-gray-800 dark:text-white">{completedSessions}</p>
           <p className="text-xs text-gray-500 dark:text-gray-400">{t('pomodoro.totalSessions')}</p>
         </div>
         <div className="w-px h-8 bg-gray-200 dark:bg-gray-700" />
         <div>
-          <p className="text-2xl font-bold text-gray-800 dark:text-white">{formatTotalTime(totalWorkSeconds)}</p>
-          <p className="text-xs text-gray-500 dark:text-gray-400">{t('pomodoro.totalWorkTime')}</p>
+          <p className="text-2xl font-bold text-gray-800 dark:text-white">{formatTotalTime(totalFocusSeconds)}</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">{t('pomodoro.totalfocustime', 'pomodoro.totalfocustime')}</p>
         </div>
       </motion.div>
 
       {/* Mode Tabs */}
       <div className="flex items-center gap-2 p-1 rounded-2xl bg-gray-100 dark:bg-dark-surface">
-        {(['work', 'break', 'longBreak'] as PomodoroMode[]).map(mode => (
+        {(['focus', 'break', 'longBreak'] as PomodoroMode[]).map(mode => (
           <button
             key={mode}
-            onClick={() => { if (!isRunning) switchMode(mode); }}
+            onClick={() => { if (!isRunning) setMode(mode); }}
             disabled={isRunning}
             className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
               currentMode === mode
@@ -478,7 +314,7 @@ function PomodoroTimer() {
           >
             {(() => {
               switch (mode) {
-                case 'work': return t('pomodoro.work');
+                case 'focus': return t('pomodoro.focus');
                 case 'break': return t('pomodoro.break');
                 case 'longBreak': return t('pomodoro.longBreak');
               }
@@ -499,6 +335,7 @@ function PomodoroTimer() {
 }
 
 function PomodoroSettingsModal({
+  
   open, onClose, settings, onSave,
 }: {
   open: boolean;
@@ -506,7 +343,7 @@ function PomodoroSettingsModal({
   settings: PomodoroSettings;
   onSave: (s: PomodoroSettings) => void;
 }) {
-  const { t } = useTranslation();
+ const { t, i18n } = useTranslation();
   const [local, setLocal] = useState(settings);
 
   useEffect(() => { setLocal(settings); }, [settings]);
@@ -515,16 +352,21 @@ function PomodoroSettingsModal({
     <Modal open={open} onClose={onClose} title={t('pomodoro.settings')} size="sm">
       <div className="space-y-4">
         <Input
-          label={t('pomodoro.workDuration')}
-          type="number"
+          label={t('pomodoro.focusDuration')}
+          type="text"
+          inputMode="numeric"
+          pattern="[0-9]*"
           min={1}
           max={120}
-          value={local.workDuration}
-          onChange={e => setLocal(p => ({ ...p, workDuration: Math.max(1, parseInt(e.target.value) || 1) }))}
+          value={local.focusDuration}
+          lang={i18n.language === 'en' ? 'en' : 'ar'}
+          onChange={e => setLocal(p => ({ ...p, focusDuration: Math.max(1, parseInt(e.target.value) || 1) }))}
         />
         <Input
           label={t('pomodoro.breakDuration')}
-          type="number"
+          type="text"
+          inputMode="numeric"
+          pattern="[0-9]*"
           min={1}
           max={60}
           value={local.breakDuration}
@@ -532,18 +374,24 @@ function PomodoroSettingsModal({
         />
         <Input
           label={t('pomodoro.longBreakDuration')}
-          type="number"
+          type="text"
+          inputMode="numeric"
+          pattern="[0-9]*"
           min={1}
           max={60}
           value={local.longBreakDuration}
+          lang={i18n.language === 'en' ? 'en' : 'ar'}
           onChange={e => setLocal(p => ({ ...p, longBreakDuration: Math.max(1, parseInt(e.target.value) || 1) }))}
         />
         <Input
           label={t('pomodoro.sessionsUntilLongBreak')}
-          type="number"
+          type="text"
+          inputMode="numeric"
+          pattern="[0-9]*"
           min={1}
           max={20}
           value={local.sessionsUntilLongBreak}
+          lang={i18n.language === 'en' ? 'en' : 'ar'}
           onChange={e => setLocal(p => ({ ...p, sessionsUntilLongBreak: Math.max(1, parseInt(e.target.value) || 1) }))}
         />
         <div className="flex gap-3 pt-2">

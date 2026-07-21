@@ -12,6 +12,7 @@ import { useLanguageStore } from '@/store/useLanguageStore';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
+
 type ToolId = 'speech-to-text';
 
 function formatTime(seconds: number): string {
@@ -19,17 +20,6 @@ function formatTime(seconds: number): string {
   const s = Math.floor(seconds % 60);
   return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 }
-
-const LANGUAGES = [
-  { value: 'en-US', label: 'English (US)' },
-  { value: 'en-GB', label: 'English (UK)' },
-  { value: 'ar-SA', label: 'Arabic' },
-  { value: 'es-ES', label: 'Spanish' },
-  { value: 'fr-FR', label: 'French' },
-  { value: 'de-DE', label: 'German' },
-  { value: 'pt-BR', label: 'Portuguese' },
-  { value: 'ja-JP', label: 'Japanese' },
-];
 
 function isSpeechRecognitionSupported(): boolean {
   return typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window);
@@ -39,6 +29,16 @@ function SpeechToTextTool() {
   const { addNotification } = useAppStore();
   const { direction } = useLanguageStore();
   const { t } = useTranslation();
+  const LANGUAGES = [
+  { value: 'en-US', label: t('languages.englishUS') },
+  { value: 'en-GB', label: t('languages.englishUK') },
+  { value: 'ar-SA', label: t('languages.arabic') },
+  { value: 'es-ES', label: t('languages.spanish') },
+  { value: 'fr-FR', label: t('languages.french') },
+  { value: 'de-DE', label: t('languages.german') },
+  { value: 'pt-BR', label: t('languages.portuguese') },
+  { value: 'ja-JP', label: t('languages.japanese') },
+];
   const [language, setLanguage] = useState('en-US');
   const [transcription, setTranscription] = useState('');
   const [isRecording, setIsRecording] = useState(false);

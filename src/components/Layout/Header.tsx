@@ -1,16 +1,23 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppStore } from '@/store/useAppStore';
 import { ThemeToggle } from '@/components/UI/ThemeToggle';
+import { usePomodoroStore } from '@/store/usePomodoroStore';
+import { useNavigate } from 'react-router-dom';
 
 interface HeaderProps {
   title?: string;
 }
 
 export function Header({ title }: HeaderProps) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
+  const { i18n } = useTranslation();
   const toggleSidebar = useAppStore((s) => s.toggleSidebar);
-
+  const navigate = useNavigate();
+  const pomodoroRunning = usePomodoroStore((s) => s.isRunning);
+  const pomodoroPaused = usePomodoroStore((s) => s.isPaused);
+  const pomodoroTimeRemaining = usePomodoroStore((s) => s.timeRemaining);
   const [now, setNow] = useState(new Date());
 
   useEffect(() => {
@@ -90,12 +97,12 @@ export function Header({ title }: HeaderProps) {
 
        
       <div className="flex-1 flex justify-center md:justify-end">
-  <div className="flex flex-col items-center md:items-end text-center md:text-right">
+      <div className="flex flex-col items-center md:items-end text-center md:text-right">
     <span className="text-sm font-semibold text-gray-900 dark:text-white">
       {gregorianDate}
     </span>
 
-    <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3">
       <span className="text-xs text-gray-500 dark:text-gray-400">
         {hijriDate}
       </span>
@@ -109,6 +116,16 @@ export function Header({ title }: HeaderProps) {
 
         {/* Theme Toggle */}
         <div className="flex items-center gap-1">
+          {(pomodoroRunning || pomodoroPaused) && (
+            <button
+              onClick={() => navigate('/tool/pomodoro')}
+              className="px-2.5 py-1.5 rounded-xl text-sm font-semibold font-mono tabular-nums text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-500/10 transition-colors"
+              aria-label={t('pomodoro.settings')}
+              title={t('tools.pomodoro')}
+            >
+              {String(Math.floor(pomodoroTimeRemaining / 60)).padStart(2, '0')}:{String(pomodoroTimeRemaining % 60).padStart(2, '0')}
+            </button>
+          )}
           <ThemeToggle />
         </div>
       </div>

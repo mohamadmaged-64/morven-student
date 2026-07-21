@@ -6,16 +6,16 @@
   "nav": {
     "dashboard": "Dashboard",
     "categories": "Categories",
-    "office": "Office & PDF",
+    "office": "PDF Tools",
     "ai": "AI Study Tools",
-    "powerpoint": "PowerPoint",
+    "powerpoint": "PowerPoint Tools",
     "video": "Video Tools",
-    "audio": "Audio",
-    "images": "Images",
-    "qrcode": "QR Code",
-    "student": "Student Tools",
-    "medical": "Medical Student",
-    "engineering": "Engineering",
+    "audio": "Audio Tools",
+    "images": "Images Tools",
+    "qrcode": "QR Code  ",
+    "student": "General",
+    "medical": "Medical Section",
+    "engineering": "Engineering Section",
     "favorites": "Favorites",
     "recent": "Recent Tools",
     "allTools": "All Tools",
@@ -43,7 +43,7 @@
   "dashboard": {
     "categories": "Categories",
     "welcome": "Welcome to Morven for Students",
-    "welcomeMessage": "Your all-in-one toolkit for productivity and study.",
+    "welcomeMessage": "Your all-in-one toolkit for study and productivity.",
     "recentTools": "Recent Tools",
     "favoriteTools": "Favorite Tools",
     "quickActions": "Quick Actions",
@@ -57,6 +57,7 @@
     "noRecentHint": "Start using tools and they will appear here"
   },
   "tools": {
+    "pomodoro": "Pomodoro Timer",
     "office": {
       "pdfMerge": {
         "name": "PDF Merge",
@@ -496,7 +497,7 @@
     "uploadVideo": "Upload video file"
   },
   "pomodoro": {
-    "work": "Work",
+    "focus": "Focus",
     "break": "Break",
     "longBreak": "Long Break",
     "start": "Start",
@@ -506,16 +507,16 @@
     "sessions": "Sessions",
     "sessionCount": "Session {{current}} of {{total}}",
     "timeUp": "Time's up!",
-    "workTime": "Work Time",
+    "workTime": "Focus Time",
     "breakTime": "Break Time",
     "longBreakTime": "Long Break Time",
     "settings": "Pomodoro Settings",
-    "workDuration": "Work Duration (minutes)",
+    "focusDuration": "Focus Duration (minutes)",
     "breakDuration": "Break Duration (minutes)",
     "longBreakDuration": "Long Break Duration (minutes)",
     "sessionsUntilLongBreak": "Sessions until long break",
     "totalSessions": "Total Sessions",
-    "totalWorkTime": "Total Work Time",
+    "totalfocustime": "Total Focus Time",
     "totalBreakTime": "Total Break Time",
     "completed": "Completed"
   },
@@ -617,7 +618,7 @@
     "audio": "Audio",
     "images": "Images",
     "qrcode": "QR Code",
-    "student": "Student Tools",
+    "student": "General",
     "medical": "Medical Student"
   },
   "emptyStates": {
@@ -628,7 +629,7 @@
     "audio": "No audio tools used yet. Record or convert audio files!",
     "images": "No image tools used yet. Compress or convert your images!",
     "qrcode": "No QR tools used yet. Generate or scan QR codes!",
-    "student": "No student tools used yet. Boost your productivity!",
+    "student": "No genearal tools used yet. Boost your productivity!",
     "medical": "No medical tools used yet. Explore anatomy or clinical notes!"
   },
   "errors": {
@@ -848,5 +849,15 @@
       "totalTime": "Total Time",
       "noLaps": "No laps recorded"
     }
-  }
+  },
+  "languages": {
+  "englishUS": "English (US)",
+  "englishUK": "English (UK)",
+  "arabic": "Arabic",
+  "spanish": "Spanish",
+  "french": "French",
+  "german": "German",
+  "portuguese": "Portuguese",
+  "japanese": "Japanese"
+}
 }

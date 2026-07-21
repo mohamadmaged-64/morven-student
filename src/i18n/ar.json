@@ -633,7 +633,7 @@
 
 
   "pomodoro": {
-    "work": "تركيز",
+    "focus": "تركيز",
     "break": "استراحة",
     "longBreak": "استراحة طويلة",
     "start": "بدء",
@@ -643,16 +643,16 @@
     "sessions": "الجلسات",
     "sessionCount": "الجلسة {{current}} من {{total}}",
     "timeUp": "انتهى الوقت!",
-    "workTime": "وقت التركيز",
+    "focusTime": "وقت التركيز",
     "breakTime": "وقت الاستراحة",
     "longBreakTime": "وقت الاستراحة الطويلة",
     "settings": "إعدادات بومودورو",
-    "workDuration": "مدة التركيز (دقائق)",
+    "focusDuration": "مدة التركيز (دقائق)",
     "breakDuration": "مدة الاستراحة (دقائق)",
     "longBreakDuration": "مدة الاستراحة الطويلة (دقائق)",
     "sessionsUntilLongBreak": "الجلسات حتى الاستراحة الطويلة",
     "totalSessions": "إجمالي الجلسات",
-    "totalWorkTime": "إجمالي وقت التركيز",
+    "totalfocustime": "إجمالي وقت التركيز",
     "totalBreakTime": "إجمالي وقت الاستراحة",
     "completed": "مكتمل",
     "m": "د"
@@ -990,7 +990,17 @@
 
     "footer": {
     "copyright": " جميع الحقوق محفوظة لشركة مورفن © 2026."
-  }
+  },
+  "languages": {
+  "englishUS": "الإنجليزية (أمريكية)",
+  "englishUK": "الإنجليزية (بريطانية)",
+  "arabic": "العربية",
+  "spanish": "الإسبانية",
+  "french": "الفرنسية",
+  "german": "الألمانية",
+  "portuguese": "البرتغالية",
+  "japanese": "اليابانية"
+}
 }
   
 
