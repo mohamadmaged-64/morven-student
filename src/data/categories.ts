@@ -10,8 +10,8 @@ import {
   QrCode, 
   GraduationCap, 
   HeartPulse,
+  Cog,
   type LucideIcon, 
-  Cog
 } from 'lucide-react';
 
 export interface CategoryMeta {
@@ -23,19 +23,40 @@ export interface CategoryMeta {
 }
 
 export const categories: Record<ToolCategory, CategoryMeta> = {
-  office: {
-    name: 'PDF Tools',
-    nameAr: 'أدوات الPDF',
-    icon: FileText,
-    description: 'Convert, merge, split, compress, and edit PDF documents',
-    descriptionAr: 'تحويل ودمج وتقسيم وضغط وتحرير مستندات PDF',
+   general: {
+    name: 'General',
+    nameAr: 'عام',
+    icon: GraduationCap,
+    description: 'Pomodoro timer, task manager, exam countdown, and more',
+    descriptionAr: 'مؤقت بومودورو ومدير المهام وعد تنازلي للامتحانات والمزيد',
   },
-  ai: {
+  medical: {
+    name: 'Medical Section',
+    nameAr: 'القسم الطبي',
+    icon: HeartPulse,
+    description: 'Medical summarizers, flashcards, drug references, and lab values',
+    descriptionAr: 'ملخصات طبية وبطاقات تعليمية ومراجع الأدوية وقيم المختبر',
+  },
+  engineering: {
+    name: 'Engineering Section',
+    nameAr: 'أدوات الهندسة',
+    icon: Cog,
+    description: 'Engineering calculators, diagrams, and design tools',
+    descriptionAr: 'حاسبات هندسية ورسومات وأدوات تصميم',
+  },
+   ai: {
     name: 'AI Study Tools',
     nameAr: 'أدوات الذكاء الاصطناعي',
     icon: Brain,
     description: 'Summarize, explain, generate quizzes and study aids with AI',
     descriptionAr: 'تلخيص وشرح وإنشاء اختبارات ووسائل تعليمية بالذكاء الاصطناعي',
+  },
+  pdf: {
+    name: 'PDF Tools',
+    nameAr: 'أدوات الPDF',
+    icon: FileText,
+    description: 'Convert, merge, split, compress, and edit PDF documents',
+    descriptionAr: 'تحويل ودمج وتقسيم وضغط وتحرير مستندات PDF',
   },
   powerpoint: {
     name: 'PowerPoint',
@@ -51,19 +72,19 @@ export const categories: Record<ToolCategory, CategoryMeta> = {
     description: 'Compress, convert, extract audio, and edit videos',
     descriptionAr: 'ضغط وتحويل واستخراج الصوت وتحرير الفيديوهات',
   },
+   images: {
+    name: 'Images',
+    nameAr: 'أدوات الصور',
+    icon: ImageIcon,
+    description: 'Remove backgrounds, rotate, blur, and convert images',
+    descriptionAr: 'إزالة الخلفيات وتدوير وتغيير الحجم وتحويل الصور',
+  },
   audio: {
     name: 'Audio',
     nameAr: 'أدوات الصوت',
     icon: Music,
     description: 'Convert audio formats and transcribe speech to text',
     descriptionAr: 'تحويل صيغ الصوت ونسخ الصوت إلى نص',
-  },
-  images: {
-    name: 'Images',
-    nameAr: 'أدوات الصور',
-    icon: ImageIcon,
-    description: 'Remove backgrounds, rotate, blur, and convert images',
-    descriptionAr: 'إزالة الخلفيات وتدوير وتغيير الحجم وتحويل الصور',
   },
   qrcode: {
     name: 'QR Code',
@@ -72,25 +93,5 @@ export const categories: Record<ToolCategory, CategoryMeta> = {
     description: 'Generate QR codes for URLs, text, and more',
     descriptionAr: 'إنشاء رموز QR للروابط والنصوص والمزيد',
   },
-  student: {
-    name: 'Student Tools',
-    nameAr: 'عام',
-    icon: GraduationCap,
-    description: 'Pomodoro timer, task manager, exam countdown, and more',
-    descriptionAr: 'مؤقت بومودورو ومدير المهام وعد تنازلي للامتحانات والمزيد',
-  },
-  medical: {
-    name: 'Medical Student',
-    nameAr: 'القسم الطبي',
-    icon: HeartPulse,
-    description: 'Medical summarizers, flashcards, drug references, and lab values',
-    descriptionAr: 'ملخصات طبية وبطاقات تعليمية ومراجع الأدوية وقيم المختبر',
-  },
-  engineering: {
-    name: 'Engineering Tools',
-    nameAr: 'أدوات الهندسة',
-    icon: Cog,
-    description: 'Engineering calculators, diagrams, and design tools',
-    descriptionAr: 'حاسبات هندسية ورسومات وأدوات تصميم',
-  },
+ 
 };

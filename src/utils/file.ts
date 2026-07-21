@@ -313,7 +313,7 @@ export async function comparePDFs(
   return { match: differences.length === 0, differences };
 }
 
-// ─── Office Conversions ─────────────────────────────────────────────
+// ─── PDF Conversions ─────────────────────────────────────────────
 
 async function extractTextFromDocx(file: File): Promise<string> {
   const buffer = await file.arrayBuffer();

@@ -28,15 +28,17 @@ const itemVariants = {
 };
 
 const badgeVariantMap: Record<string, 'primary' | 'success' | 'warning' | 'info' | 'danger' | 'neutral'> = {
-  office: 'info',
-  ai: 'primary',
-  powerpoint: 'warning',
-  video: 'danger',
-  audio: 'success',
-  images: 'primary',
-  qrcode: 'neutral',
-  student: 'success',
-  medical: 'danger',
+    general: 'success',
+    medical: 'danger',
+    engineering: 'success',
+    ai: 'primary',
+    pdf: 'info',
+    powerpoint: 'warning',
+    video: 'danger',
+    images: 'primary',
+    audio: 'success',
+    qrcode: 'neutral',
+
 };
 
 export function AllToolsPage() {

@@ -89,7 +89,7 @@ const TOOLS: Record<string, ToolConfig> = {
     icon: File,
     accepts: ['.docx', '.doc'],
     category: 'conversion',
-    section: 'office',
+    section: 'pdf',
   },
   'excel-to-pdf': {
     id: 'excel-to-pdf',
@@ -100,7 +100,7 @@ const TOOLS: Record<string, ToolConfig> = {
     icon: FileSpreadsheet,
     accepts: ['.xlsx', '.xls', '.csv'],
     category: 'conversion',
-    section: 'office',
+    section: 'pdf',
   },
   'ppt-to-pdf': {
     id: 'ppt-to-pdf',
@@ -111,7 +111,7 @@ const TOOLS: Record<string, ToolConfig> = {
     icon: Presentation,
     accepts: ['.pptx', '.ppt'],
     category: 'conversion',
-    section: 'office',
+    section: 'pdf',
   },
   'merge-pdfs': {
     id: 'merge-pdfs',
@@ -124,7 +124,7 @@ const TOOLS: Record<string, ToolConfig> = {
     multiple: true,
     maxFiles: 20,
     category: 'pdf',
-    section: 'office',
+    section: 'pdf',
   },
   'split-pdf': {
     id: 'split-pdf',
@@ -135,7 +135,7 @@ const TOOLS: Record<string, ToolConfig> = {
     icon: Scissors,
     accepts: ['.pdf'],
     category: 'pdf',
-    section: 'office',
+    section: 'pdf',
   },
   'compress-pdf': {
     id: 'compress-pdf',
@@ -146,7 +146,7 @@ const TOOLS: Record<string, ToolConfig> = {
     icon: Archive,
     accepts: ['.pdf'],
     category: 'pdf',
-    section: 'office',
+    section: 'pdf',
   },
   'delete-pages': {
     id: 'delete-pages',
@@ -157,7 +157,7 @@ const TOOLS: Record<string, ToolConfig> = {
     icon: Trash2,
     accepts: ['.pdf'],
     category: 'pdf',
-    section: 'office',
+    section: 'pdf',
   },
   'reorder-pages': {
     id: 'reorder-pages',
@@ -168,7 +168,7 @@ const TOOLS: Record<string, ToolConfig> = {
     icon: ArrowUpDown,
     accepts: ['.pdf'],
     category: 'pdf',
-    section: 'office',
+    section: 'pdf',
   },
   'rotate-pages': {
     id: 'rotate-pages',
@@ -179,7 +179,7 @@ const TOOLS: Record<string, ToolConfig> = {
     icon: RotateCw,
     accepts: ['.pdf'],
     category: 'pdf',
-    section: 'office',
+    section: 'pdf',
   },
   'password-protect': {
     id: 'password-protect',
@@ -190,7 +190,7 @@ const TOOLS: Record<string, ToolConfig> = {
     icon: Lock,
     accepts: ['.pdf'],
     category: 'pdf',
-    section: 'office',
+    section: 'pdf',
   },
   'remove-password': {
     id: 'remove-password',
@@ -201,7 +201,7 @@ const TOOLS: Record<string, ToolConfig> = {
     icon: LockOpen,
     accepts: ['.pdf'],
     category: 'pdf',
-    section: 'office',
+    section: 'pdf',
   },
   'add-watermark': {
     id: 'add-watermark',
@@ -212,7 +212,7 @@ const TOOLS: Record<string, ToolConfig> = {
     icon: Droplets,
     accepts: ['.pdf'],
     category: 'pdf',
-    section: 'office',
+    section: 'pdf',
   },
   'add-signature': {
     id: 'add-signature',
@@ -223,7 +223,7 @@ const TOOLS: Record<string, ToolConfig> = {
     icon: PenTool,
     accepts: ['.pdf'],
     category: 'pdf',
-    section: 'office',
+    section: 'pdf',
   },
   'extract-images': {
     id: 'extract-images',
@@ -234,7 +234,7 @@ const TOOLS: Record<string, ToolConfig> = {
     icon: Image,
     accepts: ['.pdf'],
     category: 'pdf',
-    section: 'office',
+    section: 'pdf',
   },
   'ocr': {
     id: 'ocr',
@@ -245,7 +245,7 @@ const TOOLS: Record<string, ToolConfig> = {
     icon: ScanSearch,
     accepts: ['.pdf'],
     category: 'pdf',
-    section: 'office',
+    section: 'pdf',
   },
   'compare-pdfs': {
     id: 'compare-pdfs',
@@ -258,7 +258,7 @@ const TOOLS: Record<string, ToolConfig> = {
     multiple: true,
     maxFiles: 2,
     category: 'pdf',
-    section: 'office',
+    section: 'pdf',
   },
 };
 
@@ -280,7 +280,7 @@ function ToolHeader({ tool, isDark, isRtl }: { tool: ToolConfig; isDark: boolean
   return (
     <>
 <button
-  onClick={() => navigate('/category/office')}
+  onClick={() => navigate('/category/pdf')}
   className="flex items-center gap-2 text-gray-500 hover:text-primary-500 dark:text-gray-400 dark:hover:text-primary-400 transition-colors mb-6 group"
 >
   <svg
@@ -726,7 +726,7 @@ function CompareResult({
 
 type Step = 'upload' | 'configure' | 'result';
 
-export default function OfficeToolPage({ toolId: propToolId }: { toolId?: string }) {
+export default function PdfToolPage({ toolId: propToolId }: { toolId?: string }) {
   const navigate = useNavigate();
   const { toolId: routeToolId } = useParams<{ toolId: string }>();
   const toolId = propToolId || routeToolId || '';

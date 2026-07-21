@@ -1,11 +1,11 @@
 export const sidebarSections = [
   {
     title: 'studentSection',
-    categories: ['student', 'medical', 'engineering'],
+    categories: ['general', 'medical', 'engineering'],
   },
   {
     title: 'studyTools',
-    categories: ['ai', 'office', 'powerpoint'],
+    categories: ['ai', 'pdf', 'powerpoint'],
   },
   {
     title: 'productivityTools',

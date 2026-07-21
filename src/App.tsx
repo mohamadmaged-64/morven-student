@@ -7,36 +7,33 @@ import { useThemeStore } from '@/store/useThemeStore';
 import { useLanguageStore } from '@/store/useLanguageStore';
 import { getToolById } from '@/data/tools';
 import type { ToolCategory } from '@/types';
-
 const Dashboard = lazy(() => import('@/pages/Dashboard'));
 const CategoryPage = lazy(() => import('@/pages/CategoryPage'));
 const AllToolsPage = lazy(() => import('@/pages/AllToolsPage'));
-const OfficeToolPage = lazy(() => import('@/pages/tools/OfficeTools'));
-const AIToolPage = lazy(() =>
-  import('@/pages/tools/AITools').then((m) => ({ default: m.AIToolPage })),
-);
+const GeneralToolPage = lazy(() => import('@/pages/tools/GeneralTools'));
+const MedicalToolPage = lazy(() => import('@/pages/tools/MedicalTools').then((m) => ({ default: m.MedicalToolPage })),);
+const EngineeringToolPage = lazy(() => import('@/pages/tools/EngineeringTools'));
+const AIToolPage = lazy(() => import('@/pages/tools/AITools').then((m) => ({ default: m.AIToolPage })),);
+const PdfToolsPage = lazy(() => import('@/pages/tools/PdfTools'));
 const PowerPointToolPage = lazy(() => import('@/pages/tools/PowerPointTools'));
 const VideoToolPage = lazy(() => import('@/pages/tools/VideoTools'));
-const AudioToolPage = lazy(() => import('@/pages/tools/AudioTools'));
 const ImageToolPage = lazy(() => import('@/pages/tools/ImageTools'));
+const AudioToolPage = lazy(() => import('@/pages/tools/AudioTools'));
 const QRCodeToolPage = lazy(() => import('@/pages/tools/QRCodeTools'));
-const StudentToolPage = lazy(() =>
-  import('@/pages/tools/StudentTools').then((m) => ({ default: m.StudentToolPage })),
-);
-const MedicalToolPage = lazy(() =>
-  import('@/pages/tools/MedicalTools').then((m) => ({ default: m.MedicalToolPage })),
-);
+
 
 const toolPageMap: Record<ToolCategory, React.LazyExoticComponent<React.ComponentType<{ toolId: string }>>> = {
-  office: OfficeToolPage,
+  general: GeneralToolPage,
+  medical: MedicalToolPage,
+  engineering: EngineeringToolPage,
   ai: AIToolPage,
+  pdf: PdfToolsPage,
   powerpoint: PowerPointToolPage,
   video: VideoToolPage,
-  audio: AudioToolPage,
   images: ImageToolPage,
+  audio: AudioToolPage,
   qrcode: QRCodeToolPage,
-  student: StudentToolPage,
-  medical: MedicalToolPage,
+  
 };
 
 function ToolPage() {

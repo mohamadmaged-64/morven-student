@@ -18,14 +18,14 @@ export interface Tool {
 }
 
 export type ToolCategory =
-  | 'office'
+  | 'pdf'
   | 'ai'
   | 'powerpoint'
   | 'video'
   | 'audio'
   | 'images'
   | 'qrcode'
-  | 'student'
+  | 'general'
   | 'medical'
   | 'engineering';
 

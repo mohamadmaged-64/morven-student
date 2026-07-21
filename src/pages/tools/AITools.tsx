@@ -1411,7 +1411,7 @@ export function AIToolPage({ toolId }: AIToolPageProps) {
               <FileUpload
                 accept={toolId === 'summarize-image'
                   ? ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/webp']
-                  : ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation', 'text/plain']}
+                  : ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-pdfdocument.wordprocessingml.document', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-pdfdocument.presentationml.presentation', 'text/plain']}
                 onFilesSelected={handleFileUpload}
                 label={language === 'ar' ? 'اسحب الملف هنا أو اضغط للتصفح' : 'Drop file here or click to browse'}
                 description={toolId === 'summarize-image'

@@ -6,14 +6,14 @@
   "nav": {
     "dashboard": "Dashboard",
     "categories": "Categories",
-    "office": "PDF Tools",
+    "pdf": "PDF Tools",
     "ai": "AI Study Tools",
     "powerpoint": "PowerPoint Tools",
     "video": "Video Tools",
     "audio": "Audio Tools",
     "images": "Images Tools",
     "qrcode": "QR Code  ",
-    "student": "General",
+    "general": "General",
     "medical": "Medical Section",
     "engineering": "Engineering Section",
     "favorites": "Favorites",
@@ -58,7 +58,7 @@
   },
   "tools": {
     "pomodoro": "Pomodoro Timer",
-    "office": {
+    "pdf": {
       "pdfMerge": {
         "name": "PDF Merge",
         "description": "Combine multiple PDF files into a single document"
@@ -296,7 +296,7 @@
         "description": "Generate QR codes for WiFi network sharing"
       }
     },
-    "student": {
+    "general": {
       "pomodoro": {
         "name": "Pomodoro Timer",
         "description": "Boost productivity with timed study sessions"
@@ -611,25 +611,26 @@
     "resetProgress": "Reset Progress"
   },
   "categories": {
-    "office": "Office & PDF",
+    "pdf": "PDF Tools",
     "ai": "AI Study Tools",
     "powerpoint": "PowerPoint",
     "video": "Video Tools",
     "audio": "Audio",
     "images": "Images",
     "qrcode": "QR Code",
-    "student": "General",
-    "medical": "Medical Student"
+    "general": "General",
+    "medical": "Medical Section",
+    "enhineering": "Engineering Section"
   },
   "emptyStates": {
-    "office": "No office tools used yet. Try merging or splitting PDFs!",
+    "pdf": "No pdf tools used yet. Try merging or splitting PDFs!",
     "ai": "No AI tools used yet. Let AI help with your studies!",
     "powerpoint": "No PowerPoint tools used yet. Convert presentations easily!",
     "video": "No video tools used yet. Compress or trim your videos!",
     "audio": "No audio tools used yet. Record or convert audio files!",
     "images": "No image tools used yet. Compress or convert your images!",
     "qrcode": "No QR tools used yet. Generate or scan QR codes!",
-    "student": "No genearal tools used yet. Boost your productivity!",
+    "general": "No genearal tools used yet. Boost your productivity!",
     "medical": "No medical tools used yet. Explore anatomy or clinical notes!"
   },
   "errors": {
@@ -815,14 +816,14 @@
       "noEcgHint": "Load an ECG recording to view"
     }
   },
-  "studentTools": {
+  "generalTools": {
     "unitConverter": {
-      "title": "Unit Converter",
-      "from": "From",
-      "to": "To",
-      "value": "Value",
-      "result": "Result",
-      "categories": {
+       "title": "Unit Converter",
+       "from": "From",
+       "to": "To",
+       "value": "Value",
+       "result": "Result",
+       "categories": {
         "length": "Length",
         "weight": "Weight",
         "temperature": "Temperature",

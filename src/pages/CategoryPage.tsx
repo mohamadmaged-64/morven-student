@@ -26,14 +26,14 @@ const itemVariants = {
 };
 
 const ALL_CATEGORIES: ToolCategory[] = [
-  'office',
+  'pdf',
   'ai',
   'powerpoint',
   'video',
   'audio',
   'images',
   'qrcode',
-  'student',
+  'general',
   'medical',
   'engineering',
 ];

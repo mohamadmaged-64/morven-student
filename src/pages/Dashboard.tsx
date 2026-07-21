@@ -81,16 +81,17 @@ const itemVariants = {
 };
 
 const badgeVariantMap: Record<string, 'primary' | 'success' | 'warning' | 'info' | 'danger' | 'neutral'> = {
-  office: 'primary',
-  ai: 'info',
-  powerpoint: 'warning',
-  video: 'danger',
-  audio: 'neutral',
-  images: 'success',
-  qrcode: 'primary',
-  student: 'info',
+  general: 'info',
   medical: 'danger',
   engineering: 'success',
+  ai: 'info',
+  pdf: 'primary',
+  powerpoint: 'warning',
+  video: 'danger',
+  images: 'success',
+  audio: 'neutral',
+  qrcode: 'primary',
+ 
 };
 
 {/* Premium Hero Section */}
@@ -268,12 +269,12 @@ export default function Dashboard() {
  const quickActions = [
   {
     icon: Paperclip,
-    label: t('tools.office.pdfMerge.name'),
+    label: t('tools.pdf.pdfMerge.name'),
     to: '/tool/merge-pdfs',
   },
   {
     icon: Scissors,
-    label: t('tools.office.pdfSplit.name'),
+    label: t('tools.pdf.pdfSplit.name'),
     to: '/tool/split-pdf',
   },
  

@@ -21,14 +21,13 @@ import { useLanguageStore } from '@/store/useLanguageStore';
 import { usePomodoroStore, type PomodoroMode, type PomodoroSettings } from '@/store/usePomodoroStore';
 import type { Task, ExamCountdown } from '@/types';
 
-// =============================================================================
-// Shared
-// =============================================================================
 
-interface StudentToolPageProps {
+// Shared
+
+interface GeneralToolPageProps {
   toolId: string;
 }
-export function StudentToolPage({ toolId }: StudentToolPageProps) {
+export default function GeneralToolPage({ toolId }: GeneralToolPageProps) {
   const navigate = useNavigate();
   const { direction } = useLanguageStore();
 
@@ -60,7 +59,7 @@ export function StudentToolPage({ toolId }: StudentToolPageProps) {
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       <button
-        onClick={() => navigate('/category/student')}
+        onClick={() => navigate('/category/general')}
         className="flex items-center gap-2 text-gray-500 hover:text-primary-500 dark:text-gray-400 dark:hover:text-primary-400 transition-colors group"
       >
         <svg
