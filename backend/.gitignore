@@ -1,0 +1,7 @@
+node_modules
+dist
+.env
+src/temp/*
+src/output/*
+!src/temp/.gitkeep
+!src/output/.gitkeep

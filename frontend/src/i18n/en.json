@@ -1,0 +1,961 @@
+{
+  "app": {
+    "name": "Morven for Students",
+    "subtitle": "Your All-in-One Student Toolkit"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "categories": "Categories",
+    "pdf": "PDF Tools",
+    "ai": "AI Study Tools",
+    "powerpoint": "PowerPoint Tools",
+    "video": "Video Tools",
+    "audio": "Audio Tools",
+    "images": "Images Tools",
+    "qrcode": "QR Code  ",
+    "general": "General",
+    "medical": "Medical Section",
+    "engineering": "Engineering Section",
+    "favorites": "Favorites",
+    "recent": "Recent Tools",
+    "allTools": "All Tools",
+    "studentSection": "Students Section",
+    "tools": "Tools",
+    "studyTools": "Studying Section",
+    "productivityTools": "Productivity Section"
+    },
+  "sidebar": {
+    "collapse": "Collapse Sidebar",
+    "expand": "Expand Sidebar",
+    "settings": "Settings",
+    "language": "Language",
+    "theme": "Theme",
+    "darkMode": "Dark Mode",
+    "lightMode": "Light Mode",
+    "english": "English",
+    "arabic": "Arabic"
+  },
+  "search": {
+    "placeholder": "Search tools...",
+    "noResults": "No tools found",
+    "tryAgain": "Try a different search term"
+  },
+  "dashboard": {
+    "categories": "Categories",
+    "welcome": "Welcome to Morven for Students",
+    "welcomeMessage": "Your all-in-one toolkit for study and productivity.",
+    "recentTools": "Recent Tools",
+    "favoriteTools": "Favorite Tools",
+    "quickActions": "Quick Actions",
+    "stats": "Statistics",
+    "tasksOverview": "Tasks Overview",
+    "upcomingExams": "Upcoming Exams",
+    "pomodoroTimer": "Pomodoro Timer",
+    "noFavorites": "No favorite tools yet",
+    "noFavoritesHint": "Click the star icon on any tool to add it to favorites",
+    "noRecent": "No recent tools",
+    "noRecentHint": "Start using tools and they will appear here"
+  },
+  "tools": {
+    "pomodoro": "Pomodoro Timer",
+    "pdf": {
+      "pdfMerge": {
+        "name": "PDF Merge",
+        "description": "Combine multiple PDF files into a single document"
+      },
+      "pdfSplit": {
+        "name": "PDF Split",
+        "description": "Split a PDF file into separate pages or ranges"
+      },
+      "pdfCompress": {
+        "name": "PDF Compress",
+        "description": "Reduce PDF file size without losing quality"
+      },
+      "pdfToImage": {
+        "name": "PDF to Image",
+        "description": "Convert PDF pages to JPG or PNG images"
+      },
+      "imageToPdf": {
+        "name": "Image to PDF",
+        "description": "Convert images into a PDF document"
+      },
+      "pdfToWord": {
+        "name": "PDF to Word",
+        "description": "Convert PDF files to editable Word documents"
+      },
+      "wordToPdf": {
+        "name": "Word to PDF",
+        "description": "Convert Word documents to PDF format"
+      },
+      "pdfWatermark": {
+        "name": "PDF Watermark",
+        "description": "Add text or image watermarks to PDF files"
+      },
+      "pdfProtect": {
+        "name": "PDF Protect",
+        "description": "Add password protection to PDF files"
+      },
+      "pdfUnlock": {
+        "name": "PDF Unlock",
+        "description": "Remove password protection from PDF files"
+      }
+    },
+    "ai": {
+      "smartNotes": {
+        "name": "Smart Notes",
+        "description": "AI-powered note summarization and organization"
+      },
+      "essayWriter": {
+        "name": "Essay Writer",
+        "description": "AI-assisted essay writing and structure suggestions"
+      },
+      "textSimplifier": {
+        "name": "Text Simplifier",
+        "description": "Simplify complex academic text for better understanding"
+      },
+      "studyFlashcards": {
+        "name": "Study Flashcards",
+        "description": "Generate and study flashcards with spaced repetition"
+      },
+      "quizGenerator": {
+        "name": "Quiz Generator",
+        "description": "Auto-generate quizzes from your study material"
+      },
+      "conceptMapper": {
+        "name": "Concept Mapper",
+        "description": "Create visual concept maps from your notes"
+      },
+      "citationGenerator": {
+        "name": "Citation Generator",
+        "description": "Generate citations in APA, MLA, Chicago, and more"
+      },
+      "translator": {
+        "name": "Translator",
+        "description": "Translate text between multiple languages"
+      },
+      "grammarChecker": {
+        "name": "Grammar Checker",
+        "description": "Check and correct grammar and spelling errors"
+      },
+      "paraphraser": {
+        "name": "Paraphraser",
+        "description": "Rewrite text while maintaining the original meaning"
+      }
+    },
+    "powerpoint": {
+      "pptxViewer": {
+        "name": "PPTX Viewer",
+        "description": "View PowerPoint presentations in the browser"
+      },
+      "pptxToPdf": {
+        "name": "PPTX to PDF",
+        "description": "Convert PowerPoint presentations to PDF"
+      },
+      "pdfToPptx": {
+        "name": "PDF to PPTX",
+        "description": "Convert PDF files to PowerPoint presentations"
+      },
+      "pptxCompress": {
+        "name": "PPTX Compress",
+        "description": "Reduce PowerPoint file size"
+      },
+      "pptxToImages": {
+        "name": "PPTX to Images",
+        "description": "Export PowerPoint slides as images"
+      },
+      "pptxTemplate": {
+        "name": "PPTX Template",
+        "description": "Create presentations from pre-made templates"
+      }
+    },
+    "video": {
+      "videoCompressor": {
+        "name": "Video Compressor",
+        "description": "Reduce video file size while maintaining quality"
+      },
+      "videoTrimmer": {
+        "name": "Video Trimmer",
+        "description": "Cut and trim video clips to desired length"
+      },
+      "videoToGif": {
+        "name": "Video to GIF",
+        "description": "Convert video clips to animated GIFs"
+      },
+      "gifToVideo": {
+        "name": "GIF to Video",
+        "description": "Convert animated GIFs to video files"
+      },
+      "videoConverter": {
+        "name": "Video Converter",
+        "description": "Convert videos between different formats"
+      },
+      "videoCropper": {
+        "name": "Video Cropper",
+        "description": "Crop and resize video frames"
+      },
+      "videoMerger": {
+        "name": "Video Merger",
+        "description": "Combine multiple video clips into one"
+      },
+      "videoAudioExtractor": {
+        "name": "Video Audio Extractor",
+        "description": "Extract audio track from video files"
+      }
+    },
+    "audio": {
+      "audioRecorder": {
+        "name": "Audio Recorder",
+        "description": "Record audio directly from your microphone"
+      },
+      "audioConverter": {
+        "name": "Audio Converter",
+        "description": "Convert audio files between formats (MP3, WAV, etc.)"
+      },
+      "audioTrimmer": {
+        "name": "Audio Trimmer",
+        "description": "Cut and trim audio clips"
+      },
+      "audioMerger": {
+        "name": "Audio Merger",
+        "description": "Combine multiple audio files into one"
+      },
+      "textToSpeech": {
+        "name": "Text to Speech",
+        "description": "Convert text into natural-sounding speech"
+      },
+      "speechToText": {
+        "name": "Speech to Text",
+        "description": "Transcribe audio recordings to text"
+      },
+      "audioCompressor": {
+        "name": "Audio Compressor",
+        "description": "Reduce audio file size"
+      },
+      "noiseRemover": {
+        "name": "Noise Remover",
+        "description": "Remove background noise from audio recordings"
+      }
+    },
+    "images": {
+      "imageCompressor": {
+        "name": "Image Compressor",
+        "description": "Reduce image file size without quality loss"
+      },
+      "imageConverter": {
+        "name": "Image Converter",
+        "description": "Convert images between formats (PNG, JPG, WebP, etc.)"
+      },
+      "imageCropper": {
+        "name": "Image Cropper",
+        "description": "Crop and resize images"
+      },
+      "imageToBase64": {
+        "name": "Image to Base64",
+        "description": "Convert images to Base64 encoded strings"
+      },
+      "backgroundRemover": {
+        "name": "Background Remover",
+        "description": "Remove background from images automatically"
+      },
+      "imageEnhancer": {
+        "name": "Image Enhancer",
+        "description": "Enhance image quality and resolution"
+      },
+      "screenshotTool": {
+        "name": "Screenshot Tool",
+        "description": "Capture and annotate screenshots"
+      },
+      "imageMerger": {
+        "name": "Image Merger",
+        "description": "Combine multiple images into one"
+      },
+      "imageResizer": {
+        "name": "Image Resizer",
+        "description": "Resize images to specific dimensions"
+      },
+      "filtersEffects": {
+        "name": "Filters & Effects",
+        "description": "Apply filters and visual effects to images"
+      }
+    },
+    "qrcode": {
+      "qrGenerate": {
+        "name": "QR Generator",
+        "description": "Generate QR codes from text, URLs, or data"
+      },
+      "qrScanner": {
+        "name": "QR Scanner",
+        "description": "Scan and decode QR codes from images"
+      },
+      "barcodeGenerator": {
+        "name": "Barcode Generator",
+        "description": "Generate various types of barcodes"
+      },
+      "wifiQr": {
+        "name": "WiFi QR Code",
+        "description": "Generate QR codes for WiFi network sharing"
+      }
+    },
+    "general": {
+      "pomodoro": {
+        "name": "Pomodoro Timer",
+        "description": "Boost productivity with timed study sessions"
+      },
+      "taskManager": {
+        "name": "Task Manager",
+        "description": "Organize and track your study tasks"
+      },
+      "examCountdown": {
+        "name": "Exam Countdown",
+        "description": "Track days remaining until your exams"
+      },
+      "flashcards": {
+        "name": "Flashcards",
+        "description": "Study with spaced repetition flashcards"
+      },
+      "gpaCalculator": {
+        "name": "GPA Calculator",
+        "description": "Calculate your grade point average"
+      },
+      "notePad": {
+        "name": "Note Pad",
+        "description": "Quick note-taking with rich text support"
+      },
+      "calendar": {
+        "name": "Calendar",
+        "description": "View and manage your study schedule"
+      },
+      "unitConverter": {
+        "name": "Unit Converter",
+        "description": "Convert between different measurement units"
+      },
+      "calculator": {
+        "name": "Calculator",
+        "description": "Scientific calculator for complex calculations"
+      },
+      "stopwatch": {
+        "name": "Stopwatch",
+        "description": "Track time with precision stopwatch"
+      },
+      "whiteboard": {
+        "name": "Whiteboard",
+        "description": "Digital whiteboard for brainstorming and diagrams"
+      },
+      "bookmarkManager": {
+        "name": "Bookmark Manager",
+        "description": "Save and organize important links"
+      },
+      "passwordGenerator": {
+        "name": "Password Generator",
+        "description": "Generate strong, secure passwords"
+      },
+      "clipboardManager": {
+        "name": "Clipboard Manager",
+        "description": "History of your copied text and images"
+      }
+    },
+    "medical": {
+      "anatomyViewer": {
+        "name": "Anatomy Viewer",
+        "description": "Interactive 3D anatomy exploration"
+      },
+      "drugReference": {
+        "name": "Drug Reference",
+        "description": "Quick access to drug information and interactions"
+      },
+      "clinicalNotes": {
+        "name": "Clinical Notes",
+        "description": "Template-based clinical note taking"
+      },
+      "medicalCalculator": {
+        "name": "Medical Calculator",
+        "description": "Clinical calculation tools (BMI, GCS, etc.)"
+      },
+      "ecgViewer": {
+        "name": "ECG Viewer",
+        "description": "View and annotate ECG recordings"
+      },
+      "medicalFlashcards": {
+        "name": "Medical Flashcards",
+        "description": "Pre-made medical study flashcards"
+      }
+    },
+    "split": {
+      "ready": "Your split PDFs are ready",
+      "resultHint": "{{count}} files were created from {{pages}} pages.",
+      "files": "Files",
+      "pages": "Pages",
+      "time": "Time",
+      "download": "Download ZIP",
+      "replace": "Replace",
+      "remove": "Remove",
+      "drop": "Drop a PDF here or click to browse",
+      "accepted": "PDF files only",
+      "method": "Split method",
+      "every-page": "Split every page",
+      "every-n": "Split every specific number of pages",
+      "ranges": "Split by page ranges",
+      "extract": "Extract specific pages",
+      "nLabel": "Pages per file",
+      "rangeLabel": "One range per line",
+      "extractLabel": "Pages to extract",
+      "preview": "Output preview",
+      "previewHint": "Your PDF will be created in these groups.",
+      "file": "File",
+      "more": "more files",
+      "action": "Split PDF"
+    }
+  },
+  "ui": {
+    "upload": "Upload",
+    "download": "Download",
+    "merge": "Merge",
+    "split": "Split",
+    "compress": "Compress",
+    "convert": "Convert",
+    "crop": "Crop",
+    "resize": "Resize",
+    "rotate": "Rotate",
+    "flip": "Flip",
+    "undo": "Undo",
+    "redo": "Redo",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "copy": "Copy",
+    "paste": "Paste",
+    "clear": "Clear",
+    "reset": "Reset",
+    "apply": "Apply",
+    "close": "Close",
+    "open": "Open",
+    "preview": "Preview",
+    "export": "Export",
+    "import": "Import",
+    "share": "Share",
+    "print": "Print",
+    "zoomIn": "Zoom In",
+    "zoomOut": "Zoom Out",
+    "fullscreen": "Fullscreen",
+    "exitFullscreen": "Exit Fullscreen",
+    "selectFile": "Select File",
+    "dragDrop": "Drag and drop files here",
+    "orClick": "or click to browse",
+    "processing": "Processing...",
+    "loading": "Loading...",
+    "noData": "No data available",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "finish": "Finish",
+    "start": "Start",
+    "stop": "Stop",
+    "pause": "Pause",
+    "resume": "Resume",
+    "yes": "Yes",
+    "no": "No",
+    "ok": "OK",
+    "error": "Error",
+    "success": "Success",
+    "warning": "Warning",
+    "info": "Info",
+    "all": "All",
+    "none": "None",
+    "size": "Size",
+    "type": "Type",
+    "name": "Name",
+    "date": "Date",
+    "actions": "Actions",
+    "options": "Options",
+    "more": "More",
+    "less": "Less",
+    "addNew": "Add New",
+    "createNew": "Create New",
+    "duplicate": "Duplicate",
+    "rename": "Rename",
+    "move": "Move",
+    "sort": "Sort",
+    "filter": "Filter",
+    "refresh": "Refresh",
+    "retry": "Retry",
+    "addToFavorites": "Add to Favorites",
+    "removeFromFavorites": "Remove from Favorites"
+  },
+  "upload": {
+    "dropHere": "Drop your files here",
+    "browseFiles": "Browse Files",
+    "maxSize": "Max file size: {{size}}",
+    "supportedFormats": "Supported formats: {{formats}}",
+    "fileTooLarge": "File is too large",
+    "invalidFormat": "Invalid file format",
+    "uploadSuccess": "File uploaded successfully",
+    "uploadError": "Error uploading file",
+    "selectAtLeastOne": "Please select at least one file",
+    "filesSelected": "{{count}} file(s) selected"
+  },
+  "notifications": {
+    "fileUploaded": "File uploaded successfully",
+    "processing": "Processing your request...",
+    "done": "All done!",
+    "error": "Something went wrong",
+    "copied": "Copied to clipboard",
+    "saved": "Changes saved",
+    "deleted": "Item deleted",
+    "merged": "Files merged successfully",
+    "split": "File split successfully",
+    "compressed": "File compressed successfully",
+    "converted": "File converted successfully",
+    "downloadReady": "Your download is ready",
+    "taskAdded": "Task added",
+    "taskCompleted": "Task marked as complete",
+    "examAdded": "Exam countdown added",
+    "flashcardAdded": "Flashcard added",
+    "noFilesToProcess": "No files to process",
+    "operationCancelled": "Operation cancelled",
+    "clipboardCleared": "Clipboard history cleared",
+    "allFilesCleared": "All files cleared"
+  },
+  "fileUpload": {
+    "dropLabel": "Drop files here or click to browse",
+    "uploadVideo": "Upload video file",
+    "dropPdf": "Drop your PDF here or click to browse",
+    "pdfOnly": "PDF files only",
+    "dropPdfOrAddMore": "Drop PDFs here or add more"
+  },
+  "pomodoro": {
+    "focus": "Focus",
+    "break": "Break",
+    "longBreak": "Long Break",
+    "start": "Start",
+    "pause": "Pause",
+    "reset": "Reset",
+    "skip": "Skip",
+    "sessions": "Sessions",
+    "sessionCount": "Session {{current}} of {{total}}",
+    "timeUp": "Time's up!",
+    "workTime": "Focus Time",
+    "breakTime": "Break Time",
+    "longBreakTime": "Long Break Time",
+    "settings": "Pomodoro Settings",
+    "focusDuration": "Focus Duration (minutes)",
+    "breakDuration": "Break Duration (minutes)",
+    "longBreakDuration": "Long Break Duration (minutes)",
+    "sessionsUntilLongBreak": "Sessions until long break",
+    "totalSessions": "Total Sessions",
+    "totalfocustime": "Total Focus Time",
+    "totalBreakTime": "Total Break Time",
+    "completed": "Completed"
+  },
+  "tasks": {
+    "title": "Task Manager",
+    "addTask": "Add Task",
+    "editTask": "Edit Task",
+    "deleteTask": "Delete Task",
+    "taskTitle": "Task Title",
+    "description": "Description",
+    "priority": "Priority",
+    "dueDate": "Due Date",
+    "completed": "Completed",
+    "pending": "Pending",
+    "overdue": "Overdue",
+    "high": "High",
+    "medium": "Medium",
+    "low": "Low",
+    "noTasks": "No tasks yet",
+    "noTasksHint": "Add a task to get started",
+    "allTasks": "All Tasks",
+    "activeTasks": "Active Tasks",
+    "completedTasks": "Completed Tasks",
+    "markComplete": "Mark as Complete",
+    "markIncomplete": "Mark as Incomplete",
+    "deleteConfirm": "Are you sure you want to delete this task?",
+    "taskCount": "{{count}} task(s)",
+    "sortByName": "Sort by Name",
+    "sortByDate": "Sort by Date",
+    "sortByPriority": "Sort by Priority",
+    "showCompleted": "Show Completed",
+    "hideCompleted": "Hide Completed",
+    "clearCompleted": "Clear Completed"
+  },
+  "exams": {
+    "title": "Exam Countdown",
+    "addExam": "Add Exam",
+    "editExam": "Edit Exam",
+    "deleteExam": "Delete Exam",
+    "examName": "Exam Name",
+    "examDate": "Exam Date",
+    "examColor": "Color",
+    "daysRemaining": "{{count}} days remaining",
+    "daysRemaining_one": "1 day remaining",
+    "today": "Today!",
+    "tomorrow": "Tomorrow!",
+    "overdue": "Exam has passed",
+    "noExams": "No exams scheduled",
+    "noExamsHint": "Add an exam to start countdown",
+    "addFirstExam": "Add Your First Exam",
+    "sortByDate": "Sort by Date",
+    "sortByName": "Sort by Name",
+    "urgent": "Urgent",
+    "upcoming": "Upcoming"
+  },
+  "flashcards": {
+    "title": "Flashcards",
+    "addCard": "Add Flashcard",
+    "editCard": "Edit Flashcard",
+    "deleteCard": "Delete Flashcard",
+    "flip": "Flip",
+    "know": "I Know This",
+    "dontKnow": "Don't Know",
+    "next": "Next Card",
+    "previous": "Previous Card",
+    "front": "Front (Question)",
+    "back": "Back (Answer)",
+    "deck": "Deck",
+    "newDeck": "New Deck",
+    "difficulty": "Difficulty",
+    "easy": "Easy",
+    "medium": "Medium",
+    "hard": "Hard",
+    "noCards": "No flashcards yet",
+    "noCardsHint": "Create flashcards to start studying",
+    "noDeckSelected": "Select a deck to study",
+    "studySession": "Study Session",
+    "reviewDue": "{{count}} cards due for review",
+    "reviewComplete": "Review session complete!",
+    "score": "Score",
+    "correct": "Correct",
+    "incorrect": "Incorrect",
+    "totalCards": "Total Cards",
+    "dueForReview": "Due for Review",
+    "nextReview": "Next Review",
+    "shuffle": "Shuffle",
+    "selectAll": "Select All",
+    "deselectAll": "Deselect All",
+    "exportDeck": "Export Deck",
+    "importDeck": "Import Deck",
+    "deckCount": "{{count}} card(s)",
+    "resetProgress": "Reset Progress"
+  },
+  "categories": {
+    "pdf": "PDF Tools",
+    "ai": "AI Study Tools",
+    "powerpoint": "PowerPoint",
+    "video": "Video Tools",
+    "audio": "Audio",
+    "images": "Images",
+    "qrcode": "QR Code",
+    "general": "General",
+    "medical": "Medical Section",
+    "enhineering": "Engineering Section"
+  },
+  "emptyStates": {
+    "pdf": "No pdf tools used yet. Try merging or splitting PDFs!",
+    "ai": "No AI tools used yet. Let AI help with your studies!",
+    "powerpoint": "No PowerPoint tools used yet. Convert presentations easily!",
+    "video": "No video tools used yet. Compress or trim your videos!",
+    "audio": "No audio tools used yet. Record or convert audio files!",
+    "images": "No image tools used yet. Compress or convert your images!",
+    "qrcode": "No QR tools used yet. Generate or scan QR codes!",
+    "general": "No genearal tools used yet. Boost your productivity!",
+    "medical": "No medical tools used yet. Explore anatomy or clinical notes!"
+  },
+  "errors": {
+    "generic": "An unexpected error occurred",
+    "fileNotFound": "File not found",
+    "invalidInput": "Invalid input provided",
+    "networkError": "Network error. Please check your connection.",
+    "processingError": "Error processing file",
+    "conversionFailed": "Conversion failed",
+    "uploadFailed": "Upload failed",
+    "downloadFailed": "Download failed",
+    "memoryError": "Not enough memory to process this file",
+    "permissionDenied": "Permission denied",
+    "unsupportedFormat": "Unsupported file format",
+    "fileCorrupted": "File appears to be corrupted",
+    "maxFileSize": "File exceeds maximum size of {{size}}",
+    "requiredField": "This field is required",
+    "invalidDate": "Please enter a valid date",
+    "invalidEmail": "Please enter a valid email address",
+    "tryAgain": "Please try again",
+    "contactSupport": "If this persists, contact support"
+  },
+  "settings": {
+    "title": "Settings",
+    "appearance": "Appearance",
+    "language": "Language",
+    "theme": "Theme",
+    "notifications": "Notifications",
+    "data": "Data & Storage",
+    "about": "About",
+    "version": "Version",
+    "clearData": "Clear All Data",
+    "clearDataConfirm": "This will delete all your data. Are you sure?",
+    "exportData": "Export Data",
+    "importData": "Import Data"
+  },
+  "clipboardManager": {
+    "title": "Clipboard History",
+    "empty": "Clipboard is empty",
+    "emptyHint": "Copied text will appear here",
+    "clearAll": "Clear All",
+    "copyAgain": "Copy Again",
+    "deleteEntry": "Delete Entry",
+    "textEntry": "Text",
+    "imageEntry": "Image",
+    "fileEntry": "File",
+    "entriesCount": "{{count}} entry/entries",
+    "maxEntries": "Maximum 50 entries stored",
+    "autoClear": "Old entries are removed automatically"
+  },
+  "gpa": {
+    "title": "GPA Calculator",
+    "addCourse": "Add Course",
+    "courseName": "Course Name",
+    "creditHours": "Credit Hours",
+    "grade": "Grade",
+    "gpa": "Your GPA",
+    "totalCredits": "Total Credits",
+    "noCourses": "No courses added",
+    "removeCourse": "Remove Course",
+    "resetAll": "Reset All",
+    "scale": "Grading Scale"
+  },
+  "whiteboard": {
+    "title": "Whiteboard",
+    "pen": "Pen",
+    "eraser": "Eraser",
+    "text": "Text",
+    "shapes": "Shapes",
+    "rectangle": "Rectangle",
+    "circle": "Circle",
+    "line": "Line",
+    "arrow": "Arrow",
+    "color": "Color",
+    "strokeWidth": "Stroke Width",
+    "clearAll": "Clear All",
+    "saveImage": "Save as Image",
+    "undo": "Undo",
+    "redo": "Redo"
+  },
+  "passwordGenerator": {
+    "title": "Password Generator",
+    "length": "Length",
+    "uppercase": "Uppercase Letters",
+    "lowercase": "Lowercase Letters",
+    "numbers": "Numbers",
+    "symbols": "Symbols",
+    "generate": "Generate Password",
+    "copy": "Copy Password",
+    "strength": "Password Strength",
+    "weak": "Weak",
+    "fair": "Fair",
+    "good": "Good",
+    "strong": "Strong",
+    "veryStrong": "Very Strong"
+  },
+  "bookmarkManager": {
+    "title": "Bookmark Manager",
+    "addBookmark": "Add Bookmark",
+    "editBookmark": "Edit Bookmark",
+    "deleteBookmark": "Delete Bookmark",
+    "bookmarkName": "Name",
+    "bookmarkUrl": "URL",
+    "bookmarkCategory": "Category",
+    "noBookmarks": "No bookmarks saved",
+    "noBookmarksHint": "Save important links for quick access"
+  },
+  "medical": {
+    "anatomy": {
+      "title": "Anatomy Viewer",
+      "skeletal": "Skeletal System",
+      "muscular": "Muscular System",
+      "nervous": "Nervous System",
+      "cardiovascular": "Cardiovascular System",
+      "respiratory": "Respiratory System",
+      "digestive": "Digestive System",
+      "selectRegion": "Select a body region",
+      "zoomIn": "Zoom In",
+      "zoomOut": "Zoom Out",
+      "resetView": "Reset View",
+      "labels": "Show Labels"
+    },
+    "drugs": {
+      "title": "Drug Reference",
+      "searchDrugs": "Search medications...",
+      "drugName": "Drug Name",
+      "drugClass": "Drug Class",
+      "indications": "Indications",
+      "contraindications": "Contraindications",
+      "sideEffects": "Side Effects",
+      "interactions": "Drug Interactions",
+      "dosage": "Dosage",
+      "mechanism": "Mechanism of Action",
+      "noResults": "No medications found"
+    },
+    "clinicalNotes": {
+      "title": "Clinical Notes",
+      "addNote": "Add Note",
+      "editNote": "Edit Note",
+      "noteTitle": "Title",
+      "noteContent": "Content",
+      "noteCategory": "Category",
+      "SOAP": "SOAP Note",
+      "HPI": "History of Present Illness",
+      "physicalExam": "Physical Examination",
+      "assessment": "Assessment",
+      "plan": "Plan",
+      "noNotes": "No clinical notes",
+      "noNotesHint": "Start documenting your clinical encounters"
+    },
+    "calculators": {
+      "title": "Medical Calculators",
+      "bmi": "BMI Calculator",
+      "bsa": "BSA Calculator",
+      "gcs": "Glasgow Coma Scale",
+      "apgar": "Apgar Score",
+      "curb65": "CURB-65 Score",
+      "wellsScore": "Wells Score",
+      "heartRate": "Heart Rate Zones",
+      "creatinineClearance": "Creatinine Clearance",
+      "fib4": "FIB-4 Index",
+      "naFlux": "Free Water Deficit",
+      "anionGap": "Anion Gap",
+      "idealBodyWeight": "Ideal Body Weight",
+      "enterValues": "Enter values to calculate",
+      "result": "Result",
+      "normal": "Normal Range",
+      "abnormal": "Abnormal"
+    },
+    "ecg": {
+      "title": "ECG Viewer",
+      "loadEcg": "Load ECG Recording",
+      "lead": "Lead",
+      "allLeads": "All Leads",
+      "measure": "Measure",
+      "annotate": "Annotate",
+      "rhythm": "Rhythm Analysis",
+      "rate": "Heart Rate",
+      "interval": "Intervals",
+      "axis": "Axis",
+      "normalSinus": "Normal Sinus Rhythm",
+      "noEcg": "No ECG loaded",
+      "noEcgHint": "Load an ECG recording to view"
+    }
+  },
+  "generalTools": {
+    "unitConverter": {
+       "title": "Unit Converter",
+       "from": "From",
+       "to": "To",
+       "value": "Value",
+       "result": "Result",
+       "categories": {
+        "length": "Length",
+        "weight": "Weight",
+        "temperature": "Temperature",
+        "area": "Area",
+        "volume": "Volume",
+        "speed": "Speed",
+        "time": "Time",
+        "data": "Data Storage"
+      }
+    },
+    "calculator": {
+      "title": "Scientific Calculator",
+      "history": "History",
+      "clearHistory": "Clear History"
+    },
+    "stopwatch": {
+      "title": "Stopwatch",
+      "start": "Start",
+      "stop": "Stop",
+      "reset": "Reset",
+      "lap": "Lap",
+      "laps": "Laps",
+      "lapTime": "Lap Time",
+      "totalTime": "Total Time",
+      "noLaps": "No laps recorded"
+    }
+  },
+  "languages": {
+  "englishUS": "English (US)",
+  "englishUK": "English (UK)",
+  "arabic": "Arabic",
+  "spanish": "Spanish",
+  "french": "French",
+  "german": "German",
+  "portuguese": "Portuguese",
+  "japanese": "Japanese"
+},
+  "pdf": {
+    "merge": {
+      "ready": "Your merged PDF is ready",
+      "mergedCount": "{{count}} PDFs have been merged into one document.",
+      "download": "Download merged PDF",
+      "arrange": "Arrange your files",
+      "orderHint": "The merged PDF follows this exact order.",
+      "addMore": "Add more PDFs to your merge",
+      "dropHere": "Drop PDFs here or click to browse",
+      "merging": "Merging your PDFs",
+      "mergingButton": "Merging PDFs…",
+      "mergeButton": "Process"
+    },
+    "split": {
+      "ready": "Your split PDFs are ready",
+      "resultHint": "{{count}} files were created from {{pages}} pages.",
+      "files": "Files",
+      "pages": "Pages",
+      "time": "Time",
+      "download": "Download ZIP",
+      "replace": "Replace",
+      "remove": "Remove",
+      "drop": "Drop a PDF here or click to browse",
+      "accepted": "PDF files only",
+      "method": "Split method",
+      "every-page": "Split every page",
+      "every-n": "Split every specific number of pages",
+      "ranges": "Split by page ranges",
+      "extract": "Extract specific pages",
+      "nLabel": "Pages per file",
+      "rangeLabel": "One range per line",
+      "extractLabel": "Pages to extract",
+      "preview": "Output preview",
+      "previewHint": "Your PDF will be created in these groups.",
+      "file": "File",
+      "more": "more files",
+      "action": "Process",
+      "page": "page",
+      "rangePlaceholder": "1-3\n4-8\n9-15",
+      "extractPlaceholder": "1,3,5,9 or 2-5,8,10"
+    },
+    "delete": {
+      "ready": "Pages deleted successfully",
+      "resultHint": "{{deleted}} pages deleted, {{remaining}} remaining.",
+      "remaining": "Remaining",
+      "deletedLabel": "Deleted",
+      "download": "Download PDF",
+      "drop": "Drop a PDF here or click to browse",
+      "selectTitle": "Select pages to delete",
+      "selectHint": "Click on pages you want to remove from the document.",
+      "selectAll": "Select All",
+      "clear": "Clear",
+      "preview": "Deletion preview",
+      "previewHint": "{{remaining}} pages will remain after deletion.",
+      "noSelection": "Select pages above to see a preview.",
+      "toDelete": "to delete",
+      "pagesWillBeRemoved": "Pages that will be removed:",
+      "action": "Process",
+      "reading": "Reading PDF…",
+      "readError": "This PDF could not be read. Please choose another file.",
+      "processing": "Deleting pages…",
+      "success": "Pages deleted successfully",
+      "error": "Unable to delete pages."
+    }
+  },
+  "common": {
+    "startAgain": "Start again",
+    "seconds": "seconds"
+  }
+}
