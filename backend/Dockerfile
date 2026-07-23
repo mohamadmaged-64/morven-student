@@ -1,6 +1,5 @@
 FROM node:22-bookworm
 
-# Install LibreOffice
 RUN apt-get update && \
     apt-get install -y libreoffice && \
     apt-get clean && \
@@ -8,13 +7,10 @@ RUN apt-get update && \
 
 WORKDIR /app
 
-# Copy backend
-COPY backend/package*.json ./backend/
-WORKDIR /app/backend
-
+COPY package*.json ./
 RUN npm install
 
-COPY backend .
+COPY . .
 
 RUN npm run build
 
