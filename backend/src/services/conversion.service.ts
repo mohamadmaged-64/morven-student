@@ -16,12 +16,6 @@ export class ConversionService {
 
     await fs.ensureDir(OUTPUT_DIR);
 
-    const exists = await fs.pathExists(LIBREOFFICE_PATH);
-    if (!exists) {
-      throw new Error(
-        `LibreOffice not found at ${LIBREOFFICE_PATH}. Install LibreOffice or set LIBREOFFICE_PATH in .env.`
-      );
-    }
 
     const fileExists = await fs.pathExists(inputPath);
     if (!fileExists) {
