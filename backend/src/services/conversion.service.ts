@@ -4,8 +4,9 @@ import fs from "fs-extra";
 
 const LIBREOFFICE_PATH =
   process.env.LIBREOFFICE_PATH ||
-  "C:\\Program Files\\LibreOffice\\program\\soffice.exe";
-
+  (process.platform === "win32"
+    ? "C:\\Program Files\\LibreOffice\\program\\soffice.exe"
+    : "soffice");
 const OUTPUT_DIR = path.resolve(__dirname, "..", "output");
 
 export class ConversionService {
