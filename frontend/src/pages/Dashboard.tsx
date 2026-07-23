@@ -290,7 +290,7 @@ export default function Dashboard() {
   },
   {
     icon: ListTodo,
-    label: t('tools.student.taskManager.name'),
+    label: t('tools.general.taskManager.name'),
     to: '/tool/task-manager',
   },
    {
