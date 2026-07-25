@@ -39,7 +39,7 @@ export const categories: Record<ToolCategory, CategoryMeta> = {
   },
   engineering: {
     name: 'Engineering Section',
-    nameAr: 'أدوات الهندسة',
+    nameAr: ' القسم الهندسي',
     icon: Cog,
     description: 'Engineering calculators, diagrams, and design tools',
     descriptionAr: 'حاسبات هندسية ورسومات وأدوات تصميم',
@@ -59,7 +59,7 @@ export const categories: Record<ToolCategory, CategoryMeta> = {
     descriptionAr: 'تحويل ودمج وتقسيم وضغط وتحرير مستندات PDF',
   },
   powerpoint: {
-    name: 'PowerPoint',
+    name: 'PowerPoint Tools',
     nameAr: 'أدوات الPowerPoint',
     icon: Presentation,
     description: 'Create, edit, convert, and enhance PowerPoint presentations',
@@ -73,14 +73,14 @@ export const categories: Record<ToolCategory, CategoryMeta> = {
     descriptionAr: 'ضغط وتحويل واستخراج الصوت وتحرير الفيديوهات',
   },
    images: {
-    name: 'Images',
+    name: 'Images Tools',
     nameAr: 'أدوات الصور',
     icon: ImageIcon,
     description: 'Remove backgrounds, rotate, blur, and convert images',
     descriptionAr: 'إزالة الخلفيات وتدوير وتغيير الحجم وتحويل الصور',
   },
   audio: {
-    name: 'Audio',
+    name: 'Audio Tools',
     nameAr: 'أدوات الصوت',
     icon: Music,
     description: 'Convert audio formats and transcribe speech to text',

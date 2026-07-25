@@ -45,7 +45,7 @@ export const icon = {
 
 export const tools: Tool[] = [
   // GENERAL
-  { id: 'pomodoro', name: 'Pomodoro Timer', nameAr: 'مؤقت بومودورو', description: 'Boost productivity with timed study sessions', descriptionAr: 'تعزيز الإنتاجية بجلسات دراسة محددة الوقت', icon: Timer, category: 'general' },
+  { id: 'pomodoro-timer', name: 'Pomodoro Timer', nameAr: 'مؤقت بومودورو', description: 'Boost productivity with timed study sessions', descriptionAr: 'تعزيز الإنتاجية بجلسات دراسة محددة الوقت', icon: Timer, category: 'general' },
   { id: 'task-manager', name: 'Task Manager', nameAr: 'مدير المهام', description: 'Organize and track your study tasks', descriptionAr: 'تنظيم وتتبع مهام دراستك', icon: ListTodo, category: 'general' },
   { id: 'exam-countdown', name: 'Exam Countdown', nameAr: 'عد تنازلي للامتحان', description: 'Track days remaining until your exams', descriptionAr: 'تتبع الأيام المتبقية حتى امتحاناتك', icon: Calendar, category: 'general' },
 
@@ -159,17 +159,17 @@ export function searchTools(query: string): Tool[] {
 export const categories: Record<ToolCategory, CategoryMeta> = {
   general: {
     name: "General",
-    nameAr: "أدوات الطالب",
+    nameAr: "عام",
     icon: GraduationCap,
   },
   medical: {
     name: "Medical Section",
-    nameAr: "طالب الطب",
+    nameAr: "القسم الطبي",
     icon: HeartPulse,
   },
   engineering: {
     name: "Engineering Section",
-    nameAr: "أدوات الهندسة",
+    nameAr: "القسم الهندسي",
     icon: Cog,
   },
   ai: {
@@ -183,43 +183,44 @@ export const categories: Record<ToolCategory, CategoryMeta> = {
     icon: FileText,
   },
   powerpoint: {
-    name: "PowerPoint",
-    nameAr: "PowerPoint",
+    name: "PowerPoint Tools",
+    nameAr: "أدوات الPowerPoint",
     icon: Presentation,
   },
   video: {
-    name: "Video",
-    nameAr: "الفيديو",
+    name: "Video Tools",
+    nameAr: "أدوات الفيديو",
     icon: Video,
   },
   images: {
-    name: "Images",
-    nameAr: "الصور",
+    name: "Images Tools",
+    nameAr: "أدوات الصور",
     icon: ImageIcon,
   },
   audio: {
-    name: "Audio",
-    nameAr: "الصوت",
+    name: "Audio Tools",
+    nameAr: "أدوات الصوت",
     icon: Mic,
   },
   qrcode: {
     name: "QR Code",
-    nameAr: "QR Code",
+    nameAr: "رمز QR",
     icon: QrCode,
   },
 
 };
 export const categoryOrder: ToolCategory[] = [
-  'pdf',
-  'ai',
-  'powerpoint',
-  'video',
-  'audio',
-  'images',
-  'qrcode',
   'general',
   'medical',
   'engineering',
+  'ai',
+  'pdf',
+  'powerpoint',
+  'video',
+  'images',
+  'audio',
+  'qrcode',
+  
 ];
 export function getCategoryInfo(category: ToolCategory): CategoryMeta {
   return categories[category];

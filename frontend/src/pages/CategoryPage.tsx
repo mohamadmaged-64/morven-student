@@ -26,16 +26,17 @@ const itemVariants = {
 };
 
 const ALL_CATEGORIES: ToolCategory[] = [
-  'pdf',
-  'ai',
-  'powerpoint',
-  'video',
-  'audio',
-  'images',
-  'qrcode',
   'general',
   'medical',
   'engineering',
+  'ai',
+  'pdf',
+  'powerpoint',
+  'video',
+  'images',
+  'audio',
+  'qrcode',
+  
 ];
 
 export function CategoryPage() {

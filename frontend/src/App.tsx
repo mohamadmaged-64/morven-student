@@ -20,7 +20,16 @@ const VideoToolPage = lazy(() => import('@/pages/tools/VideoTools'));
 const ImageToolPage = lazy(() => import('@/pages/tools/ImageTools'));
 const AudioToolPage = lazy(() => import('@/pages/tools/AudioTools'));
 const QRCodeToolPage = lazy(() => import('@/pages/tools/QRCodeTools'));
-
+const FeaturesPage = lazy(() => import('@/pages/Footer/FeaturesPage'));
+const ToolsListPage = lazy(() => import('@/pages/Footer/ToolsPage'));
+const FAQPage = lazy(() => import('@/pages/Footer/FAQPage'));
+const SecurityPage = lazy(() => import('@/pages/Footer/SecurityPage'));
+const PrivacyPolicyPage = lazy(() => import('@/pages/Footer/PrivacyPolicyPage'));
+const TermsPage = lazy(() => import('@/pages/Footer/TermsPage'));
+const AboutPage = lazy(() => import('@/pages/Footer/AboutPage'));
+const ContactPage = lazy(() => import('@/pages/Footer/ContactPage'));
+const ComplaintsPage = lazy(() => import('@/pages/Footer/ComplaintsPage'));
+const CategoryDetailPage = lazy(() => import('@/pages/Footer/CategoryDetailPage'));
 
 const toolPageMap: Record<ToolCategory, React.LazyExoticComponent<React.ComponentType<{ toolId: string }>>> = {
   general: GeneralToolPage,
@@ -132,6 +141,46 @@ export default function App() {
                 <ToolPage />
               </SuspenseWrapper>
             }
+          />
+          <Route
+            path="/features"
+            element={<SuspenseWrapper><FeaturesPage /></SuspenseWrapper>}
+          />
+          <Route
+            path="/our-tools"
+            element={<SuspenseWrapper><ToolsListPage /></SuspenseWrapper>}
+          />
+          <Route
+            path="/our-tools/:category"
+            element={<SuspenseWrapper><CategoryDetailPage /></SuspenseWrapper>}
+          />
+          <Route
+            path="/faq"
+            element={<SuspenseWrapper><FAQPage /></SuspenseWrapper>}
+          />
+          <Route
+            path="/security"
+            element={<SuspenseWrapper><SecurityPage /></SuspenseWrapper>}
+          />
+          <Route
+            path="/privacy-policy"
+            element={<SuspenseWrapper><PrivacyPolicyPage /></SuspenseWrapper>}
+          />
+          <Route
+            path="/terms"
+            element={<SuspenseWrapper><TermsPage /></SuspenseWrapper>}
+          />
+          <Route
+            path="/about"
+            element={<SuspenseWrapper><AboutPage /></SuspenseWrapper>}
+          />
+          <Route
+            path="/contact"
+            element={<SuspenseWrapper><ContactPage /></SuspenseWrapper>}
+          />
+          <Route
+            path="/complaints"
+            element={<SuspenseWrapper><ComplaintsPage /></SuspenseWrapper>}
           />
         </Route>
       </Routes>
