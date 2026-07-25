@@ -21,7 +21,6 @@ const faqCategories: { id: FaqCategory; labelEn: string; labelAr: string; icon: 
   { id: 'all', labelEn: 'All', labelAr: 'الكل', icon: HelpCircle },
   { id: 'general', labelEn: 'General', labelAr: 'عام', icon: HelpCircle },
   { id: 'account', labelEn: 'Account & Usage', labelAr: 'الحساب والاستخدام', icon: User },
-  { id: 'privacy', labelEn: 'Privacy & Security', labelAr: 'الخصوصية والأمان', icon: Shield },
 ];
 
 interface FaqItem {
@@ -47,7 +46,7 @@ const faqData: FaqItem[] = [
     questionEn: 'Which languages are supported?',
     questionAr: 'أي اللغات مدعومة؟',
     answerEn: 'Morven fully supports both English and Arabic. The interface automatically adapts to your selected language, including full right-to-left (RTL) layout support for Arabic.',
-    answerAr: 'يدعم مورfen بالكامل الإنجليزية والعربية. تتكيف الواجهة تلقائياً مع لغتك المختارة، بما في ذلك دعم تخطيط اليمين لليسار بالكامل للعربية.',
+    answerAr: 'يدعم مورفن بالكامل الإنجليزية والعربية. تتكيف الواجهة تلقائياً مع لغتك المختارة، بما في ذلك دعم تخطيط اليمين لليسار بالكامل للعربية.',
   },
 
   // ACCOUNT & USAGE
@@ -55,15 +54,15 @@ const faqData: FaqItem[] = [
     id: 'acc-1', category: 'account',
     questionEn: 'Are there any file size limits?',
     questionAr: 'هل هناك حد لحجم الملفات؟',
-    answerEn: 'File size limits depend on the tool and your device\'s capabilities. Client-side tools (like PDF merge and split) are limited mainly by your browser\'s memory. Server-side tools (like Office-to-PDF) have a limit of approximately 50MB per file.',
-    answerAr: 'تعتمد أحجام الملفات على الأداة وقدرات جهازك. الأدوات جانب العميل (مثل دمج وتقسيم PDF) محدودة بشكل أساسي بذاكرة متصفحك. الأدوات جانب الخادم (مثل Office إلى PDF) لها حد تقريبي 50 ميجابايت لكل ملف.',
+    answerEn: 'File size limits depend on the tool and your device\'s capabilities. Client-side tools (like PDF merge and split) are limited mainly by your browser\'s memory. Server-side tools (like Office-to-PDF) have a limit of approximately 100 MB per file.',
+    answerAr: 'تعتمد أحجام الملفات على الأداة وقدرات جهازك. الأدوات جانب العميل (مثل دمج وتقسيم PDF) محدودة بشكل أساسي بذاكرة متصفحك. الأدوات جانب الخادم (مثل Office إلى PDF) لها حد تقريبي 100 ميجابايت لكل ملف.',
   },
   {
     id: 'acc-2', category: 'account',
     questionEn: 'Can I use Morven on mobile devices?',
     questionAr: 'هل يمكنني استخدام مورفن على الأجهزة المحمولة؟',
     answerEn: 'Yes. Morven is fully responsive and works on smartphones and tablets. However, some advanced tools may work best on a desktop or laptop due to screen size and file management requirements.',
-    answerAr: 'نعم. مورfen متجاوب بالكامل ويعمل على الهواتف الذكية والأجهزة اللوحية. ومع ذلك، قد تعمل بعض الأدوات المتقدمة بشكل أفضل على سطح المكتب أو الحاسوب المحمول بسبب حجم الشاشة ومتطلبات إدارة الملفات.',
+    answerAr: 'نعم. مورفن متجاوب بالكامل ويعمل على الهواتف الذكية والأجهزة اللوحية. ومع ذلك، قد تعمل بعض الأدوات المتقدمة بشكل أفضل على سطح المكتب أو الحاسوب المحمول بسبب حجم الشاشة ومتطلبات إدارة الملفات.',
   },
   {
     id: 'acc-3', category: 'account',
@@ -72,14 +71,7 @@ const faqData: FaqItem[] = [
     answerEn: 'We regularly add new tools and features based on student feedback and requests. Tools marked as "Coming Soon" are actively in development. Stay tuned by checking the site periodically for updates.',
     answerAr: 'نضيف أدوات وميزات جديدة بانتظام بناءً على ملاحظات وطلبات الطلاب. الأدوات المميزة بـ "قريبًا" قيد التطوير النشط. تابعنا بالتحقق من الموقع بشكل دوري للحصول على التحديثات.',
   },
-    // PRIVACY & SECURITY
-  {
-    id: 'priv-1', category: 'privacy',
-    questionEn: 'Is my data safe when using Morven?',
-    questionAr: 'هل بياناتي آمنة عند استخدام مورفن؟',
-    answerEn: 'Absolutely. Morven is built with a privacy-first philosophy. Most tools process your files entirely in your browser using client-side technology, meaning your data never touches our servers. For tools that require server processing (like Office-to-PDF), files are deleted immediately after processing.',
-    answerAr: 'بالتأكيد. مورفن مبني بفلسفة الخصوصية أولاً. معظم الأدوات تعالج ملفاتك بالكامل في متصفحك باستخدام تقنية جانب العميل، مما يعني أن بياناتك لا تصل إلى خوادمنا. للأدوات التي تتطلب معالجة على الخادم، تُحذف الملفات فوراً بعد المعالجة.',
-  },
+  
 ];
 
 export default function FAQPage() {

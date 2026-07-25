@@ -31,7 +31,7 @@ const subjects = [
   { value: 'support', labelEn: 'Technical Support', labelAr: 'دعم فني' },
   { value: 'bug', labelEn: 'Bug Report', labelAr: 'تقرير خطأ' },
   { value: 'suggestion', labelEn: 'Feature Suggestion', labelAr: 'اقتراح ميزة' },
-  { value: 'other', labelEn: 'Other', labelAr: 'رسالة شكر' },
+  { value: 'other', labelEn: 'Appreciation message', labelAr: 'رسالة شكر' },
 ];
 
 export default function ContactPage() {
@@ -344,7 +344,7 @@ export default function ContactPage() {
         <p className="text-gray-500 dark:text-gray-400 max-w-lg mx-auto text-sm md:text-base leading-relaxed">
           {isAr
             ? 'نقدر ملاحظاتك وتساؤلاتك. كل رسالة تساعدنا على تحسين مورفن.'
-            : 'We value your feedback and inquiries. Every message helps us improve Morven and make it better for all students.'}
+            : 'We value your feedback and inquiries. Every message helps us improve Morven.'}
         </p>
       </motion.section>
     </div>

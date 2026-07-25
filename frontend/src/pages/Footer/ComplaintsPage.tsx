@@ -52,7 +52,7 @@ const feedbackCategories = [
     titleEn: 'General Feedback',
     titleAr: 'ملاحظات عامة',
     descEn: 'Any thoughts, ideas, or comments about Morven are welcome.',
-    descAr: 'كل الأفكار أو التعليقات حول مورfen مرحب بها.',
+    descAr: 'كل الأفكار أو التعليقات حول مورفن مرحب بها.',
   },
 ];
 
@@ -63,7 +63,6 @@ const processSteps = [
 ];
 
 const feedbackTypes = [
-  { value: 'bug', labelEn: 'Bug Report', labelAr: 'تقرير خطأ' },
   { value: 'feature', labelEn: 'Feature Suggestion', labelAr: 'اقتراح ميزة' },
   { value: 'complaint', labelEn: 'Complaint', labelAr: 'شكوى' },
   { value: 'feedback', labelEn: 'General Feedback', labelAr: 'ملاحظات عامة' },
@@ -144,7 +143,7 @@ export default function ComplaintsPage() {
           >
             {isAr
               ? 'نقدر ملاحظاتك وشكاويك واقتراحاتك.'
-              : 'We value your complaints, suggestions, bug reports, and general feedback. Share your ideas and contributions to make Morven better.'}
+              : 'We value your complaints, suggestions and bug reports.'}
           </motion.p>
         </div>
       </motion.section>

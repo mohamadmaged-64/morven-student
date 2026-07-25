@@ -34,7 +34,7 @@ const missionVision = [
     titleEn: 'Our Mission',
     titleAr: 'مهمتنا',
     descEn: 'Our mission is to harness technology in the service of people by developing reliable, fast, and intuitive digital tools that simplify everyday tasks and enhance productivity without unnecessary complexity. We strive to build a comprehensive platform that delivers practical solutions for individuals across a wide range of fields, while remaining committed to quality, innovation, and continuous improvement. We believe that the best technology is the kind that creates meaningful value and makes life easier for its users.',
-    descAr: 'تتمثل مهمتنا في تسخير التقنية لخدمة الناس، من خلال تطوير أدوات رقمية موثوقة، سريعة، وسهلة الاستخدام، تُسهم في تبسيط المهام اليومية ورفع الإنتاجية دون تعقيد. ونسعى إلى بناء منصة متكاملة تُقدّم حلولًا عملية تلبي احتياجات الأفراد في مختلف المجالات، مع الالتزام بالجودة، والابتكار، والتحسين المستمر، إيمانًا بأن أفضل التقنيات هي تلك التي تُحدث أثرًا نافعًا وتُيسّر حياة مستخدميها',
+    descAr: 'تتمثل مهمتنا في تسخير التقنية لخدمة الناس، من خلال تطوير أدوات رقمية موثوقة، سريعة، وسهلة الاستخدام، تُسهم في تبسيط المهام اليومية ورفع الإنتاجية دون تعقيد. ونسعى إلى بناء منصة متكاملة تُقدّم حلولًا عملية تلبي احتياجات الأفراد في مختلف المجالات، مع الالتزام بالجودة، والابتكار، والتحسين المستمر، إيمانًا بأن أفضل التقنيات هي تلك التي تُحدث أثرًا نافعًا وتُيسّر حياة مستخدميها.',
   },
   {
     icon: Eye,
@@ -67,13 +67,7 @@ const values = [
     descEn: 'Free and available to every student, on any device, in multiple languages.',
     descAr: 'مجاني ومتاح لكل طالب، على أي جهاز، بلغات متعددة.',
   },
-  {
-    icon: Lightbulb,
-    titleEn: 'Innovation',
-    titleAr: 'الابتكار',
-    descEn: 'Continuously adopt new technologies to build better, smarter tools.',
-    descAr: 'تبني تقنيات جديدة باستمرار لبناء أدوات أفضل وأذكى.',
-  },
+
   {
     icon: Rocket,
     titleEn: 'Continuous Improvement',
@@ -157,7 +151,7 @@ export default function AboutPage() {
             <p>
               {isAr
                 ? 'امتثالًا لقوله تعالى: ﴿وَتَعَاوَنُوا عَلَى الْبِرِّ وَالتَّقْوَى﴾، كانت مورفن ثمرةَ رؤيةٍ اجتمع عليها طلابٌ آمنوا بأن العلم والمعرفة ينبغي أن يكونا في متناول الجميع، فسخّروا وقتهم وجهدهم لبناء منصةٍ متكاملة تُيسّر الأعمال، وتُعين على الإنجاز، وتُقدّم أدواتٍ رقمية موثوقة تخدم الأفراد بمختلف مجالاتهم واحتياجاتهم. وانطلاقًا من هذا المبدأ، نواصل تطوير مورفن بعنايةٍ واحترافية، لنقدّم تجربةً تجمع بين الجودة، والبساطة، والابتكار، إيمانًا منّا بأن خير الأعمال ما كان أنفع للناس وأبقى أثرًا.' 
-                : 'In accordance with the words of Allah Almighty, ﴿وَتَعَاوَنُوا عَلَى الْبِرِّ وَالتَّقْوَى﴾, Morven was born from a shared vision of students who believed that knowledge and practical resources should be accessible to everyone. They dedicated their time and effort to building a comprehensive platform that simplifies everyday tasks and provides reliable digital tools for individuals across diverse fields and professions. Guided by this principle, we continue to develop Morven with care and professionalism, delivering an experience that combines quality, simplicity, and innovation, driven by our belief that the best work is that which brings lasting benefit to people.'
+                : 'In accordance with the words of Allah Almighty, ﴾وَتَعَاوَنُوا عَلَى الْبِرِّ وَالتَّقْوَى﴿, Morven was born from a shared vision of students who believed that knowledge and practical resources should be accessible to everyone. They dedicated their time and effort to building a comprehensive platform that simplifies everyday tasks and provides reliable digital tools for individuals across diverse fields and professions. Guided by this principle, we continue to develop Morven with care and professionalism, delivering an experience that combines quality, simplicity, and innovation, driven by our belief that the best work is that which brings lasting benefit to people.'
                 }
             </p>
       

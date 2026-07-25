@@ -52,7 +52,7 @@ const overviewCards = [
     icon: RefreshCw,
     titleEn: 'Changes to These Terms',
     titleAr: 'تغييرات على هذه الشروط',
-    desctEn: 'When changes are made, the "Last updated" date at the top of this page will be revised.',
+    descEn: 'When changes are made, the "Last updated" date at the top of this page will be revised.',
     descAr: 'عند إجراء تغييرات، سيتم مراجعة تاريخ "آخر تحديث" في أعلى هذه الصفحة.',
   },
 ];
