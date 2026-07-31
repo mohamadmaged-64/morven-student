@@ -79,6 +79,15 @@ export interface ClipboardEntry {
   type: 'text' | 'image' | 'file';
 }
 
+export interface Note {
+  id: string;
+  title: string;
+  content: string;
+  pinned: boolean;
+  createdAt: number;
+  updatedAt: number;
+}
+
 export interface MedicalNote {
   id: string;
   title: string;

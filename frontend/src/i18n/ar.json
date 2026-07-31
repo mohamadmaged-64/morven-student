@@ -428,6 +428,9 @@
     "orClick": "أو انقر للتصفح",
     "processing": "جاري المعالجة...",
     "loading": "جاري التحميل...",
+    "processingComplete": "تمت المعالجة بنجاح",
+    "inputDescription": "أضف المحتوى ثم اضغط على \"معالجة\".",
+    "resultPlaceholder": "ستظهر النتيجة هنا.",
     "noData": "لا توجد بيانات متاحة",
     "confirm": "تأكيد",
     "back": "رجوع",
@@ -963,6 +966,24 @@
       "noEcg": "لم يتم تحميل تخطيط القلب",
       "noEcgHint": "حمّل تسجيل تخطيط القلب للعرض"
     }
+  },
+  "quran": {
+    "title": "القرآن الكريم",
+    "description": "استمع إلى القرآن الكريم مع عدة قراء",
+    "selectReciter": "اختر قارئاً",
+    "selectSurah": "اختر سورة",
+    "noSelection": "اختر قارئاً وسورة",
+    "noSelectionHint": "اختر قارئاً وسورة من القائمة أعلاه لبدء الاستماع",
+    "play": "تشغيل",
+    "pause": "إيقاف مؤقت",
+    "stop": "إيقاف",
+    "previous": "السابق",
+    "next": "التالي",
+    "mute": "كتم الصوت",
+    "unmute": "تشغيل الصوت",
+    "volume": "مستوى الصوت",
+    "close": "إغلاق",
+    "search": "بحث..."
   },
   "generalTools": {
     "unitConverter": {

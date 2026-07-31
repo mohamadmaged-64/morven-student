@@ -459,7 +459,10 @@
     "ok": "OK",
     "error": "Error",
     "success": "Success",
+    "processingComplete": "Processing Complete",
     "warning": "Warning",
+    "inputDescription": "Enter your content, then click Process.",
+    "resultPlaceholder": "Your result will appear here.",
     "info": "Info",
     "all": "All",
     "none": "None",
@@ -843,6 +846,24 @@
       "noEcg": "No ECG loaded",
       "noEcgHint": "Load an ECG recording to view"
     }
+  },
+  "quran": {
+    "title": "Holy Quran",
+    "description": "Listen to the Holy Quran with multiple reciters",
+    "selectReciter": "Select a Reciter",
+    "selectSurah": "Select a Surah",
+    "noSelection": "Select a Reciter & Surah",
+    "noSelectionHint": "Choose a reciter and a surah from the options above to start listening",
+    "play": "Play",
+    "pause": "Pause",
+    "stop": "Stop",
+    "previous": "Previous",
+    "next": "Next",
+    "mute": "Mute",
+    "unmute": "Unmute",
+    "volume": "Volume",
+    "close": "Close",
+    "search": "Search..."
   },
   "generalTools": {
     "unitConverter": {

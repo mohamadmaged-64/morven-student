@@ -11,7 +11,7 @@
 export { aiService, aiServiceStream } from './aiService';
 
 // ── Config ─────────────────────────────────────────────────
-export { getAIConfig, mergeConfig } from './config';
+export { getBackendUrl } from './config';
 
 // ── Prompt Registry ────────────────────────────────────────
 export { registerPrompt, getPrompt, hasPrompt, getRegisteredTools } from './prompts';

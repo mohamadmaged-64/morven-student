@@ -3,7 +3,10 @@
 // This union is the single source of truth for valid tool identifiers.
 
 export type ToolName =
-  | 'summarize'
+  | 'summarize-text'
+  | 'summarize-pdf'
+  | 'summarize-image'
+  | 'summarize-audio'
   | 'translate'
   | 'rewrite'
   | 'explain'
@@ -18,8 +21,7 @@ export type ToolName =
   | 'paragraph-to-bullets'
   | 'bullets-to-article'
   | 'extract-key-ideas'
-  | 'simplify'
-  | string; // allow future tools without modifying this file
+  | 'simplify';
 
 // ─── Provider Identifiers ────────────────────────────────────
 

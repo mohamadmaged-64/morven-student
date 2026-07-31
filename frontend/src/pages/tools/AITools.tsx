@@ -1,8 +1,6 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
-
-import type { LucideIcon } from "lucide-react";
+import type { LucideIcon } from 'lucide-react';
 import {
   Button,
   Card,
@@ -10,33 +8,25 @@ import {
   Input,
   Select,
   FileUpload,
-  Spinner,
   ProgressBar,
   EmptyState,
   Badge,
-  Tabs,
-  Tooltip,
   Chip,
 } from '@/components/UI';
 import {
-  Folder,
-  House,
-  Brain,
   FileText,
+  Brain,
   Presentation,
   Video,
   Music,
   Image,
-  QrCode,
   GraduationCap,
-  HeartPulse,
-  FileTextIcon,
   Zap,
   Clock,
   Star,
   Paperclip,
   FileArchive,
-  FileIcon,
+  FileTextIcon,
   Globe,
   Timer,
   Scissors,
@@ -54,35 +44,19 @@ import {
   Calendar,
   BookOpen,
   BookCopy,
-  Cog
+  Cog,
 } from 'lucide-react';
- const icon = {
-               FileText,
-               Brain,
-               Presentation,
-               Video,
-               Music,
-               Image,
-               QrCode,
-               GraduationCap,
-               HeartPulse,
-               Zap,
-               Clock,
-               Star,
-               Paperclip,
-               FileArchive,
-               FileIcon,
-               FileTextIcon,
-               Globe,
-               Timer,
-                Scissors,
-              ListTodo,
-              Cog,
-                Inbox,
-                Pill
-};
 import { useAppStore } from '@/store/useAppStore';
 import { useLanguageStore } from '@/store/useLanguageStore';
+import { aiService } from '@/services/ai';
+import {
+  LanguagePair,
+  SideBySide,
+  GrammarHighlight,
+  EmptyResult,
+  TextPreview,
+} from '@/components/AI';
+
 import {
   summarizeText,
   summarizeMarkdown,
@@ -102,10 +76,15 @@ import {
   generateMindMap,
   extractTextFromFile,
 } from '@/utils/ai-helpers';
+import { ProcessingOverlay } from '@/components/UI/ProcessingOverlay';
+import { ToolHero } from '@/components/Tool/ToolHero';
+import { ToolLayout } from '@/components/Tool/ToolLayout';
+
+// ─── Types ──────────────────────────────────────────────────────────
 
 type ToolId =
   | 'summarize-text'
-  | 'summarize-file'
+  | 'summarize-pdf'
   | 'summarize-image'
   | 'summarize-youtube'
   | 'summarize-audio'
@@ -129,47 +108,28 @@ type ToolId =
 interface AIToolPageProps {
   toolId: string;
   icon?: LucideIcon;
-  
 }
 
 interface Flashcard {
   front: string;
   back: string;
-  icon?: LucideIcon;
-  
 }
 
 interface MCQQuestion {
   question: string;
   options: string[];
   correct: number;
-  icon?: LucideIcon;
-  
 }
 
 interface TFQuestion {
   statement: string;
   answer: boolean;
-  icon?: LucideIcon;
-  
 }
 
-interface QuizQuestion {
-  question?: string;
-  statement?: string;
-  options?: string[];
-  correct?: number;
-  answer?: boolean;
-  icon?: LucideIcon;
-  
-}
-
-function useToolInfo(toolId: string): { name: string; nameAr: string; description: string; descriptionAr: string; icon: LucideIcon } {
+// ─── Tool Info ──────────────────────────────────────────────────────
   const tools: Record<string, { name: string; nameAr: string; description: string; descriptionAr: string; icon: LucideIcon }> = {
-    'summarize-text': { name: 'Summarize Text', nameAr: 'تلخيص النص', description: 'Extract key points and create a concise summary of any text', descriptionAr: 'استخراج النقاط الرئيسية وإنشاء ملخص مختصر لأي نص', icon: FileText  },
-    'summarize-pdf': { name: 'Summarize PDF', nameAr: 'تلخيص ملف PDF', description: 'Extract key points and create a concise summary of any pdf file', descriptionAr: 'استخراج النقاط الرئيسية وإنشاء ملخص مختصر لأي ملف pdf', icon: FileText  },
-    'summarize-word': { name: 'Summarize Word', nameAr: 'تلخيص ملف Word', description: 'Extract key points and create a concise summary of any word file', descriptionAr: 'استخراج النقاط الرئيسية وإنشاء ملخص مختصر لأي ملف word', icon: FileText  },
-    'summarize-ppt': { name: 'Summarize PowerPoint', nameAr: 'تلخيص ملف PowerPoint', description: 'Extract key points and create a concise summary of any PowerPoint file', descriptionAr: 'استخراج النقاط الرئيسية وإنشاء ملخص مختصر لأي ملف PowerPoint', icon: FileText  },
+    'summarize-text': { name: 'Summarize Text', nameAr: 'تلخيص النص', description: 'Extract key points and create a concise summary of any text', descriptionAr: 'استخراج النقاط الرئيسية وإنشاء ملخص مختصر لأي نص', icon: FileText },
+    'summarize-pdf': { name: 'Summarize PDF', nameAr: 'تلخيص ملف PDF', description: 'Extract key points and create a concise summary of any pdf file', descriptionAr: 'استخراج النقاط الرئيسية وإنشاء ملخص مختصر لأي ملف pdf', icon: FileText },
     'summarize-image': { name: 'Summarize Image', nameAr: 'تلخيص الصورة', description: 'Extract and summarize text content from images', descriptionAr: 'استخراج وملخص محتوى النص من الصور', icon: Image },
     'summarize-youtube': { name: 'Summarize YouTube video', nameAr: 'تلخيص فيديو يوتيوب', description: 'Get a summary from YouTube video content', descriptionAr: 'الحصول على ملخص من محتوى فيديو يوتيوب', icon: Video },
     'summarize-audio': { name: 'Summarize Audio', nameAr: 'تلخيص الصوت', description: 'Summarize audio file content or transcribed text', descriptionAr: 'تلخيص محتوى ملف الصوت أو النص المنسوخ', icon: Music },
@@ -190,591 +150,299 @@ function useToolInfo(toolId: string): { name: string; nameAr: string; descriptio
     'explain-terminology': { name: 'Explain Terminology', nameAr: 'شرح المصطلحات', description: 'Get a detailed explanation of any term or concept', descriptionAr: 'الحصول على شرح مفصل لأي مصطلح أو مفهوم', icon: BookCopy },
     'simplify-paper': { name: 'Simplify Paper', nameAr: 'تبسيط الورقة', description: 'Simplify an academic paper or research article', descriptionAr: 'تبسيط ورقة بحثية أو مقال أكاديمي', icon: GraduationCap },
   };
-  return tools[toolId] || { name: toolId, nameAr: toolId, description: '', descriptionAr: '', icon: Cog };
+
+  function useToolInfo(toolId: string) {
+  return tools[toolId] || {
+   name: toolId,
+   nameAr: toolId,
+   description: '',
+   descriptionAr: '',
+   icon: Cog
+ };
 }
 
-function ResultActions({ text, onCopy, onDownload, onSave }: { text: string; onCopy?: () => void; onDownload?: () => void; onSave?: () => void }) {
-  const { addNotification } = useAppStore();
-  const { language } = useLanguageStore();
 
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(text);
-      addNotification(language === 'ar' ? 'تم النسخ' : 'Copied to clipboard', 'success');
-      onCopy?.();
-    } catch {
-      addNotification(language === 'ar' ? 'فشل النسخ' : 'Failed to copy', 'error');
-    }
-  };
+// ─── Helper Functions ───────────────────────────────────────────────
 
-  const handleDownload = () => {
-    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'result.txt';
-    a.click();
-    URL.revokeObjectURL(url);
-    addNotification(language === 'ar' ? 'تم التحميل' : 'Downloaded', 'success');
-    onDownload?.();
-  };
-
-  return (
-    <div className="flex items-center gap-2 mt-4">
-      <Button variant="ghost" size="sm" onClick={handleCopy}>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-          <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
-        </svg>
-        {language === 'ar' ? 'نسخ' : 'Copy'}
-      </Button>
-      <Button variant="ghost" size="sm" onClick={handleDownload}>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
-          <polyline points="7 10 12 15 17 10" />
-          <line x1="12" y1="15" x2="12" y2="3" />
-        </svg>
-        {language === 'ar' ? 'تحميل' : 'Download'}
-      </Button>
-      {onSave && (
-        <Button variant="ghost" size="sm" onClick={onSave}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z" />
-            <polyline points="17 21 17 13 7 13 7 21" />
-            <polyline points="7 3 7 8 15 8" />
-          </svg>
-          {language === 'ar' ? 'حفظ' : 'Save'}
-        </Button>
-      )}
-    </div>
-  );
+function capitalize(s: string): string {
+  if (!s) return s;
+  return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
-function LoadingOverlay({ text }: { text: string }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="absolute inset-0 z-10 flex items-center justify-center bg-white/80 dark:bg-dark-bg/80 backdrop-blur-sm rounded-2xl"
-    >
-      <div className="flex flex-col items-center gap-3">
-        <Spinner size={32} />
-        <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{text}</p>
-      </div>
-    </motion.div>
-  );
+function splitSentencesForExplain(text: string): string[] {
+  return text
+    .replace(/\s+/g, ' ')
+    .trim()
+    .split(/(?<=[.!?])\s+/)
+    .filter(s => s.trim().length > 10);
 }
 
-function FlashcardViewer({ cards }: { cards: Flashcard[] }) {
-  const [current, setCurrent] = useState(0);
-  const [flipped, setFlipped] = useState(false);
-  const [known, setKnown] = useState<number[]>([]);
-  const [unknown, setUnknown] = useState<number[]>([]);
-  const { language } = useLanguageStore();
-
-  const total = cards.length;
-  const card = cards[current];
-
-  const handleKnow = () => {
-    setKnown(prev => [...prev, current]);
-    setFlipped(false);
-    if (current < total - 1) setCurrent(current + 1);
-  };
-
-  const handleDontKnow = () => {
-    setUnknown(prev => [...prev, current]);
-    setFlipped(false);
-    if (current < total - 1) setCurrent(current + 1);
-  };
-
-  const reset = () => {
-    setCurrent(0);
-    setFlipped(false);
-    setKnown([]);
-    setUnknown([]);
-  };
-
-  if (total === 0) return null;
-
-  const isFinished = current >= total - 1 && (flipped === false) && (known.includes(current) || unknown.includes(current));
-  const score = total > 0 ? Math.round((known.length / total) * 100) : 0;
-
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <Badge variant="info">
-          {language === 'ar' ? `البطاقة ${current + 1} من ${total}` : `Card ${current + 1} of ${total}`}
-        </Badge>
-        <div className="flex items-center gap-2">
-          <Badge variant="success">{known.length} {language === 'ar' ? 'معروف' : 'Known'}</Badge>
-          <Badge variant="danger">{unknown.length} {language === 'ar' ? 'غير معروف' : 'Unknown'}</Badge>
-        </div>
-      </div>
-
-      {isFinished ? (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="text-center py-12"
-        >
-          <div className="text-6xl mb-4">{score >= 70 ? '🎉' : score >= 40 ? '💪' : '📚'}</div>
-          <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">
-            {language === 'ar' ? 'انتهت البطاقات!' : 'Cards Complete!'}
-          </h3>
-          <p className="text-gray-500 dark:text-gray-400 mb-4">
-            {language === 'ar' ? `النتيجة: ${score}%` : `Score: ${score}%`}
-          </p>
-          <ProgressBar value={score} color={score >= 70 ? 'success' : score >= 40 ? 'warning' : 'danger'} className="max-w-xs mx-auto mb-6" />
-          <Button onClick={reset}>
-            {language === 'ar' ? 'إعادة المحاولة' : 'Try Again'}
-          </Button>
-        </motion.div>
-      ) : (
-        <div className="flex justify-center">
-          <motion.div
-            className="w-full max-w-md cursor-pointer"
-            style={{ perspective: 1000 }}
-            onClick={() => setFlipped(!flipped)}
-          >
-            <motion.div
-              className="relative w-full h-64"
-              animate={{ rotateY: flipped ? 180 : 0 }}
-              transition={{ duration: 0.6, type: 'spring', stiffness: 300, damping: 30 }}
-              style={{ transformStyle: 'preserve-3d' }}
-            >
-              <div
-                className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary-500 to-primary-700 dark:from-primary-600 dark:to-primary-800 p-8 flex items-center justify-center text-white shadow-lg"
-                style={{ backfaceVisibility: 'hidden' }}
-              >
-                <div className="text-center">
-                  <p className="text-lg font-medium">{card.front}</p>
-                  <p className="text-sm opacity-70 mt-4">
-                    {language === 'ar' ? 'اضغط للتحويل' : 'Click to flip'}
-                  </p>
-                </div>
-              </div>
-              <div
-                className="absolute inset-0 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-700 dark:from-emerald-600 dark:to-emerald-800 p-8 flex items-center justify-center text-white shadow-lg"
-                style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
-              >
-                <div className="text-center">
-                  <p className="text-lg font-medium">{card.back}</p>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        </div>
-      )}
-
-      {!isFinished && (
-        <div className="flex justify-center gap-3">
-          <Button
-            variant="danger"
-            size="lg"
-            onClick={handleDontKnow}
-            disabled={isFinished}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
-            {language === 'ar' ? 'غير معروف' : "Don't Know"}
-          </Button>
-          <Button
-            variant="success"
-            size="lg"
-            onClick={handleKnow}
-            disabled={isFinished}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="20 6 9 17 4 12" />
-            </svg>
-            {language === 'ar' ? 'أعرف' : 'Know'}
-          </Button>
-        </div>
-      )}
-    </div>
-  );
-}
+// ─── Tool-Specific Viewers ──────────────────────────────────────────
 
 function QuizViewer({ mcqs, tfs, title }: { mcqs: MCQQuestion[]; tfs: TFQuestion[]; title?: string }) {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [answers, setAnswers] = useState<(number | boolean | null)[]>([]);
-  const [showResults, setShowResults] = useState(false);
-  const { language } = useLanguageStore();
-
-  const total = mcqs.length + tfs.length;
-
-  useEffect(() => {
-    setAnswers(new Array(total).fill(null));
-    setCurrentIndex(0);
-    setShowResults(false);
-  }, [mcqs, tfs, total]);
-
-  const allQuestions: QuizQuestion[] = [
-    ...mcqs.map(m => ({ ...m, type: 'mcq' as const })),
-    ...tfs.map(t => ({ ...t, type: 'tf' as const })),
+  const { language, direction } = useLanguageStore();
+  const { addNotification } = useAppStore();
+  const isRtl = direction === 'rtl';
+  const allQuestions = [
+    ...mcqs.map(q => ({ type: 'mcq' as const, data: q })),
+    ...tfs.map(q => ({ type: 'tf' as const, data: q })),
   ];
+  const [currentIdx, setCurrentIdx] = useState(0);
+  const [answers, setAnswers] = useState<(number | boolean | null)[]>(new Array(allQuestions.length).fill(null));
+  const [showResults, setShowResults] = useState(false);
 
-  const currentQ = allQuestions[currentIndex];
-  if (!currentQ || total === 0) {
-    return (
-      <EmptyState
-        title={language === 'ar' ? 'لا توجد أسئلة' : 'No Questions'}
-        description={language === 'ar' ? 'لم يتم إنشاء أي أسئلة' : 'No questions were generated'}
-      />
-    );
-  }
+  if (allQuestions.length === 0) return <EmptyState title={isRtl ? 'لا توجد أسئلة' : 'No questions generated'} />;
 
-  const handleAnswer = (answer: number | boolean) => {
-    const newAnswers = [...answers];
-    newAnswers[currentIndex] = answer;
-    setAnswers(newAnswers);
+  const q = allQuestions[currentIdx];
+  const setAnswer = (a: number | boolean) => {
+    const next = [...answers];
+    next[currentIdx] = a;
+    setAnswers(next);
   };
 
-  const checkAnswer = (qIndex: number): boolean => {
-    const q = allQuestions[qIndex];
-    const a = answers[qIndex];
-    if (a === null || a === undefined) return false;
-    if ('options' in q && q.options && typeof a === 'number') {
-      return a === q.correct;
-    }
-    if ('answer' in q && typeof a === 'boolean') {
-      return a === q.answer;
-    }
-    return false;
-  };
-
-  const getScore = () => {
-    let correct = 0;
-    for (let i = 0; i < total; i++) {
-      if (checkAnswer(i)) correct++;
-    }
-    return Math.round((correct / total) * 100);
-  };
+  const answered = answers.filter(a => a !== null).length;
+  let score = 0;
+  allQuestions.forEach((q, i) => {
+    if (q.type === 'mcq' && answers[i] === q.data.correct) score++;
+    if (q.type === 'tf' && answers[i] === q.data.answer) score++;
+  });
 
   if (showResults) {
-    const score = getScore();
+    const pct = Math.round((score / allQuestions.length) * 100);
     return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="text-center py-8"
-      >
-        <div className="text-6xl mb-4">{score >= 80 ? '🏆' : score >= 60 ? '👍' : score >= 40 ? '📖' : '💪'}</div>
-        <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">
-          {language === 'ar' ? 'اكتمل الاختبار!' : 'Quiz Complete!'}
-        </h3>
-        <p className="text-gray-500 dark:text-gray-400 mb-4">
-          {language === 'ar' ? `النتيجة: ${score}%` : `Score: ${score}%`}
-        </p>
-        <div className="flex justify-center gap-4 mb-6">
-          <Badge variant="success">
-            {answers.filter((a, i) => a !== null && checkAnswer(i)).length} {language === 'ar' ? 'صحيح' : 'Correct'}
-          </Badge>
-          <Badge variant="danger">
-            {answers.filter((a, i) => a !== null && !checkAnswer(i)).length} {language === 'ar' ? 'خطأ' : 'Wrong'}
-          </Badge>
-          <Badge variant="neutral">
-            {answers.filter(a => a === null).length} {language === 'ar' ? 'لم يُجاب' : 'Skipped'}
-          </Badge>
+      <Card className="p-6">
+        <div className="text-center mb-6">
+          <div className="w-16 h-16 rounded-2xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center mx-auto mb-4">
+            <span className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{pct}%</span>
+          </div>
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+            {isRtl ? 'نتائج الاختبار' : 'Quiz Results'}
+          </h3>
+          <div className="flex justify-center gap-3 mt-3">
+            <Badge variant="success">{score} {isRtl ? 'صحيح' : 'Correct'}</Badge>
+            <Badge variant="danger">{allQuestions.length - score} {isRtl ? 'خطأ' : 'Wrong'}</Badge>
+          </div>
         </div>
-        <ProgressBar value={getScore()} color={score >= 70 ? 'success' : score >= 40 ? 'warning' : 'danger'} className="max-w-xs mx-auto mb-6" />
-
-        <div className="space-y-3 text-left max-w-lg mx-auto">
+        <div className="space-y-3 max-h-64 overflow-auto">
           {allQuestions.map((q, i) => {
-            const isCorrect = checkAnswer(i);
-            const isAnswered = answers[i] !== null;
+            const isCorrect = q.type === 'mcq' ? answers[i] === q.data.correct : answers[i] === q.data.answer;
             return (
-              <div
-                key={i}
-                className={`p-3 rounded-xl border ${
-                  !isAnswered ? 'border-gray-200 dark:border-dark-border bg-gray-50 dark:bg-dark-surface' :
-                  isCorrect ? 'border-emerald-300 dark:border-emerald-700 bg-emerald-50 dark:bg-emerald-900/20' :
-                  'border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20'
-                }`}
-              >
-                <div className="flex items-start gap-2">
-                  <span className="text-lg">{!isAnswered ? '⬜' : isCorrect ? '✅' : '❌'}</span>
-                  <div>
-                    <p className="text-sm font-medium text-gray-800 dark:text-gray-200">
-                      {i + 1}. {q.question || q.statement}
-                    </p>
-                    {q.options && typeof answers[i] === 'number' && (
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        {language === 'ar' ? 'إجابتك' : 'Your answer'}: {q.options[answers[i] as number]}
-                        {!isCorrect && (
-                          <span className="text-emerald-600 dark:text-emerald-400">
-                            {' '}(✓ {q.options[q.correct!]})
-                          </span>
-                        )}
-                      </p>
-                    )}
-                    {'answer' in q && typeof answers[i] === 'boolean' && (
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        {language === 'ar' ? 'إجابتك' : 'Your answer'}: {(answers[i] as boolean) ? 'True' : 'False'}
-                        {!isCorrect && (
-                          <span className="text-emerald-600 dark:text-emerald-400">
-                            {' '}(✓ {q.answer ? 'True' : 'False'})
-                          </span>
-                        )}
-                      </p>
-                    )}
-                  </div>
-                </div>
+              <div key={i} className={`p-3 rounded-xl border ${isCorrect ? 'border-emerald-200 bg-emerald-50 dark:border-emerald-900/50 dark:bg-emerald-900/10' : 'border-red-200 bg-red-50 dark:border-red-900/50 dark:bg-red-900/10'}`}>
+                <p className="text-sm font-medium text-gray-900 dark:text-white">
+                  {i + 1}. {q.type === 'mcq' ? q.data.question : q.data.statement}
+                </p>
               </div>
             );
           })}
         </div>
-
-        <Button onClick={() => { setCurrentIndex(0); setAnswers(new Array(total).fill(null)); setShowResults(false); }} className="mt-6">
-          {language === 'ar' ? 'إعادة المحاولة' : 'Retake Quiz'}
-        </Button>
-      </motion.div>
+        <div className="flex gap-2 mt-4">
+          <Button variant="ghost" onClick={() => { setShowResults(false); setCurrentIdx(0); setAnswers(new Array(allQuestions.length).fill(null)); }}>
+            {isRtl ? 'إعادة المحاولة' : 'Retake'}
+          </Button>
+        </div>
+      </Card>
     );
   }
 
-  const isMCQ = 'options' in currentQ && currentQ.options;
-
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <Badge variant="primary">
-          {language === 'ar' ? `السؤال ${currentIndex + 1} من ${total}` : `Question ${currentIndex + 1} of ${total}`}
-        </Badge>
-        <Badge variant={isMCQ ? 'info' : 'warning'}>
-          {isMCQ ? 'MCQ' : 'T/F'}
-        </Badge>
+    <Card className="p-6">
+      <div className="flex items-center justify-between mb-4">
+        <Badge>{isRtl ? `السؤال ${currentIdx + 1} من ${allQuestions.length}` : `Question ${currentIdx + 1} of ${allQuestions.length}`}</Badge>
+        <Badge variant={q.type === 'mcq' ? 'primary' : 'info'}>{q.type === 'mcq' ? 'MCQ' : 'T/F'}</Badge>
       </div>
-
-      <ProgressBar value={currentIndex + 1} max={total} size="sm" animated />
-
-      <motion.div
-        key={currentIndex}
-        initial={{ opacity: 0, x: 20 }}
-        animate={{ opacity: 1, x: 0 }}
-        className="p-6 rounded-xl bg-gray-50 dark:bg-dark-surface border border-light-border dark:border-dark-border"
-      >
-        <h4 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">
-          {currentQ.question || currentQ.statement}
-        </h4>
-
-        {isMCQ && currentQ.options && (
-          <div className="space-y-2">
-            {currentQ.options.map((opt, idx) => (
-              <motion.button
-                key={idx}
-                whileHover={{ scale: 1.01 }}
-                whileTap={{ scale: 0.99 }}
-                onClick={() => handleAnswer(idx)}
-                className={`w-full text-left p-4 rounded-xl border transition-all duration-200 ${
-                  answers[currentIndex] === idx
-                    ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 ring-2 ring-primary-500/30'
-                    : 'border-light-border dark:border-dark-border hover:border-gray-300 dark:hover:border-gray-600 bg-white dark:bg-dark-card'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-medium ${
-                    answers[currentIndex] === idx
-                      ? 'bg-primary-500 text-white'
-                      : 'bg-gray-200 dark:bg-dark-hover text-gray-600 dark:text-gray-400'
-                  }`}>
-                    {String.fromCharCode(65 + idx)}
-                  </div>
-                  <span className="text-sm text-gray-700 dark:text-gray-300">{opt}</span>
-                </div>
-              </motion.button>
-            ))}
-          </div>
-        )}
-
-        {!isMCQ && (
-          <div className="flex gap-3">
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => handleAnswer(true)}
-              className={`flex-1 p-4 rounded-xl border text-center font-medium transition-all duration-200 ${
-                answers[currentIndex] === true
-                  ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 ring-2 ring-emerald-500/30'
-                  : 'border-light-border dark:border-dark-border hover:border-gray-300 dark:hover:border-gray-600 bg-white dark:bg-dark-card'
-              }`}
-            >
-              <span className="text-2xl block mb-1">✓</span>
-              True
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => handleAnswer(false)}
-              className={`flex-1 p-4 rounded-xl border text-center font-medium transition-all duration-200 ${
-                answers[currentIndex] === false
-                  ? 'border-red-500 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 ring-2 ring-red-500/30'
-                  : 'border-light-border dark:border-dark-border hover:border-gray-300 dark:hover:border-gray-600 bg-white dark:bg-dark-card'
-              }`}
-            >
-              <span className="text-2xl block mb-1">✗</span>
-              False
-            </motion.button>
-          </div>
-        )}
-      </motion.div>
-
-      <div className="flex justify-between">
-        <Button
-          variant="ghost"
-          onClick={() => setCurrentIndex(Math.max(0, currentIndex - 1))}
-          disabled={currentIndex === 0}
-        >
-          {language === 'ar' ? 'السابق' : 'Previous'}
+      <ProgressBar value={((currentIdx + 1) / allQuestions.length) * 100} size="sm" color="gradient" />
+      <p className="text-sm font-medium text-gray-900 dark:text-white mt-4 mb-4">
+        {q.type === 'mcq' ? q.data.question : q.data.statement}
+      </p>
+      {q.type === 'mcq' && (
+        <div className="space-y-2">
+          {q.data.options.map((opt, oi) => (
+            <button key={oi} onClick={() => setAnswer(oi)}
+              className={`w-full text-left px-4 py-3 rounded-xl border text-sm transition-colors ${answers[currentIdx] === oi ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 font-semibold' : 'border-light-border dark:border-dark-border hover:border-primary-300'}`}>
+              <span className="font-semibold mr-2">{String.fromCharCode(65 + oi)}.</span> {opt}
+            </button>
+          ))}
+        </div>
+      )}
+      {q.type === 'tf' && (
+        <div className="flex gap-3">
+          <button onClick={() => setAnswer(true)}
+            className={`flex-1 px-4 py-3 rounded-xl border text-sm font-semibold transition-colors ${answers[currentIdx] === true ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300' : 'border-light-border dark:border-dark-border hover:border-emerald-300'}`}>
+            {isRtl ? 'صحيح' : 'True'}
+          </button>
+          <button onClick={() => setAnswer(false)}
+            className={`flex-1 px-4 py-3 rounded-xl border text-sm font-semibold transition-colors ${answers[currentIdx] === false ? 'border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300' : 'border-light-border dark:border-dark-border hover:border-red-300'}`}>
+            {isRtl ? 'خطأ' : 'False'}
+          </button>
+        </div>
+      )}
+      <div className="flex gap-2 mt-6">
+        <Button variant="ghost" disabled={currentIdx === 0} onClick={() => setCurrentIdx(currentIdx - 1)}>
+          {isRtl ? 'السابق' : 'Previous'}
         </Button>
-        {currentIndex === total - 1 ? (
-          <Button
-            variant="primary"
-            onClick={() => setShowResults(true)}
-            disabled={answers.includes(null)}
-          >
-            {language === 'ar' ? 'إظهار النتائج' : 'Show Results'}
+        {currentIdx < allQuestions.length - 1 ? (
+          <Button variant="primary" onClick={() => setCurrentIdx(currentIdx + 1)}>
+            {isRtl ? 'التالي' : 'Next'}
           </Button>
         ) : (
-          <Button
-            variant="primary"
-            onClick={() => setCurrentIndex(currentIndex + 1)}
-          >
-            {language === 'ar' ? 'التالي' : 'Next'}
+          <Button variant="primary" onClick={() => setShowResults(true)}>
+            {isRtl ? 'عرض النتائج' : 'Show Results'}
           </Button>
         )}
+      </div>
+    </Card>
+  );
+}
+
+function FlashcardViewer({ cards }: { cards: Flashcard[] }) {
+  const { direction } = useLanguageStore();
+  const isRtl = direction === 'rtl';
+  const [current, setCurrent] = useState(0);
+  const [flipped, setFlipped] = useState(false);
+  const [known, setKnown] = useState<number[]>([]);
+  const [unknown, setUnknown] = useState<number[]>([]);
+
+  if (cards.length === 0) return <EmptyState title={isRtl ? 'لا توجد بطاقات' : 'No flashcards generated'} />;
+
+  const mark = (isKnown: boolean) => {
+    if (isKnown) setKnown([...known, current]);
+    else setUnknown([...unknown, current]);
+    setFlipped(false);
+    if (current < cards.length - 1) setCurrent(current + 1);
+  };
+
+  const allDone = known.length + unknown.length === cards.length;
+  if (allDone) {
+    const pct = Math.round((known.length / cards.length) * 100);
+    return (
+      <Card className="p-6 text-center">
+        <div className="w-16 h-16 rounded-2xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center mx-auto mb-4">
+          <span className="text-2xl">{pct >= 80 ? '🎉' : pct >= 50 ? '👍' : '💪'}</span>
+        </div>
+        <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+          {isRtl ? 'اكتملت المراجعة!' : 'Review Complete!'}
+        </h3>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+          {pct}% {isRtl ? 'تفوق' : 'mastered'}
+        </p>
+        <ProgressBar value={pct} color="gradient" className="mt-4" showLabel />
+        <Button variant="ghost" className="mt-4" onClick={() => { setCurrent(0); setFlipped(false); setKnown([]); setUnknown([]); }}>
+          {isRtl ? 'حاول مرة أخرى' : 'Try Again'}
+        </Button>
+      </Card>
+    );
+  }
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-4">
+        <Badge>{current + 1}/{cards.length}</Badge>
+        <div className="flex gap-2">
+          <Badge variant="success">{known.length} {isRtl ? 'مراجع' : 'Known'}</Badge>
+          <Badge variant="danger">{unknown.length} {isRtl ? 'يحتاج مراجعة' : 'Review'}</Badge>
+        </div>
+      </div>
+      <motion.div
+        className="cursor-pointer rounded-2xl border-2 border-primary-200 dark:border-primary-800 bg-white dark:bg-dark-card p-8 min-h-[200px] flex items-center justify-center text-center"
+        onClick={() => setFlipped(!flipped)}
+        animate={{ rotateY: flipped ? 180 : 0 }}
+        transition={{ duration: 0.4 }}
+        style={{ transformStyle: 'preserve-3d' }}
+      >
+        <p className="text-lg font-medium text-gray-900 dark:text-white" style={{ backfaceVisibility: 'hidden' }}>
+          {flipped ? cards[current].back : cards[current].front}
+        </p>
+      </motion.div>
+      <div className="flex gap-3 mt-4">
+        <Button variant="ghost" className="flex-1" onClick={() => mark(false)}>
+          {isRtl ? 'لا أعرف' : "Don't Know"}
+        </Button>
+        <Button variant="primary" className="flex-1" onClick={() => mark(true)}>
+          {isRtl ? 'أعرف' : 'Know'}
+        </Button>
       </div>
     </div>
   );
 }
 
 function MindMapView({ data }: { data: { central: string; branches: { topic: string; items: string[] }[] } }) {
-  const { language } = useLanguageStore();
-
-  const branchColors = [
-    'from-blue-400 to-blue-600',
-    'from-purple-400 to-purple-600',
-    'from-emerald-400 to-emerald-600',
-    'from-amber-400 to-amber-600',
-    'from-rose-400 to-rose-600',
-  ];
-
-  const itemColors = [
-    'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-200',
-    'bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800 text-purple-800 dark:text-purple-200',
-    'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200',
-    'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200',
-    'bg-rose-50 dark:bg-rose-900/20 border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200',
-  ];
+  const { direction } = useLanguageStore();
+  const isRtl = direction === 'rtl';
+  if (!data || data.branches.length === 0) return <EmptyState title={isRtl ? 'لا توجد بيانات' : 'No mind map data'} />;
+  const colors = ['blue', 'purple', 'emerald', 'amber', 'rose'] as const;
+  const colorMap = {
+    blue: { border: 'border-blue-200 dark:border-blue-800', bg: 'bg-blue-50 dark:bg-blue-900/10', chip: 'bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300' },
+    purple: { border: 'border-purple-200 dark:border-purple-800', bg: 'bg-purple-50 dark:bg-purple-900/10', chip: 'bg-purple-100 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300' },
+    emerald: { border: 'border-emerald-200 dark:border-emerald-800', bg: 'bg-emerald-50 dark:bg-emerald-900/10', chip: 'bg-emerald-100 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300' },
+    amber: { border: 'border-amber-200 dark:border-amber-800', bg: 'bg-amber-50 dark:bg-amber-900/10', chip: 'bg-amber-100 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300' },
+    rose: { border: 'border-rose-200 dark:border-rose-800', bg: 'bg-rose-50 dark:bg-rose-900/10', chip: 'bg-rose-100 dark:bg-rose-900/20 text-rose-700 dark:text-rose-300' },
+  };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-center">
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ type: 'spring', stiffness: 200, damping: 20 }}
-          className="px-8 py-4 rounded-2xl bg-gradient-to-br from-primary-500 to-primary-700 dark:from-primary-600 dark:to-primary-800 text-white text-xl font-bold shadow-lg shadow-primary-500/30"
-        >
+    <div>
+      <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring' }}
+        className="text-center mb-6">
+        <span className="inline-block px-6 py-3 rounded-2xl bg-gradient-to-r from-primary-500 to-primary-600 text-white font-bold text-lg shadow-lg">
           {data.central}
-        </motion.div>
-      </div>
-
-      <div className="flex justify-center">
-        <div className="w-px h-6 bg-gray-300 dark:bg-gray-600" />
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {data.branches.map((branch, bi) => (
-          <motion.div
-            key={bi}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: bi * 0.1 }}
-          >
-            <div className="flex justify-center mb-2">
-              <div className="w-px h-4 bg-gray-300 dark:bg-gray-600" />
-            </div>
-            <div className={`rounded-2xl p-[1px] bg-gradient-to-br ${branchColors[bi % branchColors.length]}`}>
-              <div className="bg-white dark:bg-dark-card rounded-[15px] p-4">
-                <h4 className="font-bold text-gray-800 dark:text-white mb-3 text-center">
-                  {branch.topic}
-                </h4>
-                <div className="space-y-2">
-                  {branch.items.map((item, ii) => (
-                    <div
-                      key={ii}
-                      className={`px-3 py-2 rounded-xl border text-xs ${itemColors[bi % itemColors.length]}`}
-                    >
-                      {item}
-                    </div>
-                  ))}
-                </div>
+        </span>
+      </motion.div>
+      <div className="w-0.5 h-6 bg-primary-300 dark:bg-primary-700 mx-auto" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mt-4">
+        {data.branches.map((branch, i) => {
+          const c = colorMap[colors[i % colors.length]];
+          return (
+            <motion.div key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
+              className={`rounded-xl border-2 ${c.border} ${c.bg} p-4`}>
+              <p className="font-semibold text-gray-900 dark:text-white text-sm mb-2">{branch.topic}</p>
+              <div className="flex flex-wrap gap-1.5">
+                {branch.items.map((item, j) => (
+                  <span key={j} className={`text-xs px-2 py-1 rounded-lg ${c.chip}`}>{item}</span>
+                ))}
               </div>
-            </div>
-          </motion.div>
-        ))}
+            </motion.div>
+          );
+        })}
       </div>
-
-      {data.branches.length === 0 && (
-        <EmptyState
-          title={language === 'ar' ? 'لا توجد فروع' : 'No Branches Found'}
-          description={language === 'ar' ? 'لم يتم اكتشاف فروع في النص' : 'No branches detected in the text'}
-        />
-      )}
     </div>
   );
 }
 
 function StudyPlanView({ plan, topics }: { plan: { day: number; topics: string[]; duration: number }[]; topics: string[] }) {
-  const { language } = useLanguageStore();
-
-  const dayEmojis = ['🌅', '☀️', '🌤️', '⛅', '🌥️', '🌙', '⭐', '🎯', '🔥', '💡', '📚', '✨', '🌟', '💪', '🎓'];
+  const { direction } = useLanguageStore();
+  const isRtl = direction === 'rtl';
+  if (plan.length === 0) return <EmptyState title={isRtl ? 'لا توجد خطة' : 'No study plan generated'} />;
   const totalHours = plan.reduce((sum, d) => sum + d.duration, 0);
-
+  const chipColors = ['bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300', 'bg-purple-100 text-purple-700 dark:bg-purple-900/20 dark:text-purple-300', 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300', 'bg-amber-100 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300'];
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-4 flex-wrap">
-        <Badge variant="primary" size="lg">{plan.length} {language === 'ar' ? 'أيام' : 'Days'}</Badge>
-        <Badge variant="success" size="lg">{totalHours.toFixed(1)} {language === 'ar' ? 'ساعات' : 'Hours'}</Badge>
-        <Badge variant="info" size="lg">{topics.length} {language === 'ar' ? 'مواضيع' : 'Topics'}</Badge>
+    <div>
+      <div className="flex gap-2 mb-4">
+        <Badge variant="primary">{plan.length} {isRtl ? 'أيام' : 'Days'}</Badge>
+        <Badge variant="info">{totalHours} {isRtl ? 'ساعات' : 'Hours'}</Badge>
+        <Badge variant="success">{topics.length} {isRtl ? 'مواضيع' : 'Topics'}</Badge>
       </div>
-
-      <div className="grid gap-3">
+      <div className="space-y-3">
         {plan.map((day, i) => (
-          <motion.div
-            key={day.day}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: i * 0.05 }}
-            className="flex items-start gap-4 p-4 rounded-xl bg-gray-50 dark:bg-dark-surface border border-light-border dark:border-dark-border"
-          >
-            <div className="flex flex-col items-center shrink-0">
-              <div className="w-12 h-12 rounded-2xl bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-xl">
-                {dayEmojis[i % dayEmojis.length]}
+          <motion.div key={i} initial={{ opacity: 0, x: isRtl ? 20 : -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }}>
+            <Card className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-primary-600 dark:text-primary-400 font-bold text-sm shrink-0">
+                  {day.day}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                    {isRtl ? `اليوم ${day.day}` : `Day ${day.day}`}
+                    <span className="text-xs font-normal text-gray-500 dark:text-gray-400 ms-2">
+                      · {day.duration}h
+                    </span>
+                  </p>
+                  <div className="flex flex-wrap gap-1.5 mt-1.5">
+                    {day.topics.map((t, j) => (
+                      <span key={j} className={`text-xs px-2 py-0.5 rounded-lg ${chipColors[j % chipColors.length]}`}>{t}</span>
+                    ))}
+                  </div>
+                </div>
               </div>
-              <span className="text-xs font-medium text-gray-500 dark:text-gray-400 mt-1">
-                {language === 'ar' ? `اليوم ${day.day}` : `Day ${day.day}`}
-              </span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
-                  {day.duration}h
-                </span>
-              </div>
-              <div className="flex flex-wrap gap-1.5">
-                {day.topics.map((topic, ti) => (
-                  <Chip
-                    key={ti}
-                    label={topic}
-                    variant={['primary', 'success', 'warning', 'danger', 'neutral'][ti % 5] as 'primary' | 'success' | 'warning' | 'danger' | 'neutral'}
-                  />
-                ))}
-              </div>
-            </div>
+            </Card>
           </motion.div>
         ))}
       </div>
@@ -783,114 +451,66 @@ function StudyPlanView({ plan, topics }: { plan: { day: number; topics: string[]
 }
 
 function TerminologyList({ terms }: { terms: { term: string; definition: string }[] }) {
-  const { language } = useLanguageStore();
-
-  if (terms.length === 0) {
-    return (
-      <EmptyState
-        title={language === 'ar' ? 'لا توجد مصطلحات' : 'No Terms Found'}
-        description={language === 'ar' ? 'لم يتم اكتشاف مصطلحات في النص' : 'No terminology detected in the text'}
-      />
-    );
-  }
-
+  const { direction } = useLanguageStore();
+  const isRtl = direction === 'rtl';
+  if (terms.length === 0) return <EmptyState title={isRtl ? 'لا توجد مصطلحات' : 'No terminology found'} />;
   return (
     <div className="space-y-3">
       {terms.map((t, i) => (
-        <motion.div
-          key={i}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: i * 0.05 }}
-          className="p-4 rounded-xl bg-gray-50 dark:bg-dark-surface border border-light-border dark:border-dark-border"
-        >
-          <h4 className="font-bold text-primary-600 dark:text-primary-400 mb-1">{t.term}</h4>
-          <p className="text-sm text-gray-600 dark:text-gray-400">{t.definition}</p>
+        <motion.div key={i} initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}>
+          <Card className="p-4">
+            <p className="text-sm font-semibold text-primary-600 dark:text-primary-400">{t.term}</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{t.definition}</p>
+          </Card>
         </motion.div>
       ))}
     </div>
   );
 }
 
-function GrammarHighlight({ text, issues }: { text: string; issues: string[] }) {
-  const { language } = useLanguageStore();
-  return (
-    <div className="space-y-4">
-      <div className="p-4 rounded-xl bg-white dark:bg-dark-card border border-light-border dark:border-dark-border">
-        <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
-          {language === 'ar' ? 'النص المصحح' : 'Corrected Text'}
-        </h4>
-        <p className="text-gray-800 dark:text-gray-200 whitespace-pre-wrap leading-relaxed">{text}</p>
-      </div>
-      <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
-        <h4 className="text-sm font-medium text-amber-700 dark:text-amber-400 mb-2">
-          {language === 'ar' ? 'المشاكل المكتشفة' : 'Issues Found'} ({issues.length})
-        </h4>
-        <ul className="space-y-1">
-          {issues.map((issue, i) => (
-            <li key={i} className="text-sm text-amber-800 dark:text-amber-300 flex items-start gap-2">
-              <span className="text-amber-500 mt-0.5">•</span>
-              {issue}
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
-  );
-}
+// ─── Placeholders ───────────────────────────────────────────────────
 
-function TranslationView({ original, translated }: { original: string; translated: string }) {
-  const { language } = useLanguageStore();
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div className="p-4 rounded-xl bg-gray-50 dark:bg-dark-surface border border-light-border dark:border-dark-border">
-        <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
-          {language === 'ar' ? 'الأصلي' : 'Original'}
-        </h4>
-        <p className="text-gray-800 dark:text-gray-200 whitespace-pre-wrap leading-relaxed">{original}</p>
-      </div>
-      <div className="p-4 rounded-xl bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800">
-        <h4 className="text-sm font-medium text-primary-600 dark:text-primary-400 mb-2">
-          {language === 'ar' ? 'الترجمة' : 'Translation'}
-        </h4>
-        <p className="text-gray-800 dark:text-gray-200 whitespace-pre-wrap leading-relaxed">{translated}</p>
-      </div>
-    </div>
-  );
-}
+const textAreaPlaceholder: Record<string, { en: string; ar: string }> = {
+  'summarize-text': { en: 'Paste the text you want to summarize here...', ar: 'الصق النص الذي تريد تلخيصه هنا...' },
+  'summarize-pdf': { en: 'Text will be extracted from the uploaded file...', ar: 'سيتم استخراج النص من الملف المرفوع...' },
+  'summarize-image': { en: 'Text will be extracted from the uploaded image...', ar: 'سيتم استخراج النص من الصورة...' },
+  'summarize-youtube': { en: '', ar: '' },
+  'summarize-audio': { en: 'Paste the transcribed text from the audio file...', ar: 'الصق النص المنسوخ من الملف الصوتي...' },
+  'explain-simply': { en: 'Paste complex text here to simplify...', ar: 'الصق النص المعقد هنا...' },
+  'rewrite-text': { en: 'Paste the text you want to rewrite...', ar: 'الصق النص الذي تريد إعادة كتابته...' },
+  'grammar-check': { en: 'Paste text to check grammar...', ar: 'الصق النص للتحقق من القواعد...' },
+  'translation': { en: 'Paste text to translate...', ar: 'الصق النص للترجمة...' },
+  'paragraph-to-bullets': { en: 'Paste a paragraph to convert to bullets...', ar: 'الصق الفقرة...' },
+  'bullets-to-article': { en: 'Paste bullet points (one per line)...', ar: 'الصق النقاط (كل نقطة في سطر)...' },
+  'extract-key-ideas': { en: 'Paste text to extract key ideas...', ar: 'الصق النص لاستخراج الأفكار الرئيسية...' },
+  'generate-mcq': { en: 'Paste text to generate multiple choice questions...', ar: 'الصق النص لإنشاء أسئلة اختيار من متعدد...' },
+  'generate-tf': { en: 'Paste text to generate true/false questions...', ar: 'الصق النص لإنشاء أسئلة صح أو خطأ...' },
+  'generate-flashcards': { en: 'Paste text to generate flashcards...', ar: 'الصق النص لإنشاء بطاقات تعليمية...' },
+  'generate-quiz': { en: 'Paste text to generate a quiz...', ar: 'الصق النص لإنشاء اختبار...' },
+  'generate-study-plan': { en: '', ar: '' },
+  'generate-mindmap': { en: 'Paste text to generate a mind map...', ar: 'الصق النص لإنشاء خريطة ذهنية...' },
+  'extract-terminology': { en: 'Paste text to extract terminology...', ar: 'الصق النص لاستخراج المصطلحات...' },
+  'explain-terminology': { en: 'Enter the term you want explained...', ar: 'أدخل المصطلح الذي تريد شرحه...' },
+  'simplify-paper': { en: 'Paste the academic paper text...', ar: 'الصق نص الورقة البحثية...' },
+};
 
-function ComparisonView({ original, modified }: { original: string; modified: string }) {
-  const { language } = useLanguageStore();
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div className="p-4 rounded-xl bg-gray-50 dark:bg-dark-surface border border-light-border dark:border-dark-border">
-        <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
-          {language === 'ar' ? 'الأصلي' : 'Original'}
-        </h4>
-        <p className="text-gray-800 dark:text-gray-200 whitespace-pre-wrap leading-relaxed text-sm">{original}</p>
-      </div>
-      <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800">
-        <h4 className="text-sm font-medium text-emerald-600 dark:text-emerald-400 mb-2">
-          {language === 'ar' ? 'المعاد كتابته' : 'Rewritten'}
-        </h4>
-        <p className="text-gray-800 dark:text-gray-200 whitespace-pre-wrap leading-relaxed text-sm">{modified}</p>
-      </div>
-    </div>
-  );
-}
+// ─── Main Component ─────────────────────────────────────────────────
 
 export function AIToolPage({ toolId }: AIToolPageProps) {
-  const navigate = useNavigate();
   const effectiveToolId = toolId as ToolId;
   const toolInfo = useToolInfo(toolId);
   const { language, direction } = useLanguageStore();
   const { addNotification, addFile, addClipboardEntry } = useAppStore();
+  const isRtl = direction === 'rtl';
 
+  // Core state
   const [inputText, setInputText] = useState('');
   const [result, setResult] = useState('');
   const [loading, setLoading] = useState(false);
   const [processed, setProcessed] = useState(false);
+  const [error, setError] = useState('');
 
+  // Structured data
   const [mcqs, setMcqs] = useState<MCQQuestion[]>([]);
   const [tfs, setTfs] = useState<TFQuestion[]>([]);
   const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
@@ -898,6 +518,8 @@ export function AIToolPage({ toolId }: AIToolPageProps) {
   const [mindMapData, setMindMapData] = useState<{ central: string; branches: { topic: string; items: string[] }[] } | null>(null);
   const [studyPlan, setStudyPlan] = useState<{ day: number; topics: string[]; duration: number }[]>([]);
   const [grammarIssues, setGrammarIssues] = useState<string[]>([]);
+
+  // Configuration
   const [translationTarget, setTranslationTarget] = useState<'en' | 'ar'>('ar');
   const [summaryCount, setSummaryCount] = useState(3);
   const [mcqCount, setMcqCount] = useState(5);
@@ -908,13 +530,15 @@ export function AIToolPage({ toolId }: AIToolPageProps) {
   const [daysAvailable, setDaysAvailable] = useState(7);
   const [terminologyTerm, setTerminologyTerm] = useState('');
 
+  // File state
   const [fileText, setFileText] = useState('');
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
-  const resetState = useCallback(() => {
+  const resetAll = useCallback(() => {
     setInputText('');
     setResult('');
     setProcessed(false);
+    setError('');
     setMcqs([]);
     setTfs([]);
     setFlashcards([]);
@@ -928,86 +552,133 @@ export function AIToolPage({ toolId }: AIToolPageProps) {
     setStudyTopics('');
   }, []);
 
-  useEffect(() => {
-    resetState();
-  }, [toolId, resetState]);
+  useEffect(() => { resetAll(); }, [toolId, resetAll]);
+
+  const handleClearResult = useCallback(() => {
+    setResult('');
+    setProcessed(false);
+    setError('');
+    setMcqs([]);
+    setTfs([]);
+    setFlashcards([]);
+    setTerminology([]);
+    setMindMapData(null);
+    setStudyPlan([]);
+    setGrammarIssues([]);
+  }, []);
+
+  const handleFileUpload = useCallback(async (files: { file: File; data: ArrayBuffer | string }[]) => {
+    if (files.length === 0) return;
+    const { file, data } = files[0];
+
+    if (file.type.startsWith('image/')) {
+      const previewUrl = typeof data === 'string' ? data : URL.createObjectURL(new Blob([data]));
+      setImagePreview(previewUrl);
+      if (effectiveToolId === 'summarize-image') {
+        const text = typeof data === 'string' ? data : await extractTextFromFile(file);
+        setFileText(text || '');
+        addNotification(isRtl ? 'تم تحميل الصورة' : 'Image loaded', 'success');
+      }
+      return;
+    }
+
+    try {
+      const text = await extractTextFromFile(file);
+      setFileText(text);
+      addNotification(isRtl ? 'تم استخراج النص بنجاح' : 'Text extracted successfully', 'success');
+    } catch {
+      addNotification(isRtl ? 'فشل استخراج النص' : 'Failed to extract text', 'error');
+    }
+  }, [effectiveToolId, isRtl, addNotification]);
+
+    const handleCopyResult = useCallback(async () => {
+  if (!result) return;
+
+  await navigator.clipboard.writeText(result);
+
+  addClipboardEntry(result, 'text');
+  addNotification(
+    isRtl ? 'تم نسخ النتيجة' : 'Result copied',
+    'success'
+  );
+}, [result, addClipboardEntry, addNotification, isRtl]);
+
+  const handleSaveResult = useCallback(() => {
+    const textToSave = result;
+    if (!textToSave) return;
+    const blob = new Blob([textToSave], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${toolInfo.name.replace(/\s+/g, '-').toLowerCase()}-result.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    try {
+      addFile({
+        id: `ai-result-${Date.now()}`,
+        name: `${toolInfo.name} Result`,
+        type: 'text/plain',
+        size: textToSave.length,
+        data: textToSave,
+        createdAt: Date.now(),
+      });
+      addClipboardEntry(textToSave, 'text');
+      addNotification(isRtl ? 'تم حفظ النتيجة' : 'Result saved', 'success');
+    } catch { /* ignore */ }
+  }, [result, toolInfo.name, isRtl, addNotification, addFile, addClipboardEntry]);
+
+  // ── Process function ────────────────────────────────────────────
 
   const process = useCallback(async () => {
-    const text = toolId === 'summarize-file' || toolId === 'summarize-image' ? fileText : inputText;
+    const text = toolId === 'summarize-pdf' || toolId === 'summarize-image' ? fileText : inputText;
     const termText = toolId === 'explain-terminology' ? terminologyTerm : inputText;
 
     if (!text && !termText && toolId !== 'generate-study-plan') {
-      addNotification(
-        language === 'ar' ? 'يرجى إدخال نص أولاً' : 'Please enter some text first',
-        'warning'
-      );
-      
+      addNotification(isRtl ? 'يرجى إدخال نص أولاً' : 'Please enter some text first', 'warning');
       return;
     }
 
     setLoading(true);
     setProcessed(false);
-
-    await new Promise(resolve => setTimeout(resolve, 400));
+    setError('');
 
     try {
       switch (toolId) {
-        case 'summarize-text': {
-          const summary = summarizeText(text, summaryCount);
-          setResult(summary);
-          setProcessed(true);
-          break;
-        }
-        case 'summarize-file': {
-          if (!text) {
-            addNotification(language === 'ar' ? 'يرجى رفع ملف أولاً' : 'Please upload a file first', 'warning');
-            break;
-          }
-          const summary = summarizeText(text, summaryCount);
-          setResult(summary);
-          setProcessed(true);
-          break;
-        }
+        case 'summarize-text':
+        case 'summarize-pdf':
         case 'summarize-image': {
-          if (!text) {
-            addNotification(language === 'ar' ? 'يرجى رفع صورة أولاً' : 'Please upload an image first', 'warning');
+          if (toolId !== 'summarize-text' && !text) {
+            addNotification(isRtl ? 'يرجى رفع ملف أولاً' : 'Please upload a file first', 'warning');
             break;
           }
-          const summary = summarizeText(text, summaryCount);
-          setResult(summary);
+          const response = await aiService({ tool: 'summarize-text', input: text });
+          setResult(response.text);
           setProcessed(true);
           break;
         }
-        case 'summarize-youtube': {
-          setResult(
-            language === 'ar'
-              ? 'لملخص فيديو يوتيوب:\n\n1. افتح الفيديو في يوتيوب\n2. اضغط على "...المزيد" ثم "عرض النص المكتوب"\n3. انسخ النص الكامل\n4. الصقه هنا واستخدم "تلخيص النص"\n\nملاحظة: يُفضل استخدام إضافة متصفح لنسخ تلقائي لنص يوتيوب.'
-              : 'To summarize a YouTube video:\n\n1. Open the video on YouTube\n2. Click "...More" then "Show transcript"\n3. Copy the full transcript\n4. Paste it here and use "Summarize Text"\n\nNote: Consider using a browser extension for auto-copying YouTube transcripts.'
-          );
+        case 'summarize-youtube':
+          setResult(isRtl
+            ? 'لملخص فيديو يوتيوب:\n\n1. افتح الفيديو في يوتيوب\n2. اضغط على "...المزيد" ثم "عرض النص المكتوب"\n3. انسخ النص الكامل\n4. الصقه هنا واستخدم "تلخيص النص"\n\nملاحظة: يُفضل استخدام إضافة متصفح لنسخ تلقائي لنص يوتيوب.'
+            : 'To summarize a YouTube video:\n\n1. Open the video on YouTube\n2. Click "...More" then "Show transcript"\n3. Copy the full transcript\n4. Paste it here and use "Summarize Text"\n\nNote: Consider using a browser extension for auto-copying YouTube transcripts.');
           setProcessed(true);
           break;
-        }
-        case 'summarize-audio': {
-          setResult(
-            language === 'ar'
-              ? 'لملخص ملف صوتي:\n\n1. استخدم برنامجاً مثل Audacity أو Whisper لتحويل الصوت إلى نص\n2. انسخ النص الناتج\n3. الصقه هنا واستخدم "تلخيص النص"\n\nملاحظة: يمكنك استخدام Whisper من OpenAI لتحويل الصوت إلى نص بدقة عالية.'
-              : 'To summarize an audio file:\n\n1. Use a tool like Audacity or Whisper to transcribe the audio to text\n2. Copy the resulting transcript\n3. Paste it here and use "Summarize Text"\n\nNote: You can use OpenAI Whisper for high-quality speech-to-text conversion.'
-          );
+        case 'summarize-audio':
+          setResult(isRtl
+            ? 'لملخص ملف صوتي:\n\n1. استخدم برنامجاً مثل Audacity أو Whisper لتحويل الصوت إلى نص\n2. انسخ النص الناتج\n3. الصقه هنا واستخدم "تلخيص النص"\n\nملاحظة: يمكنك استخدام Whisper من OpenAI لتحويل الصوت إلى نص بدقة عالية.'
+            : 'To summarize an audio file:\n\n1. Use a tool like Audacity or Whisper to transcribe the audio to text\n2. Copy the resulting transcript\n3. Paste it here and use "Summarize Text"\n\nNote: You can use OpenAI Whisper for high-quality speech-to-text conversion.');
           setProcessed(true);
           break;
-        }
-        case 'explain-simply': {
-          const simplified = explainSimply(text);
-          setResult(simplified);
+        case 'explain-simply':
+          setResult(explainSimply(text));
           setProcessed(true);
           break;
-        }
-        case 'rewrite-text': {
-          const rewritten = rewriteText(text);
-          setResult(rewritten);
+        case 'rewrite-text':
+          setResult(rewriteText(text));
           setProcessed(true);
           break;
-        }
         case 'grammar-check': {
           const { corrected, issues } = grammarCheck(text);
           setResult(corrected);
@@ -1015,94 +686,65 @@ export function AIToolPage({ toolId }: AIToolPageProps) {
           setProcessed(true);
           break;
         }
-        case 'translation': {
-          const translated = translateText(text, translationTarget);
-          setResult(translated);
+        case 'translation':
+          setResult(translateText(text, translationTarget));
           setProcessed(true);
           break;
-        }
-        case 'paragraph-to-bullets': {
-          const bullets = paragraphToBullets(text);
-          const formatted = bullets.map(b => `• ${b}`).join('\n');
-          setResult(formatted);
+        case 'paragraph-to-bullets':
+          setResult(paragraphToBullets(text).map(b => `• ${b}`).join('\n'));
           setProcessed(true);
           break;
-        }
         case 'bullets-to-article': {
-          const lines = text.split('\n').filter(l => l.trim());
-          const bullets = lines.map(l => l.replace(/^[-•*]\s*/, ''));
-          const article = bulletsToArticle(bullets);
-          setResult(article);
+          const bullets = text.split('\n').filter(l => l.trim()).map(l => l.replace(/^[-•*]\s*/, ''));
+          setResult(bulletsToArticle(bullets));
           setProcessed(true);
           break;
         }
-        case 'extract-key-ideas': {
-          const ideas = extractKeyIdeas(text);
-          const formatted = ideas.map((idea, i) => `${i + 1}. ${idea}`).join('\n');
-          setResult(formatted);
+        case 'extract-key-ideas':
+          setResult(extractKeyIdeas(text).map((idea, i) => `${i + 1}. ${idea}`).join('\n'));
           setProcessed(true);
           break;
-        }
-        case 'generate-mcq': {
-          const questions = generateMCQs(text, mcqCount);
-          setMcqs(questions);
+        case 'generate-mcq':
+          setMcqs(generateMCQs(text, mcqCount));
           setProcessed(true);
           break;
-        }
-        case 'generate-tf': {
-          const questions = generateTrueFalse(text, tfCount);
-          setTfs(questions);
+        case 'generate-tf':
+          setTfs(generateTrueFalse(text, tfCount));
           setProcessed(true);
           break;
-        }
-        case 'generate-flashcards': {
-          const cards = generateFlashcards(text, flashcardCount);
-          setFlashcards(cards);
+        case 'generate-flashcards':
+          setFlashcards(generateFlashcards(text, flashcardCount));
           setProcessed(true);
           break;
-        }
         case 'generate-quiz': {
           const quiz = generateQuiz(text);
-          const mcqData = quiz.questions.filter(q => 'options' in q) as MCQQuestion[];
-          const tfData = quiz.questions.filter(q => 'answer' in q) as TFQuestion[];
-          setMcqs(mcqData);
-          setTfs(tfData);
+          setMcqs(quiz.questions.filter(q => 'options' in q) as MCQQuestion[]);
+          setTfs(quiz.questions.filter(q => 'answer' in q) as TFQuestion[]);
           setProcessed(true);
           break;
         }
         case 'generate-study-plan': {
           const topics = studyTopics.split('\n').map(t => t.trim()).filter(t => t.length > 0);
           if (topics.length === 0) {
-            addNotification(
-              language === 'ar' ? 'يرجى إدخال مواضيع الدراسة' : 'Please enter study topics',
-              'warning'
-            );
+            addNotification(isRtl ? 'يرجى إدخال مواضيع الدراسة' : 'Please enter study topics', 'warning');
             break;
           }
-          const plan = generateStudyPlan(topics, hoursPerDay, daysAvailable);
-          setStudyPlan(plan);
+          setStudyPlan(generateStudyPlan(topics, hoursPerDay, daysAvailable));
           setProcessed(true);
           break;
         }
-        case 'generate-mindmap': {
-          const mapData = generateMindMap(text);
-          setMindMapData(mapData);
+        case 'generate-mindmap':
+          setMindMapData(generateMindMap(text));
           setProcessed(true);
           break;
-        }
-        case 'extract-terminology': {
-          const terms = extractTerminology(text);
-          setTerminology(terms);
+        case 'extract-terminology':
+          setTerminology(extractTerminology(text));
           setProcessed(true);
           break;
-        }
         case 'explain-terminology': {
           const termTextClean = terminologyTerm.trim();
           if (!termTextClean) {
-            addNotification(
-              language === 'ar' ? 'يرجى إدخال المصطلح' : 'Please enter a term',
-              'warning'
-            );
+            addNotification(isRtl ? 'يرجى إدخال المصطلح' : 'Please enter a term', 'warning');
             break;
           }
           const lower = termTextClean.toLowerCase();
@@ -1115,69 +757,40 @@ export function AIToolPage({ toolId }: AIToolPageProps) {
               'variable': 'A variable is any characteristic, number, or quantity that can be measured or counted. In experiments, it is a factor that can change or be changed.',
               'methodology': 'Methodology refers to the system of methods used in a particular area of study or activity. It is the theoretical analysis of the methods applied to a field of study.',
               'empirical': 'Empirical means based on observation or experience rather than theory or pure logic. Empirical evidence is information acquired by observation or experimentation.',
-              'qualitative': 'Qualitative research is a type of scientific research that seeks to understand underlying reasons, opinions, and motivations. It provides insights into problems and generates ideas.',
+              'qualitative': 'Qualitative research is a type of scientific research that seeks to understand underlying reasons, opinions, and motivations.',
               'quantitative': 'Quantitative research is used to quantify the problem by way of generating numerical data or data that can be transformed into usable statistics.',
-              'abstraction': 'Abstraction is the process of removing physical, spatial, or temporal details to highlight important characteristics. In computing, it hides complex implementation details.',
-              'encapsulation': 'Encapsulation is the bundling of data with the methods that operate on that data. It restricts direct access to some of an object components.',
-              'inheritance': 'Inheritance is a mechanism in object-oriented programming where a new class derives properties and characteristics from an existing class.',
-              'polymorphism': 'Polymorphism is the ability of different objects to respond to the same interface or method call in different ways.',
-              'algorithm complexity': 'Algorithm complexity measures the amount of resources (time, space) required by an algorithm as a function of input size.',
-              'recursion': 'Recursion is a method of solving a problem where the solution depends on solutions to smaller instances of the same problem.',
-              'database normalization': 'Database normalization is the process of organizing data in a database to reduce redundancy and improve data integrity.',
               'machine learning': 'Machine learning is a subset of artificial intelligence that enables systems to learn and improve from experience without being explicitly programmed.',
               'artificial intelligence': 'Artificial intelligence is the simulation of human intelligence processes by computer systems, including learning, reasoning, and self-correction.',
               'neural network': 'A neural network is a computing system inspired by biological neural networks in the brain. It consists of layers of interconnected nodes that process information.',
               'deep learning': 'Deep learning is a subset of machine learning that uses neural networks with multiple layers to progressively extract higher-level features from raw input.',
             },
             'ar': {
-              'خوارزمية': 'الخوارزمية هي مجموعة من الخطوات أو القواعد المنطقية لحل مشكلة أو إنجاز مهمة. في الحاسوب، تُستخدم الخوارزميات لمعالجة البيانات والحسابات والاستدلال الآلي.',
-              'فرضية': 'الفرضية هي شرح مقترح لظاهرة ما، تُقدّم كنقطة انطلاق لمزيد من البحث. في العلوم، هي تنبؤ قابل للاختبار عن العلاقة بين المتغيرات.',
-              'نظرية': 'النظرية هي شرح مدعم جيداً لجانب من الجوانب الطبيعية، مبني على مجموعة من الحقائق التي أُكّدت من خلال الرصد والتجربة بشكل متكرر.',
-              'نموذج': 'النموذج هو المثال النمطي أوattern لشيء ما. في العلوم، يشير إلى مجموعة متميزة من المفاهيم وأنماط الفكر.',
-              'متغير': 'المتغير هو أي صفة أو رقم أو كمية يمكن قياسها أو عدّها. في التجارب، هو عامل يمكن تغييره أو تغييره.',
-              'منهجية': 'المنهجية تشير إلى النظام من الطرق المطبقة في مجال معين من الدراسة أو النشاط.',
-              'تجريبي': 'التجريبي يعني القائم على المراقبة أو التجربة وليس على النظرية أو المنطق البحت.',
-              'نوعي': 'البحث النوعي هو نوع من البحث العلمي يسعى لفهم الأسباب والآراء والدوافع الكامنة.',
-              'كمي': 'البحث الكمي يُستخدم لقياس المشكلة من خلال توليد بيانات رقمية أو بيانات يمكن تحويلها إلى إحصائيات.',
-              'تجريد': 'التجريد هو عملية إزالة التفاصيل المادية أو المكانية أو الزمنية لتسليط الضوء على الخصائص المهمة.',
-              'تغليف': 'التغليف هو حزم البيانات مع الطرق التي تعمل عليها. يُقيّم الوصول المباشر إلى بعض مكونات الكائن.',
-              'وراثة': 'الوراثة هي آلية في البرمجة الكائنية حيث ت derives خصائص من فئة موجودة بالفعل.',
-              'تعدد الأشكال': 'تعدد الأشكال هي قدرة الكائنات المختلفة على الاستجابة لنفس الواجهة أو استدعاء الطريقة بطرق مختلفة.',
-              'تعقيد الخوارزمية': 'يقيس التعقيد كمية الموارد (الزمن، المساحة) اللازمة لخوارزمية كدالة لحجم المدخلات.',
-              'استدعاء ذاتي': 'الاستدعاء الذاتي هي طريقة لحل مشكلة تعتمد على حلول لنسخ أصغر من نفس المشكلة.',
-              'تعلم آلي': 'التعلم الآلي هو فرع من الذكاء الاصطناعي يمكّن الأنظمة من التعلم والتحسين من الخبرة دون برمجتها صراحة.',
-              'ذكاء اصطناعي': 'الذكاء الاصطناعي هو محاكاة لعمليات الذكاء البشري بواسطة أنظمة الحاسوب، بما في ذلك التعلم والاستدلال.',
+              'خوارزمية': 'الخوارزمية هي مجموعة من الخطوات أو القواعد المنطقية لحل مشكلة أو إنجاز مهمة.',
+              'فرضية': 'الفرضية هي شرح مقترح لظاهرة ما، تُقدّم كنقطة انطلاق لمزيد من البحث.',
+              'نظرية': 'النظرية هي شرح مدعم جيداً لجانب من الجوانب الطبيعية.',
+              'متغير': 'المتغير هو أي صفة أو رقم أو كمية يمكن قياسها أو عدّها.',
+              'منهجية': 'المنهجية تشير إلى النظام من الطرق المطبقة في مجال معين من الدراسة.',
+              'تعلم آلي': 'التعلم الآلي هو فرع من الذكاء الاصطناعي يمكّن الأنظمة من التعلم والتحسين من الخبرة.',
+              'ذكاء اصطناعي': 'الذكاء الاصطناعي هو محاكاة لعمليات الذكاء البشري بواسطة أنظمة الحاسوب.',
               'شبكة عصبية': 'الشبكة العصبية هي نظام حاسوبي مستوحى من الشبكات العصبية البيولوجية في الدماغ.',
-              'تعلم عميق': 'التعلم العميق هو فرع من التعلم الآلي يستخدم شبكات عصبية ذات طبقات متعددة لاستخراج الميزات.',
+              'تعلم عميق': 'التعلم العميق هو فرع من التعلم الآلي يستخدم شبكات عصبية ذات طبقات متعددة.',
             },
           };
 
           const enDict = explanations['en'] || {};
           const arDict = explanations['ar'] || {};
-
           let explanation = '';
 
           for (const [term, def] of Object.entries(enDict)) {
-            if (lower === term.toLowerCase()) {
-              explanation = def;
-              break;
-            }
+            if (lower === term.toLowerCase()) { explanation = def; break; }
           }
-
           if (!explanation) {
             for (const [term, def] of Object.entries(arDict)) {
-              if (termTextClean.includes(term) || termTextClean === term) {
-                explanation = def;
-                break;
-              }
+              if (termTextClean.includes(term) || termTextClean === term) { explanation = def; break; }
             }
           }
-
           if (!explanation) {
-            const relatedTerms = Object.keys(enDict).filter(t =>
-              t.includes(lower) || lower.includes(t)
-            );
-
+            const relatedTerms = Object.keys(enDict).filter(t => t.includes(lower) || lower.includes(t));
             if (relatedTerms.length > 0) {
               explanation = `Related information for "${termTextClean}":\n\n`;
               for (const term of relatedTerms.slice(0, 3)) {
@@ -1185,14 +798,11 @@ export function AIToolPage({ toolId }: AIToolPageProps) {
               }
             } else {
               const sentences = splitSentencesForExplain(termTextClean);
-              if (sentences.length > 0) {
-                explanation = `The term "${termTextClean}" appears in the following context:\n\n${sentences[0]}\n\nThis term is commonly used in academic and professional contexts.`;
-              } else {
-                explanation = `"${termTextClean}" is a term that requires context for a full explanation. Try providing more context or using the "Extract Terminology" tool on a relevant text first.`;
-              }
+              explanation = sentences.length > 0
+                ? `The term "${termTextClean}" appears in the following context:\n\n${sentences[0]}\n\nThis term is commonly used in academic and professional contexts.`
+                : `"${termTextClean}" is a term that requires context for a full explanation. Try providing more context or using the "Extract Terminology" tool on a relevant text first.`;
             }
           }
-
           setResult(explanation);
           setProcessed(true);
           break;
@@ -1200,247 +810,233 @@ export function AIToolPage({ toolId }: AIToolPageProps) {
         case 'simplify-paper': {
           const textToUse = fileText || text;
           if (!textToUse) {
-            addNotification(
-              language === 'ar' ? 'يرجى إدخال نص الورقة أو رفع ملف' : 'Please enter paper text or upload a file',
-              'warning'
-            );
+            addNotification(isRtl ? 'يرجى إدخال نص الورقة أو رفع ملف' : 'Please enter paper text or upload a file', 'warning');
             break;
           }
-          const simplified = explainSimply(textToUse);
-          const keyIdeas = extractKeyIdeas(textToUse);
-          const terminologyList = extractTerminology(textToUse);
-
-          let paperResult = `## Simplified Summary\n\n${simplified}\n\n`;
-          paperResult += `## Key Ideas\n\n${keyIdeas.map((idea, i) => `${i + 1}. ${idea}`).join('\n')}\n\n`;
-          if (terminologyList.length > 0) {
-            paperResult += `## Key Terms\n\n${terminologyList.map(t => `• **${t.term}**: ${t.definition}`).join('\n')}`;
+          let paperResult = `## Simplified Summary\n\n${explainSimply(textToUse)}\n\n`;
+          paperResult += `## Key Ideas\n\n${extractKeyIdeas(textToUse).map((idea, i) => `${i + 1}. ${idea}`).join('\n')}\n\n`;
+          const terms = extractTerminology(textToUse);
+          if (terms.length > 0) {
+            paperResult += `## Key Terms\n\n${terms.map(t => `• **${t.term}**: ${t.definition}`).join('\n')}`;
           }
-
           setResult(paperResult);
           setProcessed(true);
           break;
         }
       }
     } catch (err) {
-      addNotification(
-        language === 'ar' ? 'حدث خطأ أثناء المعالجة' : 'An error occurred while processing',
-        'error'
-      );
+      const message = (err && typeof err === 'object' && 'message' in err && typeof (err as { message: unknown }).message === 'string')
+        ? (err as { message: string }).message : undefined;
+      const errorMessage = message || (isRtl ? 'حدث خطأ أثناء المعالجة' : 'An error occurred while processing');
+      setError(errorMessage);
+      addNotification(errorMessage, 'error');
     } finally {
       setLoading(false);
     }
-  }, [toolId, inputText, fileText, terminologyTerm, translationTarget, summaryCount, mcqCount, tfCount, flashcardCount, studyTopics, hoursPerDay, daysAvailable, language, addNotification]);
+  }, [toolId, inputText, fileText, terminologyTerm, translationTarget, summaryCount, mcqCount, tfCount, flashcardCount, studyTopics, hoursPerDay, daysAvailable, isRtl, addNotification, fileText]);
 
-  const handleFileUpload = useCallback(async (files: { file: File; data: ArrayBuffer | string }[]) => {
-    if (files.length === 0) return;
-    const { file, data } = files[0];
+  // ── Tool-specific options ───────────────────────────────────────
 
-    if (file.type.startsWith('image/')) {
-      if (typeof data === 'string') {
-        setImagePreview(data);
-      } else {
-        const blob = new Blob([data], { type: file.type });
-        setImagePreview(URL.createObjectURL(blob));
+  const renderOptions = () => {
+    switch (toolId) {
+      case 'translation':
+  return (
+    <LanguagePair
+      targetValue={translationTarget}
+      targetOnChange={setTranslationTarget}
+      sourceLanguage={language === 'ar' ? 'العربية' : 'English'}
+      options={[
+        {
+          value: 'ar',
+          label: isRtl ? 'العربية' : 'Arabic',
+        },
+        {
+          value: 'en',
+          label: isRtl ? 'الإنجليزية' : 'English',
+        },
+      ]}
+      title={isRtl ? 'إعدادات الترجمة' : 'Translation Settings'}
+      description={
+        isRtl
+          ? 'اختر لغة الترجمة'
+          : 'Choose the target language'
       }
-
-      if (toolId === 'summarize-image') {
-        const ext = file.name.toLowerCase();
-        if (ext.endsWith('.png') || ext.endsWith('.jpg') || ext.endsWith('.jpeg')) {
-          setResult(
-            language === 'ar'
-              ? 'معالجة الصورة...\n\nتم رفع الصورة بنجاح. لاستخراج النص من الصورة، يُستخدم محرك OCR (التعرف على الضوء).\n\nيمكنك نسخ النص يدوياً من الصورة واستخدامه مع أدوات أخرى.'
-              : 'Processing image...\n\nImage uploaded successfully. To extract text from images, an OCR (Optical Character Recognition) engine is used.\n\nYou can manually copy the text from the image and use it with other tools.'
+   />
           );
-          setProcessed(true);
-        }
-      }
-      return;
+
+      case 'summarize-text':
+        return (
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
+            <Card className="p-5 sm:p-6">
+              <h2 className="text-base font-semibold text-gray-900 dark:text-white mb-1">
+                {isRtl ? 'إعدادات التلخيص' : 'Summary Settings'}
+              </h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                {isRtl ? 'عدد الجمل في الملخص' : 'Number of sentences in summary'}
+              </p>
+              <Select
+                value={String(summaryCount)}
+                onChange={(e) => setSummaryCount(Number(e.target.value))}
+                options={[1, 2, 3, 5, 7].map(n => ({ value: String(n), label: String(n) }))}
+              />
+            </Card>
+          </motion.div>
+        );
+      case 'generate-mcq':
+      case 'generate-tf':
+        return (
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
+            <Card className="p-5 sm:p-6">
+              <h2 className="text-base font-semibold text-gray-900 dark:text-white mb-1">
+                {isRtl ? 'عدد الأسئلة' : 'Number of Questions'}
+              </h2>
+              <Select
+                value={toolId === 'generate-mcq' ? String(mcqCount) : String(tfCount)}
+                onChange={(e) => toolId === 'generate-mcq' ? setMcqCount(Number(e.target.value)) : setTfCount(Number(e.target.value))}
+                options={[3, 5, 7, 10].map(n => ({ value: String(n), label: String(n) }))}
+              />
+            </Card>
+          </motion.div>
+        );
+      case 'generate-flashcards':
+        return (
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
+            <Card className="p-5 sm:p-6">
+              <h2 className="text-base font-semibold text-gray-900 dark:text-white mb-1">
+                {isRtl ? 'عدد البطاقات' : 'Number of Cards'}
+              </h2>
+              <Select
+                value={String(flashcardCount)}
+                onChange={(e) => setFlashcardCount(Number(e.target.value))}
+                options={[4, 6, 8, 10, 15].map(n => ({ value: String(n), label: String(n) }))}
+              />
+            </Card>
+          </motion.div>
+        );
+      default:
+        return null;
     }
-
-    setLoading(true);
-    try {
-      const text = await extractTextFromFile(file);
-      setFileText(text);
-      addNotification(
-        language === 'ar' ? `تم استخراج النص من ${file.name}` : `Text extracted from ${file.name}`,
-        'success'
-      );
-    } catch {
-      addNotification(
-        language === 'ar' ? 'فشل استخراج النص' : 'Failed to extract text',
-        'error'
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [toolId, language, addNotification]);
-
-  const handleSaveResult = useCallback(() => {
-    const textToSave = result || fileText;
-    if (!textToSave) return;
-
-    addFile({
-      id: `ai-${Date.now()}`,
-      name: `${toolInfo.name}-${new Date().toISOString().slice(0, 10)}.txt`,
-      type: 'text/plain',
-      size: textToSave.length,
-      data: textToSave,
-      createdAt: Date.now(),
-      toolUsed: toolId,
-    });
-
-    addClipboardEntry(textToSave, 'text');
-    addNotification(
-      language === 'ar' ? 'تم حفظ النتيجة' : 'Result saved',
-      'success'
-    );
-  }, [result, fileText, toolInfo.name, toolId, language, addFile, addClipboardEntry, addNotification]);
-
-  const isTextInput = !['summarize-file', 'summarize-image', 'generate-study-plan'].includes(toolId);
-  const isFileInput = ['summarize-file', 'summarize-image'].includes(toolId);
-  const isUrlInput = toolId === 'summarize-youtube';
-  const isAudioInput = toolId === 'summarize-audio';
-  const isTerminologyInput = toolId === 'explain-terminology';
-  const isStudyPlan = toolId === 'generate-study-plan';
-  const isGrammarCheck = toolId === 'grammar-check';
-  const isTranslation = toolId === 'translation';
-  const isRewrite = toolId === 'rewrite-text';
-
-  const textAreaPlaceholder: Record<string, string> = {
-    'summarize-text': language === 'ar' ? 'الصق النص الذي تريد تلخيصه هنا...' : 'Paste the text you want to summarize here...',
-    'summarize-file': language === 'ar' ? 'سيتم استخراج النص من الملف المرفوع...' : 'Text will be extracted from the uploaded file...',
-    'summarize-image': language === 'ar' ? 'سيتم استخراج النص من الصورة...' : 'Text will be extracted from the uploaded image...',
-    'summarize-youtube': '',
-    'summarize-audio': language === 'ar' ? 'الصق النص المنسوخ من الملف الصوتي...' : 'Paste the transcribed text from the audio file...',
-    'explain-simply': language === 'ar' ? 'الصق النص المعقد هنا...' : 'Paste complex text here to simplify...',
-    'rewrite-text': language === 'ar' ? 'الصق النص الذي تريد إعادة كتابته...' : 'Paste the text you want to rewrite...',
-    'grammar-check': language === 'ar' ? 'الصق النص للتحقق من القواعد...' : 'Paste text to check grammar...',
-    'translation': language === 'ar' ? 'الصق النص للترجمة...' : 'Paste text to translate...',
-    'paragraph-to-bullets': language === 'ar' ? 'الصق الفقرة...' : 'Paste a paragraph to convert to bullets...',
-    'bullets-to-article': language === 'ar' ? 'الصق النقاط (كل نقطة في سطر)...' : 'Paste bullet points (one per line)...',
-    'extract-key-ideas': language === 'ar' ? 'الصق النص لاستخراج الأفكار الرئيسية...' : 'Paste text to extract key ideas...',
-    'generate-mcq': language === 'ar' ? 'الصق النص لإنشاء أسئلة اختيار من متعدد...' : 'Paste text to generate multiple choice questions...',
-    'generate-tf': language === 'ar' ? 'الصق النص لإنشاء أسئلة صح أو خطأ...' : 'Paste text to generate true/false questions...',
-    'generate-flashcards': language === 'ar' ? 'الصق النص لإنشاء بطاقات تعليمية...' : 'Paste text to generate flashcards...',
-    'generate-quiz': language === 'ar' ? 'الصق النص لإنشاء اختبار...' : 'Paste text to generate a quiz...',
-    'generate-study-plan': '',
-    'generate-mindmap': language === 'ar' ? 'الصق النص لإنشاء خريطة ذهنية...' : 'Paste text to generate a mind map...',
-    'extract-terminology': language === 'ar' ? 'الصق النص لاستخراج المصطلحات...' : 'Paste text to extract terminology...',
-    'explain-terminology': language === 'ar' ? 'أدخل المصطلح الذي تريد شرحه...' : 'Enter the term you want explained...',
-    'simplify-paper': language === 'ar' ? 'الصق نص الورقة البحثية...' : 'Paste the academic paper text...',
   };
 
-  const Icon = toolInfo.icon;
+  // ── Input section ───────────────────────────────────────────────
 
-  return (
-    
-    <div className={`min-h-screen bg-light-bg dark:bg-dark-bg ${direction === 'rtl' ? 'font-arabic' : ''}`}>
-      <div className="max-w-4xl mx-auto px-4 py-8">
-       <motion.div
-  initial={{ opacity: 0, y: -10 }}
-  animate={{ opacity: 1, y: 0 }}
-  className="mb-8"
->
-  <button
-    onClick={() => navigate('/category/ai')}
-    className="flex items-center gap-2 text-gray-500 hover:text-primary-500 dark:text-gray-400 dark:hover:text-primary-400 transition-colors mb-6 group"
-  >
-    <svg
-      className={`w-5 h-5 transition-transform ${
-        direction === 'rtl'
-          ? 'rotate-180 group-hover:translate-x-1'
-          : 'group-hover:-translate-x-1'
-      }`}
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth={2}
-        d="M15 19l-7-7 7-7"
-      />
-    </svg>
-
-    <span className="text-sm font-medium">
-      {language === 'ar'
-        ? 'العودة لأدوات الذكاء الاصطناعي'
-        : 'Back to AI Tools'}
-    </span>
-  </button>
-<div className="flex items-center gap-3 mb-2">
-  <Icon className="w-8 h-8 text-primary-500" />
-
-  <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-    {language === 'ar' ? toolInfo.nameAr : toolInfo.name}
-  </h1>
-</div>
-
-  <p className="text-gray-500 dark:text-gray-400">
-    {language === 'ar'
-      ? toolInfo.descriptionAr
-      : toolInfo.description}
-  </p>
-</motion.div>
-
-        <div className="space-y-6">
-          {(isTextInput || isTerminologyInput) && !isStudyPlan && (
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
-              {toolId === 'explain-terminology' ? (
-                <Input
-                  label={language === 'ar' ? 'المصطلح' : 'Term'}
-                  value={terminologyTerm}
-                  onChange={e => setTerminologyTerm(e.target.value)}
-                  placeholder={textAreaPlaceholder[toolId]}
-                />
-              ) : (
-                <TextArea
-                  label={language === 'ar' ? 'النص المدخل' : 'Input Text'}
-                  value={inputText}
-                  onChange={e => setInputText(e.target.value)}
-                  placeholder={textAreaPlaceholder[toolId]}
-                  className="min-h-[200px]"
-                />
-              )}
-            </motion.div>
-          )}
-
-          {isFileInput && (
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
-              <FileUpload
-                accept={toolId === 'summarize-image'
-                  ? ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/webp']
-                  : ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-pdfdocument.wordprocessingml.document', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-pdfdocument.presentationml.presentation', 'text/plain']}
-                onFilesSelected={handleFileUpload}
-                label={language === 'ar' ? 'اسحب الملف هنا أو اضغط للتصفح' : 'Drop file here or click to browse'}
-                description={toolId === 'summarize-image'
-                  ? (language === 'ar' ? 'PNG, JPG, GIF, WebP' : 'PNG, JPG, GIF, WebP')
-                  : (language === 'ar' ? 'PDF, Word, PowerPoint, Text' : 'PDF, Word, PowerPoint, Text')}
-                readAs="ArrayBuffer"
+  const renderInput = () => {
+    // Study plan has its own custom input
+    if (toolId === 'generate-study-plan') {
+      return (
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
+          <Card className="p-0 overflow-hidden">
+            <div className="p-6 space-y-4">
+              <h2 className="text-base font-semibold text-gray-900 dark:text-white mb-1">
+                {isRtl ? 'مواضيع الدراسة' : 'Study Topics'}
+              </h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                {isRtl ? 'أدخل مواضيع الدراسة (كل موضوع في سطر)' : 'Enter study topics (one per line)'}
+              </p>
+              <TextArea
+                value={studyTopics}
+                onChange={(e) => setStudyTopics(e.target.value)}
+                placeholder={isRtl ? 'الرياضيات\nالفيزياء\nالكيمياء\nالأحياء' : 'Mathematics\nPhysics\nChemistry\nBiology'}
+                className="min-h-[150px]"
               />
-              {imagePreview && toolId === 'summarize-image' && (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-4">
-                  <img src={imagePreview} alt="Preview" className="max-h-64 mx-auto rounded-xl shadow-md" />
-                </motion.div>
-              )}
-              {fileText && (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-4">
-                  <TextArea
-                    label={language === 'ar' ? 'النص المستخرج' : 'Extracted Text'}
-                    value={fileText}
-                    onChange={e => setFileText(e.target.value)}
-                    className="min-h-[150px]"
-                  />
-                </motion.div>
-              )}
-            </motion.div>
-          )}
+              <div className="grid grid-cols-2 gap-4">
+                <Input
+                  label={isRtl ? 'ساعات يومياً' : 'Hours per day'}
+                  type="number"
+                  value={hoursPerDay}
+                  onChange={(e) => setHoursPerDay(Number(e.target.value))}
+                  min={1} max={12}
+                />
+                <Input
+                  label={isRtl ? 'عدد الأيام' : 'Number of days'}
+                  type="number"
+                  value={daysAvailable}
+                  onChange={(e) => setDaysAvailable(Number(e.target.value))}
+                  min={1} max={30}
+                />
+              </div>
+            </div>
+          </Card>
+        </motion.div>
+      );
+    }
 
-          {isUrlInput && (
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
+    // File-based tools
+    if (toolId === 'summarize-pdf' || toolId === 'summarize-image' || toolId === 'summarize-audio') {
+      const acceptMap: Record<string, string[]> = {
+        'summarize-pdf': ['application/pdf'],
+        'summarize-image': ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/webp'],
+        'summarize-audio': ['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/mp4', 'audio/webm'],
+      };
+      const descMap: Record<string, { en: string; ar: string }> = {
+        'summarize-pdf': { en: 'PDF', ar: 'PDF' },
+        'summarize-image': { en: 'PNG, JPG, GIF, WebP', ar: 'PNG, JPG, GIF, WebP' },
+        'summarize-audio': { en: 'MP3, WAV, OGG, M4A, WebM', ar: 'MP3, WAV, OGG, M4A, WebM' },
+      };
+      const desc = descMap[toolId] || { en: '', ar: '' };
+
+      return (
+  <Card className="p-0 overflow-hidden">
+    <div className="p-6">
+      <FileUpload
+        accept={acceptMap[toolId] || []}
+        multiple={false}
+        maxFiles={1}
+        onFilesSelected={(files) => handleFileUpload(files)}
+        label={isRtl ? 'اسحب الملف هنا أو اضغط للتصفح' : 'Drop file here or click to browse'}
+        description={isRtl ? desc.ar : desc.en}
+      />
+{toolId === 'summarize-pdf' && (
+  <p className="mt-3 text-xs text-muted-foreground text-center">
+    {isRtl
+      ? 'ملاحظة: لتلخيص ملفات Word أو PowerPoint، حوّلها إلى PDF أولًا.'
+      : 'Note: To summarize Word or PowerPoint files, convert them to PDF first.'}
+  </p>
+  )}
+      {imagePreview && toolId === 'summarize-image' && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="mt-6"
+        >
+          <img
+            src={imagePreview}
+            alt="Preview"
+            className="max-h-64 mx-auto rounded-xl shadow-md"
+          />
+        </motion.div>
+      )}
+
+
+      {fileText && toolId === 'summarize-audio' && (
+        <div className="mt-6">
+          <TextArea
+            label={isRtl ? 'أو الصق النص المنسوخ' : 'Or paste transcribed text'}
+            value={inputText}
+            onChange={(e) => setInputText(e.target.value)}
+            placeholder={textAreaPlaceholder[toolId]?.[isRtl ? 'ar' : 'en']}
+            className="min-h-[120px]"
+          />
+        </div>
+      )}
+    </div>
+  </Card>
+);
+    }
+
+    // YouTube URL input
+    if (toolId === 'summarize-youtube') {
+      return (
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
+          <Card className="p-0 overflow-hidden">
+            <div className="p-6">
+              <h2 className="text-base font-semibold text-gray-900 dark:text-white mb-1">
+                {isRtl ? 'رابط يوتيوب' : 'YouTube URL'}
+              </h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                {isRtl ? 'أدخل رابط الفيديو' : 'Enter the video URL'}
+              </p>
               <Input
-                label={language === 'ar' ? 'رابط يوتيوب' : 'YouTube URL'}
                 placeholder="https://www.youtube.com/watch?v=..."
                 icon={
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -1449,328 +1045,269 @@ export function AIToolPage({ toolId }: AIToolPageProps) {
                   </svg>
                 }
               />
-            </motion.div>
-          )}
+            </div>
+          </Card>
+        </motion.div>
+      );
+    }
 
-          {isAudioInput && (
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
-              <FileUpload
-                accept={['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/mp4', 'audio/webm']}
-                onFilesSelected={handleFileUpload}
-                label={language === 'ar' ? 'ارفع ملف صوتي' : 'Upload audio file'}
-                description={language === 'ar' ? 'MP3, WAV, OGG, M4A, WebM' : 'MP3, WAV, OGG, M4A, WebM'}
-                readAs="ArrayBuffer"
-              />
-              <div className="mt-3">
-                <TextArea
-                  label={language === 'ar' ? 'أو الصق النص المنسوخ' : 'Or paste transcribed text'}
-                  value={inputText}
-                  onChange={e => setInputText(e.target.value)}
-                  placeholder={textAreaPlaceholder[toolId]}
-                  className="min-h-[120px]"
-                />
-              </div>
-            </motion.div>
-          )}
-
-          {isStudyPlan && (
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="space-y-4">
-              <TextArea
-                label={language === 'ar' ? 'مواضيع الدراسة (كل موضوع في سطر)' : 'Study Topics (one per line)'}
-                value={studyTopics}
-                onChange={e => setStudyTopics(e.target.value)}
-                placeholder={language === 'ar' ? 'الرياضيات\nالفيزياء\nالكيمياء\nالأحياء' : 'Mathematics\nPhysics\nChemistry\nBiology'}
-                className="min-h-[150px]"
-              />
-              <div className="grid grid-cols-2 gap-4">
-                <Input
-                  label={language === 'ar' ? 'ساعات يومياً' : 'Hours per day'}
-                  type="number"
-                  value={hoursPerDay}
-                  onChange={e => setHoursPerDay(Number(e.target.value))}
-                  min={1}
-                  max={12}
-                />
-                <Input
-                  label={language === 'ar' ? 'عدد الأيام' : 'Number of days'}
-                  type="number"
-                  value={daysAvailable}
-                  onChange={e => setDaysAvailable(Number(e.target.value))}
-                  min={1}
-                  max={30}
-                />
-              </div>
-            </motion.div>
-          )}
-
-          {isTranslation && (
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-              <Select
-                label={language === 'ar' ? 'الترجمة إلى' : 'Translate to'}
-                value={translationTarget}
-                onChange={e => setTranslationTarget(e.target.value as 'en' | 'ar')}
-                options={[
-                  { value: 'ar', label: 'العربية (Arabic)' },
-                  { value: 'en', label: 'English' },
-                ]}
-              />
-            </motion.div>
-          )}
-
-          {toolId === 'summarize-text' && (
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-              <Select
-                label={language === 'ar' ? 'عدد الجمل' : 'Number of sentences'}
-                value={summaryCount}
-                onChange={e => setSummaryCount(Number(e.target.value))}
-                options={[
-                  { value: '1', label: '1' },
-                  { value: '2', label: '2' },
-                  { value: '3', label: '3' },
-                  { value: '5', label: '5' },
-                  { value: '7', label: '7' },
-                ]}
-              />
-            </motion.div>
-          )}
-
-          {toolId === 'generate-mcq' && (
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-              <Select
-                label={language === 'ar' ? 'عدد الأسئلة' : 'Number of questions'}
-                value={mcqCount}
-                onChange={e => setMcqCount(Number(e.target.value))}
-                options={[
-                  { value: '3', label: '3' },
-                  { value: '5', label: '5' },
-                  { value: '7', label: '7' },
-                  { value: '10', label: '10' },
-                ]}
-              />
-            </motion.div>
-          )}
-
-          {toolId === 'generate-tf' && (
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-              <Select
-                label={language === 'ar' ? 'عدد الأسئلة' : 'Number of questions'}
-                value={tfCount}
-                onChange={e => setTfCount(Number(e.target.value))}
-                options={[
-                  { value: '3', label: '3' },
-                  { value: '5', label: '5' },
-                  { value: '7', label: '7' },
-                  { value: '10', label: '10' },
-                ]}
-              />
-            </motion.div>
-          )}
-
-          {toolId === 'generate-flashcards' && (
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-              <Select
-                label={language === 'ar' ? 'عدد البطاقات' : 'Number of cards'}
-                value={flashcardCount}
-                onChange={e => setFlashcardCount(Number(e.target.value))}
-                options={[
-                  { value: '4', label: '4' },
-                  { value: '6', label: '6' },
-                  { value: '8', label: '8' },
-                  { value: '10', label: '10' },
-                  { value: '15', label: '15' },
-                ]}
-              />
-            </motion.div>
-          )}
-
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-            <Button
-              size="lg"
-              onClick={process}
-              loading={loading}
-              disabled={
-                (!inputText.trim() && !fileText.trim() && !terminologyTerm.trim() && toolId !== 'generate-study-plan')
-              }
-              className="w-full"
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-              </svg>
-              {language === 'ar' ? 'معالجة' : 'Process'}
-            </Button>
-          </motion.div>
-
-          <AnimatePresence mode="wait">
-            {loading && (
-              <LoadingOverlay text={language === 'ar' ? 'جاري المعالجة...' : 'Processing...'} />
-            )}
-          </AnimatePresence>
-
-          <AnimatePresence>
-            {processed && !loading && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="relative"
-              >
-                <Card className="relative">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
-                      {language === 'ar' ? 'النتيجة' : 'Result'}
-                    </h3>
-                    <Badge variant="success">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <polyline points="20 6 9 17 4 12" />
-                      </svg>
-                      {language === 'ar' ? 'مكتمل' : 'Complete'}
-                    </Badge>
-                  </div>
-
-                  <div className="relative">
-                    {toolId === 'grammar-check' && result && (
-                      <GrammarHighlight text={result} issues={grammarIssues} />
-                    )}
-
-                    {toolId === 'translation' && result && (
-                      <TranslationView original={inputText} translated={result} />
-                    )}
-
-                    {toolId === 'rewrite-text' && result && (
-                      <ComparisonView original={inputText} modified={result} />
-                    )}
-
-                    {toolId === 'generate-mcq' && mcqs.length > 0 && (
-                      <QuizViewer mcqs={mcqs} tfs={[]} title={language === 'ar' ? 'أسئلة اختيار من متعدد' : 'Multiple Choice Questions'} />
-                    )}
-
-                    {toolId === 'generate-tf' && tfs.length > 0 && (
-                      <QuizViewer mcqs={[]} tfs={tfs} title={language === 'ar' ? 'أسئلة صح أو خطأ' : 'True/False Questions'} />
-                    )}
-
-                    {toolId === 'generate-quiz' && (mcqs.length > 0 || tfs.length > 0) && (
-                      <QuizViewer mcqs={mcqs} tfs={tfs} title={language === 'ar' ? 'اختبار مختلط' : 'Mixed Quiz'} />
-                    )}
-
-                    {toolId === 'generate-flashcards' && flashcards.length > 0 && (
-                      <FlashcardViewer cards={flashcards} />
-                    )}
-
-                    {toolId === 'generate-mindmap' && mindMapData && (
-                      <MindMapView data={mindMapData} />
-                    )}
-
-                    {toolId === 'generate-study-plan' && studyPlan.length > 0 && (
-                      <StudyPlanView plan={studyPlan} topics={studyTopics.split('\n').filter(t => t.trim())} />
-                    )}
-
-                    {toolId === 'extract-terminology' && terminology.length > 0 && (
-                      <TerminologyList terms={terminology} />
-                    )}
-
-                    {!['grammar-check', 'translation', 'rewrite-text', 'generate-mcq', 'generate-tf', 'generate-quiz', 'generate-flashcards', 'generate-mindmap', 'generate-study-plan', 'extract-terminology'].includes(toolId) && result && (
-                      <div className="p-4 rounded-xl bg-gray-50 dark:bg-dark-surface border border-light-border dark:border-dark-border">
-                        <p className="text-gray-800 dark:text-gray-200 whitespace-pre-wrap leading-relaxed">{result}</p>
-                      </div>
-                    )}
-
-                    {toolId === 'explain-terminology' && result && !['grammar-check', 'translation', 'rewrite-text', 'generate-mcq', 'generate-tf', 'generate-quiz', 'generate-flashcards', 'generate-mindmap', 'generate-study-plan', 'extract-terminology'].includes(toolId) && (
-                      <div className="p-4 rounded-xl bg-gray-50 dark:bg-dark-surface border border-light-border dark:border-dark-border">
-                        <p className="text-gray-800 dark:text-gray-200 whitespace-pre-wrap leading-relaxed">{result}</p>
-                      </div>
-                    )}
-                  </div>
-
-                  {result && toolId !== 'generate-mcq' && toolId !== 'generate-tf' && toolId !== 'generate-quiz' && toolId !== 'generate-flashcards' && toolId !== 'generate-mindmap' && toolId !== 'generate-study-plan' && toolId !== 'extract-terminology' && (
-                    <ResultActions text={result} onSave={handleSaveResult} />
-                  )}
-
-                  {toolId === 'generate-mcq' && mcqs.length > 0 && (
-                    <ResultActions
-                      text={mcqs.map((q, i) => `${i + 1}. ${q.question}\n${q.options.map((o, j) => `  ${String.fromCharCode(65 + j)}. ${o}${j === q.correct ? ' ✓' : ''}`).join('\n')}`).join('\n\n')}
-                      onSave={handleSaveResult}
-                    />
-                  )}
-
-                  {toolId === 'generate-tf' && tfs.length > 0 && (
-                    <ResultActions
-                      text={tfs.map((q, i) => `${i + 1}. ${q.statement} [${q.answer ? 'TRUE' : 'FALSE'}]`).join('\n')}
-                      onSave={handleSaveResult}
-                    />
-                  )}
-
-                  {toolId === 'generate-quiz' && (mcqs.length > 0 || tfs.length > 0) && (
-                    <ResultActions
-                      text={[
-                        ...mcqs.map((q, i) => `${i + 1}. ${q.question}\n${q.options.map((o, j) => `  ${String.fromCharCode(65 + j)}. ${o}${j === q.correct ? ' ✓' : ''}`).join('\n')}`),
-                        ...tfs.map((q, i) => `${mcqs.length + i + 1}. ${q.statement} [${q.answer ? 'TRUE' : 'FALSE'}]`),
-                      ].join('\n\n')}
-                      onSave={handleSaveResult}
-                    />
-                  )}
-
-                  {toolId === 'generate-flashcards' && flashcards.length > 0 && (
-                    <ResultActions
-                      text={flashcards.map((c, i) => `Card ${i + 1}:\nFront: ${c.front}\nBack: ${c.back}`).join('\n\n')}
-                      onSave={handleSaveResult}
-                    />
-                  )}
-
-                  {toolId === 'generate-mindmap' && mindMapData && (
-                    <ResultActions
-                      text={`${mindMapData.central}\n\n${mindMapData.branches.map(b => `${b.topic}:\n${b.items.map(item => `  - ${item}`).join('\n')}`).join('\n\n')}`}
-                      onSave={handleSaveResult}
-                    />
-                  )}
-
-                  {toolId === 'generate-study-plan' && studyPlan.length > 0 && (
-                    <ResultActions
-                      text={studyPlan.map(d => `Day ${d.day} (${d.duration}h):\n${d.topics.map(t => `  - ${t}`).join('\n')}`).join('\n\n')}
-                      onSave={handleSaveResult}
-                    />
-                  )}
-
-                  {toolId === 'extract-terminology' && terminology.length > 0 && (
-                    <ResultActions
-                      text={terminology.map(t => `${t.term}: ${t.definition}`).join('\n\n')}
-                      onSave={handleSaveResult}
-                    />
-                  )}
-                </Card>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {!processed && !loading && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
-              <Card>
-                <EmptyState
-                  
-                  title={language === 'ar' ? `جاهز لـ ${toolInfo.nameAr}` : `Ready to ${toolInfo.name}`}
-                  description={
-                    isStudyPlan
-                      ? (language === 'ar' ? 'أدخل مواضيعك وإعدادات الوقت لإنشاء خطة دراسة مخصصة' : 'Enter your topics and time settings to create a personalized study plan')
-                      : (language === 'ar' ? 'أدخل النص واضغط "معالجة" للبدء' : 'Enter your text and click "Process" to get started')
-                  }
-                />
-              </Card>
-            </motion.div>
-          )}
-        </div>
+    // Terminology explain has a single-term input
+    if (toolId === 'explain-terminology') {
+  return (
+    <Card className="p-0 overflow-hidden">
+      <div className="p-6">
+        <TextArea
+          value={terminologyTerm}
+          onChange={(e) => setTerminologyTerm(e.target.value)}
+          placeholder={
+            isRtl
+              ? 'أدخل المصطلح الذي تريد شرحه...'
+              : 'Enter the term you want explained...'
+          }
+          className="min-h-[120px]"
+        />
       </div>
-    </div>
+    </Card>
   );
 }
 
-function capitalize(s: string): string {
-  if (!s) return s;
-  return s.charAt(0).toUpperCase() + s.slice(1);
-}
+const inputDescription = isRtl
+  ? 'أضف المحتوى ثم اضغط على "معالجة".'
+  : 'Enter your content, then click Process.';
 
-function splitSentencesForExplain(text: string): string[] {
-  return text
-    .replace(/\s+/g, ' ')
-    .trim()
-    .split(/(?<=[.!?])\s+/)
-    .filter(s => s.trim().length > 10);
+    // Default: text input
+    return (
+    <Card className="p-0 overflow-hidden">
+    <div className="p-6">
+ 
+
+<h1 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
+  {inputDescription}
+</h1>
+
+      <TextArea
+        value={inputText}
+        onChange={(e) => setInputText(e.target.value)}
+        placeholder={textAreaPlaceholder[toolId]?.[isRtl ? 'ar' : 'en']}
+        className="min-h-[180px]"
+      />
+    </div>
+  </Card>
+
+    );
+  };
+
+  // ── Output section ──────────────────────────────────────────────
+
+  const renderOutput = () => {
+    if (!processed && !result && mcqs.length === 0 && tfs.length === 0 && flashcards.length === 0 && terminology.length === 0 && !mindMapData && studyPlan.length === 0) {
+      return (
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+          <Card className="p-0 overflow-hidden">
+            <div className="p-6">
+              <EmptyResult
+                message={
+                isRtl
+                      ? `ستظهر نتيجة ${toolInfo.nameAr} هنا.`
+                      : `Your ${toolInfo.name} result will appear here.`
+            }
+            />
+            </div>
+          </Card>
+        </motion.div>
+      );
+    }
+
+
+    // Grammar check with highlighted issues
+    if (toolId === 'grammar-check' && result) {
+      return (
+       <Card className="p-6">
+  <GrammarHighlight
+    correctedText={result}
+    issues={grammarIssues}
+  />
+</Card>
+      );
+    }
+
+    // Translation side-by-side
+    if (toolId === 'translation' && result) {
+      return (
+        <Card className="p-6">
+  <GrammarHighlight
+    correctedText={result}
+    issues={grammarIssues}
+  />
+</Card>
+      );
+    }
+
+    // Rewrite side-by-side
+    if (toolId === 'rewrite-text' && result) {
+      return (
+        <Card className="p-6">
+  <GrammarHighlight
+    correctedText={result}
+    issues={grammarIssues}
+  />
+</Card>
+      );
+    }
+
+    // Quiz viewer
+    if ((toolId === 'generate-mcq' || toolId === 'generate-tf' || toolId === 'generate-quiz') && (mcqs.length > 0 || tfs.length > 0)) {
+      return <QuizViewer mcqs={mcqs} tfs={tfs} />;
+    }
+
+    // Flashcards
+    if (toolId === 'generate-flashcards' && flashcards.length > 0) {
+      return <FlashcardViewer cards={flashcards} />;
+    }
+
+    // Mind map
+    if (toolId === 'generate-mindmap' && mindMapData) {
+      return <MindMapView data={mindMapData} />;
+    }
+
+    // Study plan
+    if (toolId === 'generate-study-plan' && studyPlan.length > 0) {
+      return <StudyPlanView plan={studyPlan} topics={studyTopics.split('\n').filter(t => t.trim())} />;
+    }
+
+    // Terminology list
+    if (toolId === 'extract-terminology' && terminology.length > 0) {
+      return <TerminologyList terms={terminology} />;
+    }
+if (result) {
+  return (
+    <Card className="max-w-2xl mx-auto p-6 sm:p-8">
+      <div className="space-y-6">
+        <div>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+           {isRtl ? `${toolInfo.nameAr} جاهز` : `${toolInfo.name} Ready`}
+             </h2>
+
+          <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+            {isRtl
+  ? 'يمكنك نسخ النتيجة أو حفظها.'
+  : 'You can copy or save the result.'}
+          </p>
+        </div>
+
+        <div className="rounded-xl border border-light-border bg-gray-50 p-4 dark:border-dark-border dark:bg-dark-surface">
+          <pre className="whitespace-pre-wrap break-words text-sm">
+            {result}
+          </pre>
+        </div>
+
+        <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+          <Button variant="ghost" onClick={handleClearResult}>
+            t('ui.reset')
+          </Button>
+<Button
+  variant="secondary"
+  onClick={handleCopyResult}
+>
+  t('ui.copy')
+</Button>
+          <Button
+            variant="primary"
+            onClick={handleSaveResult}
+          >
+            t('ui.save')
+          </Button>
+        </div>
+      </div>
+    </Card>
+  );
+}
+    return null;
+  };
+
+  // ── Compute button disabled state ───────────────────────────────
+
+  const isButtonDisabled = (() => {
+    if (toolId === 'generate-study-plan') return !studyTopics.trim();
+    if (toolId === 'explain-terminology') return !terminologyTerm.trim();
+    if (toolId === 'summarize-pdf' || toolId === 'summarize-image') return !fileText.trim();
+    return !inputText.trim();
+  })();
+
+  // ── Render ──────────────────────────────────────────────────────
+
+return (
+  <>
+    <ToolLayout
+      backTo="/category/ai"
+      backLabel={
+        isRtl
+          ? 'العودة لأدوات الذكاء الاصطناعي'
+          : 'Back to AI Study Tools'
+      }
+    >
+      <ToolHero
+        icon={
+          <toolInfo.icon className="w-8 h-8 text-primary-600 dark:text-primary-400" />
+        }
+        title={isRtl ? toolInfo.nameAr : toolInfo.name}
+        description={isRtl ? toolInfo.descriptionAr : toolInfo.description}
+      />
+
+      <div className="space-y-5">
+        <AnimatePresence mode="wait">
+          {!processed ? (
+            <motion.div
+              key="input"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+            >
+              {renderInput()}
+            </motion.div>
+          ) : (
+            <motion.div
+              key="output"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+            >
+              {renderOutput()}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {!processed && (
+          <div
+            className={`mt-4 flex ${
+              isRtl ? 'justify-start' : 'justify-end'
+            }`}
+          >
+            <Button
+              onClick={process}
+              disabled={loading || isButtonDisabled}
+              className="min-w-[140px]"
+            >
+              {loading
+                ? isRtl
+                  ? 'جاري المعالجة...'
+                  : 'Processing...'
+                : isRtl
+                  ? 'معالجة'
+                  : 'Process'}
+            </Button>
+          </div>
+        )}
+      </div>
+    </ToolLayout>
+
+    <AnimatePresence>
+      {loading && (
+        <ProcessingOverlay
+          message={isRtl ? 'جاري المعالجة...' : 'Processing...'}
+        />
+      )}
+    </AnimatePresence>
+  </>
+);
 }

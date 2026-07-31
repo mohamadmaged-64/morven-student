@@ -5,6 +5,7 @@ import { useAppStore } from '@/store/useAppStore';
 import { ThemeToggle } from '@/components/UI/ThemeToggle';
 import { usePomodoroStore } from '@/store/usePomodoroStore';
 import { useNavigate } from 'react-router-dom';
+import { HeaderQuranPlayer } from '@/components/quran/HeaderQuranPlayer';
 
 interface HeaderProps {
   title?: string;
@@ -95,8 +96,9 @@ export function Header({ title }: HeaderProps) {
           </h1>
         )}
 
-       
-      <div className="flex-1 flex justify-center md:justify-end">
+        <HeaderQuranPlayer />
+
+       <div className="flex-1 flex justify-center md:justify-end">
       <div className="flex flex-col items-center md:items-end text-center md:text-right">
     <span className="text-sm font-semibold text-gray-900 dark:text-white">
       {gregorianDate}

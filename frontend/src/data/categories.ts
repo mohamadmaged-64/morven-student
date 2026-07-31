@@ -20,7 +20,9 @@ export interface CategoryMeta {
   icon: LucideIcon;
   description: string;
   descriptionAr: string;
+  comingSoon?: boolean;
 }
+
 
 export const categories: Record<ToolCategory, CategoryMeta> = {
    general: {
@@ -48,6 +50,7 @@ export const categories: Record<ToolCategory, CategoryMeta> = {
     name: 'AI Study Tools',
     nameAr: 'أدوات الذكاء الاصطناعي',
     icon: Brain,
+    comingSoon: true,
     description: 'Summarize, explain, generate quizzes and study aids with AI',
     descriptionAr: 'تلخيص وشرح وإنشاء اختبارات ووسائل تعليمية بالذكاء الاصطناعي',
   },

@@ -20,6 +20,8 @@ import { useAppStore } from '@/store/useAppStore';
 import { useLanguageStore } from '@/store/useLanguageStore';
 import { usePomodoroStore, type PomodoroMode, type PomodoroSettings } from '@/store/usePomodoroStore';
 import type { Task, ExamCountdown } from '@/types';
+import QuranPage from './Quran';
+import NotesPage from './Notes';
 
 
 // Shared
@@ -44,6 +46,14 @@ export default function GeneralToolPage({ toolId }: GeneralToolPageProps) {
 
     case 'exam-countdown':
       content = <ExamCountdownPage />;
+      break;
+
+    case 'holy-quran':
+      content = <QuranPage />;
+      break;
+
+    case 'notes':
+      content = <NotesPage />;
       break;
 
     default:

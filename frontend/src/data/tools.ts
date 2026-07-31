@@ -28,7 +28,7 @@ import {
   HelpCircle, Zap, Layers, BookOpenCheck, CalendarDays, BrainCircuit,
   Book, Type, ScrollText, Microscope, Sparkles, Smartphone, Timer,
   ListTodo, Calendar, ClipboardPlus, FileArchive, ArrowUpDown, Droplets, Signature, ScanSearch, ScanText, GitCompare, Stethoscope, Scale, Pill, FlaskConical, FileHeart,
-  Cog
+  Cog,Combine, Archive, Hash, NotebookPen
 } from "lucide-react";
 
 export const icon = {
@@ -39,16 +39,19 @@ export const icon = {
   Music, Lightbulb, Pen, CheckCircle, Globe, List, Newspaper, Key,
   HelpCircle, Zap, Layers, BookOpenCheck, CalendarDays, BrainCircuit,
   Book, Type, ScrollText, Microscope, Sparkles, Smartphone, Timer,
-  ListTodo, Calendar, ClipboardPlus, FileArchive, ArrowUpDown, Droplets, Signature, ScanSearch, ScanText, GitCompare, Stethoscope, Scale, Pill, FlaskConical, FileHeart
+  ListTodo, Calendar, ClipboardPlus, FileArchive, ArrowUpDown, Droplets, Signature, ScanSearch, ScanText, GitCompare, Stethoscope, Scale, Pill, FlaskConical, FileHeart,
+  Cog,Combine, Archive, Hash, NotebookPen
 
 }
 
 export const tools: Tool[] = [
   // GENERAL
-  { id: 'pomodoro-timer', name: 'Pomodoro Timer', nameAr: 'مؤقت بومودورو', description: 'Boost productivity with timed study sessions', descriptionAr: 'تعزيز الإنتاجية بجلسات دراسة محددة الوقت', icon: Timer, category: 'general' },
+  { id: 'holy-quran', name: 'Holy Quran', nameAr: 'القرآن الكريم', description: 'The best way to begin your study session is with the words of Allah; they bring peace to the soul, blessings to knowledge, and help you stay focused.', descriptionAr: 'خيرُ ما تُستفتح به دراستك هو كلامُ الله؛ فهو سكينةٌ للروح، وبركةٌ في العلم، وعونٌ على التركيز.', icon: Book, category: 'general' },
   { id: 'task-manager', name: 'Task Manager', nameAr: 'مدير المهام', description: 'Organize and track your study tasks', descriptionAr: 'تنظيم وتتبع مهام دراستك', icon: ListTodo, category: 'general' },
+  { id: 'notes', name: 'Notes', nameAr: 'الملاحظات', description: 'Quickly create and organize your notes with automatic saving', descriptionAr: 'أنشئ واحفظ ملاحظاتك بسرعة مع حفظ تلقائي', icon: NotebookPen, category: 'general' },
+  { id: 'pomodoro-timer', name: 'Pomodoro Timer', nameAr: 'مؤقت بومودورو', description: 'Boost productivity with timed study sessions', descriptionAr: 'تعزيز الإنتاجية بجلسات دراسة محددة الوقت', icon: Timer, category: 'general' },
   { id: 'exam-countdown', name: 'Exam Countdown', nameAr: 'عد تنازلي للامتحان', description: 'Track days remaining until your exams', descriptionAr: 'تتبع الأيام المتبقية حتى امتحاناتك', icon: Calendar, category: 'general' },
-
+  
   // MEDICAL
   { id: 'medical-summarizer', name: 'Medical Summarizer', nameAr: 'ملخص طبي', description: 'Summarize medical texts and articles', descriptionAr: 'تلخيص النصوص والمقالات الطبية', icon: FileHeart, comingSoon: true, category: 'medical' },
   { id: 'medical-flashcards', name: 'Medical Flashcards', nameAr: 'بطاقات طبية', description: 'Pre-made medical study flashcards', descriptionAr: 'بطاقات دراسية طبية جاهزة', icon: BookOpenCheck, comingSoon: true, category: 'medical' },
@@ -64,8 +67,6 @@ export const tools: Tool[] = [
   // AI
   { id: 'summarize-text', name: 'Summarize Text', nameAr: 'تلخيص نص', description: 'AI-powered text summarization', descriptionAr: 'تلخيص النصوص بالذكاء الاصطناعي', icon: ScrollText, category: 'ai' },
   { id: 'summarize-pdf', name: 'Summarize PDF', nameAr: 'تلخيص PDF', description: 'Summarize PDF documents with AI', descriptionAr: 'تلخيص مستندات PDF بالذكاء الاصطناعي', icon: FileText, category: 'ai' },
-  { id: 'summarize-word', name: 'Summarize Word', nameAr: 'تلخيص Word', description: 'Summarize Word documents with AI', descriptionAr: 'تلخيص مستندات Word بالذكاء الاصطناعي', icon: FileText, category: 'ai' },
-  { id: 'summarize-ppt', name: 'Summarize PPT', nameAr: 'تلخيص PPT', description: 'Summarize PowerPoint presentations with AI', descriptionAr: 'تلخيص عروض PowerPoint بالذكاء الاصطناعي', icon: Presentation, category: 'ai' },
   { id: 'summarize-images', name: 'Summarize Images', nameAr: 'تلخيص الصور', description: 'Extract and summarize text from images', descriptionAr: 'استخراج وتلخيص النص من الصور', icon: FileImage, comingSoon: true, category: 'ai' },
   { id: 'summarize-youtube', name: 'Summarize YouTube', nameAr: 'تلخيص يوتيوب', description: 'Summarize YouTube video content', descriptionAr: 'تلخيص محتوى فيديوهات يوتيوب', icon: PlaySquare, comingSoon: true, category: 'ai' },
   { id: 'summarize-audio', name: 'Summarize Audio', nameAr: 'تلخيص الصوت', description: 'Transcribe and summarize audio recordings', descriptionAr: 'نسخ وتلخيص التسجيلات الصوتية', icon: Music, comingSoon: true, category: 'ai' },
@@ -108,15 +109,14 @@ export const tools: Tool[] = [
   // POWERPOINT
 { id: 'generate-ppt-text', name: 'Generate PPT from Text', nameAr: 'إنشاء PPT من نص', description: 'Create a presentation from text content', descriptionAr: 'إنشاء عرض تقديمي من محتوى نصي', icon: Presentation, category: 'powerpoint', comingSoon: true },
 { id: 'generate-ppt-pdf', name: 'Generate PPT from PDF', nameAr: 'إنشاء PPT من PDF', description: 'Convert PDF to a PowerPoint presentation', descriptionAr: 'تحويل PDF إلى عرض PowerPoint', icon: FileText, category: 'powerpoint', comingSoon: true },
-{ id: 'generate-ppt-word', name: 'Generate PPT from Word', nameAr: 'إنشاء PPT من Word', description: 'Create a presentation from a Word document', descriptionAr: 'إنشاء عرض تقديمي من مستند Word', icon: FileText, category: 'powerpoint', comingSoon: true },
-{ id: 'generate-ppt-research', name: 'Generate Research PPT', nameAr: 'إنشاء PPT بحثي', description: 'Create research presentation slides', descriptionAr: 'إنشاء شرائح عرض تقديمي بحثية', icon: Microscope, category: 'powerpoint', comingSoon: true },
-{ id: 'extract-ppt-text', name: 'Extract PPT Text', nameAr: 'استخراج نص PPT', description: 'Extract all text from a PowerPoint file', descriptionAr: 'استخراج كل النص من ملف PowerPoint', icon: FileSearch, category: 'powerpoint', comingSoon: true },
-{ id: 'convert-ppt-pdf', name: 'Convert PPT to PDF', nameAr: 'تحويل PPT إلى PDF', description: 'Convert PowerPoint to PDF format', descriptionAr: 'تحويل PowerPoint إلى صيغة PDF', icon: FileText, category: 'powerpoint', comingSoon: true },
-{ id: 'improve-slides', name: 'Improve Slides', nameAr: 'تحسين الشرائح', description: 'AI-powered slide improvement and redesign', descriptionAr: 'تحسين وإعادة تصميم الشرائح بالذكاء الاصطناعي', icon: Sparkles, category: 'powerpoint', comingSoon: true },
-{ id: 'add-images-slides', name: 'Add Images to Slides', nameAr: 'إضافة صور للشرائح', description: 'Automatically add relevant images to slides', descriptionAr: 'إضافة صور ذات صلة تلقائياً إلى الشرائح', icon: FileImage, category: 'powerpoint', comingSoon: true },
-{ id: 'generate-speaker-notes', name: 'Generate Speaker Notes', nameAr: 'إنشاء ملاحظات المتحدث', description: 'Generate speaker notes for presentation slides', descriptionAr: 'إنشاء ملاحظات المتحدث لشرائح العرض', icon: ClipboardList, category: 'powerpoint', comingSoon: true },
+{ id: 'merge-ppt', name: 'Merge PowerPoint', nameAr: 'دمج عروض PowerPoint', description: 'Combine multiple PowerPoint presentations into one', descriptionAr: 'دمج عدة عروض PowerPoint في عرض واحد', icon: Combine, category: 'powerpoint', comingSoon: true },
+{ id: 'split-ppt', name: 'Split PowerPoint', nameAr: 'تقسيم عرض PowerPoint', description: 'Split a presentation into multiple files', descriptionAr: 'تقسيم عرض PowerPoint إلى عدة ملفات', icon: Scissors, category: 'powerpoint', comingSoon: true },
+{ id: 'compress-ppt', name: 'Compress PowerPoint', nameAr: 'ضغط PowerPoint', description: 'Reduce the size of your PowerPoint presentation', descriptionAr: 'تقليل حجم عرض PowerPoint', icon: Archive, category: 'powerpoint', comingSoon: true },
+{ id: 'protect-ppt', name: 'Protect PowerPoint', nameAr: 'حماية PowerPoint', description: 'Add password protection to your presentation', descriptionAr: 'إضافة كلمة مرور لحماية العرض التقديمي', icon: Lock, category: 'powerpoint', comingSoon: true },
+{ id: 'unlock-ppt', name: 'Unlock PowerPoint', nameAr: 'إزالة حماية PowerPoint', description: 'Remove password protection from your presentation', descriptionAr: 'إزالة كلمة المرور من العرض التقديمي', icon: Unlock, category: 'powerpoint', comingSoon: true },
+ { id: 'number-slides', name: 'Number Slides', nameAr: 'ترقيم الشرائح', description: 'Automatically add slide numbers to your presentation', descriptionAr: 'إضافة أرقام الشرائح تلقائيًا إلى العرض التقديمي', icon: Hash, category: 'powerpoint', comingSoon: true },
 
-  // VIDEO
+// VIDEO
   { id: 'extract-audio-video', name: 'Extract Audio from Video', nameAr: 'استخراج الصوت من فيديو', description: 'Extract audio track from video files', descriptionAr: 'استخراج المسار الصوتي من ملفات الفيديو', icon: Music, category: 'video' },
   { id: 'compress-video', name: 'Compress Video', nameAr: 'ضغط الفيديو', description: 'Reduce video file size while maintaining quality', descriptionAr: 'تقليل حجم ملف الفيديو مع الحفاظ على الجودة', icon: Minimize2, comingSoon: true, category: 'video' },
   { id: 'convert-video', name: 'Convert Video', nameAr: 'تحويل الفيديو', description: 'Convert videos between different formats', descriptionAr: 'تحويل الفيديوهات بين صيغ مختلفة', icon: ArrowLeftRight, comingSoon: true, category: 'video' },

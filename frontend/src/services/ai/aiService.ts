@@ -1,8 +1,7 @@
 /**
- * AI Service — Single Entry Point
+ * AI Service — Frontend HTTP Client
  *
- * Every AI tool in the application MUST call this function.
- * No tool should ever communicate directly with a provider.
+ * Every AI tool calls this function. It forwards requests to the backend.
  *
  * Usage:
  *   import { aiService } from '@/services/ai';
@@ -18,28 +17,9 @@ import type {
   AIResponse,
   AIError,
   AIErrorCode,
-  AIProvider,
   StreamChunk,
-  GenerationOptions,
 } from './types';
-import { mergeConfig } from './config';
-import { geminiProvider } from './providers/gemini';
-import { getPrompt } from './prompts';
-
-// ─── Provider Registry ───────────────────────────────────────
-
-const providers: Record<string, AIProvider> = {
-  gemini: geminiProvider,
-  // future: openai, groq, openrouter, anthropic
-};
-
-function getProvider(name: string): AIProvider {
-  const p = providers[name];
-  if (!p) {
-    throw buildError('PROVIDER_ERROR', `Unknown provider: "${name}".`);
-  }
-  return p;
-}
+import { getBackendUrl } from './config';
 
 // ─── Error Builder ───────────────────────────────────────────
 
@@ -47,10 +27,11 @@ function buildError(code: AIErrorCode, message: string, cause?: unknown): AIErro
   return { code, message, cause };
 }
 
+
+
 // ─── Main Entry Point ────────────────────────────────────────
 
 export async function aiService(request: AIRequest): Promise<AIResponse> {
-  // 1. Validate input
   if (!request.input || !request.input.trim()) {
     throw buildError('INVALID_REQUEST', 'Input text cannot be empty.');
   }
@@ -59,81 +40,54 @@ export async function aiService(request: AIRequest): Promise<AIResponse> {
     throw buildError('INVALID_REQUEST', 'Tool name is required.');
   }
 
-  // 2. Resolve config (merges defaults + caller overrides)
-  const config = mergeConfig(request.options);
+  const url = `${getBackendUrl()}/api/ai/generate`;
 
-  // 3. Resolve provider
-  const provider = getProvider(config.provider);
+  let response: Response;
 
-  // 4. Resolve prompt (if registered)
-  const promptDef = getPrompt(request.tool);
-
-  // Build enriched request with system prompt if available
-  const enrichedRequest: AIRequest = promptDef
-    ? {
-        ...request,
-        context: {
-          ...request.context,
-          __system: promptDef.build(request).system,
-        },
-      }
-    : request;
-
-  // 5. Generate
   try {
-    return await provider.generate(enrichedRequest, config);
-  } catch (err) {
-    // If it's already a normalised AIError, rethrow
-    if (isAIError(err)) throw err;
+    response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(request),
+    });
+  } catch {
+    throw buildError('NETWORK_ERROR', 'Could not reach the AI service. Is the backend running?');
+  }
 
-    // Otherwise wrap it
-    throw buildError('UNKNOWN_ERROR', 'An unexpected error occurred.', err);
+  if (!response.ok) {
+    let errorData: { code?: string; message?: string } = {};
+
+    try {
+      errorData = await response.json();
+    } catch {
+      // response wasn't JSON — use status text
+    }
+
+    const code = (errorData.code as AIErrorCode) || 'PROVIDER_ERROR';
+    const message = errorData.message || `AI request failed (${response.status})`;
+
+    throw buildError(code, message);
+  }
+
+  try {
+    const data: AIResponse = await response.json();
+    return data;
+  } catch {
+    throw buildError('PROVIDER_ERROR', 'Invalid response from AI service.');
   }
 }
-
 // ─── Streaming Entry Point ───────────────────────────────────
 
+/**
+ * TODO:
+ * Implement streaming when the backend supports
+ * Server-Sent Events (SSE) or WebSockets.
+ */
 export async function* aiServiceStream(
-  request: AIRequest,
+  _request: AIRequest,
 ): AsyncGenerator<StreamChunk, void, unknown> {
-  if (!request.input || !request.input.trim()) {
-    throw buildError('INVALID_REQUEST', 'Input text cannot be empty.');
-  }
-
-  if (!request.tool) {
-    throw buildError('INVALID_REQUEST', 'Tool name is required.');
-  }
-
-  const config = mergeConfig(request.options);
-  const provider = getProvider(config.provider);
-
-  const promptDef = getPrompt(request.tool);
-  const enrichedRequest: AIRequest = promptDef
-    ? {
-        ...request,
-        context: {
-          ...request.context,
-          __system: promptDef.build(request).system,
-        },
-      }
-    : request;
-
-  try {
-    yield* provider.generateStream(enrichedRequest, config);
-  } catch (err) {
-    if (isAIError(err)) throw err;
-    throw buildError('UNKNOWN_ERROR', 'An unexpected error occurred.', err);
-  }
-}
-
-// ─── Helpers ─────────────────────────────────────────────────
-
-function isAIError(err: unknown): err is AIError {
-  return (
-    typeof err === 'object' &&
-    err !== null &&
-    'code' in err &&
-    'message' in err &&
-    typeof (err as AIError).code === 'string'
+  throw buildError(
+    'PROVIDER_ERROR',
+    'Streaming is not yet supported by the backend.',
   );
 }

@@ -24,7 +24,7 @@ const registry: PromptRegistry = new Map();
 
 /**
  * Register a prompt definition for a tool.
- * Throws if a prompt for this tool is already registered (prevents silent conflicts).
+ Logs a warning if a prompt for this tool is already registered, then overwrites it.
  */
 export function registerPrompt(tool: ToolName, definition: PromptDefinition): void {
   if (registry.has(tool)) {

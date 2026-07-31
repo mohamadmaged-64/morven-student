@@ -19,6 +19,7 @@
     "jszip": "^3.10.1",
     "lucide-react": "^1.24.0",
     "marked": "^13.0.2",
+    "openai": "^7.1.0",
     "pdf-lib": "^1.17.1",
     "pdfjs-dist": "^4.4.168",
     "pptxgenjs": "^3.12.0",

@@ -2,10 +2,11 @@ import { NavLink } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { FileIcon } from 'lucide-react';
-
+import { useLanguageStore } from '@/store/useLanguageStore';
 import { categories } from '@/data/categories';
 import { iconMap } from './iconMap';
 import { itemVariants } from './itemVariants';
+import { Badge } from '@/components/UI/Badge'
 
 interface SidebarCategoryProps {
   category: string;
@@ -31,7 +32,8 @@ export function SidebarCategory({
     typeof meta.icon === 'string'
       ? (iconMap[meta.icon as keyof typeof iconMap] || FileIcon)
       : meta.icon;
-
+const language = useLanguageStore((s) => s.language);
+  const isComingSoon = meta.comingSoon;
   return (
     <motion.div
       custom={index}
@@ -39,6 +41,7 @@ export function SidebarCategory({
       animate="visible"
       variants={itemVariants}
     >
+      
       <NavLink
         to={`/category/${category}`}
         onClick={() => isMobile && onNavigate()}
@@ -51,21 +54,36 @@ export function SidebarCategory({
           ].join(' ')
         }
       >
-        <Icon size={18} className="shrink-0" />
+       <Icon size={18} className="shrink-0" />
 
-        <AnimatePresence>
-          {showText && (
-            <motion.span
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="flex-1 truncate whitespace-nowrap text-start"
-            >
-              {t(`nav.${category}`)}
-            </motion.span>
-          )}
-        </AnimatePresence>
-      </NavLink>
+<AnimatePresence>
+  {showText && (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="flex items-center justify-between flex-1 min-w-0"
+    >
+      <span className="truncate whitespace-nowrap text-start">
+        {t(`nav.${category}`)}
+      </span>
+
+      {isComingSoon && (
+  <Badge variant="warning" size="sm">
+    {language === 'ar' ? 'قريبًا' : 'Coming Soon'}
+  </Badge>
+)}
+       
     </motion.div>
+    
+  )}
+  
+</AnimatePresence>
+
+      </NavLink>
+      
+    </motion.div>
+    
   );
+  
 }
