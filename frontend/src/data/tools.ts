@@ -20,7 +20,7 @@ export interface CategoryMeta {
 }
 
 import {
-  FileText, FileImage, Brain, Presentation, Video, Mic, Image as ImageIcon, QrCode,
+  FileText, FileImage, Brain, Presentation, Video, Mic, ImageIcon, QrCode,
   GraduationCap, HeartPulse, File, FileSpreadsheet, Paperclip, Scissors,
   Minimize2, Trash2, Shuffle, RotateCw, Lock, Unlock, Droplet, PenTool,
   Search, Printer, ArrowLeftRight, FileSearch, ClipboardList, PlaySquare,
@@ -28,7 +28,11 @@ import {
   HelpCircle, Zap, Layers, BookOpenCheck, CalendarDays, BrainCircuit,
   Book, Type, ScrollText, Microscope, Sparkles, Smartphone, Timer,
   ListTodo, Calendar, ClipboardPlus, FileArchive, ArrowUpDown, Droplets, Signature, ScanSearch, ScanText, GitCompare, Stethoscope, Scale, Pill, FlaskConical, FileHeart,
-  Cog,Combine, Archive, Hash, NotebookPen
+  Cog,Combine, Archive, Hash, NotebookPen,
+  Braces, Regex, KeyRound, Fingerprint, Palette, Code2, FileCode2, Wand2, Table,
+  FileCode, Link, Server, Gauge, Route, Database, Box, Boxes, Table2, Grid3x3,
+  GitBranch, Terminal, Cloud, AtSign, Columns, Clock, Barcode, Quote, ListChecks,
+  CalendarClock, ShieldCheck, BadgeCheck, LockKeyhole, Shield
 } from "lucide-react";
 
 export const icon = {
@@ -53,16 +57,73 @@ export const tools: Tool[] = [
   { id: 'exam-countdown', name: 'Exam Countdown', nameAr: 'عد تنازلي للامتحان', description: 'Track days remaining until your exams', descriptionAr: 'تتبع الأيام المتبقية حتى امتحاناتك', icon: Calendar, category: 'general' },
   
   // MEDICAL
+  { id: 'disease-explain', name: 'Disease Explainer', nameAr: 'شرح الأمراض', description: 'Get simple explanations of diseases and conditions', descriptionAr: 'الحصول على شروحات بسيطة للأمراض والحالات', icon: Stethoscope, category: 'medical' },
+  { id: 'disease-compare', name: 'Disease Comparator', nameAr: 'مقارنة الأمراض', description: 'Compare different diseases side by side', descriptionAr: 'مقارنة الأمراض المختلفة جنباً إلى جنب', icon: Scale,  category: 'medical' },
+  { id: 'drug-summary', name: 'Drug Summary', nameAr: 'مرجع الأدوية', description: 'Quick access to drug information and interactions', descriptionAr: 'وصول سريع لمعلومات الأدوية والتفاعلات', icon: Pill, category: 'medical' },
+  { id: 'lab-values', name: 'Lab Values', nameAr: 'قيم المختبر', description: 'Reference for normal lab values and ranges', descriptionAr: 'مرجع للقيم المختبرية الطبيعية ونطاقاتها', icon: FlaskConical, category: 'medical' },
+  { id: 'medical-notes', name: 'Medical Notes', nameAr: 'ملاحظات طبية', description: 'Template-based clinical note taking', descriptionAr: 'تدوين الملاحظات السريرية بالقوالب', icon: ClipboardPlus, category: 'medical' },
+   { id: 'medical-flashcards', name: 'Medical Flashcards', nameAr: 'بطاقات طبية', description: 'Pre-made medical study flashcards', descriptionAr: 'بطاقات دراسية طبية جاهزة', icon: BookOpenCheck, comingSoon: true, category: 'medical' },
   { id: 'medical-summarizer', name: 'Medical Summarizer', nameAr: 'ملخص طبي', description: 'Summarize medical texts and articles', descriptionAr: 'تلخيص النصوص والمقالات الطبية', icon: FileHeart, comingSoon: true, category: 'medical' },
-  { id: 'medical-flashcards', name: 'Medical Flashcards', nameAr: 'بطاقات طبية', description: 'Pre-made medical study flashcards', descriptionAr: 'بطاقات دراسية طبية جاهزة', icon: BookOpenCheck, comingSoon: true, category: 'medical' },
-  { id: 'medical-mcq', name: 'Medical MCQ', nameAr: 'أسئلة طبية اختيار', description: 'Generate medical multiple choice questions', descriptionAr: 'إنشاء أسئلة اختيار من متعدد طبية', icon: HelpCircle, comingSoon: true, category: 'medical' },
-  { id: 'disease-explain', name: 'Disease Explainer', nameAr: 'شرح الأمراض', description: 'Get simple explanations of diseases and conditions', descriptionAr: 'الحصول على شروحات بسيطة للأمراض والحالات', icon: Stethoscope, comingSoon: true, category: 'medical' },
-  { id: 'disease-compare', name: 'Disease Comparator', nameAr: 'مقارنة الأمراض', description: 'Compare different diseases side by side', descriptionAr: 'مقارنة الأمراض المختلفة جنباً إلى جنب', icon: Scale, comingSoon: true, category: 'medical' },
-  { id: 'drug-summary', name: 'Drug Summary', nameAr: 'مرجع الأدوية', description: 'Quick access to drug information and interactions', descriptionAr: 'وصول سريع لمعلومات الأدوية والتفاعلات', icon: Pill, comingSoon: true, category: 'medical' },
-  { id: 'lab-values', name: 'Lab Values', nameAr: 'قيم المختبر', description: 'Reference for normal lab values and ranges', descriptionAr: 'مرجع للقيم المختبرية الطبيعية ونطاقاتها', icon: FlaskConical, comingSoon: true, category: 'medical' },
-  { id: 'medical-notes', name: 'Medical Notes', nameAr: 'ملاحظات طبية', description: 'Template-based clinical note taking', descriptionAr: 'تدوين الملاحظات السريرية بالقوالب', icon: ClipboardPlus, comingSoon: true, category: 'medical' },
-
+  { id: 'medical-mcq', name: 'Medical MCQ', nameAr: 'أسئلة طبية اختيار من متعدد', description: 'Generate medical multiple choice questions', descriptionAr: 'إنشاء أسئلة اختيار من متعدد طبية', icon: HelpCircle, comingSoon: true, category: 'medical' },
+ 
   // ENGINEERING
+  // Code Tools
+  { id: 'json-formatter', name: 'JSON Formatter', nameAr: 'منسق JSON', description: 'Format, validate, and beautify JSON data', descriptionAr: 'تنسيق والتحقق من بيانات JSON وتجميلها', icon: Braces, category: 'engineering' },
+  { id: 'json-validator', name: 'JSON Validator', nameAr: 'مدقق JSON', description: 'Validate JSON data and get detailed error reports', descriptionAr: 'التحقق من بيانات JSON مع تقارير أخطاء مفصلة', icon: CheckCircle, category: 'engineering' },
+  { id: 'regex-tester', name: 'Regex Tester', nameAr: 'اختبار التعبيرات النمطية', description: 'Test regular expressions against sample text', descriptionAr: 'اختبار التعبيرات النمطية على نص تجريبي', icon: Regex, category: 'engineering' },
+  { id: 'uuid-generator', name: 'UUID Generator', nameAr: 'مولد UUID', description: 'Generate random UUID v4 identifiers', descriptionAr: 'توليد معرفات UUID عشوائية v4', icon: Hash, category: 'engineering' },
+  { id: 'base64-encoder', name: 'Base64 Encoder/Decoder', nameAr: 'ترميز Base64', description: 'Encode and decode Base64 text', descriptionAr: 'ترميز وفك ترميز نص Base64', icon: ArrowLeftRight, category: 'engineering' },
+  { id: 'jwt-decoder', name: 'JWT Decoder', nameAr: 'فك ترميز JWT', description: 'Decode and inspect JWT tokens', descriptionAr: 'فك ترميز وفحص رموز JWT', icon: KeyRound, comingSoon: true, category: 'engineering' },
+  { id: 'hash-generator', name: 'Hash Generator', nameAr: 'مولد التجزئة', description: 'Generate SHA-1, SHA-256, SHA-384, and SHA-512 hashes', descriptionAr: 'توليد تجزئات SHA-1 وSHA-256 وSHA-384 وSHA-512', icon: Fingerprint, category: 'engineering' },
+  { id: 'password-generator', name: 'Password Generator', nameAr: 'مولد كلمات المرور', description: 'Generate strong random passwords', descriptionAr: 'توليد كلمات مرور قوية عشوائية', icon: Lock, category: 'engineering' },
+  // Web Development
+  { id: 'html-preview', name: 'HTML Preview', nameAr: 'معاينة HTML', description: 'Write HTML and preview it instantly', descriptionAr: 'اكتب HTML وشاهد المعاينة فوراً', icon: Globe, category: 'engineering' },
+  { id: 'css-beautifier', name: 'CSS Beautifier', nameAr: 'منسق CSS', description: 'Format and beautify CSS code', descriptionAr: 'تنسيق وتجميل أكواد CSS', icon: Palette, comingSoon: true, category: 'engineering' },
+  { id: 'css-minifier', name: 'CSS Minifier', nameAr: 'مصغّر CSS', description: 'Minify CSS to reduce file size', descriptionAr: 'تصغير CSS لتقليل حجم الملف', icon: Minimize2, comingSoon: true, category: 'engineering' },
+  { id: 'js-beautifier', name: 'JavaScript Beautifier', nameAr: 'منسق JavaScript', description: 'Format and beautify JavaScript code', descriptionAr: 'تنسيق وتجميل أكواد JavaScript', icon: Code2, comingSoon: true, category: 'engineering' },
+  { id: 'js-minifier', name: 'JavaScript Minifier', nameAr: 'مصغّر JavaScript', description: 'Minify JavaScript to reduce file size', descriptionAr: 'تصغير JavaScript لتقليل حجم الملف', icon: FileCode2, comingSoon: true, category: 'engineering' },
+  { id: 'svg-viewer', name: 'SVG Viewer', nameAr: 'عارض SVG', description: 'Write SVG and preview it in real time', descriptionAr: 'اكتب SVG وشاهد المعاينة مباشرة', icon: PenTool, category: 'engineering' },
+  { id: 'color-picker', name: 'Color Picker', nameAr: 'منتقي الألوان', description: 'Pick colors and get their HEX, RGB, and HSL values', descriptionAr: 'اختر الألوان واحصل على قيم HEX وRGB وHSL', icon: Wand2, category: 'engineering' },
+  { id: 'gradient-generator', name: 'Gradient Generator', nameAr: 'مولد التدرجات', description: 'Create beautiful CSS gradients', descriptionAr: 'إنشاء تدرجات CSS جميلة', icon: Sparkles, category: 'engineering' },
+  // Data Conversion
+  { id: 'json-yaml', name: 'JSON to YAML', nameAr: 'JSON إلى YAML', description: 'Convert between JSON and YAML formats', descriptionAr: 'التحويل بين صيغتي JSON وYAML', icon: Shuffle, comingSoon: true, category: 'engineering' },
+  { id: 'json-xml', name: 'JSON to XML', nameAr: 'JSON إلى XML', description: 'Convert between JSON and XML formats', descriptionAr: 'التحويل بين صيغتي JSON وXML', icon: ArrowLeftRight, comingSoon: true, category: 'engineering' },
+  { id: 'csv-json', name: 'CSV to JSON', nameAr: 'CSV إلى JSON', description: 'Convert CSV data to JSON and back', descriptionAr: 'تحويل بيانات CSV إلى JSON والعكس', icon: Table, category: 'engineering' },
+  { id: 'markdown-html', name: 'Markdown to HTML', nameAr: 'Markdown إلى HTML', description: 'Convert Markdown text to HTML', descriptionAr: 'تحويل نص Markdown إلى HTML', icon: FileText, category: 'engineering' },
+  { id: 'html-markdown', name: 'HTML to Markdown', nameAr: 'HTML إلى Markdown', description: 'Convert HTML to Markdown text', descriptionAr: 'تحويل HTML إلى نص Markdown', icon: FileCode, comingSoon: true, category: 'engineering' },
+  { id: 'url-encoder', name: 'URL Encode/Decode', nameAr: 'ترميز URL', description: 'Encode and decode URL strings', descriptionAr: 'ترميز وفك ترميز روابط URL', icon: Link, category: 'engineering' },
+  // API & Networking
+  { id: 'api-tester', name: 'API Tester', nameAr: 'اختبار API', description: 'Test HTTP APIs with custom requests', descriptionAr: 'اختبار واجهات برمجة التطبيقات HTTP بطلبات مخصصة', icon: Server, comingSoon: true, category: 'engineering' },
+  { id: 'http-status-codes', name: 'HTTP Status Codes', nameAr: 'أكواد حالة HTTP', description: 'Reference for HTTP status codes', descriptionAr: 'مرجع لأكواد حالة HTTP', icon: Gauge, category: 'engineering' },
+  { id: 'http-headers', name: 'HTTP Headers', nameAr: 'ترويسات HTTP', description: 'Reference for common HTTP headers', descriptionAr: 'مرجع لترويسات HTTP الشائعة', icon: ClipboardList, comingSoon: true, category: 'engineering' },
+  { id: 'mime-types', name: 'MIME Types', nameAr: 'أنواع MIME', description: 'Reference for common MIME types', descriptionAr: 'مرجع لأنواع MIME الشائعة', icon: Type, comingSoon: true, category: 'engineering' },
+  { id: 'rest-methods', name: 'REST Methods', nameAr: 'طرق REST', description: 'Reference for HTTP REST methods', descriptionAr: 'مرجع لطرق HTTP REST', icon: Route, category: 'engineering' },
+  // Database
+  { id: 'sql-formatter', name: 'SQL Formatter', nameAr: 'منسق SQL', description: 'Format SQL queries for readability', descriptionAr: 'تنسيق استعلامات SQL للقراءة', icon: Database, comingSoon: true, category: 'engineering' },
+  { id: 'sql-beautifier', name: 'SQL Beautifier', nameAr: 'مجمل SQL', description: 'Beautify and align SQL statements', descriptionAr: 'تجميل ومحاذاة جمل SQL', icon: Box, comingSoon: true, category: 'engineering' },
+  { id: 'sql-playground', name: 'SQL Playground', nameAr: 'بيئة SQL التجريبية', description: 'Experiment with SQL queries', descriptionAr: 'جرّب استعلامات SQL', icon: Boxes, comingSoon: true, category: 'engineering' },
+  { id: 'csv-to-sql', name: 'CSV to SQL', nameAr: 'CSV إلى SQL', description: 'Generate SQL INSERT statements from CSV', descriptionAr: 'توليد جمل إدراج SQL من CSV', icon: Table2, category: 'engineering' },
+  { id: 'json-to-sql', name: 'JSON to SQL', nameAr: 'JSON إلى SQL', description: 'Generate SQL INSERT statements from JSON', descriptionAr: 'توليد جمل إدراج SQL من JSON', icon: Grid3x3, category: 'engineering' },
+  // Developer Reference
+  { id: 'git-cheatsheet', name: 'Git Cheat Sheet', nameAr: 'ورقة غش Git', description: 'Quick reference for common Git commands', descriptionAr: 'مرجع سريع لأوامر Git الشائعة', icon: GitBranch, category: 'engineering' },
+  { id: 'linux-commands', name: 'Linux Commands', nameAr: 'أوامر Linux', description: 'Quick reference for common Linux commands', descriptionAr: 'مرجع سريع لأوامر Linux الشائعة', icon: Terminal, category: 'engineering' },
+  { id: 'regex-cheatsheet', name: 'Regex Cheat Sheet', nameAr: 'ورقة غش التعبيرات النمطية', description: 'Quick reference for regular expression syntax', descriptionAr: 'مرجع سريع لصيغ التعبيرات النمطية', icon: Search, category: 'engineering' },
+  { id: 'http-cheatsheet', name: 'HTTP Cheat Sheet', nameAr: 'ورقة غش HTTP', description: 'Quick reference for HTTP essentials', descriptionAr: 'مرجع سريع لأساسيات HTTP', icon: Cloud, comingSoon: true, category: 'engineering' },
+  { id: 'html-entities', name: 'HTML Entities', nameAr: 'كيانات HTML', description: 'Reference for common HTML entities', descriptionAr: 'مرجع لكيانات HTML الشائعة', icon: AtSign, category: 'engineering' },
+  { id: 'ascii-table', name: 'ASCII Table', nameAr: 'جدول ASCII', description: 'Complete ASCII character reference table', descriptionAr: 'جدول مرجعي كامل لأحرف ASCII', icon: Columns, category: 'engineering' },
+  // Developer Utilities
+  { id: 'unix-timestamp', name: 'Unix Timestamp', nameAr: 'طابع Unix الزمني', description: 'Convert Unix timestamps to human-readable dates', descriptionAr: 'تحويل طوابع Unix الزمنية إلى تواريخ مقروءة', icon: Clock, category: 'engineering' },
+  { id: 'qr-generator-eng', name: 'QR Code Generator', nameAr: 'مولد رموز QR', description: 'Generate QR codes from text and URLs', descriptionAr: 'إنشاء رموز QR من النصوص والروابط', icon: QrCode, category: 'engineering' },
+  { id: 'barcode-generator', name: 'Barcode Generator', nameAr: 'مولد الباركود', description: 'Generate barcodes from numeric data', descriptionAr: 'إنشاء باركود من البيانات الرقمية', icon: Barcode, comingSoon: true, category: 'engineering' },
+  { id: 'lorem-ipsum', name: 'Lorem Ipsum', nameAr: 'مولّد لوريم إيبسوم', description: 'Generate placeholder Lorem Ipsum text', descriptionAr: 'توليد نص لوريم إيبسوم تجريبي', icon: Quote, category: 'engineering' },
+  { id: 'random-data', name: 'Random Data', nameAr: 'مولّد بيانات عشوائية', description: 'Generate random test data of various types', descriptionAr: 'توليد بيانات اختبار عشوائية بأنواع متعددة', icon: ListChecks, category: 'engineering' },
+  { id: 'cron-builder', name: 'Cron Builder', nameAr: 'منشئ Cron', description: 'Build cron expressions visually', descriptionAr: 'إنشاء تعبيرات cron بصرياً', icon: CalendarClock, comingSoon: true, category: 'engineering' },
+  // Security
+  { id: 'password-strength', name: 'Password Strength', nameAr: 'قوة كلمة المرور', description: 'Analyze password strength and security', descriptionAr: 'تحليل قوة وأمان كلمات المرور', icon: ShieldCheck, category: 'engineering' },
+  { id: 'hash-verifier', name: 'Hash Verifier', nameAr: 'مدقق التجزئة', description: 'Verify text against a given hash', descriptionAr: 'التحقق من نص مقابل تجزئة معينة', icon: BadgeCheck, category: 'engineering' },
+  { id: 'hmac-generator', name: 'HMAC Generator', nameAr: 'مولد HMAC', description: 'Generate HMAC signatures with secret keys', descriptionAr: 'توليد توقيعات HMAC بمفاتيح سرية', icon: LockKeyhole, category: 'engineering' },
+  { id: 'jwt-inspector', name: 'JWT Inspector', nameAr: 'فاحص JWT', description: 'Inspect JWT token structure and payload', descriptionAr: 'فحص بنية رموز JWT ومحتواها', icon: Shield, comingSoon: true, category: 'engineering' },
+  { id: 'token-decoder', name: 'Token Decoder', nameAr: 'مفكك الرموز', description: 'Decode various token formats', descriptionAr: 'فك ترميز صيغ الرموز المختلفة', icon: Key, comingSoon: true, category: 'engineering' },
 
   // AI
   { id: 'summarize-text', name: 'Summarize Text', nameAr: 'تلخيص نص', description: 'AI-powered text summarization', descriptionAr: 'تلخيص النصوص بالذكاء الاصطناعي', icon: ScrollText, category: 'ai' },

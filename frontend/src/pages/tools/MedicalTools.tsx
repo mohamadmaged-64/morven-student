@@ -28,18 +28,59 @@ import {
   explainSimply,
 } from '@/utils/ai-helpers';
 import type { Flashcard, MedicalNote } from '@/types';
+import {
+  Search,
+  Info,
+  Stethoscope,
+  TriangleAlert,
+  Pill,
+  ArrowLeft,
+  HeartPulse,
+  Wind,
+  Brain,
+  UtensilsCrossed,
+  Droplets,
+  Activity,
+  Droplet,
+  Bug,
+  Bone,
+  Flower2,
+  Ear,
+  Dumbbell,
+  FlaskConical,
+  Smile,
+  type LucideIcon,
+} from 'lucide-react';
+import { groupBy } from '@/utils/groupBy';
 
 // =============================================================================
 // Types
 // =============================================================================
 
 interface DiseaseInfo {
+category: DiseaseCategory;
   name: string;
   symptoms: string[];
   causes: string[];
   treatment: string[];
   description: string;
 }
+type DiseaseCategory =
+  | 'cardiovascular'
+  | 'respiratory'
+  | 'neurology'
+  | 'gastroenterology'
+  | 'nephrology'
+  | 'endocrine'
+  | 'hematology'
+  | 'infectious'
+  | 'rheumatology'
+  | 'dermatology'
+  | 'ophthalmology'
+  | 'ent'
+  | 'musculoskeletal'
+  | 'metabolic'
+  | 'psychiatry';
 
 interface DrugInfo {
   name: string;
@@ -76,285 +117,893 @@ interface QuizQuestion {
 
 const DISEASES: Record<string, DiseaseInfo> = {
   'Diabetes Type 2': {
-    name: 'Diabetes Mellitus Type 2',
-    symptoms: ['Polyuria', 'Polydipsia', 'Polyphagia', 'Fatigue', 'Blurred vision', 'Slow wound healing', 'Tingling in hands/feet'],
-    causes: ['Insulin resistance', 'Genetic predisposition', 'Obesity', 'Sedentary lifestyle', 'Age over 45', 'PCOS'],
-    treatment: ['Metformin', 'Lifestyle modifications', 'Diet control', 'Regular exercise', 'Sulfonylureas', 'Insulin therapy if needed'],
-    description: 'A chronic metabolic disorder characterized by high blood glucose levels due to insulin resistance and relative insulin deficiency.',
-  },
-  'Hypertension': {
-    name: 'Hypertension',
-    symptoms: ['Often asymptomatic', 'Headache', 'Dizziness', 'Blurred vision', 'Nosebleeds', 'Shortness of breath'],
-    causes: ['High sodium intake', 'Obesity', 'Stress', 'Genetics', 'Lack of exercise', 'Excessive alcohol'],
-    treatment: ['ACE inhibitors', 'ARBs', 'Calcium channel blockers', 'Thiazide diuretics', 'Dietary changes', 'Regular exercise'],
-    description: 'A chronic medical condition where blood pressure in the arteries is persistently elevated.',
-  },
-  'Asthma': {
-    name: 'Asthma',
-    symptoms: ['Wheezing', 'Shortness of breath', 'Chest tightness', 'Coughing at night', 'Exercise intolerance'],
-    causes: ['Allergens', 'Air pollution', 'Respiratory infections', 'Cold air', 'Exercise', 'Stress'],
-    treatment: ['Inhaled corticosteroids', 'Short-acting beta agonists (Albuterol)', 'Leukotriene modifiers', 'Long-acting beta agonists', 'Avoidance of triggers'],
-    description: 'A chronic inflammatory disease of the airways causing reversible airflow obstruction.',
-  },
-  'Pneumonia': {
-    name: 'Pneumonia',
-    symptoms: ['Productive cough', 'Fever and chills', 'Dyspnea', 'Pleuritic chest pain', 'Fatigue', 'Confusion in elderly'],
-    causes: ['Bacterial infection (Streptococcus pneumoniae)', 'Viral infection', 'Fungal infection', 'Aspiration'],
-    treatment: ['Antibiotics (Amoxicillin, Azithromycin)', 'Antivirals if viral', 'Oxygen therapy', 'IV fluids', 'Chest physiotherapy'],
-    description: 'An infection that inflames air sacs in one or both lungs, which may fill with fluid or pus.',
-  },
-  'MI': {
-    name: 'Myocardial Infarction',
-    symptoms: ['Crushing chest pain', 'Pain radiating to left arm/jaw', 'Diaphoresis', 'Nausea/vomiting', 'Shortness of breath', 'Palpitations'],
-    causes: ['Coronary artery occlusion (atherosclerosis)', 'Thrombus formation', 'Coronary vasospasm', 'Embolism'],
-    treatment: ['Aspirin', 'PCI (angioplasty/stenting)', 'Thrombolytics', 'Beta-blockers', 'ACE inhibitors', 'Statins', 'Oxygen'],
-    description: 'Death of myocardial tissue due to prolonged ischemia of the heart muscle, usually from blockage of a coronary artery.',
-  },
-  'Stroke': {
-    name: 'Stroke',
-    symptoms: ['Sudden facial drooping', 'Arm weakness', 'Speech difficulty (FAST)', 'Visual disturbances', 'Severe headache', 'Loss of coordination'],
-    causes: ['Ischemic: thrombosis or embolism', 'Hemorrhagic: ruptured blood vessel', 'Hypertension', 'Atrial fibrillation', 'Atherosclerosis'],
-    treatment: ['Ischemic: tPA (within 4.5 hrs)', 'Mechanical thrombectomy', 'Antiplatelet therapy', 'Hemorrhagic: blood pressure control', 'Surgical intervention', 'Rehabilitation'],
-    description: 'A medical emergency where blood supply to part of the brain is interrupted or reduced, causing brain cell death.',
-  },
-  'COPD': {
-    name: 'COPD',
-    symptoms: ['Chronic cough', 'Sputum production', 'Dyspnea on exertion', 'Wheezing', 'Chest tightness', 'Fatigue'],
-    causes: ['Smoking (primary)', 'Occupational dust/fumes', 'Alpha-1 antitrypsin deficiency', 'Air pollution'],
-    treatment: ['Smoking cessation', 'Inhaled bronchodilators', 'Inhaled corticosteroids', 'Pulmonary rehabilitation', 'Oxygen therapy'],
-    description: 'A group of progressive lung diseases including emphysema and chronic bronchitis, characterized by airflow limitation.',
-  },
-  'Heart Failure': {
-    name: 'Heart Failure',
-    symptoms: ['Dyspnea', 'Orthopnea', 'Peripheral edema', 'Fatigue', 'Exercise intolerance', 'Weight gain', 'JVD'],
-    causes: ['Coronary artery disease', 'Hypertension', 'Cardiomyopathy', 'Valvular heart disease', 'Myocarditis'],
-    treatment: ['ACE inhibitors/ARBs', 'Beta-blockers', 'Diuretics', 'Aldosterone antagonists', 'Digoxin', 'Sodium restriction', 'Device therapy'],
-    description: 'A chronic condition where the heart cannot pump blood efficiently enough to meet the body needs.',
-  },
-  'AFib': {
-    name: 'Atrial Fibrillation',
-    symptoms: ['Palpitations', 'Irregular pulse', 'Dyspnea', 'Fatigue', 'Dizziness', 'Chest discomfort'],
-    causes: ['Hypertension', 'Valvular disease', 'Hyperthyroidism', 'Alcohol excess', 'Obstructive sleep apnea', 'Age'],
-    treatment: ['Rate control (Beta-blockers, CCBs)', 'Rhythm control (Amiodarone)', 'Anticoagulation (Warfarin, DOACs)', 'Cardioversion', 'Catheter ablation'],
-    description: 'The most common cardiac arrhythmia characterized by rapid and irregular atrial activation.',
-  },
-  'DVT': {
-    name: 'Deep Vein Thrombosis',
-    symptoms: ['Unilateral leg swelling', 'Pain/tenderness', 'Warmth', 'Redness', 'Dilated veins'],
-    causes: ['Venous stasis', 'Hypercoagulability', 'Endothelial injury', 'Immobility', 'Surgery', 'Cancer'],
-    treatment: ['Anticoagulation (Heparin then Warfarin)', 'DOACs', 'Compression stockings', 'Thrombolysis in severe cases', 'IVC filter if contraindication'],
-    description: 'Formation of a blood clot in a deep vein, usually in the legs, which can be life-threatening if the clot embolizes to the lungs.',
-  },
+  category: 'endocrine',
+  name: 'Diabetes Mellitus Type 2',
+  symptoms: ['Polyuria', 'Polydipsia', 'Polyphagia', 'Fatigue', 'Blurred vision', 'Slow wound healing', 'Tingling in hands/feet'],
+  causes: ['Insulin resistance', 'Genetic predisposition', 'Obesity', 'Sedentary lifestyle', 'Age over 45', 'PCOS'],
+  treatment: ['Metformin', 'Lifestyle modifications', 'Diet control', 'Regular exercise', 'Sulfonylureas', 'Insulin therapy if needed'],
+  description: 'A chronic metabolic disorder characterized by high blood glucose levels due to insulin resistance and relative insulin deficiency.',
+},
+
+'Hypertension': {
+  category: 'cardiovascular',
+  name: 'Hypertension',
+  symptoms: ['Often asymptomatic', 'Headache', 'Dizziness', 'Blurred vision', 'Nosebleeds', 'Shortness of breath'],
+  causes: ['High sodium intake', 'Obesity', 'Stress', 'Genetics', 'Lack of exercise', 'Excessive alcohol'],
+  treatment: ['ACE inhibitors', 'ARBs', 'Calcium channel blockers', 'Thiazide diuretics', 'Dietary changes', 'Regular exercise'],
+  description: 'A chronic medical condition where blood pressure in the arteries is persistently elevated.',
+},
+
+'Asthma': {
+  category: 'respiratory',
+  name: 'Asthma',
+  symptoms: ['Wheezing', 'Shortness of breath', 'Chest tightness', 'Coughing at night', 'Exercise intolerance'],
+  causes: ['Allergens', 'Air pollution', 'Respiratory infections', 'Cold air', 'Exercise', 'Stress'],
+  treatment: ['Inhaled corticosteroids', 'Short-acting beta agonists (Albuterol)', 'Leukotriene modifiers', 'Long-acting beta agonists', 'Avoidance of triggers'],
+  description: 'A chronic inflammatory disease of the airways causing reversible airflow obstruction.',
+},
+
+'Pneumonia': {
+  category: 'respiratory',
+  name: 'Pneumonia',
+  symptoms: ['Productive cough', 'Fever and chills', 'Dyspnea', 'Pleuritic chest pain', 'Fatigue', 'Confusion in elderly'],
+  causes: ['Bacterial infection (Streptococcus pneumoniae)', 'Viral infection', 'Fungal infection', 'Aspiration'],
+  treatment: ['Antibiotics (Amoxicillin, Azithromycin)', 'Antivirals if viral', 'Oxygen therapy', 'IV fluids', 'Chest physiotherapy'],
+  description: 'An infection that inflames air sacs in one or both lungs, which may fill with fluid or pus.',
+},
+
+'MI': {
+  category: 'cardiovascular',
+  name: 'Myocardial Infarction',
+  symptoms: ['Crushing chest pain', 'Pain radiating to left arm/jaw', 'Diaphoresis', 'Nausea/vomiting', 'Shortness of breath', 'Palpitations'],
+  causes: ['Coronary artery occlusion (atherosclerosis)', 'Thrombus formation', 'Coronary vasospasm', 'Embolism'],
+  treatment: ['Aspirin', 'PCI (angioplasty/stenting)', 'Thrombolytics', 'Beta-blockers', 'ACE inhibitors', 'Statins', 'Oxygen'],
+  description: 'Death of myocardial tissue due to prolonged ischemia of the heart muscle, usually from blockage of a coronary artery.',
+},
+
+'Stroke': {
+  category: 'neurology',
+  name: 'Stroke',
+  symptoms: ['Sudden facial drooping', 'Arm weakness', 'Speech difficulty (FAST)', 'Visual disturbances', 'Severe headache', 'Loss of coordination'],
+  causes: ['Ischemic: thrombosis or embolism', 'Hemorrhagic: ruptured blood vessel', 'Hypertension', 'Atrial fibrillation', 'Atherosclerosis'],
+  treatment: ['Ischemic: tPA (within 4.5 hrs)', 'Mechanical thrombectomy', 'Antiplatelet therapy', 'Hemorrhagic: blood pressure control', 'Surgical intervention', 'Rehabilitation'],
+  description: 'A medical emergency where blood supply to part of the brain is interrupted or reduced, causing brain cell death.',
+},
+
+'COPD': {
+  category: 'respiratory',
+  name: 'COPD',
+  symptoms: ['Chronic cough', 'Sputum production', 'Dyspnea on exertion', 'Wheezing', 'Chest tightness', 'Fatigue'],
+  causes: ['Smoking (primary)', 'Occupational dust/fumes', 'Alpha-1 antitrypsin deficiency', 'Air pollution'],
+  treatment: ['Smoking cessation', 'Inhaled bronchodilators', 'Inhaled corticosteroids', 'Pulmonary rehabilitation', 'Oxygen therapy'],
+  description: 'A group of progressive lung diseases including emphysema and chronic bronchitis, characterized by airflow limitation.',
+},
+
+'Heart Failure': {
+  category: 'cardiovascular',
+  name: 'Heart Failure',
+  symptoms: ['Dyspnea', 'Orthopnea', 'Peripheral edema', 'Fatigue', 'Exercise intolerance', 'Weight gain', 'JVD'],
+  causes: ['Coronary artery disease', 'Hypertension', 'Cardiomyopathy', 'Valvular heart disease', 'Myocarditis'],
+  treatment: ['ACE inhibitors/ARBs', 'Beta-blockers', 'Diuretics', 'Aldosterone antagonists', 'Digoxin', 'Sodium restriction', 'Device therapy'],
+  description: 'A chronic condition where the heart cannot pump blood efficiently enough to meet the body needs.',
+},
+
+'AFib': {
+  category: 'cardiovascular',
+  name: 'Atrial Fibrillation',
+  symptoms: ['Palpitations', 'Irregular pulse', 'Dyspnea', 'Fatigue', 'Dizziness', 'Chest discomfort'],
+  causes: ['Hypertension', 'Valvular disease', 'Hyperthyroidism', 'Alcohol excess', 'Obstructive sleep apnea', 'Age'],
+  treatment: ['Rate control (Beta-blockers, CCBs)', 'Rhythm control (Amiodarone)', 'Anticoagulation (Warfarin, DOACs)', 'Cardioversion', 'Catheter ablation'],
+  description: 'The most common cardiac arrhythmia characterized by rapid and irregular atrial activation.',
+},
+
+'DVT': {
+  category: 'cardiovascular',
+  name: 'Deep Vein Thrombosis',
+  symptoms: ['Unilateral leg swelling', 'Pain/tenderness', 'Warmth', 'Redness', 'Dilated veins'],
+  causes: ['Venous stasis', 'Hypercoagulability', 'Endothelial injury', 'Immobility', 'Surgery', 'Cancer'],
+  treatment: ['Anticoagulation (Heparin then Warfarin)', 'DOACs', 'Compression stockings', 'Thrombolysis in severe cases', 'IVC filter if contraindication'],
+  description: 'Formation of a blood clot in a deep vein, usually in the legs, which can be life-threatening if the clot embolizes to the lungs.',
+},
   'PE': {
-    name: 'Pulmonary Embolism',
-    symptoms: ['Sudden dyspnea', 'Pleuritic chest pain', 'Tachycardia', 'Hemoptysis', 'Hypoxia', 'Anxiety'],
-    causes: ['DVT embolization', 'Immobility', 'Hypercoagulable states', 'Surgery', 'Cancer', 'Oral contraceptives'],
-    treatment: ['Anticoagulation', 'Thrombolysis for massive PE', 'Embolectomy', 'IVC filter', 'Oxygen support', 'Hemodynamic support'],
-    description: 'A blockage in one of the pulmonary arteries in the lungs, usually from blood clots that travel from the legs.',
-  },
-  'GERD': {
-    name: 'GERD',
-    symptoms: ['Heartburn', 'Regurgitation', 'Dysphagia', 'Chronic cough', 'Laryngitis', 'Chest pain'],
-    causes: ['Lower esophageal sphincter dysfunction', 'Obesity', 'Hiatal hernia', 'Pregnancy', 'Smoking'],
-    treatment: ['PPIs (Omeprazole)', 'H2 blockers', 'Lifestyle modifications', 'Dietary changes', 'Antacids', 'Surgery in refractory cases'],
-    description: 'A chronic digestive disease where stomach acid frequently flows back into the esophagus, irritating its lining.',
-  },
-  'Hepatitis': {
-    name: 'Hepatitis',
-    symptoms: ['Jaundice', 'Fatigue', 'Abdominal pain', 'Nausea', 'Dark urine', 'Pale stools', 'Fever'],
-    causes: ['Viral (A, B, C, D, E)', 'Alcohol', 'Autoimmune', 'Drug-induced', 'Toxins'],
-    treatment: ['Hepatitis A: Supportive care', 'Hepatitis B: Antivirals (Tenofovir)', 'Hepatitis C: DAAs (Sofosbuvir)', 'Avoid hepatotoxins', 'Vaccination'],
-    description: 'Inflammation of the liver, most commonly caused by a viral infection, but also by alcohol, toxins, or autoimmune conditions.',
-  },
-  'Cirrhosis': {
-    name: 'Cirrhosis',
-    symptoms: ['Fatigue', 'Jaundice', 'Ascites', 'Peripheral edema', 'Easy bruising', 'Hepatic encephalopathy', 'Spider angiomata'],
-    causes: ['Chronic alcoholism', 'Chronic hepatitis B/C', 'NAFLD', 'Autoimmune hepatitis', 'Biliary diseases'],
-    treatment: ['Treat underlying cause', 'Diuretics for ascites', 'Lactulose for encephalopathy', 'Beta-blockers for portal hypertension', 'Liver transplant'],
-    description: 'Late-stage scarring (fibrosis) of the liver caused by various liver diseases and conditions.',
-  },
-  'CKD': {
-    name: 'Chronic Kidney Disease',
-    symptoms: ['Fatigue', 'Peripheral edema', 'Nocturia', 'Nausea', 'Pruritus', 'Muscle cramps', 'Anorexia'],
-    causes: ['Diabetes mellitus', 'Hypertension', 'Glomerulonephritis', 'Polycystic kidney disease', 'Obstructive uropathy'],
-    treatment: ['ACE inhibitors/ARBs', 'Blood sugar control', 'Dietary modifications (low protein, low sodium)', 'Phosphate binders', 'Dialysis', 'Kidney transplant'],
-    description: 'A gradual loss of kidney function over time, leading to waste accumulation in the body.',
-  },
-  'UTI': {
-    name: 'Urinary Tract Infection',
-    symptoms: ['Dysuria', 'Frequency', 'Urgency', 'Suprapubic pain', 'Hematuria', 'Foul-smelling urine'],
-    causes: ['E. coli (most common)', 'Klebsiella', 'Staphylococcus saprophyticus', 'Sexual activity', 'Female anatomy', 'Catheterization'],
-    treatment: ['Nitrofurantoin', 'Trimethoprim-sulfamethoxazole', 'Ciprofloxacin', 'Increase fluid intake', 'Phenazopyridine for symptoms'],
-    description: 'An infection in any part of the urinary system, most commonly the bladder and urethra.',
-  },
-  'Meningitis': {
-    name: 'Meningitis',
-    symptoms: ['Severe headache', 'Neck stiffness (nuchal rigidity)', 'Fever', 'Photophobia', 'Nausea/vomiting', 'Altered mental status', 'Kernig/Brudzinski signs'],
-    causes: ['Bacterial (Neisseria meningitidis, S. pneumoniae)', 'Viral', 'Fungal', 'Parasitic'],
-    treatment: ['Empiric antibiotics (Ceftriaxone + Vancomycin)', 'Dexamethasone', 'Acyclovir if viral suspected', 'Supportive care', 'Isolation precautions'],
-    description: 'Inflammation of the meninges (protective membranes covering the brain and spinal cord), usually due to infection.',
-  },
-  'Sepsis': {
-    name: 'Sepsis',
-    symptoms: ['Fever or hypothermia', 'Tachycardia', 'Tachypnea', 'Altered mental status', 'Hypotension', 'Warm/flushed skin', 'Oliguria'],
-    causes: ['Bacterial infection (most common)', 'Fungal infection', 'Viral infection', 'Post-surgical', 'Immunocompromised'],
-    treatment: ['Broad-spectrum antibiotics', 'IV fluid resuscitation', 'Vasopressors', 'Source control', 'Organ support', 'Corticosteroids in refractory shock'],
-    description: 'A life-threatening condition where the body response to infection causes damage to its own tissues and organs.',
-  },
-  'Anemia': {
-    name: 'Anemia',
-    symptoms: ['Fatigue', 'Pallor', 'Dyspnea on exertion', 'Tachycardia', 'Dizziness', 'Cold extremities'],
-    causes: ['Iron deficiency', 'Vitamin B12/folate deficiency', 'Chronic disease', 'Hemolysis', 'Blood loss', 'Bone marrow failure'],
-    treatment: ['Iron supplementation', 'Vitamin B12/folate', 'EPO stimulating agents', 'Blood transfusion', 'Treat underlying cause'],
-    description: 'A condition in which the blood lacks enough healthy red blood cells or hemoglobin to carry adequate oxygen to tissues.',
-  },
+  category: 'cardiovascular',
+  name: 'Pulmonary Embolism',
+  symptoms: ['Sudden dyspnea', 'Pleuritic chest pain', 'Tachycardia', 'Hemoptysis', 'Hypoxia', 'Anxiety'],
+  causes: ['DVT embolization', 'Immobility', 'Hypercoagulable states', 'Surgery', 'Cancer', 'Oral contraceptives'],
+  treatment: ['Anticoagulation', 'Thrombolysis for massive PE', 'Embolectomy', 'IVC filter', 'Oxygen support', 'Hemodynamic support'],
+  description: 'A blockage in one of the pulmonary arteries in the lungs, usually from blood clots that travel from the legs.',
+},
+
+'GERD': {
+  category: 'gastroenterology',
+  name: 'GERD',
+  symptoms: ['Heartburn', 'Regurgitation', 'Dysphagia', 'Chronic cough', 'Laryngitis', 'Chest pain'],
+  causes: ['Lower esophageal sphincter dysfunction', 'Obesity', 'Hiatal hernia', 'Pregnancy', 'Smoking'],
+  treatment: ['PPIs (Omeprazole)', 'H2 blockers', 'Lifestyle modifications', 'Dietary changes', 'Antacids', 'Surgery in refractory cases'],
+  description: 'A chronic digestive disease where stomach acid frequently flows back into the esophagus, irritating its lining.',
+},
+
+'Hepatitis': {
+  category: 'gastroenterology',
+  name: 'Hepatitis',
+  symptoms: ['Jaundice', 'Fatigue', 'Abdominal pain', 'Nausea', 'Dark urine', 'Pale stools', 'Fever'],
+  causes: ['Viral (A, B, C, D, E)', 'Alcohol', 'Autoimmune', 'Drug-induced', 'Toxins'],
+  treatment: ['Hepatitis A: Supportive care', 'Hepatitis B: Antivirals (Tenofovir)', 'Hepatitis C: DAAs (Sofosbuvir)', 'Avoid hepatotoxins', 'Vaccination'],
+  description: 'Inflammation of the liver, most commonly caused by a viral infection, but also by alcohol, toxins, or autoimmune conditions.',
+},
+
+'Cirrhosis': {
+  category: 'gastroenterology',
+  name: 'Cirrhosis',
+  symptoms: ['Fatigue', 'Jaundice', 'Ascites', 'Peripheral edema', 'Easy bruising', 'Hepatic encephalopathy', 'Spider angiomata'],
+  causes: ['Chronic alcoholism', 'Chronic hepatitis B/C', 'NAFLD', 'Autoimmune hepatitis', 'Biliary diseases'],
+  treatment: ['Treat underlying cause', 'Diuretics for ascites', 'Lactulose for encephalopathy', 'Beta-blockers for portal hypertension', 'Liver transplant'],
+  description: 'Late-stage scarring (fibrosis) of the liver caused by various liver diseases and conditions.',
+},
+
+'CKD': {
+  category: 'nephrology',
+  name: 'Chronic Kidney Disease',
+  symptoms: ['Fatigue', 'Peripheral edema', 'Nocturia', 'Nausea', 'Pruritus', 'Muscle cramps', 'Anorexia'],
+  causes: ['Diabetes mellitus', 'Hypertension', 'Glomerulonephritis', 'Polycystic kidney disease', 'Obstructive uropathy'],
+  treatment: ['ACE inhibitors/ARBs', 'Blood sugar control', 'Dietary modifications (low protein, low sodium)', 'Phosphate binders', 'Dialysis', 'Kidney transplant'],
+  description: 'A gradual loss of kidney function over time, leading to waste accumulation in the body.',
+},
+
+'UTI': {
+  category: 'nephrology',
+  name: 'Urinary Tract Infection',
+  symptoms: ['Dysuria', 'Frequency', 'Urgency', 'Suprapubic pain', 'Hematuria', 'Foul-smelling urine'],
+  causes: ['E. coli (most common)', 'Klebsiella', 'Staphylococcus saprophyticus', 'Sexual activity', 'Female anatomy', 'Catheterization'],
+  treatment: ['Nitrofurantoin', 'Trimethoprim-sulfamethoxazole', 'Ciprofloxacin', 'Increase fluid intake', 'Phenazopyridine for symptoms'],
+  description: 'An infection in any part of the urinary system, most commonly the bladder and urethra.',
+},
+
+'Meningitis': {
+  category: 'infectious',
+  name: 'Meningitis',
+  symptoms: ['Severe headache', 'Neck stiffness (nuchal rigidity)', 'Fever', 'Photophobia', 'Nausea/vomiting', 'Altered mental status', 'Kernig/Brudzinski signs'],
+  causes: ['Bacterial (Neisseria meningitidis, S. pneumoniae)', 'Viral', 'Fungal', 'Parasitic'],
+  treatment: ['Empiric antibiotics (Ceftriaxone + Vancomycin)', 'Dexamethasone', 'Acyclovir if viral suspected', 'Supportive care', 'Isolation precautions'],
+  description: 'Inflammation of the meninges (protective membranes covering the brain and spinal cord), usually due to infection.',
+},
+
+'Sepsis': {
+  category: 'infectious',
+  name: 'Sepsis',
+  symptoms: ['Fever or hypothermia', 'Tachycardia', 'Tachypnea', 'Altered mental status', 'Hypotension', 'Warm/flushed skin', 'Oliguria'],
+  causes: ['Bacterial infection (most common)', 'Fungal infection', 'Viral infection', 'Post-surgical', 'Immunocompromised'],
+  treatment: ['Broad-spectrum antibiotics', 'IV fluid resuscitation', 'Vasopressors', 'Source control', 'Organ support', 'Corticosteroids in refractory shock'],
+  description: 'A life-threatening condition where the body response to infection causes damage to its own tissues and organs.',
+},
+
+'Anemia': {
+  category: 'hematology',
+  name: 'Anemia',
+  symptoms: ['Fatigue', 'Pallor', 'Dyspnea on exertion', 'Tachycardia', 'Dizziness', 'Cold extremities'],
+  causes: ['Iron deficiency', 'Vitamin B12/folate deficiency', 'Chronic disease', 'Hemolysis', 'Blood loss', 'Bone marrow failure'],
+  treatment: ['Iron supplementation', 'Vitamin B12/folate', 'EPO stimulating agents', 'Blood transfusion', 'Treat underlying cause'],
+  description: 'A condition in which the blood lacks enough healthy red blood cells or hemoglobin to carry adequate oxygen to tissues.',
+},
   'Hyperthyroidism': {
-    name: 'Hyperthyroidism',
-    symptoms: ['Weight loss', 'Heat intolerance', 'Palpitations', 'Tremor', 'Anxiety', 'Exophthalmos', 'Diarrhea'],
-    causes: ["Graves' disease", 'Toxic multinodular goiter', 'Toxic adenoma', 'Thyroiditis', 'Excess iodine'],
-    treatment: ['Methimazole', 'Propylthiouracil', 'Radioactive iodine ablation', 'Beta-blockers for symptoms', 'Thyroidectomy'],
-    description: 'A condition of excess thyroid hormone production leading to a hypermetabolic state.',
-  },
-  'Hypothyroidism': {
-    name: 'Hypothyroidism',
-    symptoms: ['Weight gain', 'Cold intolerance', 'Fatigue', 'Constipation', 'Dry skin', 'Bradycardia', 'Depression'],
-    causes: ["Hashimoto's thyroiditis", 'Iodine deficiency', 'Post-thyroidectomy', 'Post-radioactive iodine', 'Pituitary disorders'],
-    treatment: ['Levothyroxine replacement', 'Dose monitoring with TSH', 'Lifelong therapy in most cases'],
-    description: 'A condition where the thyroid gland does not produce enough thyroid hormones, leading to a hypometabolic state.',
-  },
-  'Diabetes Type 1': {
-    name: 'Diabetes Mellitus Type 1',
-    symptoms: ['Polyuria', 'Polydipsia', 'Weight loss', 'Fatigue', 'Blurred vision', 'DKA presentation possible'],
-    causes: ['Autoimmune destruction of beta cells', 'Genetic predisposition', 'Environmental triggers'],
-    treatment: ['Insulin therapy (basal-bolus)', 'Carbohydrate counting', 'Continuous glucose monitoring', 'Regular exercise', 'Diabetic education'],
-    description: 'An autoimmune condition where the pancreas produces little or no insulin due to destruction of pancreatic beta cells.',
-  },
-  'DKA': {
-    name: 'Diabetic Ketoacidosis',
-    symptoms: ['Kussmaul breathing', 'Fruity breath odor', 'Nausea/vomiting', 'Abdominal pain', 'Dehydration', 'Altered consciousness'],
-    causes: ['Insulin deficiency', 'Infection', 'Non-compliance with insulin', 'New-onset diabetes'],
-    treatment: ['IV normal saline', 'Insulin infusion', 'Potassium replacement', 'Treat precipitating factor', 'Monitor glucose and electrolytes'],
-    description: 'A serious complication of diabetes where the body produces excess blood ketones, making the blood acidic.',
-  },
-  'Pancreatitis': {
-    name: 'Pancreatitis',
-    symptoms: ['Severe epigastric pain radiating to back', 'Nausea/vomiting', 'Fever', 'Tachycardia', 'Abdominal tenderness'],
-    causes: ['Gallstones', 'Alcohol abuse', 'Hypertriglyceridemia', 'Medications', 'ERCP', 'Autoimmune'],
-    treatment: ['NPO initially', 'IV fluid resuscitation', 'Pain management', 'Nutritional support', 'Treat underlying cause', 'Antibiotics if infected'],
-    description: 'Inflammation of the pancreas that can be acute or chronic, ranging from mild to life-threatening.',
-  },
-  'Cholecystitis': {
-    name: 'Cholecystitis',
-    symptoms: ['RUQ pain', 'Pain after fatty meals', 'Nausea/vomiting', 'Fever', "Murphy's sign positive"],
-    causes: ['Gallstones (90%)', 'Biliary sludge', 'Infection', 'Ischemia'],
-    treatment: ['NPO', 'IV fluids', 'Antibiotics', 'Pain management', 'Laparoscopic cholecystectomy'],
-    description: 'Inflammation of the gallbladder, usually caused by gallstone obstruction of the cystic duct.',
-  },
-  'Appendicitis': {
-    name: 'Appendicitis',
-    symptoms: ['Periumbilical pain migrating to RLQ', 'Anorexia', 'Nausea/vomiting', 'Fever', 'Rebound tenderness', 'Rovsing/Psoas/Obturator signs'],
-    causes: ['Obstruction of appendiceal lumen', 'Fecalith', 'Lymphoid hyperplasia', 'Tumors'],
-    treatment: ['Appendectomy (laparoscopic)', 'IV antibiotics', 'IV fluids', 'NPO', 'Appendectomy is the definitive treatment'],
-    description: 'Inflammation of the vermiform appendix, the most common cause of acute abdomen requiring surgery.',
-  },
-  'RA': {
-    name: 'Rheumatoid Arthritis',
-    symptoms: ['Symmetric joint swelling', 'Morning stiffness >30 min', 'Small joint involvement', 'Fatigue', 'Rheumatoid nodules'],
-    causes: ['Autoimmune (anti-CCP, RF positive)', 'Genetic (HLA-DR4)', 'Environmental triggers', 'Smoking increases risk'],
-    treatment: ['Methotrexate (first-line DMARD)', 'Biologics (TNF inhibitors)', 'Corticosteroids', 'Physical therapy', 'NSAIDs for symptoms'],
-    description: 'A chronic autoimmune inflammatory disorder primarily affecting the synovial joints, causing progressive joint destruction.',
-  },
-  'SLE': {
-    name: 'Systemic Lupus Erythematosus',
-    symptoms: ['Malar rash', 'Arthritis', 'Serositis', 'Renal involvement', 'Fatigue', 'Photosensitivity', 'Oral ulcers'],
-    causes: ['Autoimmune', 'Genetic predisposition', 'Hormonal factors', 'UV exposure', 'Infections'],
-    treatment: ['Hydroxychloroquine (all patients)', 'Corticosteroids', 'Immunosuppressants (Mycophenolate)', 'Belimumab', 'Sun protection'],
-    description: 'A chronic systemic autoimmune disease that can affect virtually any organ system.',
-  },
-  'Gout': {
-    name: 'Gout',
-    symptoms: ['Acute joint pain (usually 1st MTP)', 'Redness and swelling', 'Warmth', 'Tophi in chronic cases', 'Limited range of motion'],
-    causes: ['Hyperuricemia', 'Diet (red meat, alcohol, shellfish)', 'Obesity', 'Diuretics', 'Renal insufficiency'],
-    treatment: ['Colchicine (acute)', 'NSAIDs (acute)', 'Allopurinol/Febuxostat (chronic)', 'Dietary modifications', 'Corticosteroids'],
-    description: 'An inflammatory arthritis caused by deposition of monosodium urate crystals in joints due to hyperuricemia.',
-  },
-  'Osteoporosis': {
-    name: 'Osteoporosis',
-    symptoms: ['Often asymptomatic until fracture', 'Back pain', 'Loss of height', 'Kyphosis', 'Fragility fractures'],
-    causes: ['Aging', 'Postmenopausal estrogen decline', 'Low calcium/vitamin D', 'Sedentary lifestyle', 'Steroid use', 'Hyperparathyroidism'],
-    treatment: ['Bisphosphonates (Alendronate)', 'Calcium + Vitamin D supplementation', 'Weight-bearing exercise', 'Denosumab', 'Teriparatide'],
-    description: 'A condition characterized by decreased bone density and increased fragility, leading to a higher risk of fractures.',
-  },
-  'Depression': {
-    name: 'Major Depressive Disorder',
-    symptoms: ['Persistent sad mood', 'Anhedonia', 'Weight changes', 'Sleep disturbances', 'Fatigue', 'Feelings of worthlessness', 'Suicidal ideation'],
-    causes: ['Neurotransmitter imbalance (serotonin, NE, dopamine)', 'Genetic factors', 'Stressful life events', 'Medical conditions'],
-    treatment: ['SSRIs (Sertraline, Fluoxetine)', 'SNRIs', 'CBT', 'Exercise', 'Psychotherapy', 'ECT in refractory cases'],
-    description: 'A mood disorder causing persistent feelings of sadness and loss of interest that interfere with daily functioning.',
-  },
-  'Anxiety': {
-    name: 'Generalized Anxiety Disorder',
-    symptoms: ['Excessive worry', 'Restlessness', 'Fatigue', 'Difficulty concentrating', 'Muscle tension', 'Sleep disturbances', 'Irritability'],
-    causes: ['Genetic predisposition', 'Neurochemical imbalances', 'Environmental stressors', 'Personality factors'],
-    treatment: ['SSRIs/SNRIs (first-line)', 'Buspirone', 'CBT', 'Relaxation techniques', 'Avoid benzodiazepines long-term'],
-    description: 'A chronic anxiety disorder characterized by excessive, uncontrollable worry about various aspects of life.',
-  },
-  'Bipolar': {
-    name: 'Bipolar Disorder',
-    symptoms: ['Manic episodes (euphoria, grandiosity, decreased sleep)', 'Depressive episodes', 'Rapid cycling', 'Impaired functioning'],
-    causes: ['Genetic factors', 'Neurochemical imbalances', 'Stress', 'Sleep disruption'],
-    treatment: ['Mood stabilizers (Lithium, Valproate)', 'Atypical antipsychotics', 'Psychotherapy', 'Avoid antidepressants alone'],
-    description: 'A mental health condition marked by extreme mood swings including manic/hypomanic episodes and depressive episodes.',
-  },
-  "Alzheimer's": {
-    name: "Alzheimer's Disease",
-    symptoms: ['Progressive memory loss', 'Disorientation', 'Language difficulties', 'Behavioral changes', 'Loss of ADLs', 'Wandering'],
-    causes: ['Amyloid-beta plaques', 'Neurofibrillary tangles', 'Age', 'Genetic factors (APOE4)', 'Cardiovascular risk factors'],
-    treatment: ['Cholinesterase inhibitors (Donepezil)', 'Memantine', 'Supportive care', 'Cognitive stimulation', 'Caregiver support'],
-    description: 'A progressive neurodegenerative disease and the most common cause of dementia.',
-  },
-  "Parkinson's": {
-    name: "Parkinson's Disease",
-    symptoms: ['Resting tremor', 'Bradykinesia', 'Rigidity', 'Postural instability', 'Shuffling gait', 'Masked facies'],
-    causes: ['Loss of dopaminergic neurons in substantia nigra', 'Alpha-synuclein aggregation', 'Age', 'Genetics', 'Environmental toxins'],
-    treatment: ['Levodopa/Carbidopa (first-line)', 'Dopamine agonists', 'MAO-B inhibitors', 'Anticholinergics', 'Deep brain stimulation'],
-    description: 'A progressive neurodegenerative disorder affecting movement, characterized by tremor, rigidity, bradykinesia, and postural instability.',
-  },
-  'Epilepsy': {
-    name: 'Epilepsy',
-    symptoms: ['Recurrent seizures', 'Loss of awareness', 'Muscle jerking', 'Staring spells', 'Sensory disturbances', 'Post-ictal confusion'],
-    causes: ['Genetic factors', 'Brain injury', 'Infections', 'Tumors', 'Stroke', 'Developmental disorders'],
-    treatment: ['Antiepileptic drugs (Levetiracetam, Valproate)', 'Ketogenic diet', 'Vagus nerve stimulation', 'Epilepsy surgery', 'Seizure precautions'],
-    description: 'A neurological disorder characterized by recurrent, unprovoked seizures due to abnormal electrical activity in the brain.',
-  },
-  'Migraine': {
-    name: 'Migraine',
-    symptoms: ['Unilateral throbbing headache', 'Photophobia and phonophobia', 'Nausea/vomiting', 'Aura (visual)', 'Duration 4-72 hours'],
-    causes: ['Genetic predisposition', 'Stress', 'Hormonal changes', 'Certain foods', 'Sleep changes', 'Sensory stimuli'],
-    treatment: ['Triptans (Sumatriptan)', 'NSAIDs', 'Anti-emetics', 'Preventive: Beta-blockers, Antidepressants, Anticonvulsants', 'CGRP inhibitors'],
-    description: 'A neurological condition characterized by recurrent moderate to severe headaches, often with associated symptoms.',
-  },
-  'Leukemia': {
-    name: 'Leukemia',
-    symptoms: ['Fatigue', 'Frequent infections', 'Easy bruising/bleeding', 'Weight loss', 'Night sweats', 'Bone pain', 'Pallor'],
-    causes: ['Unknown in many cases', 'Genetic mutations', 'Radiation exposure', 'Chemical exposure (benzene)', 'Viral factors (HTLV-1)'],
-    treatment: ['Chemotherapy', 'Targeted therapy', 'Immunotherapy', 'Stem cell transplantation', 'Radiation therapy', 'Supportive care'],
-    description: 'A group of cancers affecting blood and bone marrow, characterized by overproduction of abnormal white blood cells.',
-  },
-  'Lymphoma': {
-    name: 'Lymphoma',
-    symptoms: ['Painless lymphadenopathy', 'B symptoms (fever, night sweats, weight loss)', 'Fatigue', 'Pruritus', 'Hepatosplenomegaly'],
-    causes: ['Unknown in many cases', 'EBV infection', 'HIV', 'Immunosuppression', 'Genetic factors'],
-    treatment: ['Chemotherapy (ABVD for Hodgkin)', 'Radiation', 'Immunotherapy', 'Stem cell transplant', 'CAR-T cell therapy'],
-    description: 'A group of blood cancers that develop in the lymphatic system, classified as Hodgkin or Non-Hodgkin lymphoma.',
-  },
-  'Hyperlipidemia': {
-    name: 'Hyperlipidemia',
-    symptoms: ['Usually asymptomatic', 'Xanthelasma', 'Corneal arcus', 'Tendon xanthomas', 'Pancreatitis (severe hypertriglyceridemia)'],
-    causes: ['Diet high in saturated fats', 'Obesity', 'Genetic (familial hyperlipidemia)', 'Hypothyroidism', 'Diabetes', 'Sedentary lifestyle'],
-    treatment: ['Statin therapy', 'Dietary modifications', 'Exercise', 'Fibrates for triglycerides', 'Ezetimibe', 'PCSK9 inhibitors'],
-    description: 'Elevated levels of lipids (cholesterol and/or triglycerides) in the blood, increasing cardiovascular disease risk.',
-  },
+  category: 'endocrine',
+  name: 'Hyperthyroidism',
+  symptoms: ['Weight loss', 'Heat intolerance', 'Palpitations', 'Tremor', 'Anxiety', 'Exophthalmos', 'Diarrhea'],
+  causes: ["Graves' disease", 'Toxic multinodular goiter', 'Toxic adenoma', 'Thyroiditis', 'Excess iodine'],
+  treatment: ['Methimazole', 'Propylthiouracil', 'Radioactive iodine ablation', 'Beta-blockers for symptoms', 'Thyroidectomy'],
+  description: 'A condition of excess thyroid hormone production leading to a hypermetabolic state.',
+},
+
+'Hypothyroidism': {
+  category: 'endocrine',
+  name: 'Hypothyroidism',
+  symptoms: ['Weight gain', 'Cold intolerance', 'Fatigue', 'Constipation', 'Dry skin', 'Bradycardia', 'Depression'],
+  causes: ["Hashimoto's thyroiditis", 'Iodine deficiency', 'Post-thyroidectomy', 'Post-radioactive iodine', 'Pituitary disorders'],
+  treatment: ['Levothyroxine replacement', 'Dose monitoring with TSH', 'Lifelong therapy in most cases'],
+  description: 'A condition where the thyroid gland does not produce enough thyroid hormones, leading to a hypometabolic state.',
+},
+
+'Diabetes Type 1': {
+  category: 'endocrine',
+  name: 'Diabetes Mellitus Type 1',
+  symptoms: ['Polyuria', 'Polydipsia', 'Weight loss', 'Fatigue', 'Blurred vision', 'DKA presentation possible'],
+  causes: ['Autoimmune destruction of beta cells', 'Genetic predisposition', 'Environmental triggers'],
+  treatment: ['Insulin therapy (basal-bolus)', 'Carbohydrate counting', 'Continuous glucose monitoring', 'Regular exercise', 'Diabetic education'],
+  description: 'An autoimmune condition where the pancreas produces little or no insulin due to destruction of pancreatic beta cells.',
+},
+
+'DKA': {
+  category: 'endocrine',
+  name: 'Diabetic Ketoacidosis',
+  symptoms: ['Kussmaul breathing', 'Fruity breath odor', 'Nausea/vomiting', 'Abdominal pain', 'Dehydration', 'Altered consciousness'],
+  causes: ['Insulin deficiency', 'Infection', 'Non-compliance with insulin', 'New-onset diabetes'],
+  treatment: ['IV normal saline', 'Insulin infusion', 'Potassium replacement', 'Treat precipitating factor', 'Monitor glucose and electrolytes'],
+  description: 'A serious complication of diabetes where the body produces excess blood ketones, making the blood acidic.',
+},
+
+'Pancreatitis': {
+  category: 'gastroenterology',
+  name: 'Pancreatitis',
+  symptoms: ['Severe epigastric pain radiating to back', 'Nausea/vomiting', 'Fever', 'Tachycardia', 'Abdominal tenderness'],
+  causes: ['Gallstones', 'Alcohol abuse', 'Hypertriglyceridemia', 'Medications', 'ERCP', 'Autoimmune'],
+  treatment: ['NPO initially', 'IV fluid resuscitation', 'Pain management', 'Nutritional support', 'Treat underlying cause', 'Antibiotics if infected'],
+  description: 'Inflammation of the pancreas that can be acute or chronic, ranging from mild to life-threatening.',
+},
+
+'Cholecystitis': {
+  category: 'gastroenterology',
+  name: 'Cholecystitis',
+  symptoms: ['RUQ pain', 'Pain after fatty meals', 'Nausea/vomiting', 'Fever', "Murphy's sign positive"],
+  causes: ['Gallstones (90%)', 'Biliary sludge', 'Infection', 'Ischemia'],
+  treatment: ['NPO', 'IV fluids', 'Antibiotics', 'Pain management', 'Laparoscopic cholecystectomy'],
+  description: 'Inflammation of the gallbladder, usually caused by gallstone obstruction of the cystic duct.',
+},
+
+'Appendicitis': {
+  category: 'gastroenterology',
+  name: 'Appendicitis',
+  symptoms: ['Periumbilical pain migrating to RLQ', 'Anorexia', 'Nausea/vomiting', 'Fever', 'Rebound tenderness', 'Rovsing/Psoas/Obturator signs'],
+  causes: ['Obstruction of appendiceal lumen', 'Fecalith', 'Lymphoid hyperplasia', 'Tumors'],
+  treatment: ['Appendectomy (laparoscopic)', 'IV antibiotics', 'IV fluids', 'NPO', 'Appendectomy is the definitive treatment'],
+  description: 'Inflammation of the vermiform appendix, the most common cause of acute abdomen requiring surgery.',
+},
+
+'RA': {
+  category: 'rheumatology',
+  name: 'Rheumatoid Arthritis',
+  symptoms: ['Symmetric joint swelling', 'Morning stiffness >30 min', 'Small joint involvement', 'Fatigue', 'Rheumatoid nodules'],
+  causes: ['Autoimmune (anti-CCP, RF positive)', 'Genetic (HLA-DR4)', 'Environmental triggers', 'Smoking increases risk'],
+  treatment: ['Methotrexate (first-line DMARD)', 'Biologics (TNF inhibitors)', 'Corticosteroids', 'Physical therapy', 'NSAIDs for symptoms'],
+  description: 'A chronic autoimmune inflammatory disorder primarily affecting the synovial joints, causing progressive joint destruction.',
+},
+
+'SLE': {
+  category: 'rheumatology',
+  name: 'Systemic Lupus Erythematosus',
+  symptoms: ['Malar rash', 'Arthritis', 'Serositis', 'Renal involvement', 'Fatigue', 'Photosensitivity', 'Oral ulcers'],
+  causes: ['Autoimmune', 'Genetic predisposition', 'Hormonal factors', 'UV exposure', 'Infections'],
+  treatment: ['Hydroxychloroquine (all patients)', 'Corticosteroids', 'Immunosuppressants (Mycophenolate)', 'Belimumab', 'Sun protection'],
+  description: 'A chronic systemic autoimmune disease that can affect virtually any organ system.',
+},
+
+'Gout': {
+  category: 'rheumatology',
+  name: 'Gout',
+  symptoms: ['Acute joint pain (usually 1st MTP)', 'Redness and swelling', 'Warmth', 'Tophi in chronic cases', 'Limited range of motion'],
+  causes: ['Hyperuricemia', 'Diet (red meat, alcohol, shellfish)', 'Obesity', 'Diuretics', 'Renal insufficiency'],
+  treatment: ['Colchicine (acute)', 'NSAIDs (acute)', 'Allopurinol/Febuxostat (chronic)', 'Dietary modifications', 'Corticosteroids'],
+  description: 'An inflammatory arthritis caused by deposition of monosodium urate crystals in joints due to hyperuricemia.',
+},
+
+ 'Osteoporosis': {
+  category: 'musculoskeletal',
+  name: 'Osteoporosis',
+  symptoms: ['Often asymptomatic until fracture', 'Back pain', 'Loss of height', 'Kyphosis', 'Fragility fractures'],
+  causes: ['Aging', 'Postmenopausal estrogen decline', 'Low calcium/vitamin D', 'Sedentary lifestyle', 'Steroid use', 'Hyperparathyroidism'],
+  treatment: ['Bisphosphonates (Alendronate)', 'Calcium + Vitamin D supplementation', 'Weight-bearing exercise', 'Denosumab', 'Teriparatide'],
+  description: 'A condition characterized by decreased bone density and increased fragility, leading to a higher risk of fractures.',
+},
+
+'Depression': {
+  category: 'psychiatry',
+  name: 'Major Depressive Disorder',
+  symptoms: ['Persistent sad mood', 'Anhedonia', 'Weight changes', 'Sleep disturbances', 'Fatigue', 'Feelings of worthlessness', 'Suicidal ideation'],
+  causes: ['Neurotransmitter imbalance (serotonin, NE, dopamine)', 'Genetic factors', 'Stressful life events', 'Medical conditions'],
+  treatment: ['SSRIs (Sertraline, Fluoxetine)', 'SNRIs', 'CBT', 'Exercise', 'Psychotherapy', 'ECT in refractory cases'],
+  description: 'A mood disorder causing persistent feelings of sadness and loss of interest that interfere with daily functioning.',
+},
+
+'Anxiety': {
+  category: 'psychiatry',
+  name: 'Generalized Anxiety Disorder',
+  symptoms: ['Excessive worry', 'Restlessness', 'Fatigue', 'Difficulty concentrating', 'Muscle tension', 'Sleep disturbances', 'Irritability'],
+  causes: ['Genetic predisposition', 'Neurochemical imbalances', 'Environmental stressors', 'Personality factors'],
+  treatment: ['SSRIs/SNRIs (first-line)', 'Buspirone', 'CBT', 'Relaxation techniques', 'Avoid benzodiazepines long-term'],
+  description: 'A chronic anxiety disorder characterized by excessive, uncontrollable worry about various aspects of life.',
+},
+
+'Bipolar': {
+  category: 'psychiatry',
+  name: 'Bipolar Disorder',
+  symptoms: ['Manic episodes (euphoria, grandiosity, decreased sleep)', 'Depressive episodes', 'Rapid cycling', 'Impaired functioning'],
+  causes: ['Genetic factors', 'Neurochemical imbalances', 'Stress', 'Sleep disruption'],
+  treatment: ['Mood stabilizers (Lithium, Valproate)', 'Atypical antipsychotics', 'Psychotherapy', 'Avoid antidepressants alone'],
+  description: 'A mental health condition marked by extreme mood swings including manic/hypomanic episodes and depressive episodes.',
+},
+
+"Alzheimer's": {
+  category: 'neurology',
+  name: "Alzheimer's Disease",
+  symptoms: ['Progressive memory loss', 'Disorientation', 'Language difficulties', 'Behavioral changes', 'Loss of ADLs', 'Wandering'],
+  causes: ['Amyloid-beta plaques', 'Neurofibrillary tangles', 'Age', 'Genetic factors (APOE4)', 'Cardiovascular risk factors'],
+  treatment: ['Cholinesterase inhibitors (Donepezil)', 'Memantine', 'Supportive care', 'Cognitive stimulation', 'Caregiver support'],
+  description: 'A progressive neurodegenerative disease and the most common cause of dementia.',
+},
+
+"Parkinson's": {
+  category: 'neurology',
+  name: "Parkinson's Disease",
+  symptoms: ['Resting tremor', 'Bradykinesia', 'Rigidity', 'Postural instability', 'Shuffling gait', 'Masked facies'],
+  causes: ['Loss of dopaminergic neurons in substantia nigra', 'Alpha-synuclein aggregation', 'Age', 'Genetics', 'Environmental toxins'],
+  treatment: ['Levodopa/Carbidopa (first-line)', 'Dopamine agonists', 'MAO-B inhibitors', 'Anticholinergics', 'Deep brain stimulation'],
+  description: 'A progressive neurodegenerative disorder affecting movement, characterized by tremor, rigidity, bradykinesia, and postural instability.',
+},
+
+'Epilepsy': {
+  category: 'neurology',
+  name: 'Epilepsy',
+  symptoms: ['Recurrent seizures', 'Loss of awareness', 'Muscle jerking', 'Staring spells', 'Sensory disturbances', 'Post-ictal confusion'],
+  causes: ['Genetic factors', 'Brain injury', 'Infections', 'Tumors', 'Stroke', 'Developmental disorders'],
+  treatment: ['Antiepileptic drugs (Levetiracetam, Valproate)', 'Ketogenic diet', 'Vagus nerve stimulation', 'Epilepsy surgery', 'Seizure precautions'],
+  description: 'A neurological disorder characterized by recurrent, unprovoked seizures due to abnormal electrical activity in the brain.',
+},
+
+'Migraine': {
+  category: 'neurology',
+  name: 'Migraine',
+  symptoms: ['Unilateral throbbing headache', 'Photophobia and phonophobia', 'Nausea/vomiting', 'Aura (visual)', 'Duration 4-72 hours'],
+  causes: ['Genetic predisposition', 'Stress', 'Hormonal changes', 'Certain foods', 'Sleep changes', 'Sensory stimuli'],
+  treatment: ['Triptans (Sumatriptan)', 'NSAIDs', 'Anti-emetics', 'Preventive: Beta-blockers, Antidepressants, Anticonvulsants', 'CGRP inhibitors'],
+  description: 'A neurological condition characterized by recurrent moderate to severe headaches, often with associated symptoms.',
+},
+
+'Leukemia': {
+  category: 'hematology',
+  name: 'Leukemia',
+  symptoms: ['Fatigue', 'Frequent infections', 'Easy bruising/bleeding', 'Weight loss', 'Night sweats', 'Bone pain', 'Pallor'],
+  causes: ['Unknown in many cases', 'Genetic mutations', 'Radiation exposure', 'Chemical exposure (benzene)', 'Viral factors (HTLV-1)'],
+  treatment: ['Chemotherapy', 'Targeted therapy', 'Immunotherapy', 'Stem cell transplantation', 'Radiation therapy', 'Supportive care'],
+  description: 'A group of cancers affecting blood and bone marrow, characterized by overproduction of abnormal white blood cells.',
+},
+
+'Lymphoma': {
+  category: 'hematology',
+  name: 'Lymphoma',
+  symptoms: ['Painless lymphadenopathy', 'B symptoms (fever, night sweats, weight loss)', 'Fatigue', 'Pruritus', 'Hepatosplenomegaly'],
+  causes: ['Unknown in many cases', 'EBV infection', 'HIV', 'Immunosuppression', 'Genetic factors'],
+  treatment: ['Chemotherapy (ABVD for Hodgkin)', 'Radiation', 'Immunotherapy', 'Stem cell transplant', 'CAR-T cell therapy'],
+  description: 'A group of blood cancers that develop in the lymphatic system, classified as Hodgkin or Non-Hodgkin lymphoma.',
+},
+
+'Hyperlipidemia': {
+  category: 'endocrine',
+  name: 'Hyperlipidemia',
+  symptoms: ['Usually asymptomatic', 'Xanthelasma', 'Corneal arcus', 'Tendon xanthomas', 'Pancreatitis (severe hypertriglyceridemia)'],
+  causes: ['Diet high in saturated fats', 'Obesity', 'Genetic (familial hyperlipidemia)', 'Hypothyroidism', 'Diabetes', 'Sedentary lifestyle'],
+  treatment: ['Statin therapy', 'Dietary modifications', 'Exercise', 'Fibrates for triglycerides', 'Ezetimibe', 'PCSK9 inhibitors'],
+  description: 'Elevated levels of lipids (cholesterol and/or triglycerides) in the blood, increasing cardiovascular disease risk.',
+},
+
+  'Stable Angina': {
+    category: 'cardiovascular',
+  name: 'Stable Angina',
+  symptoms: [
+    'Chest pain with exertion',
+    'Chest tightness',
+    'Pain relieved by rest',
+    'Pain radiating to left arm or jaw',
+    'Shortness of breath',
+    'Fatigue'
+  ],
+  causes: [
+    'Coronary artery atherosclerosis',
+    'Physical exertion',
+    'Emotional stress',
+    'Smoking',
+    'Hypertension',
+    'Hyperlipidemia'
+  ],
+  treatment: [
+    'Nitroglycerin',
+    'Beta-blockers',
+    'Calcium channel blockers',
+    'Statins',
+    'Lifestyle modification',
+    'Aspirin'
+  ],
+  description: 'Chest discomfort caused by temporary myocardial ischemia during physical activity or stress without myocardial infarction.',
+},
+
+'Infective Endocarditis': {
+  category: 'cardiovascular',
+  name: 'Infective Endocarditis',
+  symptoms: [
+    'Fever',
+    'Heart murmur',
+    'Fatigue',
+    'Night sweats',
+    'Petechiae',
+    'Osler nodes',
+    'Janeway lesions'
+  ],
+  causes: [
+    'Staphylococcus aureus',
+    'Viridans streptococci',
+    'Prosthetic heart valves',
+    'IV drug use',
+    'Congenital heart disease'
+  ],
+  treatment: [
+    'IV antibiotics',
+    'Blood culture-guided therapy',
+    'Valve surgery if indicated',
+    'Supportive care'
+  ],
+  description: 'A microbial infection of the endocardial surface of the heart, most commonly involving the heart valves.',
+},
+
+'Pericarditis': {
+  category: 'cardiovascular',
+  name: 'Pericarditis',
+  symptoms: [
+    'Sharp chest pain',
+    'Pain relieved by sitting forward',
+    'Pericardial friction rub',
+    'Fever',
+    'Dyspnea'
+  ],
+  causes: [
+    'Viral infection',
+    'Post-myocardial infarction',
+    'Autoimmune disease',
+    'Uremia',
+    'Malignancy'
+  ],
+  treatment: [
+    'NSAIDs',
+    'Colchicine',
+    'Corticosteroids in selected cases',
+    'Treat underlying cause'
+  ],
+  description: 'Inflammation of the pericardial sac surrounding the heart.',
+},
+
+'Aortic Stenosis': {
+  category: 'cardiovascular',
+  name: 'Aortic Stenosis',
+  symptoms: [
+    'Exertional chest pain',
+    'Syncope',
+    'Dyspnea',
+    'Fatigue',
+    'Reduced exercise tolerance'
+  ],
+  causes: [
+    'Age-related calcification',
+    'Congenital bicuspid valve',
+    'Rheumatic heart disease'
+  ],
+  treatment: [
+    'Aortic valve replacement',
+    'Transcatheter aortic valve implantation (TAVI)',
+    'Medical management of heart failure symptoms'
+  ],
+  description: 'Narrowing of the aortic valve causing obstruction of blood flow from the left ventricle.',
+},
+
+'Tuberculosis': {
+  category: 'infectious',
+  name: 'Tuberculosis',
+  symptoms: [
+    'Chronic cough',
+    'Hemoptysis',
+    'Night sweats',
+    'Weight loss',
+    'Fever',
+    'Fatigue'
+  ],
+  causes: [
+    'Mycobacterium tuberculosis infection'
+  ],
+  treatment: [
+    'Isoniazid',
+    'Rifampin',
+    'Pyrazinamide',
+    'Ethambutol',
+    'Directly observed therapy (DOT)'
+  ],
+  description: 'A contagious bacterial infection primarily affecting the lungs but capable of involving almost any organ.',
+},
+
+'Lung Cancer': {
+  category: 'nephrology',
+  name: 'Lung Cancer',
+  symptoms: [
+    'Persistent cough',
+    'Hemoptysis',
+    'Weight loss',
+    'Chest pain',
+    'Dyspnea',
+    'Hoarseness'
+  ],
+  causes: [
+    'Smoking',
+    'Secondhand smoke',
+    'Radon exposure',
+    'Occupational carcinogens',
+    'Air pollution'
+  ],
+  treatment: [
+    'Surgical resection',
+    'Chemotherapy',
+    'Radiotherapy',
+    'Targeted therapy',
+    'Immunotherapy'
+  ],
+  description: 'A malignant tumor arising from lung tissue and one of the leading causes of cancer-related death worldwide.',
+},
+
+'Pleural Effusion': {
+  category: 'nephrology',
+  name: 'Pleural Effusion',
+  symptoms: [
+    'Dyspnea',
+    'Chest pain',
+    'Dry cough',
+    'Reduced breath sounds',
+    'Fatigue'
+  ],
+  causes: [
+    'Heart failure',
+    'Pneumonia',
+    'Malignancy',
+    'Pulmonary embolism',
+    'Liver cirrhosis'
+  ],
+  treatment: [
+    'Thoracentesis',
+    'Treat underlying cause',
+    'Chest tube drainage if needed',
+    'Pleurodesis for recurrent cases'
+  ],
+  description: 'Accumulation of excess fluid within the pleural cavity surrounding the lungs.',
+},
+
+'Pneumothorax': {
+  category: 'nephrology',
+  name: 'Pneumothorax',
+  symptoms: [
+    'Sudden chest pain',
+    'Sudden dyspnea',
+    'Reduced breath sounds',
+    'Tachycardia',
+    'Hypoxia'
+  ],
+  causes: [
+    'Spontaneous rupture of blebs',
+    'Chest trauma',
+    'Mechanical ventilation',
+    'Underlying lung disease'
+  ],
+  treatment: [
+    'Observation for small cases',
+    'Needle aspiration',
+    'Chest tube insertion',
+    'Surgery for recurrent pneumothorax'
+  ],
+  description: 'Presence of air in the pleural space causing partial or complete collapse of the lung.',
+},
+
+'Bronchiectasis': {
+  category: 'nephrology',
+  name: 'Bronchiectasis',
+  symptoms: [
+    'Chronic productive cough',
+    'Large sputum production',
+    'Hemoptysis',
+    'Dyspnea',
+    'Recurrent chest infections'
+  ],
+  causes: [
+    'Repeated respiratory infections',
+    'Cystic fibrosis',
+    'Primary ciliary dyskinesia',
+    'Immune deficiency'
+  ],
+  treatment: [
+    'Airway clearance therapy',
+    'Antibiotics',
+    'Bronchodilators',
+    'Vaccination',
+    'Pulmonary rehabilitation'
+  ],
+  description: 'Permanent abnormal dilation of the bronchi resulting in chronic airway infection and impaired mucus clearance.',
+},
+
+'ARDS': {
+  category: 'respiratory',
+  name: 'Acute Respiratory Distress Syndrome',
+  symptoms: [
+    'Severe dyspnea',
+    'Rapid breathing',
+    'Hypoxemia',
+    'Cyanosis',
+    'Respiratory failure'
+  ],
+  causes: [
+    'Sepsis',
+    'Severe pneumonia',
+    'Aspiration',
+    'Trauma',
+    'Pancreatitis'
+  ],
+  treatment: [
+    'Mechanical ventilation',
+    'Oxygen therapy',
+    'Treat underlying cause',
+    'Prone positioning',
+    'Supportive ICU care'
+  ],
+  description: 'A life-threatening form of respiratory failure caused by widespread inflammation and increased permeability of the lungs.',
+},
+'Peptic Ulcer Disease': {
+  category: 'gastroenterology',
+  name: 'Peptic Ulcer Disease',
+  symptoms: ['Epigastric pain', 'Burning stomach pain', 'Nausea', 'Bloating', 'Early satiety', 'Melena in severe cases'],
+  causes: ['Helicobacter pylori infection', 'NSAID use', 'Smoking', 'Alcohol', 'Excess gastric acid'],
+  treatment: ['Proton pump inhibitors', 'H. pylori eradication therapy', 'Stop NSAIDs', 'Lifestyle modifications', 'Endoscopic treatment if bleeding'],
+  description: 'A condition characterized by sores or ulcers developing in the lining of the stomach or duodenum.',
+},
+
+'Ulcerative Colitis': {
+  category: 'gastroenterology',
+  name: 'Ulcerative Colitis',
+  symptoms: ['Bloody diarrhea', 'Abdominal cramps', 'Urgency', 'Rectal bleeding', 'Fatigue', 'Weight loss'],
+  causes: ['Autoimmune inflammation', 'Genetic predisposition', 'Environmental factors', 'Abnormal immune response'],
+  treatment: ['5-ASA (Mesalamine)', 'Corticosteroids', 'Immunomodulators', 'Biologic therapy', 'Colectomy in severe disease'],
+  description: 'A chronic inflammatory bowel disease affecting the colon and rectum with continuous mucosal inflammation.',
+},
+
+'Crohn Disease': {
+  category: 'gastroenterology',
+  name: 'Crohn Disease',
+  symptoms: ['Chronic diarrhea', 'Abdominal pain', 'Weight loss', 'Fatigue', 'Perianal disease', 'Fever'],
+  causes: ['Autoimmune inflammation', 'Genetic predisposition', 'Smoking', 'Environmental factors'],
+  treatment: ['Corticosteroids', 'Immunosuppressants', 'Biologic therapy', 'Nutritional support', 'Surgery for complications'],
+  description: 'A chronic inflammatory bowel disease that can affect any part of the gastrointestinal tract from mouth to anus.',
+},
+
+'Irritable Bowel Syndrome': {
+  category: 'gastroenterology',
+  name: 'Irritable Bowel Syndrome',
+  symptoms: ['Abdominal pain', 'Bloating', 'Diarrhea', 'Constipation', 'Alternating bowel habits'],
+  causes: ['Gut-brain interaction disorder', 'Stress', 'Altered gut motility', 'Food triggers'],
+  treatment: ['Dietary modification', 'Fiber supplementation', 'Antispasmodics', 'Laxatives or antidiarrheals', 'Stress management'],
+  description: 'A functional gastrointestinal disorder characterized by recurrent abdominal pain associated with altered bowel habits.',
+},
+
+'Fatty Liver Disease': {  
+  category: 'metabolic',
+  name: 'Non-Alcoholic Fatty Liver Disease',
+  symptoms: ['Often asymptomatic', 'Fatigue', 'Right upper quadrant discomfort', 'Hepatomegaly'],
+  causes: ['Obesity', 'Type 2 diabetes', 'Hyperlipidemia', 'Metabolic syndrome', 'Insulin resistance'],
+  treatment: ['Weight loss', 'Regular exercise', 'Control diabetes', 'Healthy diet', 'Manage cardiovascular risk factors'],
+  description: 'A condition in which excess fat accumulates in the liver in people with little or no alcohol consumption.',
+},
+
+'Acute Liver Failure': {
+  category: 'metabolic',
+  name: 'Acute Liver Failure',
+  symptoms: ['Jaundice', 'Confusion', 'Coagulopathy', 'Fatigue', 'Nausea', 'Hepatic encephalopathy'],
+  causes: ['Acetaminophen overdose', 'Viral hepatitis', 'Drug-induced liver injury', 'Autoimmune hepatitis'],
+  treatment: ['Supportive ICU care', 'N-acetylcysteine if indicated', 'Treat underlying cause', 'Liver transplantation'],
+  description: 'Rapid loss of liver function resulting in coagulopathy and encephalopathy in a previously healthy liver.',
+},
+
+'Cholelithiasis': {
+  category: 'metabolic',
+  name: 'Cholelithiasis',
+  symptoms: ['RUQ pain', 'Pain after fatty meals', 'Nausea', 'Vomiting', 'Biliary colic'],
+  causes: ['Cholesterol gallstones', 'Pigment stones', 'Obesity', 'Female sex', 'Rapid weight loss'],
+  treatment: ['Observation if asymptomatic', 'Pain control', 'Laparoscopic cholecystectomy', 'ERCP if choledocholithiasis'],
+  description: 'Formation of gallstones within the gallbladder that may remain asymptomatic or cause biliary colic.',
+},
+
+'Cushing Syndrome': {
+  category: 'metabolic',
+  name: 'Cushing Syndrome',
+  symptoms: ['Moon face', 'Central obesity', 'Purple striae', 'Hypertension', 'Muscle weakness', 'Hyperglycemia'],
+  causes: ['Prolonged corticosteroid use', 'Pituitary adenoma', 'Adrenal tumor', 'Ectopic ACTH production'],
+  treatment: ['Treat underlying cause', 'Reduce steroid dose if possible', 'Surgery', 'Radiotherapy', 'Medical therapy'],
+  description: 'A disorder caused by prolonged exposure to excessive levels of cortisol.',
+},
+
+'Addison Disease': {
+  category: 'metabolic',
+  name: 'Addison Disease',
+  symptoms: ['Fatigue', 'Weight loss', 'Hyperpigmentation', 'Hypotension', 'Salt craving', 'Abdominal pain'],
+  causes: ['Autoimmune adrenal destruction', 'Tuberculosis', 'Adrenal hemorrhage', 'Metastatic disease'],
+  treatment: ['Hydrocortisone replacement', 'Fludrocortisone', 'Stress-dose steroids during illness', 'Patient education'],
+  description: 'Primary adrenal insufficiency caused by inadequate production of cortisol and aldosterone.',
+},
+
+'Hyperparathyroidism': {
+  category: 'metabolic',
+  name: 'Hyperparathyroidism',
+  symptoms: ['Kidney stones', 'Bone pain', 'Abdominal pain', 'Fatigue', 'Depression', 'Muscle weakness'],
+  causes: ['Parathyroid adenoma', 'Parathyroid hyperplasia', 'Chronic kidney disease'],
+  treatment: ['Parathyroidectomy', 'Hydration', 'Bisphosphonates', 'Cinacalcet', 'Treat underlying cause'],
+  description: 'A disorder characterized by excessive secretion of parathyroid hormone leading to hypercalcemia.',
+},
+'Acute Kidney Injury': {
+  category: 'metabolic',
+  name: 'Acute Kidney Injury',
+  symptoms: ['Oliguria', 'Fluid retention', 'Peripheral edema', 'Fatigue', 'Nausea', 'Confusion'],
+  causes: ['Hypovolemia', 'Sepsis', 'Nephrotoxic drugs', 'Urinary obstruction', 'Acute tubular necrosis'],
+  treatment: ['Treat underlying cause', 'IV fluids if hypovolemic', 'Avoid nephrotoxins', 'Electrolyte correction', 'Dialysis if indicated'],
+  description: 'A sudden decline in kidney function resulting in impaired waste excretion and fluid-electrolyte imbalance.',
+},
+
+'Nephrotic Syndrome': {
+  category: 'metabolic',
+  name: 'Nephrotic Syndrome',
+  symptoms: ['Generalized edema', 'Foamy urine', 'Weight gain', 'Fatigue', 'Ascites'],
+  causes: ['Minimal change disease', 'FSGS', 'Membranous nephropathy', 'Diabetes mellitus', 'Lupus nephritis'],
+  treatment: ['ACE inhibitors', 'Diuretics', 'Corticosteroids', 'Immunosuppressants', 'Salt restriction'],
+  description: 'A kidney disorder characterized by heavy proteinuria, hypoalbuminemia, edema, and hyperlipidemia.',
+},
+
+'Nephritic Syndrome': {
+  category: 'metabolic',
+  name: 'Nephritic Syndrome',
+  symptoms: ['Hematuria', 'Hypertension', 'Oliguria', 'Periorbital edema', 'Dark urine'],
+  causes: ['Post-streptococcal glomerulonephritis', 'IgA nephropathy', 'Lupus nephritis', 'Rapidly progressive glomerulonephritis'],
+  treatment: ['Blood pressure control', 'Diuretics', 'Treat underlying cause', 'Immunosuppressive therapy if indicated'],
+  description: 'A glomerular disorder characterized by hematuria, reduced kidney function, hypertension, and mild proteinuria.',
+},
+
+'HIV/AIDS': {
+  category: 'infectious',
+  name: 'Human Immunodeficiency Virus (HIV/AIDS)',
+  symptoms: ['Fever', 'Weight loss', 'Night sweats', 'Chronic diarrhea', 'Recurrent infections', 'Lymphadenopathy'],
+  causes: ['Human immunodeficiency virus infection'],
+  treatment: ['Combination antiretroviral therapy (ART)', 'Opportunistic infection prophylaxis', 'Regular monitoring', 'Supportive care'],
+  description: 'A chronic viral infection that progressively weakens the immune system by destroying CD4 T lymphocytes.',
+},
+
+'Malaria': {
+  category: 'infectious',
+  name: 'Malaria',
+  symptoms: ['Cyclic fever', 'Chills', 'Sweating', 'Headache', 'Fatigue', 'Anemia'],
+  causes: ['Plasmodium falciparum', 'Plasmodium vivax', 'Mosquito bite (Anopheles)'],
+  treatment: ['Artemisinin-based combination therapy', 'Chloroquine where sensitive', 'Supportive care', 'IV artesunate for severe malaria'],
+  description: 'A mosquito-borne parasitic disease causing recurrent fever and systemic illness.',
+},
+
+'Dengue Fever': {
+  category: 'infectious',
+  name: 'Dengue Fever',
+  symptoms: ['High fever', 'Severe headache', 'Retro-orbital pain', 'Myalgia', 'Rash', 'Bleeding tendency'],
+  causes: ['Dengue virus transmitted by Aedes mosquitoes'],
+  treatment: ['Supportive care', 'Adequate hydration', 'Acetaminophen for fever', 'Monitor for shock', 'Avoid NSAIDs'],
+  description: 'A mosquito-borne viral illness that may progress to severe dengue with plasma leakage and hemorrhage.',
+},
+
+'Typhoid Fever': {
+  category: 'infectious',
+  name: 'Typhoid Fever',
+  symptoms: ['Prolonged fever', 'Abdominal pain', 'Constipation or diarrhea', 'Rose spots', 'Headache', 'Fatigue'],
+  causes: ['Salmonella enterica serotype Typhi'],
+  treatment: ['Ceftriaxone', 'Azithromycin', 'Fluoroquinolones where appropriate', 'Hydration', 'Supportive care'],
+  description: 'A systemic bacterial infection acquired through contaminated food or water.',
+},
+
+'COVID-19': {
+  category: 'infectious',
+  name: 'COVID-19',
+  symptoms: ['Fever', 'Dry cough', 'Shortness of breath', 'Loss of smell or taste', 'Fatigue', 'Sore throat'],
+  causes: ['SARS-CoV-2 infection'],
+  treatment: ['Supportive care', 'Oxygen therapy if needed', 'Antiviral therapy in selected patients', 'Corticosteroids in severe disease', 'Mechanical ventilation if required'],
+  description: 'A viral respiratory disease caused by SARS-CoV-2 with manifestations ranging from mild illness to severe pneumonia.',
+},
+
+'Multiple Sclerosis': {
+  category: 'metabolic',
+  name: 'Multiple Sclerosis',
+  symptoms: ['Visual disturbances', 'Muscle weakness', 'Numbness', 'Balance problems', 'Fatigue', 'Spasticity'],
+  causes: ['Autoimmune demyelination', 'Genetic predisposition', 'Environmental factors'],
+  treatment: ['High-dose corticosteroids for relapses', 'Disease-modifying therapies', 'Physical therapy', 'Symptomatic management'],
+  description: 'A chronic autoimmune disease characterized by demyelination within the central nervous system.',
+},
+
+"Bell's Palsy": {
+  category: 'ent',
+  name: "Bell's Palsy",
+  symptoms: ['Sudden unilateral facial weakness', 'Facial drooping', 'Difficulty closing one eye', 'Loss of taste', 'Hyperacusis'],
+  causes: ['Idiopathic', 'Herpes simplex virus reactivation', 'Inflammation of the facial nerve'],
+  treatment: ['Oral corticosteroids', 'Eye lubrication', 'Eye protection', 'Antiviral therapy in selected cases', 'Facial exercises'],
+  description: 'An acute peripheral facial nerve paralysis causing sudden weakness of one side of the face.',
+},
+'Guillain-Barré Syndrome': {
+  category: 'ent',
+  name: 'Guillain-Barré Syndrome',
+  symptoms: ['Ascending muscle weakness', 'Areflexia', 'Paresthesia', 'Difficulty walking', 'Respiratory muscle weakness', 'Facial weakness'],
+  causes: ['Campylobacter jejuni infection', 'Viral infections', 'Post-vaccination (rare)', 'Autoimmune response'],
+  treatment: ['IV immunoglobulin (IVIG)', 'Plasma exchange', 'Respiratory support', 'Physical rehabilitation', 'Supportive care'],
+  description: 'An acute autoimmune polyneuropathy causing rapidly progressive ascending weakness and diminished reflexes.',
+},
+
+'Brain Tumor': {
+  category: 'neurology',
+  name: 'Brain Tumor',
+  symptoms: ['Persistent headache', 'Seizures', 'Nausea and vomiting', 'Vision changes', 'Weakness', 'Personality changes'],
+  causes: ['Primary brain tumors', 'Metastatic cancer', 'Genetic syndromes', 'Radiation exposure'],
+  treatment: ['Surgical resection', 'Radiotherapy', 'Chemotherapy', 'Corticosteroids', 'Targeted therapy'],
+  description: 'An abnormal growth of cells within the brain that may be benign or malignant and can impair neurological function.',
+},
+
+'Osteoarthritis': {
+  category: 'neurology',
+  name: 'Osteoarthritis',
+  symptoms: ['Joint pain', 'Morning stiffness <30 minutes', 'Crepitus', 'Reduced range of motion', 'Joint enlargement'],
+  causes: ['Aging', 'Obesity', 'Previous joint injury', 'Repetitive joint stress', 'Genetics'],
+  treatment: ['Weight reduction', 'Physical therapy', 'NSAIDs', 'Intra-articular injections', 'Joint replacement surgery'],
+  description: 'A degenerative joint disease characterized by progressive cartilage loss and bony changes.',
+},
+
+'Ankylosing Spondylitis': {
+  category: 'neurology',
+  name: 'Ankylosing Spondylitis',
+  symptoms: ['Chronic low back pain', 'Morning stiffness', 'Reduced spinal mobility', 'Improves with exercise', 'Fatigue'],
+  causes: ['HLA-B27 association', 'Autoimmune inflammation', 'Genetic predisposition'],
+  treatment: ['NSAIDs', 'TNF inhibitors', 'IL-17 inhibitors', 'Physical therapy', 'Exercise'],
+  description: 'A chronic inflammatory disease primarily affecting the spine and sacroiliac joints.',
+},
+
+'Psoriatic Arthritis': {
+  category: 'neurology',
+  name: 'Psoriatic Arthritis',
+  symptoms: ['Joint pain', 'Swollen fingers', 'Morning stiffness', 'Nail pitting', 'Psoriatic skin lesions'],
+  causes: ['Psoriasis', 'Autoimmune inflammation', 'Genetic predisposition'],
+  treatment: ['NSAIDs', 'Methotrexate', 'Biologic agents', 'Physical therapy', 'Lifestyle modifications'],
+  description: 'An inflammatory arthritis associated with psoriasis affecting peripheral joints and the spine.',
+},
+
+'Sickle Cell Disease': {
+  category: 'hematology',
+  name: 'Sickle Cell Disease',
+  symptoms: ['Pain crises', 'Anemia', 'Jaundice', 'Fatigue', 'Frequent infections', 'Hand-foot swelling'],
+  causes: ['Inherited mutation in the beta-globin gene'],
+  treatment: ['Hydroxyurea', 'Pain management', 'Blood transfusions', 'Folic acid supplementation', 'Stem cell transplantation'],
+  description: 'An inherited hemoglobin disorder causing chronic hemolytic anemia and recurrent vaso-occlusive crises.',
+},
+
+'Hemophilia': {
+  category: 'hematology',
+  name: 'Hemophilia',
+  symptoms: ['Easy bruising', 'Prolonged bleeding', 'Hemarthrosis', 'Muscle hematomas', 'Excessive bleeding after surgery'],
+  causes: ['Inherited deficiency of clotting factor VIII or IX'],
+  treatment: ['Factor replacement therapy', 'Desmopressin (Hemophilia A)', 'Antifibrinolytics', 'Bleeding prevention'],
+  description: 'A hereditary bleeding disorder caused by deficiency of coagulation factors leading to impaired blood clotting.',
+},
+
+'Thalassemia': {
+  category: 'hematology',
+  name: 'Thalassemia',
+  symptoms: ['Chronic anemia', 'Fatigue', 'Pallor', 'Jaundice', 'Splenomegaly', 'Bone deformities in severe cases'],
+  causes: ['Inherited mutations affecting globin chain synthesis'],
+  treatment: ['Regular blood transfusions', 'Iron chelation therapy', 'Folic acid', 'Stem cell transplantation'],
+  description: 'A group of inherited blood disorders characterized by reduced production of normal hemoglobin.',
+},
+
+'Psoriasis': {
+  category: 'dermatology',
+  name: 'Psoriasis',
+  symptoms: ['Red scaly plaques', 'Itching', 'Dry cracked skin', 'Nail pitting', 'Joint pain in some patients'],
+  causes: ['Autoimmune dysfunction', 'Genetic predisposition', 'Stress', 'Infections', 'Certain medications'],
+  treatment: ['Topical corticosteroids', 'Vitamin D analogs', 'Phototherapy', 'Methotrexate', 'Biologic therapy'],
+  description: 'A chronic immune-mediated skin disease characterized by well-demarcated erythematous plaques with silvery scales.',
+},
+
+'Cellulitis': {
+  category: 'dermatology',
+  name: 'Cellulitis',
+  symptoms: ['Redness', 'Warmth', 'Swelling', 'Pain', 'Fever', 'Tender skin'],
+  causes: ['Streptococcus pyogenes', 'Staphylococcus aureus', 'Skin trauma', 'Diabetes mellitus'],
+  treatment: ['Oral or IV antibiotics', 'Elevation of affected limb', 'Pain control', 'Wound care'],
+  description: 'A bacterial infection of the skin and subcutaneous tissues causing localized inflammation and swelling.',
+},
+
 };
 
 // =============================================================================
@@ -711,6 +1360,7 @@ interface MedicalToolPageProps {
 export function MedicalToolPage({ toolId }: MedicalToolPageProps) {
   const navigate = useNavigate();
   const { direction } = useLanguageStore();
+  const { t } = useTranslation();
 
   let content: JSX.Element;
 
@@ -782,9 +1432,7 @@ export function MedicalToolPage({ toolId }: MedicalToolPageProps) {
         </svg>
 
         <span className="text-sm font-medium">
-          {direction === 'rtl'
-            ? 'العودة للأدوات الطبية'
-            : 'Back to Medical Tools'}
+          {t('Back to Medical Tools', 'Back to Medical Tools')}
         </span>
       </button>
 
@@ -1385,12 +2033,211 @@ function MedicalMCQ() {
 }
 
 // =============================================================================
+// Disease category grouping helpers
+// =============================================================================
+
+const DISEASE_CATEGORY_ICONS: Record<string, LucideIcon> = {
+  cardiovascular: HeartPulse,
+  respiratory: Wind,
+  neurology: Brain,
+  gastroenterology: UtensilsCrossed,
+  nephrology: Droplets,
+  endocrine: Activity,
+  hematology: Droplet,
+  infectious: Bug,
+  rheumatology: Bone,
+  dermatology: Flower2,
+  ent: Ear,
+  musculoskeletal: Dumbbell,
+  metabolic: FlaskConical,
+  psychiatry: Smile,
+};
+
+const DEFAULT_DISEASE_CATEGORY_ICON: LucideIcon = Stethoscope;
+
+function formatCategoryName(category: string): string {
+  return category
+    .split(/[-_]/)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
+function getCategoryIcon(category: string): LucideIcon {
+  return DISEASE_CATEGORY_ICONS[category] ?? DEFAULT_DISEASE_CATEGORY_ICON;
+}
+
+interface DiseaseCategoryGroup {
+  category: string;
+  diseases: string[];
+}
+
+function groupDiseasesByCategory(diseaseKeys: string[]): DiseaseCategoryGroup[] {
+  const groups = groupBy(diseaseKeys, (key) => DISEASES[key].category);
+  return Object.entries(groups)
+    .map(([category, diseases]) => ({ category, diseases }))
+    .sort((a, b) => a.category.localeCompare(b.category));
+}
+
+function DiseaseCard({
+  name,
+  description,
+  onClick,
+}: {
+  name: string;
+  description: string;
+  onClick: () => void;
+}) {
+  return (
+    <Card className="p-4 cursor-pointer hover:shadow-md transition-shadow" onClick={onClick}>
+      <h3 dir="ltr" className="font-semibold dark:text-white text-left">{name}</h3>
+      <p dir="ltr" className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2 text-left">{description}</p>
+    </Card>
+  );
+}
+
+function DiseaseCategoryCard({
+  category,
+  diseaseCount,
+  onClick,
+}: {
+  category: string;
+  diseaseCount: number;
+  onClick: () => void;
+}) {
+  const { t } = useTranslation();
+  const Icon = getCategoryIcon(category);
+
+  return (
+    <Card className="p-5 cursor-pointer hover:shadow-md transition-shadow group h-full" onClick={onClick}>
+      <div className="w-12 h-12 rounded-xl bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center mb-3">
+        <Icon className="w-6 h-6 text-primary-600 dark:text-primary-400 group-hover:scale-110 transition-transform duration-200" />
+      </div>
+      <h3 className="font-semibold dark:text-white">{formatCategoryName(category)}</h3>
+      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+        {t('diseases', { count: diseaseCount, defaultValue: '{{count}} diseases' })}
+      </p>
+    </Card>
+  );
+}
+
+type DiseaseAccent = 'red' | 'amber' | 'emerald';
+
+const DISEASE_ACCENT_STYLES: Record<
+  DiseaseAccent,
+  { card: string; border: string; iconWrap: string; icon: string; dot: string; countBadge: string; chipHover: string }
+> = {
+  red: {
+    card: 'from-red-50/60 via-white to-white dark:from-red-900/15 dark:via-dark-card dark:to-dark-card',
+    border: 'border-red-100 dark:border-red-900/30',
+    iconWrap: 'bg-red-100 dark:bg-red-900/30',
+    icon: 'text-red-500 dark:text-red-400',
+    dot: 'bg-red-400',
+    countBadge: 'bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-300',
+    chipHover: 'hover:border-red-200 hover:bg-white dark:hover:border-red-800/50 dark:hover:bg-white/10',
+  },
+  amber: {
+    card: 'from-amber-50/60 via-white to-white dark:from-amber-900/15 dark:via-dark-card dark:to-dark-card',
+    border: 'border-amber-100 dark:border-amber-900/30',
+    iconWrap: 'bg-amber-100 dark:bg-amber-900/30',
+    icon: 'text-amber-500 dark:text-amber-400',
+    dot: 'bg-amber-400',
+    countBadge: 'bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-300',
+    chipHover: 'hover:border-amber-200 hover:bg-white dark:hover:border-amber-800/50 dark:hover:bg-white/10',
+  },
+  emerald: {
+    card: 'from-emerald-50/60 via-white to-white dark:from-emerald-900/15 dark:via-dark-card dark:to-dark-card',
+    border: 'border-emerald-100 dark:border-emerald-900/30',
+    iconWrap: 'bg-emerald-100 dark:bg-emerald-900/30',
+    icon: 'text-emerald-500 dark:text-emerald-400',
+    dot: 'bg-emerald-400',
+    countBadge: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-300',
+    chipHover: 'hover:border-emerald-200 hover:bg-white dark:hover:border-emerald-800/50 dark:hover:bg-white/10',
+  },
+};
+
+function DiseaseStatPill({
+  icon: Icon,
+  count,
+  label,
+  accent,
+}: {
+  icon: LucideIcon;
+  count: number;
+  label: string;
+  accent: DiseaseAccent;
+}) {
+  const s = DISEASE_ACCENT_STYLES[accent];
+  return (
+    <div className={`inline-flex items-center gap-2.5 rounded-full border bg-gradient-to-b px-4 py-2 shadow-sm ${s.border} ${s.card}`}>
+      <Icon className={`h-4 w-4 ${s.icon}`} />
+      <span className="text-sm font-bold tabular-nums text-gray-900 dark:text-white">{count}</span>
+      <span className="text-sm font-medium text-gray-500 dark:text-gray-400">{label}</span>
+    </div>
+  );
+}
+
+function DiseaseCategoryBadge({ category }: { category: string }) {
+  const Icon = getCategoryIcon(category);
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-primary-200/70 bg-white/80 px-3.5 py-1.5 text-xs font-semibold text-primary-700 shadow-sm dark:border-primary-800/40 dark:bg-primary-900/30 dark:text-primary-300">
+      <Icon className="h-3.5 w-3.5" />
+      {formatCategoryName(category)}
+    </span>
+  );
+}
+
+function DiseaseInfoSection({
+  icon: Icon,
+  title,
+  items,
+  accent,
+}: {
+  icon: LucideIcon;
+  title: string;
+  items: string[];
+  accent: DiseaseAccent;
+}) {
+  const s = DISEASE_ACCENT_STYLES[accent];
+  return (
+    <motion.div variants={staggerItem} className="h-full">
+      <div className={`flex h-full flex-col rounded-2xl border bg-gradient-to-b p-6 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg ${s.card} ${s.border}`}>
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <span className={`flex h-10 w-10 items-center justify-center rounded-xl ${s.iconWrap}`}>
+              <Icon className={`h-5 w-5 ${s.icon}`} />
+            </span>
+            <h3 className="text-base font-semibold text-gray-900 dark:text-white">{title}</h3>
+          </div>
+          <span className={`flex-shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${s.countBadge}`}>{items.length}</span>
+        </div>
+        <ul dir="ltr" className="mt-5 space-y-2 text-left">
+          {items.map((item, i) => (
+            <motion.li
+              key={i}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.06 * i, duration: 0.3, ease: 'easeOut' }}
+              className={`flex items-start gap-2.5 rounded-xl border border-transparent bg-white/70 px-3.5 py-2.5 transition-all duration-200 dark:bg-white/5 ${s.chipHover}`}
+            >
+              <span className={`mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full ${s.dot}`} />
+              <span className="text-sm leading-relaxed text-gray-700 dark:text-gray-300">{item}</span>
+            </motion.li>
+          ))}
+        </ul>
+      </div>
+    </motion.div>
+  );
+}
+
+// =============================================================================
 // 4. Disease Explain
 // =============================================================================
 
 function DiseaseExplain() {
   const { t } = useTranslation();
+  const { direction } = useLanguageStore();
   const [search, setSearch] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedDisease, setSelectedDisease] = useState<string | null>(null);
 
   const filteredDiseases = useMemo(() => {
@@ -1404,30 +2251,109 @@ function DiseaseExplain() {
     );
   }, [search]);
 
+  const categoryGroups = useMemo(
+    () => groupDiseasesByCategory(filteredDiseases).filter((g) => g.diseases.length > 0),
+    [filteredDiseases]
+  );
+
+  const categoryDiseases = useMemo(
+    () => (selectedCategory ? filteredDiseases.filter((k) => DISEASES[k].category === selectedCategory) : []),
+    [selectedCategory, filteredDiseases]
+  );
+
   const disease = selectedDisease ? DISEASES[selectedDisease] : null;
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearch(e.target.value);
+    setSelectedCategory(null);
+    setSelectedDisease(null);
+  };
 
   return (
     <motion.div {...fadeIn} className="space-y-6">
       <Card className="p-6">
-        <h2 className="text-2xl font-bold mb-2 dark:text-white">{t('Disease Encyclopedia', 'Disease Encyclopedia')}</h2>
-        <p className="text-gray-500 dark:text-gray-400 mb-4">{t('Search and learn about medical diseases, their symptoms, causes, and treatments.', 'Search and learn about medical diseases, their symptoms, causes, and treatments.')}</p>
-        <Input
-          value={search}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => { setSearch(e.target.value); setSelectedDisease(null); }}
-          placeholder={t('Search diseases...', 'Search diseases...')}
-        />
-      </Card>
+  <div className="flex items-center gap-3 mb-2">
+    <div className="w-12 h-12 rounded-xl bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
+      <Stethoscope className="w-6 h-6 text-primary-600 dark:text-primary-400" />
+    </div>
 
-      {!selectedDisease && (
+    <div>
+      <h2 className="text-2xl font-bold dark:text-white">
+        {t('Disease Encyclopedia', 'Disease Encyclopedia')}
+      </h2>
+
+      <p className="text-gray-500 dark:text-gray-400">
+        {t(
+          'Search and learn about medical diseases, their symptoms, causes, and treatments.',
+          'Search and learn about medical diseases, their symptoms, causes, and treatments.'
+        )}
+      </p>
+    </div>
+  </div>
+
+  <div className="relative mt-5">
+    <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+
+    <Input
+      value={search}
+      onChange={handleSearchChange}
+      placeholder={t('Search diseases...', 'Search diseases...')}
+      className="ps-10"
+    />
+  </div>
+</Card>
+
+      {!selectedCategory && !selectedDisease && (
         <motion.div {...fadeIn}>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">{filteredDiseases.length} {t('diseases found', 'diseases found')}</p>
+          <div className="flex items-center justify-between mb-3">
+  <p className="text-sm text-gray-500 dark:text-gray-400">
+    {t('medical categories found', { count: categoryGroups.length, defaultValue: '{{count}} medical categories found' })}
+  </p>
+</div>
+          {categoryGroups.length === 0 ? (
+            <EmptyState
+              icon={<span className="text-4xl">🔍</span>}
+              title={t('No categories found', 'No categories found')}
+              description={t('No medical categories match your search.', 'No medical categories match your search.')}
+            />
+          ) : (
+            <motion.div variants={staggerContainer} initial="initial" animate="animate" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {categoryGroups.map((group) => (
+                <motion.div key={group.category} variants={staggerItem} className="h-full">
+                  <DiseaseCategoryCard
+                    category={group.category}
+                    diseaseCount={group.diseases.length}
+                    onClick={() => setSelectedCategory(group.category)}
+                  />
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
+        </motion.div>
+      )}
+
+      {selectedCategory && !selectedDisease && (
+        <motion.div {...fadeIn} className="space-y-4">
+          <div className="flex items-center justify-between gap-3">
+            <Button
+              variant="ghost"
+              onClick={() => setSelectedCategory(null)}
+              icon={<ArrowLeft className={`w-4 h-4 ${direction === 'rtl' ? 'rotate-180' : ''}`} />}
+            >
+              {t('Back to categories', 'Back to categories')}
+            </Button>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              {t('diseases found', { count: categoryDiseases.length, defaultValue: '{{count}} diseases found' })}
+            </p>
+          </div>
           <motion.div variants={staggerContainer} initial="initial" animate="animate" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {filteredDiseases.map((key) => (
+            {categoryDiseases.map((key) => (
               <motion.div key={key} variants={staggerItem}>
-                <Card className="p-4 cursor-pointer hover:shadow-md transition-shadow" onClick={() => setSelectedDisease(key)}>
-                  <h3 className="font-semibold dark:text-white">{DISEASES[key].name}</h3>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">{DISEASES[key].description}</p>
-                </Card>
+                <DiseaseCard
+                  name={DISEASES[key].name}
+                  description={DISEASES[key].description}
+                  onClick={() => setSelectedDisease(key)}
+                />
               </motion.div>
             ))}
           </motion.div>
@@ -1436,49 +2362,73 @@ function DiseaseExplain() {
 
       <AnimatePresence>
         {disease && (
-          <motion.div {...fadeIn} className="space-y-4">
-            <Button variant="ghost" onClick={() => setSelectedDisease(null)} className="mb-2">
-              ← {t('Back to list', 'Back to list')}
+          <motion.div {...fadeIn} className="space-y-6">
+            <Button
+              variant="ghost"
+              onClick={() => setSelectedDisease(null)}
+              icon={<ArrowLeft className={`w-4 h-4 ${direction === 'rtl' ? 'rotate-180' : ''}`} />}
+              className="mb-2"
+            >
+              {t('Back to list', 'Back to list')}
             </Button>
-            <Card className="p-6">
-              <h2 className="text-2xl font-bold mb-3 dark:text-white">{disease.name}</h2>
-              <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">{disease.description}</p>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4">
-                  <h3 className="font-bold text-red-700 dark:text-red-300 mb-2">🩺 {t('Symptoms', 'Symptoms')}</h3>
-                  <ul className="space-y-1">
-                    {disease.symptoms.map((s, i) => (
-                      <li key={i} className="text-sm text-gray-700 dark:text-gray-300 flex items-start gap-1">
-                        <span className="text-red-400 mt-1">•</span> {s}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, ease: 'easeOut' }}
+              dir="ltr"
+              className="relative overflow-hidden rounded-2xl border border-light-border bg-gradient-to-br from-primary-50/70 via-white to-white p-6 text-left shadow-sm dark:border-dark-border dark:from-primary-900/20 dark:via-dark-card dark:to-dark-card md:p-10"
+            >
+              <div className="pointer-events-none absolute -end-24 -top-28 h-72 w-72 rounded-full bg-primary-100/50 blur-3xl dark:bg-primary-500/10" />
+              <div className="pointer-events-none absolute -bottom-32 -start-20 h-64 w-64 rounded-full bg-red-50/60 blur-3xl dark:bg-red-500/5" />
 
-                <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4">
-                  <h3 className="font-bold text-amber-700 dark:text-amber-300 mb-2">⚡ {t('Causes', 'Causes')}</h3>
-                  <ul className="space-y-1">
-                    {disease.causes.map((c, i) => (
-                      <li key={i} className="text-sm text-gray-700 dark:text-gray-300 flex items-start gap-1">
-                        <span className="text-amber-400 mt-1">•</span> {c}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+              <div className="relative">
+                <DiseaseCategoryBadge category={disease.category} />
 
-                <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-4">
-                  <h3 className="font-bold text-green-700 dark:text-green-300 mb-2">💊 {t('Treatment', 'Treatment')}</h3>
-                  <ul className="space-y-1">
-                    {disease.treatment.map((tr, i) => (
-                      <li key={i} className="text-sm text-gray-700 dark:text-gray-300 flex items-start gap-1">
-                        <span className="text-green-400 mt-1">•</span> {tr}
-                      </li>
-                    ))}
-                  </ul>
+                <h2 className="mt-5 text-3xl font-bold tracking-tight text-gray-900 dark:text-white md:text-4xl">
+                  {disease.name}
+                </h2>
+
+                <p className="mt-4 max-w-3xl text-base leading-relaxed text-gray-600 dark:text-gray-300 md:text-lg">
+                  {disease.description}
+                </p>
+
+                <div className="mt-8 flex flex-wrap gap-3">
+                  <DiseaseStatPill icon={Stethoscope} count={disease.symptoms.length} label={t('Symptoms', 'Symptoms')} accent="red" />
+                  <DiseaseStatPill icon={TriangleAlert} count={disease.causes.length} label={t('Causes', 'Causes')} accent="amber" />
+                  <DiseaseStatPill icon={Pill} count={disease.treatment.length} label={t('Treatment', 'Treatment')} accent="emerald" />
                 </div>
               </div>
-            </Card>
+            </motion.div>
+
+            <motion.div
+              variants={staggerContainer}
+              initial="initial"
+              animate="animate"
+              className="grid grid-cols-1 gap-5 md:grid-cols-3"
+            >
+              <DiseaseInfoSection icon={Stethoscope} title={t('Symptoms', 'Symptoms')} items={disease.symptoms} accent="red" />
+              <DiseaseInfoSection icon={TriangleAlert} title={t('Causes', 'Causes')} items={disease.causes} accent="amber" />
+              <DiseaseInfoSection icon={Pill} title={t('Treatment', 'Treatment')} items={disease.treatment} accent="emerald" />
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.2, ease: 'easeOut' }}
+            >
+              <div className="flex items-start gap-3 rounded-2xl border border-amber-200/70 bg-gradient-to-br from-amber-50/70 to-white p-5 shadow-sm dark:border-amber-800/40 dark:from-amber-900/15 dark:to-dark-card">
+                <span className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/40">
+                  <Info className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                </span>
+                <p dir="ltr" className="pt-1 text-left text-sm leading-6 text-amber-800/90 dark:text-amber-200">
+                  {t(
+                    'This tool is intended for educational purposes only. Medical information may change over time.',
+                    'This tool is intended for educational purposes only. Medical information may change over time.'
+                  )}
+                </p>
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -1766,7 +2716,7 @@ function LabValuesTool() {
                   : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
               }`}
             >
-              {cat}
+              {cat === 'All' ? t('All', 'All') : cat}
             </button>
           ))}
         </div>
@@ -1795,15 +2745,15 @@ function LabValuesTool() {
                     transition={{ delay: i * 0.02 }}
                     className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
                   >
-                    <td className="py-3 px-4 font-medium dark:text-white">{lab.name}</td>
-                    <td className="py-3 px-4">
+                    <td dir="ltr" className="py-3 px-4 font-medium dark:text-white">{lab.name}</td>
+                    <td dir="ltr" className="py-3 px-4">
                       <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${CATEGORY_COLORS[lab.category] || 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'}`}>
                         {lab.category}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-gray-500 dark:text-gray-400">{lab.unit}</td>
-                    <td className="py-3 px-4 text-gray-700 dark:text-gray-300">{lab.normalRange}</td>
-                    <td className="py-3 px-4">
+                    <td dir="ltr" className="py-3 px-4 text-gray-500 dark:text-gray-400">{lab.unit}</td>
+                    <td dir="ltr" className="py-3 px-4 text-gray-700 dark:text-gray-300">{lab.normalRange}</td>
+                    <td dir="ltr" className="py-3 px-4">
                       <span className="text-red-600 dark:text-red-400 font-medium">{lab.criticalHigh}</span>
                     </td>
                   </motion.tr>
@@ -1886,7 +2836,7 @@ function MedicalNotesTool() {
 
   const saveNote = useCallback(() => {
     if (!editTitle.trim() || !editContent.trim()) {
-      addNotification('Please fill in both title and content.', 'warning');
+      addNotification(t('Please fill in both title and content.', 'Please fill in both title and content.'), 'warning');
       return;
     }
 
@@ -1898,7 +2848,7 @@ function MedicalNotesTool() {
             : n
         )
       );
-      addNotification('Note updated!', 'success');
+      addNotification(t('Note updated!', 'Note updated!'), 'success');
     } else {
       const newNote: MedicalNote = {
         id: `note-${Date.now()}`,
@@ -1909,7 +2859,7 @@ function MedicalNotesTool() {
         updatedAt: Date.now(),
       };
       setNotes((prev) => [newNote, ...prev]);
-      addNotification('Note created!', 'success');
+      addNotification(t('Note created!', 'Note created!'), 'success');
     }
     setIsCreating(false);
     setEditingId(null);
@@ -1917,7 +2867,7 @@ function MedicalNotesTool() {
 
   const deleteNote = useCallback((id: string) => {
     setNotes((prev) => prev.filter((n) => n.id !== id));
-    addNotification('Note deleted.', 'info');
+    addNotification(t('Note deleted.', 'Note deleted.'), 'info');
   }, [addNotification]);
 
   const applyTemplate = useCallback((templateId: string) => {

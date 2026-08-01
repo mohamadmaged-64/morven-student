@@ -30,7 +30,7 @@ export const categories: Record<ToolCategory, CategoryMeta> = {
     nameAr: 'عام',
     icon: GraduationCap,
     description: 'Pomodoro timer, task manager, exam countdown, and more',
-    descriptionAr: 'مؤقت بومودورو ومدير المهام وعد تنازلي للامتحانات والمزيد',
+    descriptionAr: '  مدير المهام ومنشئ الملاحظات ومؤقت البومودورو والمزيد',
   },
   medical: {
     name: 'Medical Section',
@@ -43,6 +43,7 @@ export const categories: Record<ToolCategory, CategoryMeta> = {
     name: 'Engineering Section',
     nameAr: ' القسم الهندسي',
     icon: Cog,
+    comingSoon: true,
     description: 'Engineering calculators, diagrams, and design tools',
     descriptionAr: 'حاسبات هندسية ورسومات وأدوات تصميم',
   },

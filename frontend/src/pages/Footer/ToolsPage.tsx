@@ -15,7 +15,7 @@ const fadeUp = {
 };
 
 const categoryDescriptions: Record<ToolCategory, { en: string; ar: string }> = {
-  general: { en: 'Pomodoro timer, task manager, exam countdown, and productivity aids.', ar: 'مؤقت بومودورو ومدير المهام وعد تنازلي للامتحانات وأدوات الإنتاجية.' },
+  general: { en: 'Pomodoro timer, task manager, exam countdown, and productivity aids.', ar: 'مدير المهام ومنشئ الملاحظات ومؤقت البومودورو والمزيد' },
   medical: { en: 'Medical summarizers, flashcards, drug references, and lab values for students.', ar: 'ملخصات طبية وبطاقات تعليمية ومراجع الأدوية وقيم المختبر للطلاب.' },
   engineering: { en: 'Engineering calculators, diagrams, and design tools coming soon.', ar: 'حاسبات هندسية ورسومات وأدوات تصميم قريباً.' },
   pdf: { en: 'Convert, merge, split, compress, and manage your PDF documents with ease.', ar: 'تحويل ودمج وتقسيم وضغط وإدارة مستندات PDF بسهولة.' },

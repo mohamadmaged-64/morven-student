@@ -30,7 +30,7 @@ const fadeUp = {
 };
 
 const featureCards = [
-  { icon: GraduationCap, titleEn: 'General Tools', titleAr: 'أدوات عامة', descEn: 'Pomodoro timer, task manager, exam countdown, and productivity aids.', descAr: 'مؤقت بومودورو ومدير المهام وعد تنازلي للامتحانات وأدوات الإنتاجية.' },
+  { icon: GraduationCap, titleEn: 'General Tools', titleAr: 'أدوات عامة', descEn: 'Pomodoro timer, task manager, exam countdown, and productivity aids.', descAr: 'مدير المهام ومنشئ الملاحظات ومؤقت البومودورو والمزيد.' },
   { icon: HeartPulse, titleEn: 'Medical Section', titleAr: 'القسم الطبي', descEn: 'Medical summarizers, flashcards, drug references, and lab values.', descAr: 'ملخصات طبية وبطاقات تعليمية ومراجع الأدوية وقيم المختبر.' },
    { icon: Cog, titleEn: 'Engineering Section', titleAr: 'القسم الهندسي', descEn: 'Computer enguneering tools and more', descAr: 'أدوات هندسة الحاسوب والمزيد' },
   { icon: Brain, titleEn: 'AI Study Tools', titleAr: 'أدوات الذكاء الاصطناعي', descEn: 'Summarize, explain, generate quizzes, flashcards, and study plans with AI.', descAr: 'تلخيص وشرح وإنشاء اختبارات وبطاقات وخطط دراسة بالذكاء الاصطناعي.' },
