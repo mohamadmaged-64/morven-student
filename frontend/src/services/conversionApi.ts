@@ -112,3 +112,77 @@ export async function compressPdf(
 
   return response.blob();
 }
+
+async function postPdfSecurity(
+  tag: string,
+  url: string,
+  file: File,
+  password: string,
+): Promise<Blob> {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("password", password);
+
+  console.log(`[${tag}] fetch URL:`, url);
+
+  let response: Response;
+
+  try {
+    response = await fetch(url, {
+      method: "POST",
+      body: formData,
+    });
+  } catch (error) {
+    console.error(`[${tag}] fetch threw:`, error);
+    throw error;
+  }
+
+  console.log(`[${tag}] response status:`, response.status);
+
+  if (!response.ok) {
+    let message = `PDF operation failed (${response.status})`;
+
+    try {
+      const bodyText = await response.text();
+      console.log(`[${tag}] response body:`, bodyText);
+
+      try {
+        const body = JSON.parse(bodyText);
+        if (body.error) message = body.error;
+      } catch {
+        // body wasn't JSON — keep default message
+      }
+    } catch (error) {
+      console.error(`[${tag}] failed to read response body:`, error);
+    }
+
+    throw new Error(message);
+  }
+
+  const contentType = response.headers.get("content-type") || "";
+  console.log(`[${tag}] content-type:`, contentType);
+
+  if (!contentType.includes("application/pdf")) {
+    throw new Error("Invalid response. Expected a PDF file.");
+  }
+
+  return response.blob();
+}
+
+export async function protectPdf(file: File, password: string): Promise<Blob> {
+  return postPdfSecurity(
+    "protectPdf",
+    `${API_BASE_URL}/api/protect`,
+    file,
+    password,
+  );
+}
+
+export async function unlockPdf(file: File, password: string): Promise<Blob> {
+  return postPdfSecurity(
+    "unlockPdf",
+    `${API_BASE_URL}/api/unlock`,
+    file,
+    password,
+  );
+}

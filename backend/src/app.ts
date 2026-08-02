@@ -3,6 +3,7 @@ import cors from "cors";
 import healthRoutes from "./routes/health";
 import convertRoutes from "./routes/convert";
 import compressRoutes from "./routes/compress";
+import pdfSecurityRoutes from "./routes/pdf-security";
 import aiRoutes from "./routes/ai";
 
 const app = express();
@@ -41,6 +42,7 @@ app.use(express.json({ limit: "10mb" }));
 app.use("/", healthRoutes);
 app.use("/", convertRoutes);
 app.use("/", compressRoutes);
+app.use("/", pdfSecurityRoutes);
 app.use("/", aiRoutes);
 
 // JSON 404 fallback for unknown routes.

@@ -37,8 +37,6 @@ import {
   deletePDFPages,
   rotatePDFPages,
   reorderPDFPages,
-  passwordProtectPDF,
-  removePDFPassword,
   addWatermarkPDF,
   extractPDFImages,
   ocrPDF,
@@ -48,7 +46,7 @@ import {
   validatePageRanges,
   type PDFPageGroup,
 } from '@/utils/file';
-import { convertToPdf, compressPdf } from '@/services/conversionApi';
+import { convertToPdf, compressPdf, protectPdf, unlockPdf } from '@/services/conversionApi';
 
 import {
   FileText,
@@ -1396,163 +1394,6 @@ function ReorderPdfWorkspace({
   );
 }
 
-// ─── Signature Canvas ───────────────────────────────────────────────
-
-function SignaturePad({
-  onSave,
-  onCancel,
-}: {
-  onSave: (dataUrl: string) => void;
-  onCancel: () => void;
-}) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [isDrawing, setIsDrawing] = useState(false);
-  const lastPos = useRef({ x: 0, y: 0 });
-  const { theme } = useThemeStore();
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    ctx.fillStyle = theme === 'dark' ? '#1a1a2e' : '#ffffff';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.strokeStyle = theme === 'dark' ? '#ffffff' : '#000000';
-    ctx.lineWidth = 2;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-  }, [theme]);
-
-  const getPos = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    const canvas = canvasRef.current!;
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-    return {
-      x: (e.clientX - rect.left) * scaleX,
-      y: (e.clientY - rect.top) * scaleY,
-    };
-  };
-
-  const handleDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    e.currentTarget.setPointerCapture(e.pointerId);
-    setIsDrawing(true);
-    lastPos.current = getPos(e);
-  };
-
-  const handleMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    if (!isDrawing) return;
-    const ctx = canvasRef.current?.getContext('2d');
-    if (!ctx) return;
-    const pos = getPos(e);
-    ctx.beginPath();
-    ctx.moveTo(lastPos.current.x, lastPos.current.y);
-    ctx.lineTo(pos.x, pos.y);
-    ctx.stroke();
-    lastPos.current = pos;
-  };
-
-  const handleUp = () => setIsDrawing(false);
-
-  const clear = () => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    ctx.fillStyle = theme === 'dark' ? '#1a1a2e' : '#ffffff';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-  };
-
-  const save = () => {
-    const dataUrl = canvasRef.current?.toDataURL('image/png');
-    if (dataUrl) onSave(dataUrl);
-  };
-
-  return (
-    <div className="space-y-3">
-      <canvas
-        ref={canvasRef}
-        width={500}
-        height={200}
-        className="w-full rounded-xl border-2 border-dashed border-primary-300 dark:border-primary-600 cursor-crosshair bg-white dark:bg-dark-surface"
-        onPointerDown={handleDown}
-        onPointerMove={handleMove}
-        onPointerUp={handleUp}
-        onPointerLeave={handleUp}
-      />
-      <div className="flex gap-2">
-        <Button variant="primary" size="sm" onClick={save}>
-          Save Signature
-        </Button>
-        <Button variant="ghost" size="sm" onClick={clear}>
-          Clear
-        </Button>
-        <Button variant="ghost" size="sm" onClick={onCancel}>
-          Cancel
-        </Button>
-      </div>
-    </div>
-  );
-}
-
-// ─── Compare Result ─────────────────────────────────────────────────
-
-function CompareResult({
-  result,
-  isRtl,
-}: {
-  result: { match: boolean; differences: string[] };
-  isRtl: boolean;
-}) {
-  return (
-    <Card className="p-6 mt-4">
-      <div className="flex items-center gap-3 mb-4">
-        <div
-          className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-            result.match
-              ? 'bg-emerald-100 dark:bg-emerald-900/30'
-              : 'bg-amber-100 dark:bg-amber-900/30'
-          }`}
-        >
-          {result.match ? (
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-600 dark:text-emerald-400">
-              <polyline points="20 6 9 17 4 12" />
-            </svg>
-          ) : (
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-600 dark:text-amber-400">
-              <circle cx="12" cy="12" r="10" />
-              <line x1="12" y1="8" x2="12" y2="12" />
-              <line x1="12" y1="16" x2="12.01" y2="16" />
-            </svg>
-          )}
-        </div>
-        <div>
-          <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
-            {result.match ? 'Documents Match' : 'Differences Found'}
-          </h3>
-          <p className="text-xs text-gray-500 dark:text-gray-400">
-            {result.differences.length} {result.differences.length === 1 ? 'difference' : 'differences'} found
-          </p>
-        </div>
-      </div>
-
-      {result.differences.length > 0 && (
-        <div className="space-y-2 max-h-48 overflow-auto">
-          {result.differences.map((diff, i) => (
-            <div
-              key={i}
-              className="flex items-start gap-2 p-2 rounded-lg bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800/30"
-            >
-              <span className="text-amber-600 dark:text-amber-400 text-xs mt-0.5">•</span>
-              <span className="text-xs text-gray-700 dark:text-gray-300">{diff}</span>
-            </div>
-          ))}
-        </div>
-      )}
-    </Card>
-  );
-}
-
 // ─── Main Page Component ────────────────────────────────────────────
 
 type Step = 'upload' | 'configure' | 'result';
@@ -1733,13 +1574,13 @@ export default function PdfToolPage({ toolId: propToolId }: { toolId?: string })
         case 'password-protect':
           setProgress(20);
           if (!password) throw new Error('Enter a password');
-          output = await passwordProtectPDF(firstFile, password);
+          output = await protectPdf(firstFile, password);
           break;
 
         case 'remove-password':
           setProgress(20);
           if (!password) throw new Error('Enter the current password');
-          output = await removePDFPassword(firstFile, password);
+          output = await unlockPdf(firstFile, password);
           break;
 
         case 'add-watermark':
@@ -2262,115 +2103,6 @@ export default function PdfToolPage({ toolId: propToolId }: { toolId?: string })
                 </Card>
               )}
 
-              {/* Watermark */}
-              {tool.id === 'add-watermark' && (
-                <Card className="p-6 space-y-4">
-                  <Input
-                    label={t('Watermark Text', 'Watermark Text')}
-                    value={watermarkText}
-                    onChange={(e) => setWatermarkText(e.target.value)}
-                    placeholder={'e.g. CONFIDENTIAL'}
-                  />
-                  <div className="grid grid-cols-2 gap-4">
-                    <Input
-                      label={t('Font Size', 'Font Size')}
-                      type="number"
-                      value={watermarkFontSize}
-                      onChange={(e) => setWatermarkFontSize(Number(e.target.value))}
-                      min={10}
-                      max={200}
-                    />
-                    <Input
-                      label={t('Color', 'Color')}
-                      type="color"
-                      value={watermarkColor}
-                      onChange={(e) => setWatermarkColor(e.target.value)}
-                      className="h-[42px]"
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <Input
-                      label={t('Opacity', 'Opacity')}
-                      type="number"
-                      value={watermarkOpacity}
-                      onChange={(e) => setWatermarkOpacity(Math.min(1, Math.max(0, Number(e.target.value))))}
-                      min={0.05}
-                      max={1}
-                      step={0.05}
-                    />
-                    <Input
-                      label={t('Rotation (degrees)', 'Rotation (degrees)')}
-                      type="number"
-                      value={watermarkRotation}
-                      onChange={(e) => setWatermarkRotation(Number(e.target.value))}
-                      min={-180}
-                      max={180}
-                    />
-                  </div>
-                </Card>
-              )}
-
-              {/* Add Signature */}
-              {tool.id === 'add-signature' && (
-                <Card className="p-6 space-y-4">
-                  {!showSignaturePad && !signatureData && (
-                    <Button variant="primary" onClick={() => setShowSignaturePad(true)}>
-                      {t('Draw Signature', 'Draw Signature')}
-                    </Button>
-                  )}
-                  {showSignaturePad && (
-                    <SignaturePad
-                      onSave={(data) => {
-                        setSignatureData(data);
-                        setShowSignaturePad(false);
-                      }}
-                      onCancel={() => setShowSignaturePad(false)}
-                    />
-                  )}
-                  {signatureData && !showSignaturePad && (
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-3">
-                        <img src={signatureData} alt="Signature" className="h-16 rounded-lg border border-light-border dark:border-dark-border bg-white px-2" />
-                        <Button variant="ghost" size="sm" onClick={() => { setSignatureData(''); setShowSignaturePad(true); }}>
-                          {t('Redraw', 'Redraw')}
-                        </Button>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <Input label={t('Page', 'Page')} type="number" value={sigPage} onChange={(e) => setSigPage(Number(e.target.value))} min={0} />
-                        <Input label={t('X Position', 'X Position')} type="number" value={sigX} onChange={(e) => setSigX(Number(e.target.value))} min={0} />
-                        <Input label={t('Y Position', 'Y Position')} type="number" value={sigY} onChange={(e) => setSigY(Number(e.target.value))} min={0} />
-                        <Input label={t('Width', 'Width')} type="number" value={sigWidth} onChange={(e) => setSigWidth(Number(e.target.value))} min={20} />
-                        <Input label={t('Height', 'Height')} type="number" value={sigHeight} onChange={(e) => setSigHeight(Number(e.target.value))} min={20} />
-                      </div>
-                    </div>
-                  )}
-                </Card>
-              )}
-
-              {/* OCR Language */}
-              {(tool.id === 'ocr' || tool.id === 'scan-to-text') && (
-                <Card className="p-6">
-                  <Select
-                    label={t('Language', 'Language')}
-                    value={ocrLang}
-                    onChange={(e) => setOcrLang(e.target.value)}
-                    options={[
-                      { value: 'eng', label: 'English' },
-                      { value: 'ara', label: 'Arabic' },
-                      { value: 'fra', label: 'French' },
-                      { value: 'deu', label: 'German' },
-                      { value: 'spa', label: 'Spanish' },
-                      { value: 'ita', label: 'Italian' },
-                      { value: 'por', label: 'Portuguese' },
-                      { value: 'rus', label: 'Russian' },
-                      { value: 'jpn', label: 'Japanese' },
-                      { value: 'chi_sim', label: 'Chinese (Simplified)' },
-                      { value: 'kor', label: 'Korean' },
-                    ]}
-                  />
-                </Card>
-              )}
-
               {/* Page Selection Tools */}
               {(tool.id === 'split-pdf' || tool.id === 'delete-pages' || tool.id === 'rotate-pages') && (
                 <Card className="p-6">
@@ -2433,24 +2165,7 @@ export default function PdfToolPage({ toolId: propToolId }: { toolId?: string })
                 </Card>
               )}
 
-              {/* Compare PDFs extra file upload */}
-              {tool.id === 'compare-pdfs' && files.length < 2 && (
-                <Card className="p-6">
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-                    {t('Upload a second PDF to compare', 'Upload a second PDF to compare')}
-                  </p>
-                  <FileUpload
-                    accept={['.pdf']}
-                    onFilesSelected={(f) => {
-                      if (f.length > 0) {
-                        setFiles((prev) => [...prev, f[0]]);
-                      }
-                    }}
-                    maxFiles={1}
-                    label={t('Drop second PDF here', 'Drop second PDF here')}
-                  />
-                </Card>
-              )}
+        
 
               {error && (
                 <Card className="p-4 border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/10">
@@ -2496,7 +2211,7 @@ export default function PdfToolPage({ toolId: propToolId }: { toolId?: string })
             >
               {compareResult ? (
                 <>
-                  <CompareResult result={compareResult} isRtl={isRtl} />
+                
                   <div className="mt-4">
                     <Button variant="ghost" onClick={reset}>
                       {t('Start Over', 'Start Over')}
