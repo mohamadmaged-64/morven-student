@@ -159,14 +159,14 @@ export const tools: Tool[] = [
   { id: 'password-protect', name: 'Password Protect', nameAr: 'حماية بكلمة مرور', description: 'Add password protection to PDF files', descriptionAr: 'إضافة حماية بكلمة مرور لملفات PDF', icon: Lock, category: 'pdf' },
   
   // POWERPOINT
-{ id: 'generate-ppt-text', name: 'Generate PPT from Text', nameAr: 'إنشاء PPT من نص', description: 'Create a presentation from text content', descriptionAr: 'إنشاء عرض تقديمي من محتوى نصي', icon: Presentation, category: 'powerpoint', comingSoon: true },
-{ id: 'generate-ppt-pdf', name: 'Generate PPT from PDF', nameAr: 'إنشاء PPT من PDF', description: 'Convert PDF to a PowerPoint presentation', descriptionAr: 'تحويل PDF إلى عرض PowerPoint', icon: FileText, category: 'powerpoint', comingSoon: true },
-{ id: 'merge-ppt', name: 'Merge PowerPoint', nameAr: 'دمج عروض PowerPoint', description: 'Combine multiple PowerPoint presentations into one', descriptionAr: 'دمج عدة عروض PowerPoint في عرض واحد', icon: Combine, category: 'powerpoint', comingSoon: true },
-{ id: 'split-ppt', name: 'Split PowerPoint', nameAr: 'تقسيم عرض PowerPoint', description: 'Split a presentation into multiple files', descriptionAr: 'تقسيم عرض PowerPoint إلى عدة ملفات', icon: Scissors, category: 'powerpoint', comingSoon: true },
-{ id: 'compress-ppt', name: 'Compress PowerPoint', nameAr: 'ضغط PowerPoint', description: 'Reduce the size of your PowerPoint presentation', descriptionAr: 'تقليل حجم عرض PowerPoint', icon: Archive, category: 'powerpoint', comingSoon: true },
-{ id: 'protect-ppt', name: 'Protect PowerPoint', nameAr: 'حماية PowerPoint', description: 'Add password protection to your presentation', descriptionAr: 'إضافة كلمة مرور لحماية العرض التقديمي', icon: Lock, category: 'powerpoint', comingSoon: true },
-{ id: 'unlock-ppt', name: 'Unlock PowerPoint', nameAr: 'إزالة حماية PowerPoint', description: 'Remove password protection from your presentation', descriptionAr: 'إزالة كلمة المرور من العرض التقديمي', icon: Unlock, category: 'powerpoint', comingSoon: true },
- { id: 'number-slides', name: 'Number Slides', nameAr: 'ترقيم الشرائح', description: 'Automatically add slide numbers to your presentation', descriptionAr: 'إضافة أرقام الشرائح تلقائيًا إلى العرض التقديمي', icon: Hash, category: 'powerpoint', comingSoon: true },
+{ id: 'generate-ppt-text', name: 'Generate PPT from Text', nameAr: 'إنشاء PPT من نص', description: 'Create a presentation from text content', descriptionAr: 'إنشاء عرض تقديمي من محتوى نصي', icon: Presentation, category: 'powerpoint' },
+{ id: 'generate-ppt-pdf', name: 'Generate PPT from PDF', nameAr: 'إنشاء PPT من PDF', description: 'Convert PDF to a PowerPoint presentation', descriptionAr: 'تحويل PDF إلى عرض PowerPoint', icon: FileText, category: 'powerpoint' },
+{ id: 'merge-ppt', name: 'Merge PowerPoint', nameAr: 'دمج عروض PowerPoint', description: 'Combine multiple PowerPoint presentations into one', descriptionAr: 'دمج عدة عروض PowerPoint في عرض واحد', icon: Combine, category: 'powerpoint' },
+{ id: 'split-ppt', name: 'Split PowerPoint', nameAr: 'تقسيم عرض PowerPoint', description: 'Split a presentation into multiple files', descriptionAr: 'تقسيم عرض PowerPoint إلى عدة ملفات', icon: Scissors, category: 'powerpoint' },
+{ id: 'compress-ppt', name: 'Compress PowerPoint', nameAr: 'ضغط PowerPoint', description: 'Reduce the size of your PowerPoint presentation', descriptionAr: 'تقليل حجم عرض PowerPoint', icon: Archive, category: 'powerpoint' },
+{ id: 'protect-ppt', name: 'Protect PowerPoint', nameAr: 'حماية PowerPoint', description: 'Add password protection to your presentation', descriptionAr: 'إضافة كلمة مرور لحماية العرض التقديمي', icon: Lock, category: 'powerpoint' },
+{ id: 'unlock-ppt', name: 'Unlock PowerPoint', nameAr: 'إزالة حماية PowerPoint', description: 'Remove password protection from your presentation', descriptionAr: 'إزالة كلمة المرور من العرض التقديمي', icon: Unlock, category: 'powerpoint' },
+ { id: 'number-slides', name: 'Number Slides', nameAr: 'ترقيم الشرائح', description: 'Automatically add slide numbers to your presentation', descriptionAr: 'إضافة أرقام الشرائح تلقائيًا إلى العرض التقديمي', icon: Hash, category: 'powerpoint' },
 
 // VIDEO
   { id: 'extract-audio-video', name: 'Extract Audio from Video', nameAr: 'استخراج الصوت من فيديو', description: 'Extract audio track from video files', descriptionAr: 'استخراج المسار الصوتي من ملفات الفيديو', icon: Music, category: 'video' },

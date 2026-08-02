@@ -4,6 +4,7 @@ import healthRoutes from "./routes/health";
 import convertRoutes from "./routes/convert";
 import compressRoutes from "./routes/compress";
 import pdfSecurityRoutes from "./routes/pdf-security";
+import pptRoutes from "./routes/ppt";
 import aiRoutes from "./routes/ai";
 
 const app = express();
@@ -43,6 +44,7 @@ app.use("/", healthRoutes);
 app.use("/", convertRoutes);
 app.use("/", compressRoutes);
 app.use("/", pdfSecurityRoutes);
+app.use("/", pptRoutes);
 app.use("/", aiRoutes);
 
 // JSON 404 fallback for unknown routes.
