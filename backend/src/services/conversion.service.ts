@@ -23,8 +23,13 @@ export class ConversionService {
     }
 
     return new Promise<string>((resolve, reject) => {
+      // Isolate the LibreOffice profile per conversion to avoid
+      // profile-lock failures under concurrent requests in containers.
+      const userInstallation = `-env:UserInstallation=file:///tmp/morven-lo-${Date.now()}`;
+
       const args = [
         "--headless",
+        userInstallation,
         "--convert-to",
         "pdf",
         "--outdir",
@@ -35,7 +40,7 @@ export class ConversionService {
       execFile(
         LIBREOFFICE_PATH,
         args,
-        { timeout: 60000 },
+        { timeout: 60000, maxBuffer: 10 * 1024 * 1024 },
         async (error, _stdout, stderr) => {
           if (error) {
             reject(

@@ -92,7 +92,7 @@ export class CompressionService {
       execFile(
         GHOSTSCRIPT_PATH,
         args,
-        { timeout: 120000 },
+        { timeout: 120000, maxBuffer: 10 * 1024 * 1024 },
         async (error, _stdout, stderr) => {
           if (error) {
             reject(

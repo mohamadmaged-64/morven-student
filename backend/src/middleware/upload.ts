@@ -3,8 +3,11 @@ import path from "path";
 import fs from "fs";
 
 const TEMP_DIR = path.resolve(__dirname, "..", "temp");
-if (!fs.existsSync(TEMP_DIR)) {
+
+try {
   fs.mkdirSync(TEMP_DIR, { recursive: true });
+} catch (err) {
+  console.error("Failed to create temp directory:", err);
 }
 
 const storage = multer.diskStorage({

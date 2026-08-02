@@ -40,7 +40,6 @@ import {
   passwordProtectPDF,
   removePDFPassword,
   addWatermarkPDF,
-  compressPDF,
   extractPDFImages,
   ocrPDF,
   comparePDFs,
@@ -49,7 +48,7 @@ import {
   validatePageRanges,
   type PDFPageGroup,
 } from '@/utils/file';
-import { convertToPdf } from '@/services/conversionApi';
+import { convertToPdf, compressPdf } from '@/services/conversionApi';
 
 import {
   FileText,
@@ -1711,7 +1710,7 @@ export default function PdfToolPage({ toolId: propToolId }: { toolId?: string })
 
         case 'compress-pdf':
           setProgress(20);
-          output = await compressPDF(firstFile);
+          output = await compressPdf(firstFile, 'medium');
           break;
 
         case 'delete-pages':
