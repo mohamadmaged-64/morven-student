@@ -58,13 +58,11 @@ export const tools: Tool[] = [
   
   // MEDICAL
   { id: 'disease-explain', name: 'Disease Explainer', nameAr: 'شرح الأمراض', description: 'Get simple explanations of diseases and conditions', descriptionAr: 'الحصول على شروحات بسيطة للأمراض والحالات', icon: Stethoscope, category: 'medical' },
-  { id: 'disease-compare', name: 'Disease Comparator', nameAr: 'مقارنة الأمراض', description: 'Compare different diseases side by side', descriptionAr: 'مقارنة الأمراض المختلفة جنباً إلى جنب', icon: Scale,  category: 'medical' },
   { id: 'drug-summary', name: 'Drug Summary', nameAr: 'مرجع الأدوية', description: 'Quick access to drug information and interactions', descriptionAr: 'وصول سريع لمعلومات الأدوية والتفاعلات', icon: Pill, category: 'medical' },
   { id: 'lab-values', name: 'Lab Values', nameAr: 'قيم المختبر', description: 'Reference for normal lab values and ranges', descriptionAr: 'مرجع للقيم المختبرية الطبيعية ونطاقاتها', icon: FlaskConical, category: 'medical' },
   { id: 'medical-notes', name: 'Medical Notes', nameAr: 'ملاحظات طبية', description: 'Template-based clinical note taking', descriptionAr: 'تدوين الملاحظات السريرية بالقوالب', icon: ClipboardPlus, category: 'medical' },
-   { id: 'medical-flashcards', name: 'Medical Flashcards', nameAr: 'بطاقات طبية', description: 'Pre-made medical study flashcards', descriptionAr: 'بطاقات دراسية طبية جاهزة', icon: BookOpenCheck, comingSoon: true, category: 'medical' },
-  { id: 'medical-summarizer', name: 'Medical Summarizer', nameAr: 'ملخص طبي', description: 'Summarize medical texts and articles', descriptionAr: 'تلخيص النصوص والمقالات الطبية', icon: FileHeart, comingSoon: true, category: 'medical' },
-  { id: 'medical-mcq', name: 'Medical MCQ', nameAr: 'أسئلة طبية اختيار من متعدد', description: 'Generate medical multiple choice questions', descriptionAr: 'إنشاء أسئلة اختيار من متعدد طبية', icon: HelpCircle, comingSoon: true, category: 'medical' },
+   { id: 'medical-flashcards', name: 'Medical Flashcards', nameAr: 'بطاقات طبية', description: 'Pre-made medical study flashcards', descriptionAr: 'بطاقات دراسية طبية جاهزة', icon: BookOpenCheck, category: 'medical' },
+  { id: 'medical-mcq', name: 'Medical MCQ', nameAr: 'أسئلة طبية اختيار من متعدد', description: 'Generate medical multiple choice questions', descriptionAr: 'إنشاء أسئلة اختيار من متعدد طبية', icon: HelpCircle, category: 'medical' },
  
   // ENGINEERING
   // Code Tools
@@ -154,19 +152,13 @@ export const tools: Tool[] = [
   { id: 'ppt-to-pdf', name: 'PPT to PDF', nameAr: 'PPT إلى PDF', description: 'Convert PowerPoint presentations to PDF', descriptionAr: 'تحويل عروض PowerPoint إلى PDF', icon: Presentation, category: 'pdf' },
   { id: 'merge-pdfs', name: 'Merge PDF', nameAr: 'دمج PDF', description: 'Combine multiple PDF files into a single document', descriptionAr: 'دمج ملفات PDF متعددة في مستند واحد', icon: Paperclip, category: 'pdf' },
   { id: 'split-pdf', name: 'Split PDF', nameAr: 'تقسيم PDF', description: 'Split a PDF file into separate pages or ranges', descriptionAr: 'تقسيم ملف PDF إلى صفحات أو نطاقات منفصلة', icon: Scissors, category: 'pdf' },
-  { id: 'delete-pages', name: 'Delete Pages', nameAr: 'حذف صفحات', description: 'Remove unwanted pages from a PDF document', descriptionAr: 'إزالة الصفحات غير المرغوب فيها من مستند PDF', icon: Trash2, category: 'pdf' }, 
-  { id: 'compress-pdf', name: 'Compress PDF', nameAr: 'ضغط PDF', description: 'Reduce PDF file size without losing quality', descriptionAr: 'تقليل حجم ملف PDF دون فقدان الجودة', icon: FileArchive, comingSoon: true, category: 'pdf' },
-  { id: 'reorder-pages', name: 'Reorder Pages', nameAr: 'إعادة ترتيب الصفحات', description: 'Rearrange pages in a PDF document', descriptionAr: 'إعادة ترتيب الصفحات في مستند PDF', icon: ArrowUpDown, category: 'pdf', comingSoon: true },
-  { id: 'rotate-pages', name: 'Rotate Pages', nameAr: 'تدوير الصفحات', description: 'Rotate individual pages in a PDF', descriptionAr: 'تدوير صفحات فردية في PDF', icon: RotateCw, comingSoon: true, category: 'pdf' },
-  { id: 'password-protect', name: 'Password Protect', nameAr: 'حماية بكلمة مرور', description: 'Add password protection to PDF files', descriptionAr: 'إضافة حماية بكلمة مرور لملفات PDF', icon: Lock, comingSoon: true, category: 'pdf' },
-  { id: 'remove-password', name: 'Remove Password', nameAr: 'إزالة كلمة المرور', description: 'Remove password protection from PDF files', descriptionAr: 'إزالة حماية كلمة المرور من ملفات PDF', icon: Unlock, comingSoon: true, category: 'pdf' },
-  { id: 'add-watermark', name: 'Add Watermark', nameAr: 'إضافة علامة مائية', description: 'Add text or image watermarks to PDF files', descriptionAr: "إضافة علامات مائية نصية أو صور إلى ملفات PDF", icon: Droplets, comingSoon: true, category: "pdf" },
-  { id: 'add-signature', name: 'Add Signature', nameAr: 'إضافة توقيع', description: 'Add digital signatures to PDF documents', descriptionAr: 'إضافة توقيعات رقمية إلى مستندات PDF', icon: Signature, comingSoon: true, category: 'pdf' },
-  { id: 'extract-images', name: 'Extract Images', nameAr: 'استخراج الصور', description: 'Extract images from PDF files', descriptionAr: 'استخراج الصور من ملفات PDF', icon: ImageIcon, comingSoon: true, category: 'pdf' },
-  { id: 'ocr', name: 'OCR', nameAr: 'التعرف الضوئي', description: 'Optical character recognition for scanned PDFs', descriptionAr: 'التعرف البصري على الأحرف لملفات PDF الممسوحة ضوئياً', icon: ScanSearch, comingSoon: true, category: 'pdf' },
-  { id: 'scan-to-text', name: 'Scan to Text', nameAr: 'مسح إلى نص', description: 'Convert scanned documents and images to editable text', descriptionAr: 'تحويل المستندات والصور الممسوحة ضوئياً إلى نص قابل للتعديل', icon: ScanText, comingSoon: true, category: 'pdf' },
-  { id: 'compare-pdfs', name: 'Compare PDFs', nameAr: 'مقارنة PDF', description: 'Compare two PDF files and highlight differences', descriptionAr: 'مقارنة ملفي PDF وإبراز الاختلافات', icon: GitCompare, comingSoon: true, category: 'pdf' },
+ { id: 'compress-pdf', name: 'Compress PDF', nameAr: 'ضغط PDF', description: 'Reduce PDF file size without losing quality', descriptionAr: 'تقليل حجم ملف PDF دون فقدان الجودة', icon: FileArchive, category: 'pdf' },
 
+  { id: 'delete-pages', name: 'Delete Pages', nameAr: 'حذف صفحات', description: 'Remove unwanted pages from a PDF document', descriptionAr: 'إزالة الصفحات غير المرغوب فيها من مستند PDF', icon: Trash2, category: 'pdf' }, 
+  { id: 'reorder-pages', name: 'Reorder Pages', nameAr: 'إعادة ترتيب الصفحات', description: 'Rearrange pages in a PDF document', descriptionAr: 'إعادة ترتيب الصفحات في مستند PDF', icon: ArrowUpDown, category: 'pdf' },
+  { id: 'rotate-pages', name: 'Rotate Pages', nameAr: 'تدوير الصفحات', description: 'Rotate individual pages in a PDF', descriptionAr: 'تدوير صفحات فردية في PDF', icon: RotateCw, category: 'pdf' },
+  { id: 'password-protect', name: 'Password Protect', nameAr: 'حماية بكلمة مرور', description: 'Add password protection to PDF files', descriptionAr: 'إضافة حماية بكلمة مرور لملفات PDF', icon: Lock, category: 'pdf' },
+  { id: 'remove-password', name: 'Remove Password', nameAr: 'إزالة كلمة المرور', description: 'Remove password protection from PDF files', descriptionAr: 'إزالة حماية كلمة المرور من ملفات PDF', icon: Unlock, category: 'pdf' },
   // POWERPOINT
 { id: 'generate-ppt-text', name: 'Generate PPT from Text', nameAr: 'إنشاء PPT من نص', description: 'Create a presentation from text content', descriptionAr: 'إنشاء عرض تقديمي من محتوى نصي', icon: Presentation, category: 'powerpoint', comingSoon: true },
 { id: 'generate-ppt-pdf', name: 'Generate PPT from PDF', nameAr: 'إنشاء PPT من PDF', description: 'Convert PDF to a PowerPoint presentation', descriptionAr: 'تحويل PDF إلى عرض PowerPoint', icon: FileText, category: 'powerpoint', comingSoon: true },

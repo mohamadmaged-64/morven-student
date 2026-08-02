@@ -15,6 +15,7 @@ import {
   Tooltip,
   Chip,
   ProgressBar,
+  SearchBar,
 } from '@/components/UI';
 import { useAppStore } from '@/store/useAppStore';
 import { Notebook } from 'lucide-react';
@@ -35,6 +36,18 @@ import {
   TriangleAlert,
   Pill,
   ArrowLeft,
+  ArrowRight,
+  ChevronLeft,
+  ChevronRight,
+  RefreshCw,
+  BookOpen,
+  CheckCircle2,
+  XCircle,
+  ClipboardList,
+  Award,
+  Target,
+  Sparkles,
+  Layers,
   HeartPulse,
   Wind,
   Brain,
@@ -1242,6 +1255,45 @@ const LAB_VALUES: LabValue[] = [
 
 const BUILT_IN_DECKS: FlashcardDeck[] = [
   {
+    id: 'general',
+    name: 'General Medicine',
+    icon: '⚕️',
+    cards: [
+      { front: 'What are normal adult vital signs?', back: 'HR: 60-100 bpm | BP: <120/<80 mmHg | RR: 12-20 breaths/min | Temp: 36.1-37.2°C (97-99°F) | SpO2: 95-100% | Pain: 0-10 scale' },
+      { front: 'What are the BMI categories (WHO)?', back: 'Underweight: <18.5 | Normal: 18.5-24.9 | Overweight: 25-29.9 | Obese Class I: 30-34.9 | Obese Class II: 35-39.9 | Obese Class III: ≥40' },
+      { front: 'How do you assess dehydration severity?', back: 'Mild (3-5%): Thirst, slightly dry mucous membranes | Moderate (6-9%): Tachycardia, decreased skin turgor, oliguria, sunken eyes | Severe (>10%): Hypotension, altered consciousness, no urine output, shock.' },
+      { front: 'What are the 4 types of shock?', back: '1. Hypovolemic: blood/fluid loss 2. Cardiogenic: pump failure 3. Distributive: vasodilation (sepsis, anaphylaxis, neurogenic) 4. Obstructive: physical obstruction (tension pneumothorax, PE, tamponade)' },
+      { front: 'What are the Acid-Base disorders and their compensation?', back: 'Metabolic Acidosis: ↓pH, ↓HCO3-, compensate with ↑RR | Metabolic Alkalosis: ↑pH, ↑HCO3-, compensate with ↓RR | Respiratory Acidosis: ↓pH, ↑PCO2, compensate with ↑HCO3- | Respiratory Alkalosis: ↑pH, ↓PCO2, compensate with ↓HCO3-' },
+      { front: 'What are the causes of high anion gap metabolic acidosis (HAGMA)?', back: 'MUDPILES: Methanol, Uremia, DKA/alcoholic ketoacidosis, Propylene glycol, Isoniazid/Iron, Lactic acidosis, Ethylene glycol, Salicylates.' },
+      { front: 'What is the normal anion gap and its formula?', back: 'AG = Na+ - (Cl- + HCO3-); normal 8-12 mEq/L. In HAGMA, also compute the delta-delta gap (ΔAG/ΔHCO3) to detect a concurrent metabolic alkalosis or a mixed NAGMA.' },
+      { front: 'What is the Winter formula?', back: 'Expected PaCO2 = 1.5 × HCO3 + 8 (±2). Assesses respiratory compensation in metabolic acidosis. Measured PaCO2 higher than predicted → concurrent respiratory acidosis; lower → respiratory alkalosis.' },
+      { front: 'What are the causes and treatment of hyponatremia?', back: 'Causes: SIADH, hypovolemia, hypervolemia (HF, cirrhosis), adrenal insufficiency, hypothyroidism, drugs. Acute severe (seizures): hypertonic saline. Correct by ≤8-10 mEq/L per day — rapid correction causes central pontine myelinolysis.' },
+      { front: 'What are the causes and treatment of hypernatremia?', back: 'Causes: water loss (diabetes insipidus, insensible loss, osmotic diuresis), poor intake, hypertonic saline. Free water deficit = 0.6 × weight × (Na/140 - 1). Replace slowly and treat the underlying cause.' },
+      { front: 'What are the causes, ECG, and treatment of hypokalemia?', back: 'Causes: diuretics, vomiting, diarrhea, aldosterone excess, alkalosis. ECG: flat/inverted T waves, U waves, ST depression, arrhythmias. Treatment: PO/IV potassium (never IV push). Hypokalemia precipitates digoxin toxicity.' },
+      { front: 'List the common causes of hyperkalemia.', back: 'Renal failure, ACEi/ARB, K-sparing diuretics, cell lysis (rhabdomyolysis, tumor lysis), metabolic acidosis, Addison disease, excessive K+ intake, pseudohyperkalemia (hemolysis). ECG: peaked T waves then wide QRS.' },
+      { front: 'What are the signs of hypocalcemia?', back: 'Perioral tingling, carpopedal spasm, Chvostek sign (facial twitch on tapping the nerve), Trousseau sign (carpal spasm with a BP cuff), tetany, seizures, prolonged QT. Causes: hypoparathyroidism, vitamin D deficiency, CKD, pancreatitis.' },
+      { front: 'What are the causes and treatment of hypercalcemia?', back: 'Causes: HOMES — Hyperparathyroidism, Malignancy (PTHrP), Multiple myeloma, Endocrine, Sarcoidosis/Supplements. Features: stones, bones, moans, groans (renal stones, bone pain, depression, constipation). Treatment: IV fluids, calcitonin, bisphosphonates.' },
+      { front: 'What are the symptoms and treatment of hypoglycemia?', back: 'Autonomic: sweating, tremor, palpitations, hunger. Neuroglycopenic: confusion, seizure, coma. Treatment: Rule of 15 — 15 g fast carbs, recheck in 15 min; if unconscious, IV dextrose or IM glucagon.' },
+      { front: 'What are the ADA diagnostic criteria for diabetes?', back: 'Any one: fasting glucose ≥126 mg/dL, random glucose ≥200 with symptoms, HbA1c ≥6.5%, or 2-h OGTT glucose ≥200 after 75 g. A second abnormal test confirms the diagnosis.' },
+      { front: 'What are the features and treatment of DKA?', back: 'Hyperglycemia (>250 mg/dL), ketonemia, high anion gap acidosis, dehydration, Kussmaul breathing, fruity breath. Treatment: IV fluids (normal saline), insulin infusion (once K+ >3.3), potassium replacement, and treat the precipitant.' },
+      { front: 'What is HHS and how does it differ from DKA?', back: 'Hyperosmolar hyperglycemic state: glucose >600, extreme dehydration, minimal ketosis/acidosis, marked hyperosmolality; elderly type 2 diabetics. Treatment: fluids and insulin; higher thrombosis and hypokalemia risk — correct more slowly than DKA.' },
+      { front: 'What are the features of hypothyroidism versus hyperthyroidism?', back: 'Hypo: fatigue, cold intolerance, weight gain, constipation, bradycardia, coarse skin/hair, myxedema. Hyper: heat intolerance, weight loss, tremor, tachycardia, diarrhea, anxiety, and exophthalmos in Graves disease.' },
+      { front: 'What is thyroid storm and its treatment?', back: 'Life-threatening hyperthyroidism: fever, tachycardia, agitation, delirium, vomiting. Treatment: beta-blocker (propranolol), thionamide, iodine (only AFTER thionamide), corticosteroids, cooling, and treat the precipitant (infection).' },
+      { front: 'What are the features of Addison disease (adrenal insufficiency)?', back: 'Weakness, fatigue, weight loss, hyperpigmentation (skin and creases), hyponatremia, hyperkalemia, hypotension/shock, salt craving. Treatment: glucocorticoid + mineralocorticoid replacement, with stress-dose steroids during illness.' },
+      { front: 'What are the features of Cushing syndrome?', back: 'Central obesity, moon facies, buffalo hump, purple abdominal striae, easy bruising, proximal myopathy, hyperglycemia, HTN, osteoporosis, hirsutism. Causes: exogenous steroids, adrenal adenoma, pituitary adenoma (Cushing disease), ectopic ACTH.' },
+      { front: 'What are the features of pheochromocytoma?', back: 'Episodic: hypertension, headache, palpitations, sweating, pallor. Rule of 10s: 10% bilateral, malignant, extra-adrenal, familial. Diagnosis: plasma/urinary metanephrines. Pre-op: alpha-blockade FIRST (phenoxybenzamine), then beta-blockade — never beta first.' },
+      { front: 'What are the causes of acute kidney injury (AKI)?', back: 'Pre-renal: hypovolemia, sepsis, heart failure (BUN:Cr >20, improves with fluids). Intra-renal: ATN (ischemia, nephrotoxins), glomerulonephritis, interstitial nephritis. Post-renal: obstruction (stones, BPH, tumor).' },
+      { front: 'What are the qSOFA criteria and the initial sepsis management?', back: 'qSOFA: altered mentation, RR ≥22, SBP ≤100 — ≥2 points suggests sepsis. First hour: lactate, blood cultures BEFORE antibiotics, broad-spectrum antibiotics, IV fluids 30 mL/kg if hypotensive or high lactate, norepinephrine if refractory.' },
+      { front: 'What is anaphylaxis and its treatment?', back: 'Rapid onset: urticaria/angioedema, bronchospasm, hypotension, nausea. Treatment: IM epinephrine (0.3-0.5 mg anterolateral thigh) FIRST, repeat q5-15 min. Adjuncts: oxygen, IV fluids, antihistamines, steroids; observe 4-6 h.' },
+      { front: 'How do heat exhaustion and heat stroke differ?', back: 'Heat exhaustion: fatigue, sweating, tachycardia, normal mentation, core <40°C — fluids and cooling. Heat stroke: core >40°C with CNS dysfunction (confusion, coma) and hot dry skin — EMERGENCY: rapid cooling (ice water immersion) and IV fluids.' },
+      { front: 'What are the types of acute transfusion reactions?', back: 'Acute hemolytic (ABO mismatch: fever, flank pain, DIC — stop and support), Febrile non-hemolytic (most common), Allergic (urticaria), Anaphylactic (IgA deficiency), TRALI (ARDS within 6 h), TACO (volume overload).' },
+      { front: 'What are the causes of microcytic versus macrocytic anemia?', back: 'Microcytic (low MCV): iron deficiency, thalassemia, sideroblastic, chronic disease (can be normocytic). Macrocytic (high MCV): B12/folate deficiency, alcohol, liver disease, hypothyroidism, drugs (methotrexate), reticulocytosis.' },
+      { front: 'What are the causes of upper GI bleeding and its initial management?', back: 'Causes: peptic ulcer, esophageal varices, Mallory-Weiss tear, esophagitis, cancer. Initial: ABC, two large-bore IVs, fluid resuscitation, cross-match/transfuse, IV PPI, and for suspected varices octreotide + antibiotics; urgent endoscopy.' },
+      { front: 'What is DIC and how is it managed?', back: 'Disseminated intravascular coagulation: consumption of platelets and clotting factors causing bleeding plus microthrombosis. Causes: sepsis, obstetric complications, malignancy, trauma. Labs: ↓ platelets, ↑ PT/INR, ↓ fibrinogen, ↑ D-dimer. Treatment: treat the cause, replace factors/platelets if bleeding.' },
+      { front: 'What is febrile neutropenia and its management?', back: 'Temperature ≥38.3°C (or ≥38.0°C for >1 h) with ANC <500/mm3, typically post-chemotherapy. Management: blood cultures, urgent broad-spectrum IV antibiotics within 1 hour (anti-pseudomonal: piperacillin-tazobactam or cefepime), G-CSF selectively.' },
+    ],
+  },
+  {
     id: 'cardiovascular',
     name: 'Cardiovascular',
     icon: '🫀',
@@ -1251,6 +1303,37 @@ const BUILT_IN_DECKS: FlashcardDeck[] = [
       { front: 'What are the classic symptoms of MI (STEMI)?', back: 'Crushing substernal chest pain radiating to left arm/jaw, diaphoresis, nausea/vomiting, dyspnea, palpitations, sense of impending doom.' },
       { front: 'What are the stages of Heart Failure (ACC/AHA)?', back: 'Stage A: At risk, no symptoms | Stage B: Structural disease, no symptoms | Stage C: Structural disease with symptoms | Stage D: Refractory HF requiring advanced interventions' },
       { front: 'Name 5 common cardiac arrhythmias', back: '1. Atrial fibrillation 2. Atrial flutter 3. Ventricular tachycardia 4. Ventricular fibrillation 5. Supraventricular tachycardia (SVT)' },
+      { front: 'How do you distinguish a systolic from a diastolic heart murmur?', back: 'Systolic: occurs between S1 and S2 (e.g., aortic stenosis, mitral regurgitation, VSD). Diastolic: occurs between S2 and S1 and is ALWAYS pathological (e.g., aortic regurgitation, mitral stenosis).' },
+      { front: 'Describe the murmur of aortic stenosis (AS).', back: 'Crescendo-decrescendo systolic ejection murmur, best heard at the right upper sternal border, radiating to the carotids. Associated: pulsus parvus et tardus, S4, LVH. Causes: calcific, bicuspid valve, rheumatic.' },
+      { front: 'Describe the murmur of mitral regurgitation (MR).', back: 'Holosystolic (pansystolic) murmur at the apex, radiating to the axilla. Causes: mitral valve prolapse, rheumatic disease, LV dilation, papillary muscle dysfunction or rupture after MI.' },
+      { front: 'Describe the murmur of aortic regurgitation (AR).', back: 'Early diastolic decrescendo murmur at the left sternal border, best heard leaning forward in expiration. Associated: water-hammer (Corrigan) pulse, wide pulse pressure, Austin Flint murmur. Causes: rheumatic, endocarditis, aortic root dilation.' },
+      { front: 'Describe the murmur of mitral stenosis (MS).', back: 'Diastolic rumble with an opening snap, best heard at the apex in the left lateral decubitus position. Most common cause: rheumatic fever. Associated: atrial fibrillation, LA enlargement, pulmonary hypertension.' },
+      { front: 'Which murmur gets louder with Valsalva and why?', back: 'Hypertrophic cardiomyopathy (HCM): Valsalva decreases preload, narrowing the LV outflow tract, so the systolic murmur gets LOUDER. AS, MR and VSD murmurs typically get quieter.' },
+      { front: 'What is the most common cause of isolated right-sided heart failure?', back: 'Cor pulmonale: right ventricular failure due to pulmonary hypertension, most often from COPD. Overall, left heart failure is the most common cause of RV failure. Other causes: massive PE, primary pulmonary hypertension.' },
+      { front: 'Which leads show an acute inferior STEMI and which artery is involved?', back: 'ST elevation in leads II, III, aVF (right coronary artery). Consider a concurrent RV infarct: do a right-sided ECG (V4R) and avoid nitrates in inferior + RV infarction.' },
+      { front: 'What are the ECG features of left bundle branch block (LBBB)?', back: 'QRS ≥120 ms, no Q waves, broad notched (M-shaped) R wave in I, V5, V6, deep S in V1, ST/T discordance. New LBBB with chest pain = treat as STEMI until proven otherwise.' },
+      { front: 'What are the ECG features of right bundle branch block (RBBB)?', back: 'QRS ≥120 ms with rSR pattern (rabbit ears) in V1-V2 and a slurred S wave in I and V6. Causes: PE, ischemia, congenital heart disease; often a benign finding in young athletes.' },
+      { front: 'What are the ECG features and management of atrial fibrillation?', back: 'ECG: irregularly irregular rhythm, no P waves, variable R-R intervals. Management: rate control (beta-blocker or non-DHP CCB), rhythm control, and anticoagulation based on the CHA2DS2-VASc score.' },
+      { front: 'What are the ECG features of Wolff-Parkinson-White (WPW) syndrome?', back: 'Short PR (<120 ms), slurred QRS upstroke (delta wave), wide QRS. Risk: AVRT and AF with rapid conduction. In AF with WPW, AVOID AV nodal blockers (verapamil, digoxin) — they worsen conduction.' },
+      { front: 'What is complete heart block (third-degree AV block) and its management?', back: 'Complete AV dissociation: P waves and QRS complexes are independent, with bradycardia and a wide escape rhythm. Causes: ischemia, AV nodal disease, drugs. Treatment: atropine (often fails), transcutaneous pacing, then permanent pacemaker.' },
+      { front: 'How do you define STEMI, NSTEMI, and unstable angina?', back: 'STEMI: ST elevation plus troponin rise. NSTEMI: troponin rise without ST elevation. Unstable angina: typical symptoms without troponin rise. All three fall under acute coronary syndrome (ACS).' },
+      { front: 'What is the acute management of a STEMI?', back: 'MONA plus reperfusion: oxygen (if hypoxic), aspirin 300 mg chewed, nitrates, morphine, plus primary PCI within 90 minutes (or fibrinolysis within 30 min if PCI unavailable), DAPT, anticoagulant, and a high-intensity statin.' },
+      { front: 'What is DAPT and who needs it after ACS?', back: 'Dual antiplatelet therapy: aspirin plus a P2Y12 inhibitor (clopidogrel, ticagrelor, or prasugrel). Given for at least 12 months after ACS (± stenting) to prevent stent thrombosis and recurrent events.' },
+      { front: 'List the common complications of myocardial infarction.', back: 'Early: arrhythmias (VT/VF), cardiogenic shock, papillary muscle rupture causing MR, free wall rupture (tamponade), ventricular septal defect. Late: Dressler pericarditis, LV aneurysm, mural thrombus with embolization, heart failure.' },
+      { front: 'How does HFrEF differ from HFpEF?', back: 'HFrEF: ejection fraction ≤40% — systolic pump failure, has proven disease-modifying therapy. HFpEF: EF ≥50% — diastolic dysfunction (HTN, LVH, elderly); treatment is diuretics + SGLT2i + managing comorbidities.' },
+      { front: 'What are the four pillars of guideline-directed therapy for HFrEF?', back: '1) ARNI (or ACEi/ARB), 2) evidence-based beta-blocker (carvedilol, metoprolol succinate, bisoprolol), 3) mineralocorticoid receptor antagonist, 4) SGLT2 inhibitor (dapagliflozin/empagliflozin).' },
+      { front: 'What is cardiogenic shock and how is it managed?', back: 'Persistent hypotension with end-organ hypoperfusion despite adequate filling, due to pump failure (large MI, fulminant myocarditis). Management: norepinephrine + inotropes, urgent revascularization, and mechanical support (IABP, Impella, VA-ECMO).' },
+      { front: 'What are the key features of hypertrophic cardiomyopathy (HCM)?', back: 'Autosomal dominant sarcomeric mutation. Features: exertional dyspnea/syncope, LV hypertrophy without dilation, outflow murmur louder with Valsalva, sudden cardiac death risk (VT). Screen with ECG/echo; restrict intense exercise.' },
+      { front: 'What are the modified Duke criteria for infective endocarditis?', back: 'Major: typical organisms on 2 blood cultures, or endocardial involvement on echo. Minor: fever, predisposing condition, vascular/immunologic phenomena. Definite: 2 major, 1 major + 3 minor, or 5 minor.' },
+      { front: 'Which patients need infective endocarditis prophylaxis before dental work?', back: 'Only highest-risk patients: prosthetic heart valve, previous IE, unrepaired cyanotic congenital heart disease, or cardiac transplant valvulopathy. Prophylaxis: amoxicillin 2 g before the procedure.' },
+      { front: 'How does pericarditis pain differ from MI pain?', back: 'Pericarditis: sharp, pleuritic, positional (worse supine, better leaning forward), with a friction rub; ECG shows diffuse ST elevation and PR depression (not coronary distribution). MI: pressure-type exertional pain with regional ECG changes.' },
+      { front: 'What is cardiac tamponade and how is it treated?', back: 'Pericardial fluid compressing the heart. Beck triad: hypotension, muffled heart sounds, distended neck veins. ECG: low voltage with electrical alternans. Treatment: urgent echo-guided pericardiocentesis; IV fluids to maintain preload first.' },
+      { front: 'What are the features and management of aortic dissection?', back: 'Risk factors: hypertension, Marfan syndrome, bicuspid aortic valve. Features: abrupt tearing chest/back pain, unequal arm BPs, aortic regurgitation, wide mediastinum. Management: beta-blocker first, then BP control; urgent surgery for type A (ascending).' },
+      { front: 'What is a hypertensive emergency versus a hypertensive urgency?', back: 'Emergency: BP >180/120 with acute end-organ damage (stroke, MI, AKI, papilledema) — IV antihypertensives, lower MAP ~20-25% in the first hour. Urgency: severely elevated BP WITHOUT end-organ damage — oral agents, no immediate crisis.' },
+      { front: 'What are the ECG changes and treatment of hyperkalemia?', back: 'ECG: peaked T waves, PR prolongation, loss of P waves, wide QRS, sine wave, then VF/asystole. Treatment: IV calcium gluconate (membrane stabilizer), insulin + glucose, beta-2 agonist, sodium bicarbonate, then K+ removal (loop diuretic, binders, dialysis).' },
+      { front: 'What are the features and treatment of digoxin toxicity?', back: 'Features: nausea, visual disturbances (yellow-green halos), bradyarrhythmias, atrial tachycardia with AV block. Risk factors: hypokalemia, renal failure, drug interactions (amiodarone). Treatment: stop digoxin, correct potassium, digoxin immune Fab.' },
+      { front: 'What are the 5 Hs and 5 Ts of pulseless electrical activity (PEA)?', back: 'Hs: Hypovolemia, Hypoxia, Hydrogen ion (acidosis), Hypo/hyperkalemia, Hypothermia. Ts: Tension pneumothorax, cardiac Tamponade, Thrombosis (MI/PE), Toxins, Trauma.' },
+      { front: 'How is ventricular fibrillation or pulseless VT managed?', back: 'High-quality CPR with immediate defibrillation, epinephrine 1 mg every 3-5 min, amiodarone 300 mg (then 150 mg) after the 3rd shock, and treat reversible causes (Hs and Ts).' },
     ],
   },
   {
@@ -1263,6 +1346,32 @@ const BUILT_IN_DECKS: FlashcardDeck[] = [
       { front: 'How do COPD and Asthma differ?', back: 'Asthma: Reversible, early onset, atopy common, eosinophilic, variable airflow limitation. COPD: Irreversible/progressive, late onset, smoking history, neutrophilic, persistent airflow limitation.' },
       { front: 'What are the classic signs of Pulmonary Embolism?', back: 'Sudden dyspnea, pleuritic chest pain, tachycardia, tachypnea, hemoptysis, hypoxia, anxiety. Signs of DVT in legs. RV strain on ECG (S1Q3T3).' },
       { front: 'What are the types of Respiratory Failure?', back: 'Type I (Hypoxemic): Low PaO2 (<60mmHg), normal/low PaCO2. Type II (Hypercapnic): High PaCO2 (>50mmHg) with/without hypoxemia. Most common cause of Type II is COPD.' },
+      { front: 'How do you distinguish obstructive from restrictive lung disease on spirometry?', back: 'Obstructive: ↓FEV1/FVC ratio (<0.70), ↓FEV1, air trapping (↑RV/TLC). Restrictive: ↓FVC with normal or increased FEV1/FVC ratio, ↓TLC (e.g., ILD, neuromuscular disease).' },
+      { front: 'What are the normal ABG values?', back: 'pH 7.35-7.45 | PaCO2 35-45 mmHg | HCO3 22-26 mEq/L | PaO2 80-100 mmHg | Base excess -2 to +2 | SpO2 ~95-100%.' },
+      { front: 'How do you systematically interpret an ABG?', back: 'R.O.M.E.: Respiratory is Opposite (high CO2 = low pH), Metabolic is Equal (high HCO3 = high pH). Then check compensation and calculate the anion gap if metabolic acidosis is present.' },
+      { front: 'What are the main causes of respiratory acidosis?', back: 'Hypoventilation: CNS depression (opioids, sedatives), neuromuscular disease (GBS, myasthenia), airway obstruction, COPD, chest wall disease, obesity hypoventilation. Compensation: renal retention of HCO3 (slow).' },
+      { front: 'What are the causes of respiratory alkalosis?', back: 'Hyperventilation: anxiety, pain, hypoxia, pulmonary embolism, salicylate toxicity (early), hepatic failure, pregnancy, high altitude. Compensation: renal loss of HCO3. Treatment: treat the cause; rebreathing for anxiety.' },
+      { front: 'How is asthma treated in steps?', back: 'Step 1: SABA as needed. Step 2: low-dose ICS. Step 3: low-dose ICS + LABA. Step 4: medium-dose ICS + LABA. Step 5: high-dose ICS + LABA plus add-ons (tiotropium, biologics).' },
+      { front: 'What are the features of status asthmaticus?', back: 'Severe asthma unresponsive to bronchodilators: silent chest, PEF <50% predicted, normal or rising PaCO2 (ominous sign of fatigue), pulsus paradoxus, cyanosis. Treatment: O2, repeated inhaled bronchodilators, IV steroids, magnesium, NIV or intubation.' },
+      { front: 'What is the GOLD definition of COPD?', back: 'Persistent airflow limitation confirmed by a post-bronchodilator FEV1/FVC ratio <0.70. The obstruction is progressive and not fully reversible; the main risk factor is smoking.' },
+      { front: 'How do you manage an acute COPD exacerbation?', back: 'O2 titrated to SpO2 88-92%, inhaled short-acting bronchodilators (SABA + SAMA), systemic corticosteroids, antibiotics for purulent sputum, NIV (BiPAP) for hypercapnic respiratory failure, and treat the precipitant.' },
+      { front: 'What are the types of pneumothorax and their treatment?', back: 'Primary spontaneous: tall thin young males, apical blebs — small: observation; large/symptomatic: aspiration or chest drain. Secondary: with underlying lung disease. Tension: emergency needle decompression + chest tube.' },
+      { front: 'What are the features and immediate treatment of tension pneumothorax?', back: 'Features: severe dyspnea, tracheal deviation AWAY from the affected side, absent breath sounds, hyperresonance, hypotension, distended neck veins. Treatment: immediate needle decompression (2nd intercostal space midclavicular line), then chest tube.' },
+      { front: 'What are Light criteria for an exudative pleural effusion?', back: 'Exudate if any one: pleural/serum protein ratio >0.5, pleural/serum LDH ratio >0.6, or pleural LDH >2/3 of the serum upper limit. Transudates: CHF, cirrhosis, nephrotic syndrome. Exudates: infection, malignancy, PE, TB, pancreatitis.' },
+      { front: 'What are the Wells criteria for pulmonary embolism?', back: 'Items: clinical DVT, HR >100, immobilization or recent surgery, previous DVT/PE, hemoptysis, malignancy, PE most likely diagnosis. Scores: low (<2), moderate (2-6), high (>6). Guides D-dimer testing versus CTPA.' },
+      { front: 'What is the treatment of acute pulmonary embolism?', back: 'Anticoagulation (LMWH or DOAC; UFH if hemodynamically unstable). Massive PE with shock: thrombolysis or surgical/mechanical embolectomy. Submassive PE: anticoagulation, with selective thrombolysis.' },
+      { front: 'What is the CURB-65 score and when is it used?', back: 'CURB-65: Confusion, Urea >7 mmol/L, RR ≥30, BP <90/≤60 mmHg, age ≥65. Score 0-1: outpatient. 2: hospital admission. ≥3: severe — ICU. Used for CAP severity and site-of-care decisions.' },
+      { front: 'How does primary tuberculosis differ from reactivation TB?', back: 'Primary: usually lower/middle lobes, subpleural Ghon focus, often asymptomatic or flu-like. Reactivation: upper lobe apical disease (oxygen-rich), cavitation, hemoptysis, fever, night sweats, weight loss.' },
+      { front: 'What is the standard treatment regimen for pulmonary TB?', back: 'RIPE: Rifampin, Isoniazid, Pyrazinamide, Ethambutol for 2 months, then Rifampin + Isoniazid for 4 months (total 6 months). Latent TB: isoniazid for 9 months (or a rifampin-based regimen).' },
+      { front: 'What are the classic features of sarcoidosis?', back: 'Bilateral hilar lymphadenopathy, erythema nodosum, uveitis, restrictive lung disease, elevated ACE, hypercalcemia, non-caseating granulomas. Most common in Black women. Stage 1: hilar lymphadenopathy only.' },
+      { front: 'What are the paraneoplastic syndromes of lung cancer?', back: 'Small cell: SIADH (hyponatremia), ACTH (Cushing), Lambert-Eaton syndrome. Squamous cell: hypercalcemia (PTHrP). Large cell: gynecomastia (hCG). Pancoast (apical) tumor: Horner syndrome + shoulder/arm pain.' },
+      { front: 'What are the key features of cystic fibrosis?', back: 'Autosomal recessive CFTR mutation. Features: chronic cough, recurrent infections (S. aureus, P. aeruginosa), pancreatic insufficiency, elevated sweat chloride, male infertility (absent vas deferens), clubbing.' },
+      { front: 'What are the 4 causes of hypoxemia and how do you distinguish them?', back: '1) Hypoventilation: ↑PaCO2, normal A-a gradient. 2) V/Q mismatch: normal A-a gradient, improves with O2. 3) Diffusion impairment: widened A-a gradient, worse with exercise. 4) Shunt: does NOT improve with 100% O2.' },
+      { front: 'What is ARDS and the Berlin criteria?', back: 'Acute (≤7 days) bilateral pulmonary infiltrates not due to heart failure or fluid overload, with PaO2/FiO2: mild 200-300, moderate 100-200, severe <100. Treatment: lung-protective ventilation (tidal volume 4-6 mL/kg), treat the cause.' },
+      { front: 'How do obstructive and central sleep apnea differ?', back: 'Obstructive: airway collapse despite respiratory effort (snoring, daytime somnolence, obesity). Central: no respiratory effort (brain fails to drive breathing; Cheyne-Stokes in heart failure). Diagnosis: polysomnography. OSA: CPAP, weight loss.' },
+      { front: 'What is the difference between wheezing and stridor?', back: 'Wheeze: high-pitched musical sound mainly on expiration, from lower airway narrowing (asthma, COPD). Stridor: harsh inspiratory sound from upper airway obstruction (croup, epiglottitis, foreign body) — an emergency.' },
+      { front: 'What are the indications and contraindications for NIV?', back: 'Indications: acute hypercapnic respiratory failure (COPD), cardiogenic pulmonary edema (CPAP), obesity hypoventilation. Contraindications: coma, hemodynamic instability, facial trauma, vomiting, inability to protect the airway.' },
+      { front: 'What is massive hemoptysis and how is it managed?', back: 'Hemoptysis >200-600 mL/24h (or rapid bleeding with instability). Causes: TB, bronchiectasis, lung cancer, aspergilloma. Management: protect the airway (intubate, position bleeding lung down), reverse coagulopathy, bronchoscopy/bronchial artery embolization, definitive surgery.' },
     ],
   },
   {
@@ -1275,6 +1384,34 @@ const BUILT_IN_DECKS: FlashcardDeck[] = [
       { front: 'What is the Glasgow Coma Scale (GCS)?', back: 'Eye Opening (1-4) + Verbal Response (1-5) + Motor Response (1-6) = 3-15. Mild: 13-15, Moderate: 9-12, Severe: 3-8.' },
       { front: 'What is the classic meningitis triad?', back: '1. Fever 2. Nuchal rigidity (neck stiffness) 3. Altered mental status. Also: headache, photophobia, nausea/vomiting, positive Kernig and Brudzinski signs.' },
       { front: 'What are the main seizure types?', back: 'Focal (partial): Simple (aware) or Complex (impaired awareness). Generalized: Tonic-clonic, Absence, Myoclonic, Atonic, Tonic, Clonic. Also: Status epilepticus (prolonged seizure).' },
+      { front: 'Which cranial nerves control eye movements and the pupil?', back: 'CN III (oculomotor): most extraocular muscles, levator, pupillary constriction (PSNS). CN IV (trochlear): superior oblique (depresses adducted eye). CN VI (abducens): lateral rectus (abduction). CN III palsy: down-and-out eye with a blown pupil.' },
+      { front: 'How do you distinguish Bell palsy from stroke facial weakness?', back: 'Bell palsy (LMN): the whole side of the face is weak — forehead involved, ear pain, hyperacusis. Stroke (UMN): forehead is spared (upper face intact), with other deficits such as limb weakness or aphasia.' },
+      { front: 'What are the features of ischemic versus hemorrhagic stroke?', back: 'Ischemic (85%): abrupt focal deficit; risk factors: atherosclerosis, atrial fibrillation. Hemorrhagic: headache, vomiting, decreased consciousness, rapid progression; HTN or anticoagulation. Imaging: CT shows hemorrhage as white; MRI for ischemia.' },
+      { front: 'How do thrombotic and embolic stroke differ?', back: 'Thrombotic: in-situ clot on atherosclerosis, often preceded by TIAs, at bifurcations. Embolic: from the heart (AF, valve, endocarditis) or carotid — sudden maximal deficit, can involve multiple territories, higher hemorrhagic conversion risk.' },
+      { front: 'What is a TIA and how is it evaluated?', back: 'Transient (<24 h, usually <1 h) focal neurologic deficit from ischemia without infarction. Evaluate urgently: CT/MRI, carotid imaging, ECG/holter for AF, labs. Treat with antiplatelets and risk-factor modification.' },
+      { front: 'What is the time window and criteria for IV thrombolysis in ischemic stroke?', back: 'IV rtPA (alteplase/tenecteplase) within 4.5 hours of symptom onset (0.9 mg/kg). Mechanical thrombectomy for large vessel occlusion can be offered up to 24 h in selected patients based on perfusion imaging.' },
+      { front: 'What are the contraindications to IV thrombolysis?', back: 'Active bleeding, recent major surgery or head trauma, GI/GU bleed within 21 days, INR >1.7, platelets <100,000, uncontrolled BP >185/110, prior stroke within 3 months, current DOAC use, suspected aortic dissection.' },
+      { front: 'What are the CSF findings in bacterial versus viral meningitis?', back: 'Bacterial: ↑↑ WBC (PMN predominant), ↓ glucose, ↑ protein, high opening pressure. Viral: lymphocytic pleocytosis, normal glucose, mildly elevated protein. TB: lymphocytic, very low glucose, very high protein.' },
+      { front: 'What is the empirical treatment of acute bacterial meningitis?', back: 'Dexamethasone (before or with the first antibiotic) + Ceftriaxone + Vancomycin. Add ampicillin (Listeria coverage) in patients <3 months, >50 years, or immunocompromised.' },
+      { front: 'What are the features and treatment of HSV encephalitis?', back: 'Features: fever, headache, altered consciousness, focal seizures, temporal lobe involvement (hemorrhagic necrosis). CSF: lymphocytic pleocytosis with red cells. Treatment: IV acyclovir started empirically — do not wait for PCR.' },
+      { front: 'How is status epilepticus managed?', back: 'ABCs and check glucose. 1) Benzodiazepine (IV lorazepam or IM midazolam) 2) Second-line: fosphenytoin, levetiracetam, or valproate 3) Third-line: anesthetics (propofol or midazolam infusion) with EEG monitoring. Treat the underlying cause.' },
+      { front: 'What are the first-line AEDs for focal versus generalized seizures?', back: 'Focal: levetiracetam, lamotrigine, carbamazepine, phenytoin. Generalized tonic-clonic: valproate, levetiracetam, lamotrigine. Absence: ethosuximide or valproate. Avoid carbamazepine in absence/myoclonic seizures (worsens them).' },
+      { front: 'What are the features of absence seizures?', back: 'Brief (5-10 s) staring spells with eyelid fluttering, no aura or post-ictal state, provoked by hyperventilation. EEG: 3 Hz spike-and-wave. Children. First-line: ethosuximide (or valproate).' },
+      { front: 'What are the cardinal features of Parkinson disease?', back: 'TRAP: Tremor (resting, pill-rolling), Rigidity (cogwheel), Akinesia/bradykinesia, Postural instability. Also: masked face, shuffling gait, micrographia. Treatment: carbidopa-levodopa, dopamine agonists, MAO-B inhibitors.' },
+      { front: 'Which drugs cause drug-induced parkinsonism?', back: 'Dopamine blockers: antipsychotics (haloperidol), antiemetics (metoclopramide, prochlorperazine), reserpine, tetrabenazine. Usually reversible after stopping the offending drug.' },
+      { front: 'What are the features and treatment of multiple sclerosis?', back: 'Young women, CNS demyelination separated in time and space. Features: optic neuritis, Uththoff phenomenon (heat worsens), internuclear ophthalmoplegia, Lhermitte sign. Acute relapse: steroids. Prevention: disease-modifying therapy (interferons, glatiramer, natalizumab).' },
+      { front: 'What are the features and treatment of myasthenia gravis?', back: 'Autoantibodies to the ACh receptor; fatigable weakness (ptosis, diplopia, proximal muscles) that improves with rest. Tests: ice pack, edrophonium (Tensilon), anti-AChR antibodies. Treatment: pyridostigmine, steroids, thymectomy if thymoma.' },
+      { front: 'What are the features and treatment of Guillain-Barré syndrome?', back: 'Ascending symmetric weakness after infection (Campylobacter), areflexia, autonomic instability; CSF shows albuminocytologic dissociation (high protein, normal cells). Treatment: IVIG or plasmapheresis; monitor respiratory function (NIF/VC).' },
+      { front: 'What are the features of amyotrophic lateral sclerosis (ALS)?', back: 'Combined UMN signs (spasticity, hyperreflexia, Babinski) and LMN signs (weakness, atrophy, fasciculations), NO sensory loss, with bulbar involvement (dysphagia, dysarthria). Progressive and fatal; riluzole offers modest benefit.' },
+      { front: 'What is trigeminal neuralgia and its first-line treatment?', back: 'Severe lancinating paroxysmal facial pain (V2/V3), triggered by touch, wind, or eating, with a normal exam. First-line: carbamazepine (or oxcarbazepine). Causes: vascular compression, MS, tumor.' },
+      { front: 'How is Bell palsy treated?', back: 'Oral prednisone within 72 hours improves recovery; eye protection (lubrication, patch). Add antivirals in severe cases or Ramsay Hunt syndrome (zoster). Most patients recover fully.' },
+      { front: 'What are the features of subarachnoid hemorrhage?', back: 'Thunderclap (worst-ever) headache, often a sentinel headache, neck stiffness, vomiting, decreased consciousness. Causes: ruptured berry aneurysm (80%). CT within 6 h is highly sensitive; then LP for xanthochromia. Watch for vasospasm (days 4-14).' },
+      { front: 'How do epidural and subdural hematoma differ?', back: 'Epidural: arterial (middle meningeal), after trauma with a lucid interval, lentiform shape on CT, does NOT cross suture lines. Subdural: venous (bridging veins), elderly/anticoagulation, often chronic, crescent shape, crosses sutures.' },
+      { front: 'What is Cushing triad of increased intracranial pressure?', back: '1) Hypertension, 2) Bradycardia, 3) Irregular respirations (Cushing reflex). A late sign of impending herniation. Management: head elevation, mannitol or hypertonic saline, hyperventilation, urgent decompressive surgery.' },
+      { front: 'How do you differentiate delirium from dementia?', back: 'Delirium: acute onset, fluctuating course, inattention, hallucinations; reversible — often triggered by infection, drugs, or metabolic disturbance in the elderly. Dementia: chronic progressive decline with intact consciousness until late.' },
+      { front: 'What are the features and treatment of Alzheimer disease?', back: 'Most common dementia: insidious memory loss (recent events first), then visuospatial and executive decline, later aphasia/apraxia. Treatment: cholinesterase inhibitors (donepezil) and memantine for moderate-severe disease; no cure.' },
+      { front: 'What is Wernicke encephalopathy and its treatment?', back: 'Triad: Confusion, Ataxia, Ophthalmoplegia (nystagmus) — from thiamine (B1) deficiency in alcoholism. EMERGENCY: give IV thiamine BEFORE glucose to prevent Wernicke-Korsakoff syndrome. Korsakoff: irreversible amnesia with confabulation.' },
+      { front: 'What is normal pressure hydrocephalus?', back: 'Triad: Urinary incontinence, Dementia, Gait apraxia (magnetic gait) — "wet, wacky, wobbly". CT: ventriculomegaly with normal CSF pressure. May improve dramatically after a ventriculoperitoneal shunt.' },
     ],
   },
   {
@@ -1287,20 +1424,37 @@ const BUILT_IN_DECKS: FlashcardDeck[] = [
       { front: 'What are the main anticoagulant classes?', back: '1. Heparin (UFH) / LMWH (Enoxaparin) - indirect Xa/IIa inhibitors 2. Warfarin - Vit K antagonist 3. DOACs: Rivaroxaban, Apixaban (Xa) | Dabigatran (IIa) 4. Fondaparinux (Xa only)' },
       { front: 'How do NSAIDs work and what are the risks?', back: 'Mechanism: COX-1/COX-2 inhibitors → decreased prostaglandin synthesis. Risks: GI bleeding (COX-1 protection lost), renal impairment, cardiovascular risk, platelet dysfunction, bronchospasm in aspirin-sensitive asthmatics.' },
       { front: 'What are ACE Inhibitors and their key features?', back: 'Mechanism: Block ACE → decreased angiotensin II → vasodilation + decreased aldosterone. Side effects: Dry cough, hyperkalemia, angioedema, teratogenic. Examples: Lisinopril, Enalapril, Ramipril.' },
+      { front: 'What are the adverse effects and contraindications of beta-blockers?', back: 'Effects: bradycardia, AV block, bronchospasm, fatigue, masking of hypoglycemia, depression, erectile dysfunction, cold extremities. Contraindications: severe asthma, decompensated HF, sinus bradycardia, second/third-degree AV block.' },
+      { front: 'What are the two classes of calcium channel blockers?', back: 'Dihydropyridines (amlodipine, nifedipine): vascular — treat HTN/angina; cause peripheral edema. Non-dihydropyridines (verapamil, diltiazem): cardiac — rate control in AF, angina; AVOID in HF (negative inotrope) and WPW.' },
+      { front: 'What are the diuretic classes and their sites of action?', back: 'Loop (furosemide): thick ascending loop of Henle — most potent; pulmonary edema, HF, renal failure. Thiazide (HCTZ): distal convoluted tubule — HTN. K-sparing (spironolactone): collecting duct — HF, cirrhosis, HTN.' },
+      { front: 'What are the side effects of loop diuretics?', back: 'Hypokalemia, hyponatremia, hypomagnesemia, hypocalcemia, metabolic alkalosis, ototoxicity (high dose), dehydration/azotemia, hyperuricemia (gout), hyperglycemia.' },
+      { front: 'What are the side effects of thiazide diuretics?', back: 'Hypokalemia, hyponatremia, HYPERcalcemia, hyperuricemia, hyperglycemia, hyperlipidemia, photosensitivity, and sulfa cross-reactivity. Distinctive feature versus loop: raises calcium.' },
+      { front: 'What are the uses and side effects of spironolactone?', back: 'K-sparing aldosterone antagonist. Uses: HFrEF, resistant HTN, cirrhosis ascites, primary hyperaldosteronism. Side effects: hyperkalemia, gynecomastia, menstrual irregularities (antiandrogen). Caution with ACEi/ARB (K+ retention).' },
+      { front: 'How do ARBs compare to ACE inhibitors?', back: 'ARBs block the AT1 receptor; ACEi block Ang I→II conversion. ARBs cause less cough and angioedema but share hyperkalemia, hypotension, and teratogenicity. Used when ACEi cough is intolerable.' },
+      { front: 'What are the mechanism and side effects of statins?', back: 'HMG-CoA reductase inhibitors: ↓ cholesterol synthesis, ↑ LDL receptors. Side effects: myopathy/rhabdomyolysis, transaminitis, small increase in diabetes risk, GI upset. Myopathy risk increases with fibrates and certain interacting drugs.' },
+      { front: 'What is the mechanism of clopidogrel and its key interaction?', back: 'P2Y12 inhibitor — blocks the ADP receptor on platelets. It is a prodrug activated by CYP2C19. Omeprazole (CYP2C19 inhibitor) reduces its efficacy; used in ACS, stents, and stroke prevention.' },
+      { front: 'What is the mechanism and use of aspirin?', back: 'Irreversible COX-1/COX-2 inhibition → decreased thromboxane A2 → antiplatelet effect. Used in ACS, stroke prevention, and after PCI. Side effects: GI bleeding and bronchospasm (aspirin-exacerbated respiratory disease).' },
+      { front: 'How is warfarin monitored and reversed?', back: 'Monitor INR (target 2-3 for most indications; 2.5-3.5 for mechanical mitral valve). Reversal: vitamin K for mild, and FFP or 4-factor PCC for life-threatening bleeding. Many drug and dietary (vitamin K) interactions.' },
+      { front: 'How is heparin monitored and what is HIT?', back: 'Monitor aPTT for unfractionated heparin (LMWH needs no routine monitoring). HIT: thrombocytopenia with thrombosis 5-10 days after exposure, anti-PF4 antibodies. Treatment: STOP heparin, use a non-heparin anticoagulant (argatroban, fondaparinux).' },
+      { front: 'Which DOACs are factor Xa inhibitors and which is a thrombin inhibitor?', back: 'Xa inhibitors: rivaroxaban, apixaban, edoxaban. Direct thrombin (IIa) inhibitor: dabigatran. Reversal: andexanet alfa (Xa inhibitors); idarucizumab (dabigatran).' },
+      { front: 'What is the mechanism of metformin and its contraindications?', back: 'Decreases hepatic gluconeogenesis and improves insulin sensitivity (AMPK activation). Contraindications: eGFR <30, severe hypoxia/sepsis, alcoholism, acute decompensated HF, and iodinated contrast with acute kidney injury risk.' },
+      { front: 'What are the side effects of metformin?', back: 'GI upset (nausea, diarrhea), B12 deficiency with long-term use, metallic taste, and rare lactic acidosis (renal failure or contrast). Does not cause hypoglycemia when used alone and is weight neutral.' },
+      { front: 'What are the types of insulin and their onset?', back: 'Rapid (lispro, aspart): onset ~15 min, peak ~1 h. Short (regular): onset ~30 min, peak 2-3 h. Intermediate (NPH): onset 2-4 h, peak 4-12 h. Long (glargine, detemir): peakless, ~24 h.' },
+      { front: 'What are the mechanism and side effects of sulfonylureas?', back: 'Stimulate insulin secretion by closing the K-ATP channel in pancreatic beta cells. Side effects: hypoglycemia (especially glibenclamide, elderly, renal failure) and weight gain. Examples: glipizide, glimepiride, gliclazide.' },
+      { front: 'What are the mechanism and side effects of SGLT2 inhibitors?', back: 'Block renal glucose reabsorption, causing glycosuria. Benefits: heart failure, CKD, weight loss. Side effects: UTIs and genital mycosis, euglycemic DKA, volume depletion. Examples: empagliflozin, dapagliflozin.' },
+      { front: 'What are the mechanism and side effects of GLP-1 receptor agonists?', back: 'Incretin mimetics: ↑ insulin, ↓ glucagon, slow gastric emptying, weight loss, CV benefit. Side effects: nausea/vomiting, rare pancreatitis, gallbladder disease; caution in MEN2 (medullary thyroid cancer risk).' },
+      { front: 'How is hypothyroidism treated and monitored?', back: 'Levothyroxine (T4) once daily on an empty stomach. Recheck TSH 6-8 weeks after a dose change; goal is a normal TSH. Myxedema coma: IV levothyroxine, hydrocortisone, and supportive care.' },
+      { front: 'What are the mechanism and side effects of thionamides (PTU, methimazole)?', back: 'Inhibit thyroid peroxidase, decreasing thyroid hormone synthesis. Side effects: agranulocytosis (fever/sore throat → check CBC), hepatotoxicity (PTU), rash. PTU is preferred in the first trimester of pregnancy.' },
+      { front: 'What are the adverse effects of long-term corticosteroids?', back: 'Cushingoid features, hyperglycemia, osteoporosis, immunosuppression, GI ulcers, adrenal suppression, cataracts, glaucoma, proximal myopathy, weight gain. Always taper to avoid adrenal crisis.' },
+      { front: 'What is opioid toxicity and its treatment?', back: 'Features: pinpoint pupils, respiratory depression (↓ RR), coma, hypotension. Treatment: naloxone titrated to restore breathing (watch for re-sedation with long-acting opioids) plus airway support.' },
+      { front: 'What is paracetamol (acetaminophen) toxicity and its antidote?', back: 'Initially asymptomatic, then nausea and RUQ pain, with hepatic failure at 48-72 h. Antidote: N-acetylcysteine. Consider if dose >150 mg/kg or a toxic level on the Rumack-Matthew nomogram.' },
+      { front: 'What are the uses and side effects of nitroglycerin?', back: 'Venodilator (and arterial) → decreased preload and myocardial O2 demand. Uses: angina, ACS, hypertensive emergency, CHF. Side effects: headache, flushing, hypotension, reflex tachycardia. Contraindications: PDE5 inhibitors (sildenafil), severe aortic stenosis, RV infarction.' },
+      { front: 'What are the side effects of amiodarone?', back: 'Pulmonary fibrosis (most feared), thyroid dysfunction (hypo or hyper), corneal microdeposits, blue-gray skin, photosensitivity, hepatotoxicity, bradycardia, QT prolongation, neuropathy. Very long half-life (~50 days).' },
+      { front: 'What are the mechanism and side effects of vancomycin?', back: 'Inhibits cell wall synthesis by binding D-ala-D-ala. Side effects: Red man syndrome (histamine release on infusion), nephrotoxicity, ototoxicity, thrombocytopenia. Monitor troughs (15-20 mcg/mL for serious infections).' },
+      { front: 'What are the side effects of aminoglycosides?', back: 'Nephrotoxicity, ototoxicity (vestibular and cochlear), neuromuscular blockade, teratogenic. Concentration-dependent killing — once-daily dosing. Monitor peaks/troughs; avoid other nephrotoxins.' },
     ],
   },
-  {
-    id: 'general',
-    name: 'General Medicine',
-    icon: '⚕️',
-    cards: [
-      { front: 'What are normal adult vital signs?', back: 'HR: 60-100 bpm | BP: <120/<80 mmHg | RR: 12-20 breaths/min | Temp: 36.1-37.2°C (97-99°F) | SpO2: 95-100% | Pain: 0-10 scale' },
-      { front: 'What are the BMI categories (WHO)?', back: 'Underweight: <18.5 | Normal: 18.5-24.9 | Overweight: 25-29.9 | Obese Class I: 30-34.9 | Obese Class II: 35-39.9 | Obese Class III: ≥40' },
-      { front: 'How do you assess dehydration severity?', back: 'Mild (3-5%): Thirst, slightly dry mucous membranes | Moderate (6-9%): Tachycardia, decreased skin turgor, oliguria, sunken eyes | Severe (>10%): Hypotension, altered consciousness, no urine output, shock.' },
-      { front: 'What are the 4 types of shock?', back: '1. Hypovolemic: blood/fluid loss 2. Cardiogenic: pump failure 3. Distributive: vasodilation (sepsis, anaphylaxis, neurogenic) 4. Obstructive: physical obstruction (tension pneumothorax, PE, tamponade)' },
-      { front: 'What are the Acid-Base disorders and their compensation?', back: 'Metabolic Acidosis: ↓pH, ↓HCO3-, compensate with ↑RR | Metabolic Alkalosis: ↑pH, ↑HCO3-, compensate with ↓RR | Respiratory Acidosis: ↓pH, ↑PCO2, compensate with ↑HCO3- | Respiratory Alkalosis: ↑pH, ↓PCO2, compensate with ↓HCO3-' },
-    ],
-  },
+  
 ];
 
 // =============================================================================
@@ -1585,6 +1739,84 @@ function MedicalSummarizer() {
 
 type FlashcardMode = 'decks' | 'study' | 'create';
 
+const DECK_ICONS: Record<string, LucideIcon> = {
+  cardiovascular: HeartPulse,
+  respiratory: Wind,
+  neuro: Brain,
+  pharmacology: Pill,
+  general: Stethoscope,
+  custom: Notebook,
+};
+
+interface DeckTheme {
+  gradient: string;
+  border: string;
+  iconWrap: string;
+  icon: string;
+  studyBtn: string;
+  count: string;
+  glow: string;
+}
+
+const DECK_THEMES: Record<string, DeckTheme> = {
+  cardiovascular: {
+    gradient: 'from-rose-50 via-white to-white dark:from-rose-500/15 dark:via-dark-card dark:to-dark-card',
+    border: 'border-rose-100 dark:border-rose-900/30',
+    iconWrap: 'bg-rose-100 dark:bg-rose-500/15',
+    icon: 'text-rose-500 dark:text-rose-300',
+    studyBtn: 'bg-rose-500 text-white hover:bg-rose-600 shadow-sm shadow-rose-500/30',
+    count: 'text-rose-500 dark:text-rose-300',
+    glow: 'bg-rose-400/10',
+  },
+  respiratory: {
+    gradient: 'from-sky-50 via-white to-white dark:from-sky-500/15 dark:via-dark-card dark:to-dark-card',
+    border: 'border-sky-100 dark:border-sky-900/30',
+    iconWrap: 'bg-sky-100 dark:bg-sky-500/15',
+    icon: 'text-sky-500 dark:text-sky-300',
+    studyBtn: 'bg-sky-500 text-white hover:bg-sky-600 shadow-sm shadow-sky-500/30',
+    count: 'text-sky-500 dark:text-sky-300',
+    glow: 'bg-sky-400/10',
+  },
+  neuro: {
+    gradient: 'from-violet-50 via-white to-white dark:from-violet-500/15 dark:via-dark-card dark:to-dark-card',
+    border: 'border-violet-100 dark:border-violet-900/30',
+    iconWrap: 'bg-violet-100 dark:bg-violet-500/15',
+    icon: 'text-violet-500 dark:text-violet-300',
+    studyBtn: 'bg-violet-500 text-white hover:bg-violet-600 shadow-sm shadow-violet-500/30',
+    count: 'text-violet-500 dark:text-violet-300',
+    glow: 'bg-violet-400/10',
+  },
+  pharmacology: {
+    gradient: 'from-emerald-50 via-white to-white dark:from-emerald-500/15 dark:via-dark-card dark:to-dark-card',
+    border: 'border-emerald-100 dark:border-emerald-900/30',
+    iconWrap: 'bg-emerald-100 dark:bg-emerald-500/15',
+    icon: 'text-emerald-500 dark:text-emerald-300',
+    studyBtn: 'bg-emerald-500 text-white hover:bg-emerald-600 shadow-sm shadow-emerald-500/30',
+    count: 'text-emerald-500 dark:text-emerald-300',
+    glow: 'bg-emerald-400/10',
+  },
+  general: {
+    gradient: 'from-amber-50 via-white to-white dark:from-amber-500/15 dark:via-dark-card dark:to-dark-card',
+    border: 'border-amber-100 dark:border-amber-900/30',
+    iconWrap: 'bg-amber-100 dark:bg-amber-500/15',
+    icon: 'text-amber-500 dark:text-amber-300',
+    studyBtn: 'bg-amber-500 text-white hover:bg-amber-600 shadow-sm shadow-amber-500/30',
+    count: 'text-amber-500 dark:text-amber-300',
+    glow: 'bg-amber-400/10',
+  },
+  custom: {
+    gradient: 'from-indigo-50 via-white to-white dark:from-indigo-500/15 dark:via-dark-card dark:to-dark-card',
+    border: 'border-indigo-100 dark:border-indigo-900/30',
+    iconWrap: 'bg-indigo-100 dark:bg-indigo-500/15',
+    icon: 'text-indigo-500 dark:text-indigo-300',
+    studyBtn: 'bg-indigo-500 text-white hover:bg-indigo-600 shadow-sm shadow-indigo-500/30',
+    count: 'text-indigo-500 dark:text-indigo-300',
+    glow: 'bg-indigo-400/10',
+  },
+};
+
+const DEFAULT_DECK_THEME = DECK_THEMES.custom;
+
 function MedicalFlashcards() {
   const { t } = useTranslation();
   const [mode, setMode] = useState<FlashcardMode>('decks');
@@ -1599,8 +1831,9 @@ function MedicalFlashcards() {
   const [showAnswer, setShowAnswer] = useState(false);
   const [masteredCount, setMasteredCount] = useState(0);
   const [reviewCount, setReviewCount] = useState(0);
+  const [deckSearch, setDeckSearch] = useState('');
   const { addNotification, flashcards, addFlashcard, deleteFlashcard } = useAppStore();
-  const { language } = useLanguageStore();
+  const { language, direction } = useLanguageStore();
 
   useEffect(() => {
     setCustomCards(loadCustomFlashcards());
@@ -1620,6 +1853,14 @@ function MedicalFlashcards() {
     return [...BUILT_IN_DECKS, customDeck];
   }, [customCards]);
 
+  const filteredDecks = useMemo(() => {
+    const q = deckSearch.trim().toLowerCase();
+    if (!q) return allDecks;
+    return allDecks.filter((d) => d.name.toLowerCase().includes(q));
+  }, [allDecks, deckSearch]);
+
+  const totalCards = useMemo(() => allDecks.reduce((sum, d) => sum + d.cards.length, 0), [allDecks]);
+
   const startStudy = useCallback((deckId: string) => {
     const deck = allDecks.find((d) => d.id === deckId);
     if (!deck || deck.cards.length === 0) {
@@ -1635,6 +1876,14 @@ function MedicalFlashcards() {
     setReviewCount(0);
     setMode('study');
   }, [allDecks, addNotification]);
+
+  const prevCard = useCallback(() => {
+    setIsFlipped(false);
+    setShowAnswer(false);
+    if (studyIndex > 0) {
+      setStudyIndex((p) => p - 1);
+    }
+  }, [studyIndex]);
 
   const nextCard = useCallback(() => {
     setIsFlipped(false);
@@ -1689,57 +1938,127 @@ function MedicalFlashcards() {
 
   if (mode === 'study' && studyCards.length > 0) {
     const card = studyCards[studyIndex];
+    const deckName = allDecks.find((d) => d.id === selectedDeck)?.name ?? '';
+
     return (
-      <motion.div {...fadeIn} className="space-y-6">
-        <div className="flex items-center justify-between">
-          <Button variant="ghost" onClick={() => setMode('decks')}>← {t('Back to Decks', 'Back to Decks')}</Button>
-          <span className="text-sm text-gray-500 dark:text-gray-400">{studyIndex + 1} / {studyCards.length}</span>
+      <motion.div {...fadeIn} dir={direction} className="mx-auto flex min-h-[70vh] w-full max-w-3xl flex-col">
+        {/* Header */}
+        <div className="flex items-center justify-between gap-3">
+          <button
+            onClick={() => setMode('decks')}
+            className="flex items-center gap-2 rounded-full border border-light-border dark:border-dark-border bg-white px-3.5 py-2 text-sm font-medium text-gray-600 shadow-sm transition-all duration-200 hover:bg-gray-50 hover:text-primary-600 dark:bg-dark-card dark:text-gray-300 dark:hover:bg-dark-hover dark:hover:text-primary-300"
+          >
+            <ArrowLeft className={`h-4 w-4 transition-transform ${direction === 'rtl' ? 'rotate-180' : ''}`} />
+            <span className="hidden sm:inline">{t('Back', 'Back')}</span>
+          </button>
+
+          <div className="flex flex-col items-center">
+            <h2 className="text-sm font-semibold text-gray-900 dark:text-white sm:text-base">{deckName}</h2>
+            <p className="text-xs font-medium text-gray-500 dark:text-gray-400 tabular-nums">
+              {studyIndex + 1} / {studyCards.length}
+            </p>
+          </div>
+
+          <div className="w-24" aria-hidden="true" />
         </div>
 
         <ProgressBar
           value={((studyIndex + 1) / studyCards.length) * 100}
-          className="h-2"
+          color="gradient"
+          className="mt-5"
         />
 
-        <div className="flex justify-center" style={{ perspective: '1000px' }}>
+        {/* Flashcard */}
+        <div className="flex flex-1 items-center justify-center py-8 sm:py-10" style={{ perspective: '1600px' }}>
           <motion.div
-            className="w-full max-w-lg cursor-pointer"
-            onClick={() => setIsFlipped(!isFlipped)}
-            animate={{ rotateY: isFlipped ? 180 : 0 }}
-            transition={{ duration: 0.5 }}
+            className="relative w-full max-w-2xl cursor-pointer select-none"
             style={{ transformStyle: 'preserve-3d' }}
+            onClick={() => setIsFlipped((f) => !f)}
+            animate={{ rotateY: isFlipped ? 180 : 0 }}
+            transition={{ duration: 0.6, ease: [0.45, 0.05, 0.35, 1] }}
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.99 }}
           >
-            <Card className="p-8 min-h-[280px] flex items-center justify-center">
-              <div
-                className="text-center"
-                style={{ backfaceVisibility: 'hidden', transform: isFlipped ? 'rotateY(180deg)' : 'none' }}
-              >
-                {isFlipped ? (
-                  <p className="text-lg text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{card.back}</p>
-                ) : (
-                  <p className="text-xl font-semibold text-gray-900 dark:text-white whitespace-pre-wrap">{card.front}</p>
-                )}
-              </div>
-            </Card>
+            {/* Front face */}
+            <div
+              className="flex min-h-[300px] w-full flex-col items-center justify-center rounded-3xl border border-white/50 bg-white/85 p-8 shadow-elevated backdrop-blur-xl dark:border-white/10 dark:bg-dark-card/85 sm:min-h-[360px] sm:p-12"
+              style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' }}
+            >
+              <span className="mb-6 inline-flex items-center gap-1.5 rounded-full bg-primary-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary-600 dark:bg-primary-500/10 dark:text-primary-300">
+                <BookOpen className="h-3.5 w-3.5" />
+                {t('Question', 'Question')}
+              </span>
+              <p className="text-center text-2xl font-semibold leading-snug text-gray-900 dark:text-white sm:text-[28px]">
+                {card.front}
+              </p>
+            </div>
+
+            {/* Back face */}
+            <div
+              className="absolute inset-0 flex min-h-[300px] w-full flex-col items-center justify-center rounded-3xl border border-white/50 bg-gradient-to-br from-emerald-50 via-white to-white p-8 shadow-elevated backdrop-blur-xl dark:border-emerald-900/30 dark:from-emerald-500/15 dark:via-dark-card dark:to-dark-card sm:min-h-[360px] sm:p-12"
+              style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
+            >
+              <span className="mb-6 inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-300">
+                <CheckCircle2 className="h-3.5 w-3.5" />
+                {t('Answer', 'Answer')}
+              </span>
+              <p className="max-h-[240px] overflow-y-auto text-center text-lg font-medium leading-relaxed text-gray-800 dark:text-gray-200 sm:text-xl">
+                {card.back}
+              </p>
+            </div>
           </motion.div>
         </div>
 
-        <p className="text-center text-sm text-gray-400 dark:text-gray-500">
-          {isFlipped ? t('Card flipped - rate your confidence', 'Card flipped - rate your confidence') : t('Click card to reveal answer', 'Click card to reveal answer')}
-        </p>
+        {/* Confidence rating */}
+        <div className="flex min-h-[56px] items-center justify-center">
+          {isFlipped ? (
+            <motion.div {...fadeIn} className="flex flex-wrap items-center justify-center gap-3">
+              <Button variant="secondary" onClick={handleReviewLater} className="px-6">
+                {t('Review Again', 'Review Again')}
+              </Button>
+              <Button variant="success" onClick={handleMastered} className="px-6">
+                {t('Mastered!', 'Mastered!')}
+              </Button>
+            </motion.div>
+          ) : (
+            <p className="text-sm text-gray-400 dark:text-gray-500">
+              {t('Tap the card to reveal the answer', 'Tap the card to reveal the answer')}
+            </p>
+          )}
+        </div>
 
-        {isFlipped && (
-          <motion.div {...fadeIn} className="flex justify-center gap-4">
-            <Button variant="danger" onClick={handleReviewLater} className="px-6">
-              {t('Review Again', 'Review Again')}
-            </Button>
-            <Button variant="primary" onClick={handleMastered} className="px-6">
-              {t('Mastered!', 'Mastered!')}
-            </Button>
-          </motion.div>
-        )}
+        {/* Bottom navigation */}
+        <div className="flex items-center justify-center gap-3 sm:gap-4">
+          <button
+            onClick={prevCard}
+            disabled={studyIndex === 0}
+            className="flex h-12 items-center gap-2 rounded-full border border-light-border dark:border-dark-border bg-white px-4 text-sm font-medium text-gray-700 shadow-card transition-all duration-200 hover:-translate-y-0.5 hover:text-primary-600 dark:bg-dark-card dark:text-gray-300 dark:hover:text-primary-300 disabled:cursor-not-allowed disabled:opacity-40 sm:px-5"
+          >
+            <ChevronLeft className={`h-5 w-5 ${direction === 'rtl' ? 'rotate-180' : ''}`} />
+            <span className="hidden sm:inline">{t('Previous', 'Previous')}</span>
+          </button>
 
-        <div className="flex justify-center gap-4 text-sm">
+          <motion.button
+            onClick={() => setIsFlipped((f) => !f)}
+            whileHover={{ scale: 1.05, y: -2 }}
+            whileTap={{ scale: 0.95 }}
+            className="flex h-12 items-center gap-2 rounded-full bg-primary-600 px-6 text-sm font-semibold text-white shadow-md shadow-primary-600/30 transition-colors hover:bg-primary-700"
+          >
+            <RefreshCw className={`h-5 w-5 transition-transform duration-300 ${isFlipped ? 'rotate-180' : ''}`} />
+            {t('Flip', 'Flip')}
+          </motion.button>
+
+          <button
+            onClick={nextCard}
+            className="flex h-12 items-center gap-2 rounded-full border border-light-border dark:border-dark-border bg-white px-4 text-sm font-medium text-gray-700 shadow-card transition-all duration-200 hover:-translate-y-0.5 hover:text-primary-600 dark:bg-dark-card dark:text-gray-300 dark:hover:text-primary-300 sm:px-5"
+          >
+            <span className="hidden sm:inline">{t('Next', 'Next')}</span>
+            <ChevronRight className={`h-5 w-5 ${direction === 'rtl' ? 'rotate-180' : ''}`} />
+          </button>
+        </div>
+
+        {/* Session stats */}
+        <div className="mt-6 flex items-center justify-center gap-3">
           <Chip variant="success" label={`${t('Mastered', 'Mastered')}: ${masteredCount}`} />
           <Chip variant="warning" label={`${t('Review', 'Review')}: ${reviewCount}`} />
         </div>
@@ -1748,24 +2067,76 @@ function MedicalFlashcards() {
   }
 
   return (
-    <motion.div {...fadeIn} className="space-y-6">
-      <div className="flex items-center gap-3">
-        <Button variant={mode === 'decks' ? 'primary' : 'ghost'} onClick={() => setMode('decks')}>
-          {t('Decks', 'Decks')}
-        </Button>
-        <Button variant={mode === 'create' ? 'primary' : 'ghost'} onClick={() => setMode('create')}>
-          {t('Create Card', 'Create Card')}
-        </Button>
+    <motion.div {...fadeIn} dir={direction} className="space-y-8">
+      {/* Hero */}
+      <div className="relative overflow-hidden rounded-3xl border border-light-border dark:border-dark-border bg-gradient-to-br from-primary-50 via-white to-white px-6 py-10 shadow-card dark:from-primary-900/20 dark:via-dark-card dark:to-dark-card sm:px-10 sm:py-12">
+        <div className="pointer-events-none absolute -end-20 -top-24 h-64 w-64 rounded-full bg-primary-500/10 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-24 -start-16 h-56 w-56 rounded-full bg-rose-400/10 blur-3xl" />
+
+        <div className="relative">
+          <div className="flex items-center gap-4">
+            <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-primary-600/10 text-primary-600 shadow-sm dark:bg-primary-500/15 dark:text-primary-300">
+              <Layers className="h-7 w-7" />
+            </span>
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
+                {t('Medical Flashcards', 'Medical Flashcards')}
+              </h1>
+              <p className="mt-1.5 max-w-xl text-sm text-gray-500 dark:text-gray-400 sm:text-base">
+                {t('Master medical concepts with interactive flashcards across key topics.', 'Master medical concepts with interactive flashcards across key topics.')}
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <SearchBar
+              value={deckSearch}
+              onChange={setDeckSearch}
+              placeholder={t('Search decks...', 'Search decks...')}
+              shortcut=""
+              className="w-full sm:max-w-sm"
+            />
+            <div className="flex items-center gap-2 text-sm">
+              <span className="font-semibold text-gray-900 dark:text-white tabular-nums">{filteredDecks.length}</span>
+              <span className="text-gray-500 dark:text-gray-400">{t('Decks', 'Decks')}</span>
+              <span className="text-gray-300 dark:text-gray-600">•</span>
+              <span className="font-semibold text-gray-900 dark:text-white tabular-nums">{totalCards}</span>
+              <span className="text-gray-500 dark:text-gray-400">{t('cards', 'cards')}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Segmented control */}
+      <div className="flex items-center justify-between gap-4">
+        <div className="inline-flex items-center gap-1 rounded-full border border-light-border dark:border-dark-border bg-gray-50 p-1 dark:bg-dark-surface">
+          {(['decks', 'create'] as FlashcardMode[]).map((m) => (
+            <button
+              key={m}
+              onClick={() => setMode(m)}
+              className={`rounded-full px-5 py-2 text-sm font-medium transition-all duration-200 ${
+                mode === m
+                  ? 'bg-white text-primary-600 shadow-sm dark:bg-dark-card dark:text-primary-300'
+                  : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+              }`}
+            >
+              {m === 'decks' ? t('Decks', 'Decks') : t('Create Card', 'Create Card')}
+            </button>
+          ))}
+        </div>
       </div>
 
       <AnimatePresence mode="wait">
         {mode === 'create' && (
-          <motion.div key="create" {...fadeIn}>
-            <Card className="p-6">
-              <h3 className="text-lg font-bold mb-4 dark:text-white">{t('Create New Flashcard', 'Create New Flashcard')}</h3>
-              <div className="space-y-4">
+          <motion.div key="create" {...fadeIn} className="space-y-6">
+            <Card className="p-6 sm:p-8">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white">{t('Create New Flashcard', 'Create New Flashcard')}</h3>
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                {t('Add your own cards to the custom deck for personalized study.', 'Add your own cards to the custom deck for personalized study.')}
+              </p>
+              <div className="mt-5 space-y-5">
                 <div>
-                  <label className="block text-sm font-medium mb-1 dark:text-gray-300">{t('Front (Question)', 'Front (Question)')}</label>
+                  <label className="block text-sm font-medium mb-1.5 text-gray-700 dark:text-gray-300">{t('Front (Question)', 'Front (Question)')}</label>
                   <TextArea
                     value={newFront}
                     onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setNewFront(e.target.value)}
@@ -1774,7 +2145,7 @@ function MedicalFlashcards() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1 dark:text-gray-300">{t('Back (Answer)', 'Back (Answer)')}</label>
+                  <label className="block text-sm font-medium mb-1.5 text-gray-700 dark:text-gray-300">{t('Back (Answer)', 'Back (Answer)')}</label>
                   <TextArea
                     value={newBack}
                     onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setNewBack(e.target.value)}
@@ -1783,7 +2154,7 @@ function MedicalFlashcards() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1 dark:text-gray-300">{t('Deck', 'Deck')}</label>
+                  <label className="block text-sm font-medium mb-1.5 text-gray-700 dark:text-gray-300">{t('Deck', 'Deck')}</label>
                   <Input
                     value={newDeck}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewDeck(e.target.value)}
@@ -1795,13 +2166,13 @@ function MedicalFlashcards() {
             </Card>
 
             {customCards.length > 0 && (
-              <Card className="p-6 mt-4">
-                <h3 className="text-lg font-bold mb-4 dark:text-white">{t('Your Custom Cards ({count})', { count: customCards.length, defaultValue: `Your Custom Cards (${customCards.length})` })}</h3>
+              <Card className="p-6 sm:p-8">
+                <h3 className="text-lg font-bold mb-4 text-gray-900 dark:text-white">{t('Your Custom Cards ({count})', { count: customCards.length, defaultValue: `Your Custom Cards (${customCards.length})` })}</h3>
                 <div className="space-y-2">
                   {customCards.map((card) => (
-                    <div key={card.id} className="flex items-center justify-between bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
+                    <div key={card.id} className="flex items-center justify-between rounded-xl bg-gray-50 p-3 transition-colors hover:bg-gray-100 dark:bg-dark-surface dark:hover:bg-dark-hover">
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm truncate dark:text-white">{card.front}</p>
+                        <p className="font-medium text-sm truncate text-gray-900 dark:text-white">{card.front}</p>
                         <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{card.back}</p>
                       </div>
                       <Button variant="ghost" size="sm" onClick={() => handleDeleteCard(card.id)} className="ms-2 text-red-500">
@@ -1817,19 +2188,50 @@ function MedicalFlashcards() {
 
         {mode === 'decks' && (
           <motion.div key="decks" {...fadeIn}>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {allDecks.map((deck) => (
-                <motion.div key={deck.id} variants={staggerItem}>
-                  <Card className="p-6 hover:shadow-lg transition-shadow cursor-pointer" onClick={() => startStudy(deck.id)}>
-                    <div className="text-3xl mb-3">{deck.icon}</div>
-                    <h3 className="text-lg font-bold dark:text-white">{deck.name}</h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      {deck.cards.length} {t('cards', 'cards')}
-                    </p>
-                  </Card>
-                </motion.div>
-              ))}
-            </div>
+            {filteredDecks.length === 0 ? (
+              <EmptyState
+                icon={<Search className="h-8 w-8" />}
+                title={t('No decks found', 'No decks found')}
+                description={t('Try a different search term.', 'Try a different search term.')}
+              />
+            ) : (
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                {filteredDecks.map((deck) => {
+                  const theme = DECK_THEMES[deck.id] ?? DEFAULT_DECK_THEME;
+                  const DeckIcon = DECK_ICONS[deck.id] ?? Notebook;
+                  return (
+                    <motion.div key={deck.id} variants={staggerItem}>
+                      <div
+                        onClick={() => startStudy(deck.id)}
+                        className={`group relative flex h-full cursor-pointer flex-col overflow-hidden rounded-3xl border bg-gradient-to-br p-6 shadow-card transition-all duration-300 hover:-translate-y-1.5 hover:shadow-elevated ${theme.gradient} ${theme.border}`}
+                      >
+                        <div className={`pointer-events-none absolute -end-6 -top-8 h-28 w-28 rounded-full blur-2xl transition-transform duration-500 group-hover:scale-150 ${theme.glow}`} />
+
+                        <div className="relative flex items-start justify-between gap-3">
+                          <span className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl shadow-sm transition-transform duration-300 group-hover:scale-110 ${theme.iconWrap}`}>
+                            <DeckIcon className={`h-6 w-6 ${theme.icon}`} />
+                          </span>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); startStudy(deck.id); }}
+                            className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all duration-200 hover:scale-105 ${theme.studyBtn}`}
+                          >
+                            {t('Study', 'Study')}
+                            <ArrowRight className={`h-3.5 w-3.5 ${direction === 'rtl' ? 'rotate-180' : ''}`} />
+                          </button>
+                        </div>
+
+                        <div className="relative mt-6">
+                          <h3 className="text-lg font-bold text-gray-900 dark:text-white">{deck.name}</h3>
+                          <p className={`mt-1 text-sm font-medium tabular-nums ${theme.count}`}>
+                            {deck.cards.length} {t('cards', 'cards')}
+                          </p>
+                        </div>
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
@@ -1843,6 +2245,7 @@ function MedicalFlashcards() {
 
 function MedicalMCQ() {
   const { t } = useTranslation();
+  const { direction } = useLanguageStore();
   const [input, setInput] = useState('');
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [currentQ, setCurrentQ] = useState(0);
@@ -1895,11 +2298,18 @@ function MedicalMCQ() {
   const handleNext = useCallback(() => {
     if (currentQ < questions.length - 1) {
       setCurrentQ((p) => p + 1);
-      setSelected(null);
+      setSelected(answers[currentQ + 1] ?? null);
     } else {
       setShowResult(true);
     }
-  }, [currentQ, questions.length]);
+  }, [currentQ, questions.length, answers]);
+
+  const handlePrev = useCallback(() => {
+    if (currentQ > 0) {
+      setCurrentQ((p) => p - 1);
+      setSelected(answers[currentQ - 1] ?? null);
+    }
+  }, [currentQ, answers]);
 
   const score = useMemo(() => {
     return questions.reduce((acc, q, i) => (answers[i] === q.correct ? acc + 1 : acc), 0);
@@ -1914,119 +2324,315 @@ function MedicalMCQ() {
     setShowResult(false);
   }, []);
 
+  const restartQuiz = useCallback(() => {
+    setCurrentQ(0);
+    setSelected(null);
+    setAnswers(new Array(questions.length).fill(null));
+    setShowResult(false);
+  }, [questions.length]);
+
+  const detectedCategories = useMemo(() => {
+    const found = new Set<string>();
+    const lower = input.toLowerCase();
+    for (const key of Object.keys(DISEASES)) {
+      const d = DISEASES[key];
+      if (lower.includes(key.toLowerCase()) || lower.includes(d.name.toLowerCase())) {
+        found.add(d.category);
+      }
+    }
+    return Array.from(found).sort();
+  }, [input]);
+
+  const getPerformanceMessage = useCallback((pct: number) => {
+    if (pct >= 90) return t('Outstanding!', 'Outstanding!');
+    if (pct >= 70) return t('Great job!', 'Great job!');
+    if (pct >= 50) return t('Good effort!', 'Good effort!');
+    return t('Keep practicing!', 'Keep practicing!');
+  }, [t]);
+
   if (quizStarted && questions.length > 0 && showResult) {
     const pct = Math.round((score / questions.length) * 100);
+    const correctCount = score;
+    const wrongCount = questions.length - score;
+    const good = pct >= 70;
     return (
-      <motion.div {...fadeIn} className="space-y-6">
-        <Card className="p-8 text-center">
-          <h2 className="text-2xl font-bold mb-4 dark:text-white">{t('Quiz Complete!', 'Quiz Complete!')}</h2>
-          <div className="text-6xl font-bold mb-4">
-            <span className={pct >= 70 ? 'text-green-500' : pct >= 50 ? 'text-yellow-500' : 'text-red-500'}>
-              {score}/{questions.length}
-            </span>
-          </div>
-          <p className="text-lg text-gray-500 dark:text-gray-400 mb-2">{pct}% {t('correct', 'correct')}</p>
-          <ProgressBar value={pct} color={pct >= 70 ? 'success' : pct >= 50 ? 'warning' : 'danger'} className="h-3 max-w-md mx-auto mb-6" />
+      <motion.div {...fadeIn} dir={direction} className="mx-auto max-w-3xl">
+        <div className="relative overflow-hidden rounded-3xl border border-light-border dark:border-dark-border bg-gradient-to-br from-emerald-50 via-white to-white px-6 py-10 text-center shadow-card dark:from-emerald-900/20 dark:via-dark-card dark:to-dark-card sm:px-10">
+          <div className="pointer-events-none absolute -end-16 -top-16 h-48 w-48 rounded-full bg-emerald-400/10 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-16 -start-16 h-48 w-48 rounded-full bg-primary-500/10 blur-3xl" />
 
-          <div className="space-y-3 text-left max-w-2xl mx-auto mb-6">
-            {questions.map((q, i) => (
-              <div
-                key={i}
-                className={`p-3 rounded-lg border ${
-                  answers[i] === q.correct
-                    ? 'bg-green-50 dark:bg-green-900/20 border-green-300 dark:border-green-700'
-                    : 'bg-red-50 dark:bg-red-900/20 border-red-300 dark:border-red-700'
-                }`}
-              >
-                <p className="font-medium text-sm dark:text-white">{i + 1}. {q.question}</p>
-                <p className="text-xs mt-1 dark:text-gray-300">
-                  {t('Your answer', 'Your answer')}: {q.options[answers[i] ?? 0]}
-                  {answers[i] !== q.correct && (
-                    <span className="ms-2 text-green-600 dark:text-green-400">| {t('Correct', 'Correct')}: {q.options[q.correct]}</span>
-                  )}
-                </p>
+          <div className="relative">
+            <motion.div
+              initial={{ scale: 0.7, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: 'spring', stiffness: 200, damping: 15 }}
+            >
+              <span className={`inline-flex h-16 w-16 items-center justify-center rounded-full ${good ? 'bg-emerald-100 dark:bg-emerald-500/15' : 'bg-amber-100 dark:bg-amber-500/15'}`}>
+                {good ? <Award className="h-8 w-8 text-emerald-500 dark:text-emerald-300" /> : <Target className="h-8 w-8 text-amber-500 dark:text-amber-300" />}
+              </span>
+            </motion.div>
+
+            <h2 className="mt-4 text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-3xl">
+              {t('Quiz Complete!', 'Quiz Complete!')}
+            </h2>
+            <p className="mt-1 text-sm font-medium text-primary-600 dark:text-primary-300">{getPerformanceMessage(pct)}</p>
+
+            <div className="mt-6 flex items-center justify-center gap-8">
+              <div className="text-center">
+                <div className="text-5xl font-extrabold tabular-nums">
+                  <span className={good ? 'text-emerald-500 dark:text-emerald-300' : 'text-amber-500 dark:text-amber-300'}>{score}</span>
+                  <span className="text-2xl text-gray-400 dark:text-gray-500"> / {questions.length}</span>
+                </div>
+                <p className="mt-1 text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">{t('Score', 'Score')}</p>
               </div>
-            ))}
-          </div>
+              <div className="h-16 w-px bg-gray-200 dark:bg-dark-border" aria-hidden="true" />
+              <div className="text-center">
+                <div className="text-5xl font-extrabold tabular-nums text-gray-900 dark:text-white">{pct}%</div>
+                <p className="mt-1 text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">{t('Accuracy', 'Accuracy')}</p>
+              </div>
+            </div>
 
-          <div className="flex justify-center gap-3">
-            <Button onClick={reset}>{t('New Quiz', 'New Quiz')}</Button>
+            <ProgressBar value={pct} color={good ? 'success' : pct >= 50 ? 'warning' : 'danger'} className="mx-auto mt-6 max-w-md" />
+
+            <div className="mt-6 flex items-center justify-center gap-3">
+              <Chip variant="success" icon={<CheckCircle2 className="h-3.5 w-3.5" />} label={`${correctCount} ${t('Correct', 'Correct')}`} />
+              <Chip variant="danger" icon={<XCircle className="h-3.5 w-3.5" />} label={`${wrongCount} ${t('Wrong', 'Wrong')}`} />
+            </div>
+
+            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <Button onClick={restartQuiz} className="w-full sm:w-auto">
+                <RefreshCw className={`me-2 h-4 w-4 ${direction === 'rtl' ? 'rotate-180' : ''}`} />
+                {t('Restart Quiz', 'Restart Quiz')}
+              </Button>
+              <Button variant="secondary" onClick={reset} className="w-full sm:w-auto">
+                {t('New Quiz', 'New Quiz')}
+              </Button>
+            </div>
           </div>
-        </Card>
+        </div>
+
+        <div className="mt-8">
+          <h3 className="mb-3 flex items-center gap-2 text-base font-semibold text-gray-900 dark:text-white">
+            <BookOpen className="h-4 w-4 text-primary-500" />
+            {t('Review your answers', 'Review your answers')}
+          </h3>
+          <div className="space-y-3">
+            {questions.map((q, i) => {
+              const ok = answers[i] === q.correct;
+              return (
+                <motion.div
+                  key={i}
+                  {...fadeIn}
+                  className={`rounded-2xl border p-4 shadow-sm ${
+                    ok
+                      ? 'border-emerald-200 bg-emerald-50/60 dark:border-emerald-900/40 dark:bg-emerald-500/5'
+                      : 'border-red-200 bg-red-50/60 dark:border-red-900/40 dark:bg-red-500/5'
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
+                    <span className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${ok ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-300' : 'bg-red-100 text-red-500 dark:bg-red-500/15 dark:text-red-300'}`}>
+                      {ok ? <CheckCircle2 className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-semibold leading-snug text-gray-900 dark:text-white">{i + 1}. {q.question}</p>
+                      <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">
+                        {t('Your answer', 'Your answer')}: {q.options[answers[i] ?? 0]}
+                      </p>
+                      {answers[i] !== q.correct && (
+                        <p className="mt-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                          {t('Correct', 'Correct')}: {q.options[q.correct]}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
+        </div>
       </motion.div>
     );
   }
 
   if (quizStarted && questions.length > 0) {
     const q = questions[currentQ];
-    const isCorrect = selected === q.correct;
+    const total = questions.length;
+    const singleCategory = detectedCategories.length === 1 ? formatCategoryName(detectedCategories[0]) : null;
+    const isAnswered = selected !== null;
     return (
-      <motion.div {...fadeIn} className="space-y-6">
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-500 dark:text-gray-400">
-            {t('Question', 'Question')} {currentQ + 1} / {questions.length}
-          </span>
-          <ProgressBar value={((currentQ + 1) / questions.length) * 100} className="w-1/2 h-2" />
-        </div>
+      <motion.div {...fadeIn} dir={direction} className="mx-auto flex min-h-[70vh] w-full max-w-3xl flex-col">
+        <div className="flex items-center justify-between gap-3">
+          <button
+            onClick={reset}
+            className="flex items-center gap-2 rounded-full border border-light-border dark:border-dark-border bg-white px-3.5 py-2 text-sm font-medium text-gray-600 shadow-sm transition-all duration-200 hover:bg-gray-50 hover:text-primary-600 dark:bg-dark-card dark:text-gray-300 dark:hover:bg-dark-hover dark:hover:text-primary-300"
+          >
+            <ArrowLeft className={`h-4 w-4 transition-transform ${direction === 'rtl' ? 'rotate-180' : ''}`} />
+            <span className="hidden sm:inline">{t('Back', 'Back')}</span>
+          </button>
 
-        <Card className="p-6">
-          <h3 className="text-lg font-semibold mb-4 dark:text-white">{q.question}</h3>
-          <div className="space-y-3">
-            {q.options.map((opt, i) => {
-              let borderClass = 'border-gray-200 dark:border-gray-700 hover:border-blue-400';
-              if (selected !== null) {
-                if (i === q.correct) borderClass = 'border-green-500 bg-green-50 dark:bg-green-900/20';
-                else if (i === selected) borderClass = 'border-red-500 bg-red-50 dark:bg-red-900/20';
-                else borderClass = 'border-gray-200 dark:border-gray-700 opacity-50';
-              }
-              return (
-                <motion.button
-                  key={i}
-                  whileHover={selected === null ? { scale: 1.01 } : {}}
-                  whileTap={selected === null ? { scale: 0.99 } : {}}
-                  className={`w-full text-left p-4 rounded-lg border-2 transition-all ${borderClass}`}
-                  onClick={() => handleSelect(i)}
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-sm font-bold dark:text-white">
-                      {String.fromCharCode(65 + i)}
-                    </span>
-                    <span className="dark:text-gray-200">{opt}</span>
-                    {selected !== null && i === q.correct && <span className="ms-auto text-green-500">✓</span>}
-                    {selected !== null && i === selected && i !== q.correct && <span className="ms-auto text-red-500">✕</span>}
-                  </div>
-                </motion.button>
-              );
-            })}
+          <div className="flex flex-col items-center">
+            <h2 className="text-sm font-semibold text-gray-900 dark:text-white sm:text-base">{singleCategory ?? t('Medical Quiz', 'Medical Quiz')}</h2>
+            <p className="text-xs font-medium text-gray-500 dark:text-gray-400 tabular-nums">
+              {t('Question', 'Question')} {currentQ + 1} / {total}
+            </p>
           </div>
 
-          {selected !== null && (
-            <motion.div {...fadeIn} className="mt-4 flex justify-end">
-              <Button onClick={handleNext}>
-                {currentQ < questions.length - 1 ? t('Next Question', 'Next Question') : t('See Results', 'See Results')}
+          <div className="w-24" aria-hidden="true" />
+        </div>
+
+        <ProgressBar value={((currentQ + 1) / total) * 100} color="gradient" className="mt-5" />
+
+        <div className="relative mt-6 overflow-hidden rounded-3xl border border-light-border dark:border-dark-border bg-white/85 p-8 shadow-card backdrop-blur-xl dark:bg-dark-card/85 sm:p-10">
+          <div className="pointer-events-none absolute -end-12 -top-12 h-32 w-32 rounded-full bg-primary-500/10 blur-3xl" />
+          <span className="relative inline-flex items-center gap-1.5 rounded-full bg-primary-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary-600 dark:bg-primary-500/10 dark:text-primary-300">
+            <ClipboardList className="h-3.5 w-3.5" />
+            {t('Question', 'Question')} {currentQ + 1}
+          </span>
+          <motion.h3
+            key={currentQ}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="relative mt-4 text-xl font-semibold leading-snug text-gray-900 dark:text-white sm:text-2xl"
+          >
+            {q.question}
+          </motion.h3>
+        </div>
+
+        <div className="mt-5 space-y-3">
+          {q.options.map((opt, i) => {
+            const letter = String.fromCharCode(65 + i);
+            let state: 'idle' | 'correct' | 'wrong' | 'dimmed' = 'idle';
+            if (selected !== null) {
+              if (i === q.correct) state = 'correct';
+              else if (i === selected) state = 'wrong';
+              else state = 'dimmed';
+            }
+            const optionClasses = {
+              idle: 'border-light-border dark:border-dark-border bg-white hover:-translate-y-0.5 hover:border-primary-300 hover:shadow-elevated dark:bg-dark-card dark:hover:border-primary-500/50 dark:hover:shadow-primary-500/10',
+              correct: 'border-emerald-500 bg-emerald-50 dark:border-emerald-400 dark:bg-emerald-500/10 shadow-lg shadow-emerald-500/10',
+              wrong: 'border-red-500 bg-red-50 dark:border-red-400 dark:bg-red-500/10 shadow-lg shadow-red-500/10',
+              dimmed: 'border-light-border dark:border-dark-border bg-white opacity-40 dark:bg-dark-card',
+            }[state];
+            const letterClasses = {
+              idle: 'bg-gray-100 text-gray-600 group-hover:bg-primary-50 group-hover:text-primary-600 dark:bg-dark-surface dark:text-gray-400 dark:group-hover:bg-primary-500/10 dark:group-hover:text-primary-300',
+              correct: 'bg-emerald-500 text-white',
+              wrong: 'bg-red-500 text-white',
+              dimmed: 'bg-gray-100 text-gray-600 dark:bg-dark-surface dark:text-gray-400',
+            }[state];
+            return (
+              <motion.button
+                key={i}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.05 }}
+                whileHover={selected === null ? { scale: 1.01, y: -2 } : {}}
+                whileTap={selected === null ? { scale: 0.98 } : {}}
+                disabled={selected !== null}
+                onClick={() => handleSelect(i)}
+                className={`group flex w-full items-center gap-4 rounded-2xl border-2 p-4 text-start shadow-sm transition-all duration-200 sm:p-5 ${optionClasses}`}
+              >
+                <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-bold transition-colors duration-200 ${letterClasses}`}>
+                  {letter}
+                </span>
+                <span className={`flex-1 text-sm font-medium sm:text-base ${state === 'dimmed' ? 'text-gray-500 dark:text-gray-500' : 'text-gray-800 dark:text-gray-200'}`}>
+                  {opt}
+                </span>
+                {state === 'correct' && <CheckCircle2 className="h-6 w-6 shrink-0 text-emerald-500 dark:text-emerald-400" />}
+                {state === 'wrong' && <XCircle className="h-6 w-6 shrink-0 text-red-500 dark:text-red-400" />}
+              </motion.button>
+            );
+          })}
+        </div>
+
+        <div className="mt-6 flex min-h-[56px] items-center justify-between gap-3">
+          <Button variant="secondary" onClick={handlePrev} disabled={currentQ === 0} className="px-5">
+            <ChevronLeft className={`me-1 h-4 w-4 ${direction === 'rtl' ? 'rotate-180' : ''}`} />
+            {t('Previous', 'Previous')}
+          </Button>
+          {isAnswered ? (
+            <motion.div {...fadeIn}>
+              <Button onClick={handleNext} className="px-6">
+                {currentQ < total - 1 ? t('Next Question', 'Next Question') : t('See Results', 'See Results')}
+                <ArrowRight className={`ms-2 h-4 w-4 ${direction === 'rtl' ? 'rotate-180' : ''}`} />
               </Button>
             </motion.div>
+          ) : (
+            <p className="text-sm text-gray-400 dark:text-gray-500">{t('Select an answer to continue', 'Select an answer to continue')}</p>
           )}
-        </Card>
+        </div>
       </motion.div>
     );
   }
 
   return (
-    <motion.div {...fadeIn} className="space-y-6">
-      <Card className="p-6">
-        <h2 className="text-2xl font-bold mb-2 dark:text-white">{t('Medical MCQ Generator', 'Medical MCQ Generator')}</h2>
-        <p className="text-gray-500 dark:text-gray-400 mb-4">{t('Paste medical text and generate interactive multiple-choice questions for study.', 'Paste medical text and generate interactive multiple-choice questions for study.')}</p>
-        <TextArea
-          value={input}
-          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setInput(e.target.value)}
-          placeholder={t('Paste medical text here to generate quiz questions...', 'Paste medical text here to generate quiz questions...')}
-          rows={10}
-          className="mb-4"
-        />
-        <Button onClick={handleGenerate} disabled={loading || !input.trim()} className="w-full sm:w-auto">
-          {loading ? t('Generating...', 'Generating...') : t('Generate Quiz', 'Generate Quiz')}
-        </Button>
+    <motion.div {...fadeIn} dir={direction} className="space-y-8">
+      <div className="relative overflow-hidden rounded-3xl border border-light-border dark:border-dark-border bg-gradient-to-br from-primary-50 via-white to-white px-6 py-10 shadow-card dark:from-primary-900/20 dark:via-dark-card dark:to-dark-card sm:px-10 sm:py-12">
+        <div className="pointer-events-none absolute -end-20 -top-24 h-64 w-64 rounded-full bg-primary-500/10 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-24 -start-16 h-56 w-56 rounded-full bg-emerald-400/10 blur-3xl" />
+
+        <div className="relative">
+          <div className="flex items-center gap-4">
+            <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-primary-600/10 text-primary-600 shadow-sm dark:bg-primary-500/15 dark:text-primary-300">
+              <ClipboardList className="h-7 w-7" />
+            </span>
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
+                {t('Medical MCQ', 'Medical MCQ')}
+              </h1>
+              <p className="mt-1.5 max-w-xl text-sm text-gray-500 dark:text-gray-400 sm:text-base">
+                {t('Generate interactive multiple-choice questions from your medical notes and test yourself.', 'Generate interactive multiple-choice questions from your medical notes and test yourself.')}
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-6 flex flex-wrap items-center gap-2 text-sm">
+            <span className="flex items-center gap-1.5 rounded-full bg-white px-3.5 py-1.5 font-semibold text-gray-900 shadow-sm dark:bg-dark-card dark:text-white">
+              <Sparkles className="h-4 w-4 text-primary-500" />
+              5
+              <span className="font-normal text-gray-500 dark:text-gray-400">{t('questions per quiz', 'questions per quiz')}</span>
+            </span>
+            <span className="flex items-center gap-1.5 rounded-full bg-white px-3.5 py-1.5 font-semibold text-gray-900 shadow-sm dark:bg-dark-card dark:text-white">
+              <Layers className="h-4 w-4 text-emerald-500" />
+              {detectedCategories.length}
+              <span className="font-normal text-gray-500 dark:text-gray-400">{t('Topics', 'Topics')}</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <Card className="p-6 sm:p-8">
+        <div className="flex items-center gap-2">
+          <BookOpen className="h-5 w-5 text-primary-500" />
+          <h2 className="text-lg font-bold text-gray-900 dark:text-white">{t('Create your quiz', 'Create your quiz')}</h2>
+        </div>
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          {t('Paste medical text below and we will generate a 5-question quiz from it.', 'Paste medical text below and we will generate a 5-question quiz from it.')}
+        </p>
+        <div className="mt-5 space-y-5">
+          <TextArea
+            value={input}
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setInput(e.target.value)}
+            placeholder={t('Paste medical text here to generate quiz questions...', 'Paste medical text here to generate quiz questions...')}
+            rows={8}
+            className="text-base"
+          />
+
+          <div className="flex flex-col items-stretch gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex min-h-[32px] flex-1 flex-wrap items-center gap-2">
+              {detectedCategories.length > 0 ? (
+                detectedCategories.map((cat) => {
+                  const CatIcon = getCategoryIcon(cat);
+                  return <Chip key={cat} variant="primary" icon={<CatIcon className="h-3.5 w-3.5" />} label={formatCategoryName(cat)} />;
+                })
+              ) : (
+                <p className="text-xs text-gray-400 dark:text-gray-500">{t('Detected topics will appear here', 'Detected topics will appear here')}</p>
+              )}
+            </div>
+            <Button onClick={handleGenerate} disabled={loading || !input.trim()} className="shrink-0">
+              {loading ? t('Generating...', 'Generating...') : t('Generate Quiz', 'Generate Quiz')}
+            </Button>
+          </div>
+        </div>
       </Card>
     </motion.div>
   );

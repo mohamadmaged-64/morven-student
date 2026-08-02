@@ -222,28 +222,7 @@ const TOOLS: Record<string, ToolConfig> = {
     category: 'pdf',
     section: 'pdf',
   },
-  'add-watermark': {
-    id: 'add-watermark',
-    name: 'Add Watermark',
-    nameAr: 'إضافة علامة مائية',
-    description: 'Add a text watermark to all pages of a PDF',
-    descriptionAr: 'إضافة علامة مائية نصية لجميع صفحات PDF',
-    icon: Droplets,
-    accepts: ['.pdf'],
-    category: 'pdf',
-    section: 'pdf',
-  },
-  'add-signature': {
-    id: 'add-signature',
-    name: 'Add Signature',
-    nameAr: 'إضافة توقيع',
-    description: 'Draw and place a signature on a PDF page',
-    descriptionAr: 'رسم ووضع توقيع على صفحة PDF',
-    icon: PenTool,
-    accepts: ['.pdf'],
-    category: 'pdf',
-    section: 'pdf',
-  },
+ 
   'extract-images': {
     id: 'extract-images',
     name: 'Extract Images',
@@ -255,30 +234,7 @@ const TOOLS: Record<string, ToolConfig> = {
     category: 'pdf',
     section: 'pdf',
   },
-  'ocr': {
-    id: 'ocr',
-    name: 'OCR - Text Recognition',
-    nameAr: 'OCR - التعرف على النص',
-    description: 'Extract text from scanned PDFs using OCR',
-    descriptionAr: 'استخراج النص من PDFات الممسوحة باستخدام OCR',
-    icon: ScanSearch,
-    accepts: ['.pdf'],
-    category: 'pdf',
-    section: 'pdf',
-  },
-  'compare-pdfs': {
-    id: 'compare-pdfs',
-    name: 'Compare PDFs',
-    nameAr: 'مقارنة ملفات PDF',
-    description: 'Compare two PDF documents and find differences',
-    descriptionAr: 'مقارنة مستندين PDF وإيجاد الفروقات',
-    icon: Scale,
-    accepts: ['.pdf'],
-    multiple: true,
-    maxFiles: 2,
-    category: 'pdf',
-    section: 'pdf',
-  },
+
 };
 
 // ─── Types ──────────────────────────────────────────────────────────
@@ -1161,6 +1117,286 @@ function PDFPageThumbnails({
   );
 }
 
+// ─── Reorder PDF Workspace ─────────────────────────────────────────
+
+function ReorderPdfWorkspace({
+  file, pageCount, order, processing, progress, status, error, result,
+  onFile, onRemove, onMove, onResetOrder, onProcess, onReset,
+}: {
+  file: UploadedFileData | null;
+  pageCount: number;
+  order: number[];
+  processing: boolean;
+  progress: number;
+  status: string;
+  error: string | null;
+  result: { blob: Blob; pages: number; duration: number } | null;
+  onFile: (file: File) => void;
+  onRemove: () => void;
+  onMove: (from: number, to: number) => void;
+  onResetOrder: () => void;
+  onProcess: () => void;
+  onReset: () => void;
+}) {
+  const { t } = useTranslation();
+  const { direction } = useLanguageStore();
+  const isRtl = direction === 'rtl';
+  const [dragged, setDragged] = useState<number | null>(null);
+  const [thumbnails, setThumbnails] = useState<Map<number, string>>(new Map());
+
+  useEffect(() => {
+    let cancelled = false;
+    setThumbnails(new Map());
+    if (!file) return;
+    const load = async () => {
+      const pdfjsLib = await import('pdfjs-dist');
+      const buffer = await file.file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
+      if (cancelled) return;
+      const indices = Array.from({ length: pdf.numPages }, (_, i) => i);
+      for (const idx of indices) {
+        if (cancelled) return;
+        const page = await pdf.getPage(idx + 1);
+        const viewport = page.getViewport({ scale: 0.3 });
+        const canvas = document.createElement('canvas');
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) continue;
+        await page.render({ canvasContext: ctx as unknown as CanvasRenderingContext2D, viewport })
+          .promise;
+        if (!cancelled) {
+          setThumbnails((prev) => new Map(prev).set(idx, canvas.toDataURL()));
+        }
+      }
+    };
+    load();
+    return () => { cancelled = true; };
+  }, [file]);
+
+  const handleFileDrop = (f: File) => {
+    if (f.type !== 'application/pdf' && !f.name.toLowerCase().endsWith('.pdf')) return;
+    onFile(f);
+  };
+
+  const isDefaultOrder = order.length === pageCount && order.every((p, i) => p === i);
+
+  if (result) {
+    return (
+      <Card className="max-w-2xl mx-auto p-6 sm:p-8 text-center">
+        <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
+          <CheckCircle2 className="h-8 w-8" />
+        </div>
+        <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+          {t('pdf.reorder.ready')}
+        </h2>
+        <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+          {t('pdf.reorder.resultHint', '{{pages}} pages were reordered successfully.', { pages: result.pages })}
+        </p>
+
+        <div className="mt-6 grid grid-cols-3 gap-3 text-left">
+          <div className="rounded-xl bg-gray-50 p-3 dark:bg-dark-surface">
+            <p className="text-xs text-gray-500">{t('pdf.reorder.files')}</p>
+            <p className="mt-1 font-semibold text-gray-900 dark:text-white">1</p>
+          </div>
+          <div className="rounded-xl bg-gray-50 p-3 dark:bg-dark-surface">
+            <p className="text-xs text-gray-500">{t('pdf.reorder.pages')}</p>
+            <p className="mt-1 font-semibold text-gray-900 dark:text-white">{result.pages}</p>
+          </div>
+          <div className="rounded-xl bg-gray-50 p-3 dark:bg-dark-surface">
+            <p className="text-xs text-gray-500">{t('pdf.split.time')}</p>
+            <p className="mt-1 font-semibold text-gray-900 dark:text-white">{(result.duration / 1000).toFixed(1)} {t('common.seconds')}</p>
+          </div>
+        </div>
+
+        <div className="mt-6 flex flex-col-reverse justify-center gap-3 sm:flex-row">
+          <Button variant="ghost" onClick={onReset}>
+            {t('common.startAgain')}
+          </Button>
+          <Button
+            variant="primary"
+            onClick={() => downloadBlob(result.blob, file?.file.name?.replace(/\.pdf$/i, '') + '_reordered.pdf' || 'reordered-pages.pdf')}
+            icon={<Download className="h-4 w-4" />}
+          >
+            {t('pdf.reorder.download')}
+          </Button>
+        </div>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="space-y-5">
+
+      {/* Upload area */}
+      <Card className="p-0 overflow-hidden">
+        <div className="p-6">
+          {!file ? (
+            <FileUpload
+              accept={['.pdf', 'application/pdf']}
+              onFilesSelected={(selected) => { if (selected[0]) handleFileDrop(selected[0].file); }}
+              label={t('fileUpload.dropPdf')}
+              description={t('fileUpload.pdfOnly')}
+            />
+          ) : (
+            <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-dark-surface border border-light-border dark:border-dark-border">
+              <div className="w-10 h-10 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-red-500">
+                <FileText className="h-5 w-5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">{file.file.name}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{pageCount} {pageCount === 1 ? t('pdf.split.page') : t('pdf.split.pages')}</p>
+              </div>
+              <button
+                type="button"
+                className="text-xs text-primary-600 hover:underline dark:text-primary-400"
+                onClick={() => onRemove()}
+              >
+                {t('pdf.split.replace')}
+              </button>
+            </div>
+          )}
+        </div>
+      </Card>
+
+      {/* Reorder pages */}
+      {file && (
+        <Card className="p-5 sm:p-6">
+          <div className="flex items-center justify-between mb-2">
+            <div>
+              <h2 className="text-base font-semibold text-gray-900 dark:text-white">
+                {t('pdf.reorder.title')}
+              </h2>
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                {t('pdf.reorder.hint')}
+              </p>
+            </div>
+            <Button variant="ghost" size="sm" onClick={onResetOrder} disabled={processing || isDefaultOrder}>
+              {t('pdf.reorder.reset')}
+            </Button>
+          </div>
+
+          <div className="mt-4 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3">
+            {order.map((pageIdx, position) => (
+              <motion.div
+                key={pageIdx}
+                layout
+                draggable={!processing}
+                onDragStart={() => setDragged(position)}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  if (dragged !== null && dragged !== position) onMove(dragged, position);
+                  setDragged(null);
+                }}
+                className={[
+                  'relative rounded-xl border-2 overflow-hidden transition-all select-none cursor-grab active:cursor-grabbing',
+                  dragged === position
+                    ? 'border-primary-500 ring-2 ring-primary-500/30 shadow-md'
+                    : 'border-light-border dark:border-dark-border hover:border-primary-300 dark:hover:border-primary-600',
+                ].join(' ')}
+              >
+                {thumbnails.get(pageIdx) ? (
+                  <img
+                    src={thumbnails.get(pageIdx)}
+                    alt={`Page ${pageIdx + 1}`}
+                    className="w-full aspect-[1/1.41] object-contain bg-white"
+                    draggable={false}
+                  />
+                ) : (
+                  <div className="w-full aspect-[1/1.41] bg-gray-100 dark:bg-dark-surface flex items-center justify-center">
+                    <Spinner size={16} />
+                  </div>
+                )}
+                <div className="absolute top-0 inset-x-0 flex items-center justify-between bg-gradient-to-b from-black/40 to-transparent px-1.5 pt-1">
+                  <span className="text-[10px] font-semibold text-white/90">{position + 1}</span>
+                  <GripVertical className="h-3.5 w-3.5 text-white/80" />
+                </div>
+                <div className="absolute bottom-0 inset-x-0 bg-black/50 text-white text-[10px] text-center py-0.5 font-medium">
+                  {pageIdx + 1}
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </Card>
+      )}
+
+      {/* Preview + action */}
+      {file && (
+        <Card className="p-5 sm:p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-base font-semibold text-gray-900 dark:text-white">
+                {t('pdf.reorder.preview')}
+              </h2>
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                {t('pdf.reorder.previewHint')}
+              </p>
+            </div>
+            <span className="rounded-full bg-primary-100 px-3 py-1 text-xs font-semibold text-primary-700 dark:bg-primary-900/30">
+              {order.length} {t('pdf.reorder.pages')}
+            </span>
+          </div>
+
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={order.join(',')}
+              initial={{ opacity: 0, y: 5 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-4 rounded-xl border border-light-border bg-gray-50 p-4 dark:border-dark-border dark:bg-dark-surface"
+            >
+              <p className="text-sm font-medium text-gray-900 dark:text-white">
+                {t('pdf.reorder.newOrder')}
+              </p>
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                {order.map((p) => p + 1).join(', ')}
+              </p>
+            </motion.div>
+          </AnimatePresence>
+
+          {error && (
+            <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-900/10 dark:text-red-400">
+              {error}
+            </div>
+          )}
+
+          {processing && (
+            <ProgressBar
+              value={progress}
+              color="gradient"
+              showLabel
+              label={status}
+              className="mt-5"
+            />
+          )}
+        </Card>
+      )}
+
+      {file && (
+        <div className="flex items-center gap-3 w-full">
+          <Button
+            variant="primary"
+            size="md"
+            loading={processing}
+            disabled={!order.length || processing || isDefaultOrder}
+            onClick={onProcess}
+            icon={
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polygon points="5 3 19 12 5 21 5 3" />
+              </svg>
+            }
+          >
+            {processing ? status : t('pdf.reorder.action')}
+          </Button>
+          <Button variant="ghost" onClick={onReset}>
+            {t('Cancel', 'Cancel')}
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Signature Canvas ───────────────────────────────────────────────
 
 function SignaturePad({
@@ -1356,6 +1592,11 @@ export default function PdfToolPage({ toolId: propToolId }: { toolId?: string })
   const [deleteStatus, setDeleteStatus] = useState('');
   const [deleteResult, setDeleteResult] = useState<{ blob: Blob; remaining: number; deleted: number; duration: number } | null>(null);
 
+  // Reorder-specific state
+  const [reorderPageCount, setReorderPageCount] = useState(0);
+  const [reorderStatus, setReorderStatus] = useState('');
+  const [reorderResult, setReorderResult] = useState<{ blob: Blob; pages: number; duration: number } | null>(null);
+
   // Tool-specific state
   const [selectedPages, setSelectedPages] = useState<number[]>([]);
   const [pageOrder, setPageOrder] = useState<number[]>([]);
@@ -1400,6 +1641,9 @@ export default function PdfToolPage({ toolId: propToolId }: { toolId?: string })
     setDeleteSelectedPages([]);
     setDeleteStatus('');
     setDeleteResult(null);
+    setReorderPageCount(0);
+    setReorderStatus('');
+    setReorderResult(null);
   }, []);
 
   if (!tool) {
@@ -1730,6 +1974,59 @@ export default function PdfToolPage({ toolId: propToolId }: { toolId?: string })
     }
   };
 
+  const addReorderFile = async (file: File) => {
+    if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) return;
+    try {
+      setError(null);
+      setReorderResult(null);
+      setReorderStatus(t('pdf.reorder.reading'));
+      const data = await fileToArrayBuffer(file);
+      const pageCount = await getPDFPageCount(file);
+      setFiles([{ id: 'reorder-' + Date.now(), file, data, pageCount }]);
+      setReorderPageCount(pageCount);
+      setPageOrder(Array.from({ length: pageCount }, (_, i) => i));
+    } catch {
+      setError(t('pdf.reorder.readError'));
+    }
+  };
+
+  const handleReorderMove = (from: number, to: number) => {
+    setPageOrder((current) => {
+      if (to < 0 || to >= current.length) return current;
+      const reordered = [...current];
+      const [moved] = reordered.splice(from, 1);
+      reordered.splice(to, 0, moved);
+      return reordered;
+    });
+  };
+
+  const processReorder = async () => {
+    const source = files[0]?.file;
+    if (!source || pageOrder.length === 0) return;
+    const started = performance.now();
+    setError(null);
+    setProcessState('processing');
+    try {
+      setReorderStatus(t('pdf.reorder.processing'));
+      setProgress(30);
+      const output = await reorderPDFPages(source, pageOrder);
+      setProgress(100);
+      setReorderStatus('Done');
+      setReorderResult({
+        blob: output,
+        pages: pageOrder.length,
+        duration: performance.now() - started,
+      });
+      setProcessState('done');
+      addNotification(t('pdf.reorder.success'), 'success');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : t('pdf.reorder.error');
+      setError(message);
+      setProcessState('error');
+      addNotification(message, 'error');
+    }
+  };
+
   const addMergeFiles = async (selected: File[]) => {
     const remainingSlots = (tool.maxFiles || 20) - files.length;
     if (remainingSlots <= 0) {
@@ -1851,6 +2148,32 @@ export default function PdfToolPage({ toolId: propToolId }: { toolId?: string })
             onSelectAll={selectAllDeletePages}
             onClearSelection={() => setDeleteSelectedPages([])}
             onProcess={processDelete}
+            onReset={reset}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  if (tool.id === 'reorder-pages') {
+    return (
+      <div className={'min-h-screen bg-light-bg dark:bg-dark-bg ' + (isRtl ? 'rtl' : 'ltr')}>
+        <div className="max-w-4xl mx-auto px-4 py-8">
+          <ToolHeader tool={tool} isDark={isDark} isRtl={isRtl} />
+          <ReorderPdfWorkspace
+            file={files[0] || null}
+            pageCount={reorderPageCount}
+            order={pageOrder}
+            processing={processState === 'processing'}
+            progress={progress}
+            status={reorderStatus}
+            error={error}
+            result={reorderResult}
+            onFile={addReorderFile}
+            onRemove={() => { setFiles([]); setReorderPageCount(0); setPageOrder([]); setError(null); }}
+            onMove={handleReorderMove}
+            onResetOrder={() => setPageOrder(Array.from({ length: reorderPageCount }, (_, i) => i))}
+            onProcess={processReorder}
             onReset={reset}
           />
         </div>
