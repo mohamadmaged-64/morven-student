@@ -208,29 +208,7 @@ const TOOLS: Record<string, ToolConfig> = {
     category: 'pdf',
     section: 'pdf',
   },
-  'remove-password': {
-    id: 'remove-password',
-    name: 'Remove PDF Password',
-    nameAr: 'إزالة كلمة مرور PDF',
-    description: 'Remove password protection from a PDF',
-    descriptionAr: 'إزالة الحماية بكلمة مرور من ملف PDF',
-    icon: LockOpen,
-    accepts: ['.pdf'],
-    category: 'pdf',
-    section: 'pdf',
-  },
- 
-  'extract-images': {
-    id: 'extract-images',
-    name: 'Extract Images',
-    nameAr: 'استخراج الصور',
-    description: 'Extract all images from a PDF document',
-    descriptionAr: 'استخراج جميع الصور من مستند PDF',
-    icon: Image,
-    accepts: ['.pdf'],
-    category: 'pdf',
-    section: 'pdf',
-  },
+  
 
 };
 

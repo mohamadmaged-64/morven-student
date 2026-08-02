@@ -153,12 +153,11 @@ export const tools: Tool[] = [
   { id: 'merge-pdfs', name: 'Merge PDF', nameAr: 'دمج PDF', description: 'Combine multiple PDF files into a single document', descriptionAr: 'دمج ملفات PDF متعددة في مستند واحد', icon: Paperclip, category: 'pdf' },
   { id: 'split-pdf', name: 'Split PDF', nameAr: 'تقسيم PDF', description: 'Split a PDF file into separate pages or ranges', descriptionAr: 'تقسيم ملف PDF إلى صفحات أو نطاقات منفصلة', icon: Scissors, category: 'pdf' },
  { id: 'compress-pdf', name: 'Compress PDF', nameAr: 'ضغط PDF', description: 'Reduce PDF file size without losing quality', descriptionAr: 'تقليل حجم ملف PDF دون فقدان الجودة', icon: FileArchive, category: 'pdf' },
-
   { id: 'delete-pages', name: 'Delete Pages', nameAr: 'حذف صفحات', description: 'Remove unwanted pages from a PDF document', descriptionAr: 'إزالة الصفحات غير المرغوب فيها من مستند PDF', icon: Trash2, category: 'pdf' }, 
   { id: 'reorder-pages', name: 'Reorder Pages', nameAr: 'إعادة ترتيب الصفحات', description: 'Rearrange pages in a PDF document', descriptionAr: 'إعادة ترتيب الصفحات في مستند PDF', icon: ArrowUpDown, category: 'pdf' },
   { id: 'rotate-pages', name: 'Rotate Pages', nameAr: 'تدوير الصفحات', description: 'Rotate individual pages in a PDF', descriptionAr: 'تدوير صفحات فردية في PDF', icon: RotateCw, category: 'pdf' },
   { id: 'password-protect', name: 'Password Protect', nameAr: 'حماية بكلمة مرور', description: 'Add password protection to PDF files', descriptionAr: 'إضافة حماية بكلمة مرور لملفات PDF', icon: Lock, category: 'pdf' },
-  { id: 'remove-password', name: 'Remove Password', nameAr: 'إزالة كلمة المرور', description: 'Remove password protection from PDF files', descriptionAr: 'إزالة حماية كلمة المرور من ملفات PDF', icon: Unlock, category: 'pdf' },
+  
   // POWERPOINT
 { id: 'generate-ppt-text', name: 'Generate PPT from Text', nameAr: 'إنشاء PPT من نص', description: 'Create a presentation from text content', descriptionAr: 'إنشاء عرض تقديمي من محتوى نصي', icon: Presentation, category: 'powerpoint', comingSoon: true },
 { id: 'generate-ppt-pdf', name: 'Generate PPT from PDF', nameAr: 'إنشاء PPT من PDF', description: 'Convert PDF to a PowerPoint presentation', descriptionAr: 'تحويل PDF إلى عرض PowerPoint', icon: FileText, category: 'powerpoint', comingSoon: true },
