@@ -120,7 +120,7 @@ export function Header({ title }: HeaderProps) {
         <div className="flex items-center gap-1">
           {(pomodoroRunning || pomodoroPaused) && (
             <button
-              onClick={() => navigate('/tool/pomodoro')}
+              onClick={() => navigate('/tool/pomodoro-timer')}
               className="px-2.5 py-1.5 rounded-xl text-sm font-semibold font-mono tabular-nums text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-500/10 transition-colors"
               aria-label={t('pomodoro.settings')}
               title={t('tools.pomodoro')}

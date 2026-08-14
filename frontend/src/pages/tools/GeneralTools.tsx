@@ -36,7 +36,7 @@ export default function GeneralToolPage({ toolId }: GeneralToolPageProps) {
   let content: React.ReactNode;
 
   switch (toolId) {
-    case 'pomodoro':
+    case 'pomodoro-timer':
       content = <PomodoroTimer />;
       break;
 

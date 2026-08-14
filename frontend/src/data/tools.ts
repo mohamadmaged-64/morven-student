@@ -165,7 +165,6 @@ export const tools: Tool[] = [
 { id: 'split-ppt', name: 'Split PowerPoint', nameAr: 'تقسيم عرض PowerPoint', description: 'Split a presentation into multiple files', descriptionAr: 'تقسيم عرض PowerPoint إلى عدة ملفات', icon: Scissors, category: 'powerpoint' },
 { id: 'compress-ppt', name: 'Compress PowerPoint', nameAr: 'ضغط PowerPoint', description: 'Reduce the size of your PowerPoint presentation', descriptionAr: 'تقليل حجم عرض PowerPoint', icon: Archive, category: 'powerpoint' },
 { id: 'protect-ppt', name: 'Protect PowerPoint', nameAr: 'حماية PowerPoint', description: 'Add password protection to your presentation', descriptionAr: 'إضافة كلمة مرور لحماية العرض التقديمي', icon: Lock, category: 'powerpoint' },
-{ id: 'unlock-ppt', name: 'Unlock PowerPoint', nameAr: 'إزالة حماية PowerPoint', description: 'Remove password protection from your presentation', descriptionAr: 'إزالة كلمة المرور من العرض التقديمي', icon: Unlock, category: 'powerpoint' },
  { id: 'number-slides', name: 'Number Slides', nameAr: 'ترقيم الشرائح', description: 'Automatically add slide numbers to your presentation', descriptionAr: 'إضافة أرقام الشرائح تلقائيًا إلى العرض التقديمي', icon: Hash, category: 'powerpoint' },
 
 // VIDEO

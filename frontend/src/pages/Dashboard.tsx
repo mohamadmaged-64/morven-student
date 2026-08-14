@@ -281,7 +281,7 @@ export default function Dashboard() {
   {
     icon: Timer,
     label: t('tools.pomodoro'),
-    to: '/tool/pomodoro',
+    to: '/tool/pomodoro-timer',
   },
   {
     icon: QrCode,
