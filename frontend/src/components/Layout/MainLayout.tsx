@@ -4,6 +4,7 @@ import { useLanguageStore } from '@/store/useLanguageStore';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar/Sidebar';
 import { PomodoroTimerService } from '@/components/PomodoroTimerService';
+import { ToolErrorBoundary } from '@/components/Tool/ToolErrorBoundary';
 import Footer from './Footer';
 
 const FOOTER_ROUTES = ['/', '/features', '/our-tools', '/faq', '/security', '/privacy-policy', '/terms', '/about', '/contact', '/complaints'];
@@ -36,7 +37,9 @@ export function MainLayout() {
   className="flex-1 overflow-y-auto transition-all duration-300 flex flex-col"
 >
   <div className="flex-1 p-4 md:p-6 lg:p-8">
-    <Outlet />
+    <ToolErrorBoundary resetKey={pathname}>
+      <Outlet />
+    </ToolErrorBoundary>
   </div>
 
   {showFooter && <Footer />}

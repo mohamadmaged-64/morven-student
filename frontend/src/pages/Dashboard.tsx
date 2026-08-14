@@ -12,7 +12,6 @@ import { categories } from '@/data/categories';
 import { getToolById, tools } from '@/data/tools';
 type Tool = (typeof tools)[number];
 import { categoryOrder } from '@/data/navigation';
-import { file } from 'jszip';
 import {
   Folder,
   House,

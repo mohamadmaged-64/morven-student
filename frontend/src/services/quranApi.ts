@@ -133,6 +133,15 @@ export function useQuranData() {
     let mounted = true;
 
     async function load() {
+      // Never attempt a network request while offline: the Quran tool is
+      // online-only and this hook also runs from the always-mounted header.
+      if (typeof navigator !== 'undefined' && !navigator.onLine) {
+        if (mounted) {
+          setLoading(false);
+        }
+        return;
+      }
+
       try {
         setLoading(true);
 

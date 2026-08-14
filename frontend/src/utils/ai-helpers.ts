@@ -1034,7 +1034,7 @@ export async function extractTextFromFile(file: File): Promise<string> {
       const pdfjs = pdfjsLib as typeof import('pdfjs-dist');
       if ('GlobalWorkerOptions' in pdfjs) {
         (pdfjs as { GlobalWorkerOptions: { workerSrc: string } }).GlobalWorkerOptions.workerSrc =
-          `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+          new URL('pdfjs-dist/build/pdf.worker.mjs', import.meta.url).toString();
       }
       const arrayBuffer = await file.arrayBuffer();
       const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;

@@ -12,12 +12,15 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['morven.png', 'morven-192.png', 'morven-512.png', 'apple-touch-icon.png'],
       manifest: {
+        id: '/',
         name: 'Morven For Student',
         short_name: 'Morven',
         description: 'أدواتك الشاملة للدراسة والإنتاجية',
         theme_color: '#0a0a0f',
         background_color: '#0a0a0f',
         display: 'standalone',
+        display_override: ['standalone', 'minimal-ui'],
+        scope: '/',
         start_url: '/',
         lang: 'ar',
         dir: 'rtl',
@@ -45,14 +48,15 @@ export default defineConfig({
         cleanupOutdatedCaches: true,
         clientsClaim: true,
         skipWaiting: true,
-        globPatterns: ['**/*.{js,mjs,css,html,ico,png,svg,woff2,woff,ttf,otf,eot}'],
-        globIgnores: ['**/*.map'],
+        globPatterns: ['**/*.{js,mjs,css,html,ico,png,svg,woff2,woff,ttf,otf,eot,webmanifest}'],
+        globIgnores: ['**/*.map', '**/*.gz', '**/sw.js'],
         navigateFallback: '/index.html',
-        maximumFileSizeToCacheInBytes: 10 * 1024 * 1024,
+        navigateFallbackDenylist: [/^\/api\//],
+        maximumFileSizeToCacheInBytes: 15 * 1024 * 1024,
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.(googleapis|gstatic)\.com\/.*/i,
-            handler: 'StaleWhileRevalidate',
+            handler: 'CacheFirst',
             options: {
               cacheName: 'google-fonts',
               expiration: {

@@ -1,9 +1,7 @@
 import { PDFDocument, rgb, StandardFonts, degrees as pdfDegrees } from 'pdf-lib';
 import * as pdfjsLib from 'pdfjs-dist';
-import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import JSZip from 'jszip';
-import { createWorker } from 'tesseract.js';
 import type { FileItem } from '@/types';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
@@ -418,6 +416,7 @@ export async function extractPDFImages(file: File): Promise<Blob[]> {
 }
 
 export async function ocrPDF(file: File, lang = 'eng'): Promise<string> {
+  const { createWorker } = await import('tesseract.js');
   const buffer = await file.arrayBuffer();
   const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
   let fullText = '';
