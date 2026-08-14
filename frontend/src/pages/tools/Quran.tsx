@@ -7,19 +7,51 @@ import { ReciterSelector } from '@/components/quran/ReciterSelector';
 import { SurahSelector } from '@/components/quran/SurahSelector';
 import { QuranPlayer } from '@/components/quran/QuranPlayer';
 import { useQuranData } from '@/services/quranApi';
-import { Book, Headphones, AlertCircle } from 'lucide-react';
+import { useOnlineStatus } from '@/hooks/useOnlineStatus';
+import { Button } from '@/components/UI/Button';
+import { useEffect, useRef } from 'react';
+import { Book, Headphones, AlertCircle, WifiOff } from 'lucide-react';
 
 export default function QuranPage() {
   const { language } = useLanguageStore();
   const { currentReciter, currentSurah, setReciter, setSurah } = useQuranStore();
-  const { reciters, surahs, loading, error } = useQuranData();
-  
+  const { reciters, surahs, loading, error, refetch } = useQuranData();
+  const isOnline = useOnlineStatus();
+  const wasOffline = useRef(!isOnline);
+
+  useEffect(() => {
+    if (wasOffline.current && isOnline) {
+      refetch();
+    }
+    wasOffline.current = !isOnline;
+  }, [isOnline, refetch]);
 
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
         <Spinner className="w-8 h-8 text-primary-500" />
       </div>
+    );
+  }
+
+  if (!isOnline) {
+    return (
+      <Card padding="lg">
+        <div className="flex flex-col items-center justify-center py-8 text-center">
+          <WifiOff className="w-12 h-12 text-amber-500 mb-3" />
+          <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-1">
+            {language === 'ar' ? 'أنت غير متصل بالإنترنت' : 'You are offline'}
+          </h3>
+          <p className="text-sm text-gray-400 dark:text-gray-500 max-w-md mb-4">
+            {language === 'ar'
+              ? 'يتطلب القرآن الكريم اتصالاً بالإنترنت لتحميل القراء والسور والاستماع إليها.'
+              : 'The Holy Quran tool requires an internet connection to load reciters, surahs, and audio.'}
+          </p>
+          <Button onClick={refetch}>
+            {language === 'ar' ? 'إعادة المحاولة' : 'Try Again'}
+          </Button>
+        </div>
+      </Card>
     );
   }
 
@@ -31,7 +63,10 @@ export default function QuranPage() {
           <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-1">
             {language === 'ar' ? 'خطأ في التحميل' : 'Failed to Load'}
           </h3>
-          <p className="text-sm text-gray-400 dark:text-gray-500 max-w-md">{error}</p>
+          <p className="text-sm text-gray-400 dark:text-gray-500 max-w-md mb-4">{error}</p>
+          <Button onClick={refetch}>
+            {language === 'ar' ? 'إعادة المحاولة' : 'Try Again'}
+          </Button>
         </div>
       </Card>
     );

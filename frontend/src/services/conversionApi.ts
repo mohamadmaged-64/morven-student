@@ -1,3 +1,5 @@
+import { toNetworkError } from './apiError';
+
 console.log("[conversionApi] import.meta.env.VITE_API_URL =", import.meta.env.VITE_API_URL);
 
 const API_BASE_URL =
@@ -28,7 +30,7 @@ export async function convertToPdf(file: File): Promise<Blob> {
     });
   } catch (error) {
     console.error("[convertToPdf] fetch threw:", error);
-    throw error;
+    throw toNetworkError("Could not reach the conversion server.", error);
   }
 
   console.log("[convertToPdf] response status:", response.status);
@@ -83,7 +85,7 @@ export async function compressPdf(
     });
   } catch (error) {
     console.error("[compressPdf] fetch threw:", error);
-    throw error;
+    throw toNetworkError("Could not reach the conversion server.", error);
   }
 
   console.log("[compressPdf] response status:", response.status);
@@ -139,7 +141,7 @@ async function postPdfSecurity(
     });
   } catch (error) {
     console.error(`[${tag}] fetch threw:`, error);
-    throw error;
+    throw toNetworkError("Could not reach the conversion server.", error);
   }
 
   console.log(`[${tag}] response status:`, response.status);
@@ -214,7 +216,7 @@ export async function numberSlides(
     });
   } catch (error) {
     console.error("[numberSlides] fetch threw:", error);
-    throw error;
+    throw toNetworkError("Could not reach the conversion server.", error);
   }
 
   console.log("[numberSlides] response status:", response.status);
@@ -266,7 +268,7 @@ export async function generatePptFromText(
     });
   } catch (error) {
     console.error("[generatePptFromText] fetch threw:", error);
-    throw error;
+    throw toNetworkError("Could not reach the conversion server.", error);
   }
 
   console.log("[generatePptFromText] response status:", response.status);
@@ -317,7 +319,7 @@ export async function generatePptFromPdf(file: File): Promise<Blob> {
     });
   } catch (error) {
     console.error("[generatePptFromPdf] fetch threw:", error);
-    throw error;
+    throw toNetworkError("Could not reach the conversion server.", error);
   }
 
   console.log("[generatePptFromPdf] response status:", response.status);
@@ -368,7 +370,7 @@ export async function mergePowerPoint(files: File[]): Promise<Blob> {
     });
   } catch (error) {
     console.error("[mergePowerPoint] fetch threw:", error);
-    throw error;
+    throw toNetworkError("Could not reach the conversion server.", error);
   }
 
   console.log("[mergePowerPoint] response status:", response.status);
@@ -420,7 +422,7 @@ export async function splitPowerPoint(file: File, ranges = ""): Promise<Blob> {
     });
   } catch (error) {
     console.error("[splitPowerPoint] fetch threw:", error);
-    throw error;
+    throw toNetworkError("Could not reach the conversion server.", error);
   }
 
   console.log("[splitPowerPoint] response status:", response.status);

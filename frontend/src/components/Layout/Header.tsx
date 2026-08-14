@@ -6,6 +6,7 @@ import { ThemeToggle } from '@/components/UI/ThemeToggle';
 import { usePomodoroStore } from '@/store/usePomodoroStore';
 import { useNavigate } from 'react-router-dom';
 import { HeaderQuranPlayer } from '@/components/quran/HeaderQuranPlayer';
+import { OfflineIndicator } from '@/components/Layout/OfflineIndicator';
 
 interface HeaderProps {
   title?: string;
@@ -66,6 +67,7 @@ export function Header({ title }: HeaderProps) {
         'border-b border-light-border dark:border-dark-border',
       ].join(' ')}
     >
+      <OfflineIndicator />
       <div className="flex items-center gap-3 px-4 h-16">
         {/* Mobile Menu */}
         <button

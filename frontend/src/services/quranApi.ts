@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import type { Reciter, Surah } from '@/types/quran';
 
 const CACHE_DURATION = 0
@@ -127,6 +127,7 @@ export function useQuranData() {
   const [surahs, setSurahs] = useState<Surah[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [reloadFlag, setReloadFlag] = useState(0);
 
   useEffect(() => {
     let mounted = true;
@@ -165,12 +166,15 @@ export function useQuranData() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [reloadFlag]);
+
+  const refetch = useCallback(() => setReloadFlag((f) => f + 1), []);
 
   return {
     reciters,
     surahs,
     loading,
     error,
+    refetch,
   };
 }

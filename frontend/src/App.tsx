@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, useParams } from 'react-router-dom';
 import { MainLayout } from '@/components/Layout/MainLayout';
+import { NotificationHost } from '@/components/Layout/NotificationHost';
 import { FullPageLoader } from '@/components/UI/Loading';
 import { useAppStore } from '@/store/useAppStore';
 import { useThemeStore } from '@/store/useThemeStore';
@@ -108,6 +109,7 @@ export default function App() {
 
   return (
     <BrowserRouter>
+      <NotificationHost />
       <Routes>
         <Route element={<MainLayout />}>
           <Route

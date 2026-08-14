@@ -49,6 +49,7 @@ import {
 import { useAppStore } from '@/store/useAppStore';
 import { useLanguageStore } from '@/store/useLanguageStore';
 import { aiService } from '@/services/ai';
+import { isNetworkError } from '@/services/apiError';
 import {
   LanguagePair,
   SideBySide,
@@ -825,8 +826,13 @@ export function AIToolPage({ toolId }: AIToolPageProps) {
         }
       }
     } catch (err) {
-      const message = (err && typeof err === 'object' && 'message' in err && typeof (err as { message: unknown }).message === 'string')
+      let message = (err && typeof err === 'object' && 'message' in err && typeof (err as { message: unknown }).message === 'string')
         ? (err as { message: string }).message : undefined;
+      if (isNetworkError(err)) {
+        message = isRtl
+          ? 'أنت غير متصل بالإنترنت. تتطلب هذه الأداة اتصالاً بالإنترنت. حاول مرة أخرى عند توفر الاتصال.'
+          : 'You are offline. This tool requires an internet connection. Try again once you are back online.';
+      }
       const errorMessage = message || (isRtl ? 'حدث خطأ أثناء المعالجة' : 'An error occurred while processing');
       setError(errorMessage);
       addNotification(errorMessage, 'error');
@@ -1276,6 +1282,15 @@ return (
             </motion.div>
           )}
         </AnimatePresence>
+
+        {error && (
+          <div
+            role="alert"
+            className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-900/10 dark:text-red-400"
+          >
+            {error}
+          </div>
+        )}
 
         {!processed && (
           <div

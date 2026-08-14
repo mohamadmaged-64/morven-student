@@ -18,6 +18,13 @@ import { useLanguageStore } from '@/store/useLanguageStore';
 import { useNavigate } from 'react-router-dom';
 import { ToolHero } from '@/components/Tool/ToolHero';
 import { numberSlides, generatePptFromText, generatePptFromPdf, mergePowerPoint, splitPowerPoint, type SlideNumberPosition } from '@/services/conversionApi';
+import { isNetworkError } from '@/services/apiError';
+
+function networkErrorMessage(direction: string): string {
+  return direction === 'rtl'
+    ? 'أنت غير متصل بالإنترنت. تتطلب هذه الأداة اتصالاً بالإنترنت. حاول مرة أخرى عند توفر الاتصال.'
+    : 'You are offline. This tool requires an internet connection. Try again once you are back online.';
+}
 
 type OldToolId =
   | 'ppt-from-text'
@@ -338,7 +345,7 @@ function GeneratePptFromTextTool() {
       if (progressRef.current) clearInterval(progressRef.current);
       setProcessing(false);
       setDone(false);
-      const msg = err instanceof Error ? err.message : 'Failed to generate presentation';
+      const msg = isNetworkError(err) ? networkErrorMessage(direction) : (err instanceof Error ? err.message : 'Failed to generate presentation');
       addNotification(msg, 'error');
     }
   }, [title, content, addNotification, t]);
@@ -428,7 +435,7 @@ function GeneratePptFromPdfTool() {
       if (progressRef.current) clearInterval(progressRef.current);
       setProcessing(false);
       setDone(false);
-      const msg = err instanceof Error ? err.message : 'Failed to convert PDF to presentation';
+      const msg = isNetworkError(err) ? networkErrorMessage(direction) : (err instanceof Error ? err.message : 'Failed to convert PDF to presentation');
       addNotification(msg, 'error');
     }
   }, [uploaded, addNotification, t]);
@@ -510,7 +517,7 @@ function MergePptTool() {
       if (progressRef.current) clearInterval(progressRef.current);
       setProcessing(false);
       setDone(false);
-      const msg = err instanceof Error ? err.message : 'Failed to merge presentations';
+      const msg = isNetworkError(err) ? networkErrorMessage(direction) : (err instanceof Error ? err.message : 'Failed to merge presentations');
       addNotification(msg, 'error');
     }
   }, [files, addNotification, t]);
@@ -596,7 +603,7 @@ function SplitPptTool() {
       if (progressRef.current) clearInterval(progressRef.current);
       setProcessing(false);
       setDone(false);
-      const msg = err instanceof Error ? err.message : 'Failed to split presentation';
+      const msg = isNetworkError(err) ? networkErrorMessage(direction) : (err instanceof Error ? err.message : 'Failed to split presentation');
       addNotification(msg, 'error');
     }
   }, [uploaded, ranges, addNotification, t]);
@@ -785,7 +792,7 @@ function NumberSlidesTool() {
       if (progressRef.current) clearInterval(progressRef.current);
       setProcessing(false);
       setDone(false);
-      const msg = err instanceof Error ? err.message : 'Failed to add slide numbers';
+      const msg = isNetworkError(err) ? networkErrorMessage(direction) : (err instanceof Error ? err.message : 'Failed to add slide numbers');
       addNotification(msg, 'error');
     }
   }, [uploaded, startNumber, position, addNotification, t]);

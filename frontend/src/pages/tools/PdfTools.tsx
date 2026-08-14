@@ -47,6 +47,7 @@ import {
   type PDFPageGroup,
 } from '@/utils/file';
 import { convertToPdf, compressPdf, protectPdf, unlockPdf } from '@/services/conversionApi';
+import { isNetworkError } from '@/services/apiError';
 
 import {
   FileText,
@@ -1631,7 +1632,12 @@ export default function PdfToolPage({ toolId: propToolId }: { toolId?: string })
         'success',
       );
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'An error occurred';
+      let msg = err instanceof Error ? err.message : 'An error occurred';
+      if (isNetworkError(err)) {
+        msg = isRtl
+          ? 'أنت غير متصل بالإنترنت. تتطلب هذه الأداة اتصالاً بالإنترنت. حاول مرة أخرى عند توفر الاتصال.'
+          : 'You are offline. This tool requires an internet connection. Try again once you are back online.';
+      }
       setError(msg);
       setProcessState('error');
       addNotification(msg, 'error');
