@@ -1,7 +1,8 @@
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguageStore } from '@/store/useLanguageStore';
-import { Book, Search, ChevronDown } from 'lucide-react';
+import { useQuranStore } from '@/store/quranStore';
+import { Book, Search, ChevronDown, Download } from 'lucide-react';
 import type { Surah } from '@/types/quran';
 
 interface SurahSelectorProps {
@@ -14,6 +15,15 @@ export function SurahSelector({ surahs, currentSurah, onSelect }: SurahSelectorP
   const { language } = useLanguageStore();
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
+  const downloads = useQuranStore((s) => s.downloads);
+
+  const downloadedSurahIds = useMemo(() => {
+    const ids = new Set<number>();
+    for (const d of Object.values(downloads)) {
+      if (d.status === 'done') ids.add(d.surahId);
+    }
+    return ids;
+  }, [downloads]);
 
   const filtered = useMemo(() => {
     if (!search.trim()) return surahs;
@@ -108,6 +118,14 @@ export function SurahSelector({ surahs, currentSurah, onSelect }: SurahSelectorP
                               {language === 'ar' ? surah.nameAr : surah.name}
                             </div>
                           </div>
+                          {downloadedSurahIds.has(surah.id) ? (
+                            <span
+                              className="flex items-center gap-1 text-xs font-medium text-primary-600 dark:text-primary-400"
+                              title={language === 'ar' ? 'متاحة بدون إنترنت' : 'Available offline'}
+                            >
+                              <Download className="w-3.5 h-3.5" />
+                            </span>
+                          ) : null}
                           {surah.verses ? (
                             <span className="text-xs text-gray-400 dark:text-gray-500 tabular-nums">
                               {surah.verses}

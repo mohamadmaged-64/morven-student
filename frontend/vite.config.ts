@@ -91,7 +91,7 @@ export default defineConfig({
         },
       },
     },
-    chunkSizeWarningLimit: 1000,
+    chunkSizeWarningLimit: 2000,
   },
   optimizeDeps: {
     include: ['react', 'react-dom', 'react-router-dom', 'zustand'],
