@@ -7,12 +7,9 @@ import { PomodoroTimerService } from '@/components/PomodoroTimerService';
 import { ToolErrorBoundary } from '@/components/Tool/ToolErrorBoundary';
 import Footer from './Footer';
 
-const FOOTER_ROUTES = ['/', '/features', '/our-tools', '/faq', '/security', '/privacy-policy', '/terms', '/about', '/contact', '/complaints'];
-
 export function MainLayout() {
   const direction = useLanguageStore((s) => s.direction);
   const { pathname } = useLocation();
-  const showFooter = FOOTER_ROUTES.includes(pathname) || pathname.startsWith('/our-tools/');
 
   const mainRef = useRef<HTMLElement>(null);
 
@@ -42,7 +39,7 @@ export function MainLayout() {
     </ToolErrorBoundary>
   </div>
 
-  {showFooter && <Footer />}
+  <Footer />
 </main>
       </div>
     </div>

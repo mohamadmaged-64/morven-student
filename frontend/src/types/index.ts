@@ -106,3 +106,20 @@ export interface Flashcard {
   reviewCount: number;
   createdAt: number;
 }
+
+export interface PersistentFile {
+  id: string;
+  name: string;
+  type: string;
+  size: number;
+  data: ArrayBuffer;
+  createdAt: number;
+}
+
+export interface ResumeItem {
+  id: string;
+  toolId: string;
+  label: string;
+  progress: Record<string, unknown>;
+  updatedAt: number;
+}
