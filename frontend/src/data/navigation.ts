@@ -4,7 +4,6 @@ export const categoryOrder: ToolCategory[] = [
   'general',
   'medical',
   'engineering',
-  'ai',
   'pdf',
   'powerpoint',
   'video',

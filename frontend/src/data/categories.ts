@@ -2,7 +2,6 @@ import type { ToolCategory } from '@/types';
 
 import { 
   FileText, 
-  Brain, 
   Presentation, 
   Video, 
   Music, 
@@ -47,14 +46,7 @@ export const categories: Record<ToolCategory, CategoryMeta> = {
     description: 'Engineering calculators, diagrams, and design tools',
     descriptionAr: 'حاسبات هندسية ورسومات وأدوات تصميم',
   },
-   ai: {
-    name: 'AI Study Tools',
-    nameAr: 'أدوات الذكاء الاصطناعي',
-    icon: Brain,
-    comingSoon: true,
-    description: 'Summarize, explain, generate quizzes and study aids with AI',
-    descriptionAr: 'تلخيص وشرح وإنشاء اختبارات ووسائل تعليمية بالذكاء الاصطناعي',
-  },
+
   pdf: {
     name: 'PDF Tools',
     nameAr: 'أدوات الPDF',

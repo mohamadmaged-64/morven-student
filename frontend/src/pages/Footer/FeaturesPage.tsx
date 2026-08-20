@@ -2,7 +2,6 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/UI';
 import {
   FileText,
-  Brain,
   Presentation,
   Video,
   Music,
@@ -33,7 +32,6 @@ const featureCards = [
   { icon: GraduationCap, titleEn: 'General Tools', titleAr: 'أدوات عامة', descEn: 'Pomodoro timer, task manager, exam countdown, and productivity aids.', descAr: 'مدير المهام ومنشئ الملاحظات ومؤقت البومودورو والمزيد.' },
   { icon: HeartPulse, titleEn: 'Medical Section', titleAr: 'القسم الطبي', descEn: 'Medical summarizers, flashcards, drug references, and lab values.', descAr: 'ملخصات طبية وبطاقات تعليمية ومراجع الأدوية وقيم المختبر.' },
    { icon: Cog, titleEn: 'Engineering Section', titleAr: 'القسم الهندسي', descEn: 'Computer enguneering tools and more', descAr: 'أدوات هندسة الحاسوب والمزيد' },
-  { icon: Brain, titleEn: 'AI Study Tools', titleAr: 'أدوات الذكاء الاصطناعي', descEn: 'Summarize, explain, generate quizzes, flashcards, and study plans with AI.', descAr: 'تلخيص وشرح وإنشاء اختبارات وبطاقات وخطط دراسة بالذكاء الاصطناعي.' },
   { icon: FileText, titleEn: 'PDF Tools', titleAr: 'أدوات ال PDF', descEn: 'Convert, merge, split, compress, and edit PDF documents entirely in your browser.', descAr: 'تحويل ودمج وتقسيم وضغط وتحرير مستندات PDF بالكامل في متصفحك.' },
   { icon: Presentation, titleEn: 'PowerPoint', titleAr: 'أدوات ال PowerPoint', descEn: 'Create, edit, convert, and enhance PowerPoint presentations with ease.', descAr: 'إنشاء وتحرير وتحويل وتحسين عروض PowerPoint التقديمية بسهولة.' },
   { icon: Video, titleEn: 'Video Tools', titleAr: 'أدوات الفيديو', descEn: 'Compress, convert, and extract audio and more', descAr: 'ضغط وتحويل واستخراج الصوت والمزيد' },
@@ -132,8 +130,8 @@ export default function FeaturesPage() {
           </h2>
           <p className="text-gray-500 dark:text-gray-400 max-w-lg mx-auto">
             {isAr
-              ? 'أدوات متنوعة تغطي احتياجاتك الدراسية من PDF إلى الذكاء الاصطناعي.'
-              : 'A diverse set of tools covering your study needs from PDF to AI.'}
+              ? 'أدوات متنوعة تغطي احتياجاتك الدراسية من PDF إلى PowerPoint.'
+              : 'A diverse set of tools covering your study needs from PDF to PowerPoint.'}
           </p>
         </motion.div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

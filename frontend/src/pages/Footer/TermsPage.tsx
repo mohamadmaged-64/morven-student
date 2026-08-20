@@ -69,8 +69,8 @@ const termsSections = [
     icon: CheckCircle,
     titleEn: 'Use of the Services',
     titleAr: 'استخدام الخدمات',
-    contentEn: 'Morven provides free online tools for students, including PDF processing, AI-powered study aids, presentation tools, and media utilities. You may use these tools for personal, educational, or non-commercial purposes. You agree not to use the services for any unlawful purpose, to attempt to disrupt or overload the infrastructure, or to circumvent any usage limitations.',
-    contentAr: 'يقدم مورفن أدوات مجانية عبر الإنترنت للطلاب، بما في ذلك معالجة PDF ومساعدات الدراسة بالذكاء الاصطناعي وأدوات العروض التقديمية وأدوات الوسائط. يمكنك استخدام هذه الأدوات لأغراض شخصية أو تعليمية أو غير تجارية. أنت توافق على عدم استخدام الخدمات لأي غرض غير قانوني، أو محاولة إعاقة أو حمل البنية التحتية، أو التحايل على أي قيود استخدام.',
+    contentEn: 'Morven provides free online tools for students, including PDF processing, study aids, presentation tools, and media utilities. You may use these tools for personal, educational, or non-commercial purposes. You agree not to use the services for any unlawful purpose, to attempt to disrupt or overload the infrastructure, or to circumvent any usage limitations.',
+    contentAr: 'يقدم مورفن أدوات مجانية عبر الإنترنت للطلاب، بما في ذلك معالجة PDF ومساعدات الدراسة وأدوات العروض التقديمية وأدوات الوسائط. يمكنك استخدام هذه الأدوات لأغراض شخصية أو تعليمية أو غير تجارية. أنت توافق على عدم استخدام الخدمات لأي غرض غير قانوني، أو محاولة إعاقة أو حمل البنية التحتية، أو التحايل على أي قيود استخدام.',
   },
 ];
 

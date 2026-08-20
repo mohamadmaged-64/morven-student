@@ -5,7 +5,7 @@ export const sidebarSections = [
   },
   {
     title: 'nav.studyTools',
-    categories: ['ai', 'pdf', 'powerpoint'],
+    categories: ['pdf', 'powerpoint'],
   },
   {
     title: 'nav.productivityTools',

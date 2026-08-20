@@ -15,7 +15,6 @@ import { categoryOrder } from '@/data/navigation';
 import {
   Folder,
   House,
-  Brain,
   FileText,
   Presentation,
   Video,
@@ -40,7 +39,6 @@ import {
 } from 'lucide-react';
  const icon = {
                FileText,
-               Brain,
                Presentation,
                Video,
                Music,
@@ -83,7 +81,6 @@ const badgeVariantMap: Record<string, 'primary' | 'success' | 'warning' | 'info'
   general: 'info',
   medical: 'danger',
   engineering: 'success',
-  ai: 'info',
   pdf: 'primary',
   powerpoint: 'warning',
   video: 'danger',

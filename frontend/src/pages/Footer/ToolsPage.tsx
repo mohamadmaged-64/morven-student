@@ -19,7 +19,6 @@ const categoryDescriptions: Record<ToolCategory, { en: string; ar: string }> = {
   medical: { en: 'Medical summarizers, flashcards, drug references, and lab values for students.', ar: 'ملخصات طبية وبطاقات تعليمية ومراجع الأدوية وقيم المختبر للطلاب.' },
   engineering: { en: 'Engineering calculators, diagrams, and design tools coming soon.', ar: 'حاسبات هندسية ورسومات وأدوات تصميم قريباً.' },
   pdf: { en: 'Convert, merge, split, compress, and manage your PDF documents with ease.', ar: 'تحويل ودمج وتقسيم وضغط وإدارة مستندات PDF بسهولة.' },
-  ai: { en: 'Summarize, explain, generate quizzes, flashcards, and study plans powered by AI.', ar: 'تلخيص وشرح وإنشاء اختبارات وبطاقات وخطط دراسة بالذكاء الاصطناعي.' },
   powerpoint: { en: 'Create, edit, convert, and enhance PowerPoint presentations effortlessly.', ar: 'إنشاء وتحرير وتحويل وتحسين عروض PowerPoint التقديمية بسهولة.' },
   video: { en: 'Compress, convert, and extract audio from video files in seconds.', ar: 'ضغط وتحويل واستخراج الصوت من ملفات الفيديو في ثوانٍ.' },
   images: { en: 'Remove backgrounds, rotate, blur, and convert images with a click.', ar: 'إزالة الخلفيات وتدوير وتغيير الحجم وتحويل الصور بنقرة واحدة.' },

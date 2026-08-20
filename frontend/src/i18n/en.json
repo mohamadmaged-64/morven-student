@@ -7,7 +7,6 @@
     "dashboard": "Dashboard",
     "categories": "Categories",
     "pdf": "PDF Tools",
-    "ai": "AI Study Tools",
     "powerpoint": "PowerPoint Tools",
     "video": "Video Tools",
     "audio": "Audio Tools",
@@ -98,48 +97,6 @@
       "pdfUnlock": {
         "name": "PDF Unlock",
         "description": "Remove password protection from PDF files"
-      }
-    },
-    "ai": {
-      "smartNotes": {
-        "name": "Smart Notes",
-        "description": "AI-powered note summarization and organization"
-      },
-      "essayWriter": {
-        "name": "Essay Writer",
-        "description": "AI-assisted essay writing and structure suggestions"
-      },
-      "textSimplifier": {
-        "name": "Text Simplifier",
-        "description": "Simplify complex academic text for better understanding"
-      },
-      "studyFlashcards": {
-        "name": "Study Flashcards",
-        "description": "Generate and study flashcards with spaced repetition"
-      },
-      "quizGenerator": {
-        "name": "Quiz Generator",
-        "description": "Auto-generate quizzes from your study material"
-      },
-      "conceptMapper": {
-        "name": "Concept Mapper",
-        "description": "Create visual concept maps from your notes"
-      },
-      "citationGenerator": {
-        "name": "Citation Generator",
-        "description": "Generate citations in APA, MLA, Chicago, and more"
-      },
-      "translator": {
-        "name": "Translator",
-        "description": "Translate text between multiple languages"
-      },
-      "grammarChecker": {
-        "name": "Grammar Checker",
-        "description": "Check and correct grammar and spelling errors"
-      },
-      "paraphraser": {
-        "name": "Paraphraser",
-        "description": "Rewrite text while maintaining the original meaning"
       }
     },
     "powerpoint": {
@@ -643,7 +600,6 @@
   },
   "categories": {
     "pdf": "PDF Tools",
-    "ai": "AI Study Tools",
     "powerpoint": "PowerPoint",
     "video": "Video Tools",
     "audio": "Audio",
@@ -655,7 +611,6 @@
   },
   "emptyStates": {
     "pdf": "No pdf tools used yet. Try merging or splitting PDFs!",
-    "ai": "No AI tools used yet. Let AI help with your studies!",
     "powerpoint": "No PowerPoint tools used yet. Convert presentations easily!",
     "video": "No video tools used yet. Compress or trim your videos!",
     "audio": "No audio tools used yet. Record or convert audio files!",

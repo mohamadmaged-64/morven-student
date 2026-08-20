@@ -14,7 +14,6 @@ import AllToolsPage from '@/pages/AllToolsPage';
 import GeneralToolPage from '@/pages/tools/GeneralTools';
 import { MedicalToolPage } from '@/pages/tools/MedicalTools';
 import EngineeringToolPage from '@/pages/tools/EngineeringTools';
-import { AIToolPage } from '@/pages/tools/AITools';
 import PdfToolsPage from '@/pages/tools/PdfTools';
 import PowerPointToolPage from '@/pages/tools/PowerPointTools';
 import VideoToolPage from '@/pages/tools/VideoTools';
@@ -36,7 +35,6 @@ const toolPageMap: Record<ToolCategory, ComponentType<{ toolId: string }>> = {
   general: GeneralToolPage,
   medical: MedicalToolPage,
   engineering: EngineeringToolPage,
-  ai: AIToolPage,
   pdf: PdfToolsPage,
   powerpoint: PowerPointToolPage,
   video: VideoToolPage,

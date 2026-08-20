@@ -1,5 +1,4 @@
 import {
-  Brain,
   FileText,
   Presentation,
   Video,
@@ -12,7 +11,6 @@ import {
 
 export const iconMap = {
   FileText,
-  Brain,
   Presentation,
   Video,
   Music,

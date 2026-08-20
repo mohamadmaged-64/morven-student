@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Search, HelpCircle, MessageCircle, ChevronRight, FileText, Brain, Shield, User, X } from 'lucide-react';
+import { Search, HelpCircle, MessageCircle, ChevronRight, FileText, Shield, User, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/UI';
 import { Accordion } from '@/components/UI/Accordion';
@@ -15,7 +15,7 @@ const fadeUp = {
   }),
 };
 
-type FaqCategory = 'all' | 'general' | 'pdf' | 'ai' | 'privacy' | 'account';
+type FaqCategory = 'all' | 'general' | 'pdf' | 'privacy' | 'account';
 
 const faqCategories: { id: FaqCategory; labelEn: string; labelAr: string; icon: React.ElementType }[] = [
   { id: 'all', labelEn: 'All', labelAr: 'الكل', icon: HelpCircle },
@@ -38,8 +38,8 @@ const faqData: FaqItem[] = [
     id: 'gen-1', category: 'general',
     questionEn: 'What is Morven for Students?',
     questionAr: 'ما هو مورفن للطلاب؟',
-    answerEn: 'Morven for Students is an all-in-one web-based toolkit designed specifically for students. It offers a wide range of tools including PDF editing, AI-powered study aids, presentation tools, video and audio utilities, and more — all accessible directly from your browser.',
-    answerAr: 'مورفن للطلاب هو حقيبة أدوات شاملة تعمل على الويب ومصممة خصيصاً للطلاب. يوفر مجموعة واسعة من الأدوات بما في ذلك تحرير PDF ومساعدات الدراسة بالذكاء الاصطناعي وأدوات العروض التقديمية وأدوات الفيديو والصوت والمزيد — الكل متاح مباشرة من متصفحك.',
+    answerEn: 'Morven for Students is an all-in-one web-based toolkit designed specifically for students. It offers a wide range of tools including PDF editing, study aids, presentation tools, video and audio utilities, and more — all accessible directly from your browser.',
+    answerAr: 'مورفن للطلاب هو حقيبة أدوات شاملة تعمل على الويب ومصممة خصيصاً للطلاب. يوفر مجموعة واسعة من الأدوات بما في ذلك تحرير PDF ومساعدات الدراسة وأدوات العروض التقديمية وأدوات الفيديو والصوت والمزيد — الكل متاح مباشرة من متصفحك.',
   },
   {
     id: 'gen-4', category: 'general',

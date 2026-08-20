@@ -32,7 +32,6 @@ const ALL_CATEGORIES: ToolCategory[] = [
   'general',
   'medical',
   'engineering',
-  'ai',
   'pdf',
   'powerpoint',
   'video',

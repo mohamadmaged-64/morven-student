@@ -19,7 +19,6 @@ export interface Tool {
 
 export type ToolCategory =
   | 'pdf'
-  | 'ai'
   | 'powerpoint'
   | 'video'
   | 'audio'

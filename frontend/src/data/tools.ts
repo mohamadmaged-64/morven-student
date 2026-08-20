@@ -20,32 +20,29 @@ export interface CategoryMeta {
 }
 
 import {
-  FileText, FileImage, Brain, Presentation, Video, Mic, ImageIcon, QrCode,
+  FileText, FileImage, Presentation, Video, Mic, ImageIcon, QrCode,
   GraduationCap, HeartPulse, File, FileSpreadsheet, Paperclip, Scissors,
   Minimize2, Trash2, Shuffle, RotateCw, Lock, Unlock, Droplet, PenTool,
-  Search, Printer, ArrowLeftRight, FileSearch, ClipboardList, PlaySquare,
+  Search, Printer, ArrowLeftRight, FileSearch, ClipboardList,
   Music, Lightbulb, Pen, CheckCircle, Globe, List, Newspaper, Key,
-  HelpCircle, Zap, Layers, BookOpenCheck, CalendarDays, BrainCircuit,
-  Book, Type, ScrollText, Microscope, Sparkles, Smartphone, Timer,
+  HelpCircle, Sparkles, Smartphone, Timer,
   ListTodo, Calendar, ClipboardPlus, FileArchive, ArrowUpDown, Droplets, Signature, ScanSearch, ScanText, GitCompare, Stethoscope, Scale, Pill, FlaskConical, FileHeart,
-  Cog,Combine, Archive, Hash, NotebookPen,
+  Cog, Combine, Archive, Hash, NotebookPen,
   Braces, Regex, KeyRound, Fingerprint, Palette, Code2, FileCode2, Wand2, Table,
   FileCode, Link, Server, Gauge, Route, Database, Box, Boxes, Table2, Grid3x3,
   GitBranch, Terminal, Cloud, AtSign, Columns, Clock, Barcode, Quote, ListChecks,
-  CalendarClock, ShieldCheck, BadgeCheck, LockKeyhole, Shield
+  CalendarClock, ShieldCheck, BadgeCheck, LockKeyhole, Shield, Book, BookOpenCheck, Type
 } from "lucide-react";
 
 export const icon = {
-  FileText, FileImage, Brain, Presentation, Video, Mic, ImageIcon, QrCode,
+  FileText, FileImage, Presentation, Video, Mic, ImageIcon, QrCode,
   GraduationCap, HeartPulse, File, FileSpreadsheet, Paperclip, Scissors,
   Minimize2, Trash2, Shuffle, RotateCw, Lock, Unlock, Droplet, PenTool,
-  Search, Printer, ArrowLeftRight, FileSearch, ClipboardList, PlaySquare,
+  Search, Printer, ArrowLeftRight, FileSearch, ClipboardList,
   Music, Lightbulb, Pen, CheckCircle, Globe, List, Newspaper, Key,
-  HelpCircle, Zap, Layers, BookOpenCheck, CalendarDays, BrainCircuit,
-  Book, Type, ScrollText, Microscope, Sparkles, Smartphone, Timer,
+  HelpCircle, Sparkles, Smartphone, Timer,
   ListTodo, Calendar, ClipboardPlus, FileArchive, ArrowUpDown, Droplets, Signature, ScanSearch, ScanText, GitCompare, Stethoscope, Scale, Pill, FlaskConical, FileHeart,
-  Cog,Combine, Archive, Hash, NotebookPen
-
+  Cog, Combine, Archive, Hash, NotebookPen, Book, BookOpenCheck, Type
 }
 
 export const tools: Tool[] = [
@@ -122,29 +119,6 @@ export const tools: Tool[] = [
   { id: 'hmac-generator', name: 'HMAC Generator', nameAr: 'مولد HMAC', description: 'Generate HMAC signatures with secret keys', descriptionAr: 'توليد توقيعات HMAC بمفاتيح سرية', icon: LockKeyhole, category: 'engineering' },
   { id: 'jwt-inspector', name: 'JWT Inspector', nameAr: 'فاحص JWT', description: 'Inspect JWT token structure and payload', descriptionAr: 'فحص بنية رموز JWT ومحتواها', icon: Shield, comingSoon: true, category: 'engineering' },
   { id: 'token-decoder', name: 'Token Decoder', nameAr: 'مفكك الرموز', description: 'Decode various token formats', descriptionAr: 'فك ترميز صيغ الرموز المختلفة', icon: Key, comingSoon: true, category: 'engineering' },
-
-  // AI
-  { id: 'summarize-text', name: 'Summarize Text', nameAr: 'تلخيص نص', description: 'AI-powered text summarization', descriptionAr: 'تلخيص النصوص بالذكاء الاصطناعي', icon: ScrollText, category: 'ai' },
-  { id: 'summarize-pdf', name: 'Summarize PDF', nameAr: 'تلخيص PDF', description: 'Summarize PDF documents with AI', descriptionAr: 'تلخيص مستندات PDF بالذكاء الاصطناعي', icon: FileText, category: 'ai' },
-  { id: 'summarize-images', name: 'Summarize Images', nameAr: 'تلخيص الصور', description: 'Extract and summarize text from images', descriptionAr: 'استخراج وتلخيص النص من الصور', icon: FileImage, comingSoon: true, category: 'ai' },
-  { id: 'summarize-youtube', name: 'Summarize YouTube', nameAr: 'تلخيص يوتيوب', description: 'Summarize YouTube video content', descriptionAr: 'تلخيص محتوى فيديوهات يوتيوب', icon: PlaySquare, comingSoon: true, category: 'ai' },
-  { id: 'summarize-audio', name: 'Summarize Audio', nameAr: 'تلخيص الصوت', description: 'Transcribe and summarize audio recordings', descriptionAr: 'نسخ وتلخيص التسجيلات الصوتية', icon: Music, comingSoon: true, category: 'ai' },
-  { id: 'explain-simply', name: 'Explain Simply', nameAr: 'شرح مبسط', description: 'Explain complex topics in simple terms', descriptionAr: 'شرح المواضيع المعقدة بعبارات بسيطة', icon: Lightbulb, comingSoon: true, category: 'ai' },
-  { id: 'rewrite-text', name: 'Rewrite Text', nameAr: 'إعادة كتابة النص', description: 'Rewrite text in different styles and tones', descriptionAr: 'إعادة كتابة النص بأساليب ونغمات مختلفة', icon: Pen, comingSoon: true, category: 'ai' },
-  { id: 'grammar-check', name: 'Grammar Check', nameAr: 'تدقيق نحوي', description: 'Check and correct grammar and spelling errors', descriptionAr: 'التحقق وتصحيح أخطاء القواعد والإملاء', icon: CheckCircle, comingSoon: true, category: 'ai' },
-  { id: 'translate', name: 'Translate', nameAr: 'ترجمة', description: 'Translate text between multiple languages', descriptionAr: 'ترجمة النصوص بين لغات متعددة', icon: Globe, comingSoon: true, category: 'ai' },
-  { id: 'paragraph-to-bullets', name: 'Paragraph to Bullets', nameAr: 'فقرة إلى نقاط', description: 'Convert paragraphs into bullet point summaries', descriptionAr: 'تحويل الفقرات إلى نقاط تلخيصية', icon: List, comingSoon: true, category: 'ai' },
-  { id: 'bullets-to-article', name: 'Bullets to Article', nameAr: 'نقاط إلى مقال', description: 'Expand bullet points into a full article', descriptionAr: 'توسيع النقاط إلى مقال كامل', icon: Newspaper, comingSoon: true, category: 'ai' },
-  { id: 'extract-key-ideas', name: 'Extract Key Ideas', nameAr: 'استخراج الأفكار الرئيسية', description: 'Identify and extract key ideas from text', descriptionAr: 'تحديد واستخراج الأفكار الرئيسية من النص', icon: Key, comingSoon: true, category: 'ai' },
-  { id: 'generate-mcqs', name: 'Generate MCQs', nameAr: 'إنشاء أسئلة اختيار', description: 'Generate multiple choice questions from content', descriptionAr: 'إنشاء أسئلة اختيار من متعدد من المحتوى', icon: HelpCircle, comingSoon: true, category: 'ai' },
-  { id: 'generate-tf', name: 'Generate True/False', nameAr: 'إنشاء صح/خطأ', description: 'Generate true/false questions from content', descriptionAr: 'إنشاء أسئلة صح أو خطأ من المحتوى', icon: Zap, comingSoon: true, category: 'ai' },
-  { id: 'generate-flashcards', name: 'Generate Flashcards', nameAr: 'إنشاء بطاقات تعليمية', description: 'Auto-generate flashcards from your study material', descriptionAr: 'إنشاء بطاقات تعليمية تلقائياً من مواد دراستك', icon: Layers, comingSoon: true, category: 'ai' },
-  { id: 'generate-quiz', name: 'Generate Quiz', nameAr: 'إنشاء اختبار', description: 'Create a complete quiz from any content', descriptionAr: 'إنشاء اختبار كامل من أي محتوى', icon: BookOpenCheck, comingSoon: true, category: 'ai' },
-  { id: 'generate-study-plan', name: 'Generate Study Plan', nameAr: 'إنشاء خطة دراسة', description: 'Create a personalized study plan', descriptionAr: 'إنشاء خطة دراسة مخصصة', icon: CalendarDays, comingSoon: true, category: 'ai' },
-  { id: 'generate-mindmap', name: 'Generate Mind Map', nameAr: 'إنشاء خريطة ذهنية', description: 'Create visual mind maps from text content', descriptionAr: 'إنشاء خرائط ذهنية مرئية من المحتوى النصي', icon: BrainCircuit, comingSoon: true, category: 'ai' },
-  { id: 'extract-terminology', name: 'Extract Terminology', nameAr: 'استخراج المصطلحات', description: 'Extract key terms and definitions from content', descriptionAr: 'استخراج المصطلحات والتعريفات الرئيسية من المحتوى', icon: Book, comingSoon: true, category: 'ai' },
-  { id: 'explain-terminology', name: 'Explain Terminology', nameAr: 'شرح المصطلحات', description: 'Get simple explanations of complex terminology', descriptionAr: 'الحصول على شروحات بسيطة للمصطلحات المعقدة', icon: Type, comingSoon: true, category: 'ai' },
-  { id: 'simplify-paper', name: 'Simplify Paper', nameAr: 'تبسيط ورقة بحثية', description: 'Simplify academic papers for better understanding', descriptionAr: 'تبسيط الأوراق الأكاديمية لفهم أفضل', icon: Microscope, comingSoon: true, category: 'ai' },
 
   // PDF
   { id: 'word-to-pdf', name: 'Word to PDF', nameAr: 'Word إلى PDF', description: 'Convert Word documents to PDF format', descriptionAr: 'تحويل مستندات Word إلى صيغة PDF', icon: FileText, category: 'pdf' },
@@ -223,11 +197,7 @@ export const categories: Record<ToolCategory, CategoryMeta> = {
     nameAr: "القسم الهندسي",
     icon: Cog,
   },
-  ai: {
-    name: "AI Study Tools",
-    nameAr: "أدوات الذكاء الاصطناعي",
-    icon: Brain,
-  },
+
   pdf: {
     name: "PDF Tools",
     nameAr: "أدوات الPDF",
@@ -264,7 +234,7 @@ export const categoryOrder: ToolCategory[] = [
   'general',
   'medical',
   'engineering',
-  'ai',
+
   'pdf',
   'powerpoint',
   'video',
