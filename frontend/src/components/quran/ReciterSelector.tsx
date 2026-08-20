@@ -94,20 +94,7 @@ export function ReciterSelector({
               </div>
 
               <div className="max-h-64 overflow-y-auto overscroll-contain">
-                {reciters.length === 0 ? (
-                  <div className="p-4 text-sm text-gray-400 dark:text-gray-500 text-center space-y-1">
-                    <p>
-                      {language === 'ar'
-                        ? 'لا يتوفر قراء حالياً'
-                        : 'No reciters available right now'}
-                    </p>
-                    <p className="text-xs">
-                      {language === 'ar'
-                        ? 'تتطلب قائمة القراء اتصالاً بالإنترنت، لكن قراءة النص والبحث والتلاوات المحملة تعمل بدون إنترنت'
-                        : 'The reciter list needs an internet connection, but reading, search, and downloaded recitations work offline'}
-                    </p>
-                  </div>
-                ) : filtered.length === 0 ? (
+                {filtered.length === 0 ? (
                   <div className="p-4 text-sm text-gray-400 dark:text-gray-500 text-center">
                     {language === 'ar'
                       ? 'لا توجد نتائج'

@@ -67,7 +67,7 @@ if (!self.define) {
     });
   };
 }
-define(['./workbox-c3db30c9'], (function (workbox) { 'use strict';
+define(['./workbox-f3e8f99b'], (function (workbox) { 'use strict';
 
   workbox.setCacheNameDetails({
     prefix: "morven-student"
@@ -81,14 +81,13 @@ define(['./workbox-c3db30c9'], (function (workbox) { 'use strict';
    */
   workbox.precacheAndRoute([{
     "url": "/index.html",
-    "revision": "0.u916eri8nm4"
+    "revision": "0.bks5bm2d0is"
   }], {});
   workbox.cleanupOutdatedCaches();
   workbox.registerRoute(new workbox.NavigationRoute(workbox.createHandlerBoundToURL("/index.html"), {
-    allowlist: [/^\/$/],
-    denylist: [/^\/api\//]
+    allowlist: [/^\/$/]
   }));
-  workbox.registerRoute(/^https:\/\/fonts\.(googleapis|gstatic)\.com\/.*/i, new workbox.CacheFirst({
+  workbox.registerRoute(/^https:\/\/fonts\.(googleapis|gstatic)\.com\/.*/i, new workbox.StaleWhileRevalidate({
     "cacheName": "google-fonts",
     plugins: [new workbox.ExpirationPlugin({
       maxEntries: 20,

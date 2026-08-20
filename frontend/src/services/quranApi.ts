@@ -1,6 +1,5 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import type { Reciter, Surah } from '@/types/quran';
-import { getSurahList } from '@/data/quran';
 
 const CACHE_DURATION = 0
 
@@ -25,6 +24,7 @@ interface CacheEntry<T> {
 }
 
 let recitersCache: CacheEntry<Reciter[]> | null = null;
+let surahsCache: CacheEntry<Surah[]> | null = null;
 
 async function fetchRecitersInternal(): Promise<Reciter[]> {
   if (recitersCache && Date.now() - recitersCache.timestamp < CACHE_DURATION) {
@@ -83,21 +83,58 @@ async function fetchRecitersInternal(): Promise<Reciter[]> {
   return reciters;
 }
 
+async function fetchSurahsInternal(): Promise<Surah[]> {
+  if (surahsCache && Date.now() - surahsCache.timestamp < CACHE_DURATION) {
+    return surahsCache.data;
+  }
+
+  const [arRes, enRes] = await Promise.all([
+    fetch('https://mp3quran.net/api/v3/suwar?language=ar'),
+    fetch('https://mp3quran.net/api/v3/suwar?language=en'),
+  ]);
+
+  if (!arRes.ok || !enRes.ok) {
+    throw new Error('Failed to fetch surahs');
+  }
+
+  const arData = await arRes.json();
+  const enData = await enRes.json();
+
+  const enMap = new Map(
+    (enData.suwar as any[]).map((s: any) => [s.id, s]),
+  );
+
+  const surahs: Surah[] = (arData.suwar as any[]).map((s: any) => {
+    const enSurah = enMap.get(s.id);
+
+    return {
+      id: s.id,
+      name: (enSurah?.name || s.name).trim(),
+      nameAr: s.name.trim(),
+    };
+  });
+
+  surahsCache = {
+    data: surahs,
+    timestamp: Date.now(),
+  };
+
+  return surahs;
+}
+
 export function useQuranData() {
   const [reciters, setReciters] = useState<Reciter[]>([]);
+  const [surahs, setSurahs] = useState<Surah[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [reloadFlag, setReloadFlag] = useState(0);
-
-  const surahs = useMemo<Surah[]>(() => getSurahList(), []);
 
   useEffect(() => {
     let mounted = true;
 
     async function load() {
-      // Never attempt a network request while offline: reciters are fetched
-      // from the remote API only when online; surahs always come from the
-      // bundled local dataset.
+      // Never attempt a network request while offline: the Quran tool is
+      // online-only and this hook also runs from the always-mounted header.
       if (typeof navigator !== 'undefined' && !navigator.onLine) {
         if (mounted) {
           setLoading(false);
@@ -108,10 +145,14 @@ export function useQuranData() {
       try {
         setLoading(true);
 
-        const recitersData = await fetchRecitersInternal();
+        const [recitersData, surahsData] = await Promise.all([
+          fetchRecitersInternal(),
+          fetchSurahsInternal(),
+        ]);
 
         if (mounted) {
           setReciters(recitersData);
+          setSurahs(surahsData);
           setError(null);
         }
       } catch (err) {
