@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, useParams } from 'react-router-dom';
 import { MainLayout } from '@/components/Layout/MainLayout';
 import { NotificationHost } from '@/components/Layout/NotificationHost';
 import { ToolErrorBoundary } from '@/components/Tool/ToolErrorBoundary';
+import { ArabicIndicNumerals } from '@/components/ArabicIndicNumerals';
 import { useAppStore } from '@/store/useAppStore';
 import { useThemeStore } from '@/store/useThemeStore';
 import { getToolById } from '@/data/tools';
@@ -101,6 +102,7 @@ export default function App() {
 
   return (
     <BrowserRouter>
+      <ArabicIndicNumerals />
       <NotificationHost />
       <Routes>
         <Route element={<MainLayout />}>
