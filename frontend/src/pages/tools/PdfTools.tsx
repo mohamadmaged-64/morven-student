@@ -17,6 +17,7 @@ import { useAppStore } from '@/store/useAppStore';
 import { useThemeStore } from '@/store/useThemeStore';
 import { useLanguageStore } from '@/store/useLanguageStore';
 import { useNavigate } from 'react-router-dom';
+import { saveToLibrary } from '@/services/savedFilesService';
 import {
   fileToArrayBuffer,
   fileToDataURL,
@@ -369,7 +370,11 @@ function SuccessResult({
           {!isText && result instanceof Blob && (
           <Button
   variant="primary"
-  onClick={() => downloadBlob(result, originalFileName ? originalFileName.replace(/\.[^.]+$/, '') + '.pdf' : toolName + '.pdf')}
+  onClick={() => {
+              const fn = originalFileName ? originalFileName.replace(/\.[^.]+$/, '') + '.pdf' : toolName + '.pdf';
+              downloadBlob(result, fn);
+              saveToLibrary(result as Blob, fn, 'pdf-tools').catch(() => {});
+            }}
   icon={
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
@@ -387,6 +392,7 @@ function SuccessResult({
               onClick={() => {
                 const blob = new Blob([result], { type: 'text/plain' });
                 downloadBlob(blob, toolName + '.txt', 'text/plain');
+                saveToLibrary(blob, toolName + '.txt', 'pdf-tools', 'text/plain').catch(() => {});
               }}
               icon={
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -445,7 +451,10 @@ function MergePdfWorkspace({ files, processing, progress, result, error, onAdd, 
   {t('common.startAgain')}
 </Button><Button
   variant="primary"
-  onClick={() => downloadBlob(result, 'merged-pdfs.pdf')}
+  onClick={() => {
+    downloadBlob(result, 'merged-pdfs.pdf');
+    saveToLibrary(result as Blob, 'merged-pdfs.pdf', 'pdf-tools').catch(() => {});
+  }}
   icon={<Download className="h-4 w-4" />}
 >
   {t('pdf.merge.download')}
@@ -591,7 +600,10 @@ function SplitPdfWorkspace({
           </Button>
           <Button
             variant="primary"
-            onClick={() => downloadBlob(result.blob, 'split-pdfs.zip')}
+            onClick={() => {
+              downloadBlob(result.blob, 'split-pdfs.zip');
+              saveToLibrary(result.blob, 'split-pdfs.zip', 'pdf-tools').catch(() => {});
+            }}
             icon={<Download className="h-4 w-4" />}
           >
             {t('pdf.split.download')}
@@ -849,7 +861,11 @@ function DeletePdfWorkspace({
           </Button>
           <Button
             variant="primary"
-            onClick={() => downloadBlob(result.blob, file?.file.name?.replace(/\.pdf$/i, '') + '_pages.pdf' || 'deleted-pages.pdf')}
+            onClick={() => {
+              const fn = file?.file.name?.replace(/\.pdf$/i, '') + '_pages.pdf' || 'deleted-pages.pdf';
+              downloadBlob(result.blob, fn);
+              saveToLibrary(result.blob, fn, 'pdf-tools').catch(() => {});
+            }}
             icon={<Download className="h-4 w-4" />}
           >
             {t('pdf.delete.download')}
@@ -1191,7 +1207,11 @@ function ReorderPdfWorkspace({
           </Button>
           <Button
             variant="primary"
-            onClick={() => downloadBlob(result.blob, file?.file.name?.replace(/\.pdf$/i, '') + '_reordered.pdf' || 'reordered-pages.pdf')}
+            onClick={() => {
+              const fn = file?.file.name?.replace(/\.pdf$/i, '') + '_reordered.pdf' || 'reordered-pages.pdf';
+              downloadBlob(result.blob, fn);
+              saveToLibrary(result.blob, fn, 'pdf-tools').catch(() => {});
+            }}
             icon={<Download className="h-4 w-4" />}
           >
             {t('pdf.reorder.download')}

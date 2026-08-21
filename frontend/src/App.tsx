@@ -31,7 +31,7 @@ import ContactPage from '@/pages/Footer/ContactPage';
 import ComplaintsPage from '@/pages/Footer/ComplaintsPage';
 import CategoryDetailPage from '@/pages/Footer/CategoryDetailPage';
 import FileManagerPage from '@/pages/FileManagerPage';
-import ResumeManagerPage from '@/pages/ResumeManagerPage';
+
 
 const toolPageMap: Record<ToolCategory, ComponentType<{ toolId: string }>> = {
   general: GeneralToolPage,
@@ -126,7 +126,7 @@ export default function App() {
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/complaints" element={<ComplaintsPage />} />
           <Route path="/files" element={<FileManagerPage />} />
-          <Route path="/resume" element={<ResumeManagerPage />} />
+
         </Route>
       </Routes>
     </BrowserRouter>

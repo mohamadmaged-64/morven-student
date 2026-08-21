@@ -11,6 +11,7 @@ import { useAppStore } from '@/store/useAppStore';
 import { useLanguageStore } from '@/store/useLanguageStore';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { saveToLibrary } from '@/services/savedFilesService';
 
 type ToolId = 'extract-audio-video' | 'compress-video' | 'convert-video-formats' | 'video-to-audio';
 
@@ -97,6 +98,7 @@ function ExtractAudioFromVideo() {
             a.href = url; a.download = file.name.replace(/\.[^.]+$/, '') + '-audio.webm';
             document.body.appendChild(a); a.click(); document.body.removeChild(a);
             URL.revokeObjectURL(url);
+            saveToLibrary(blob, file.name.replace(/\.[^.]+$/, '') + '-audio.webm', 'video-tools').catch(() => {});
             setProgress(100); addNotification('Audio extracted successfully!', 'success');
             setProcessing(false); setTimeout(() => setProgress(0), 2000);
           };
@@ -195,6 +197,7 @@ function CompressVideo() {
           a.href = url; a.download = file.name.replace(/\.[^.]+$/, '') + '-compressed.webm';
           document.body.appendChild(a); a.click(); document.body.removeChild(a);
           URL.revokeObjectURL(url);
+          saveToLibrary(blob, file.name.replace(/\.[^.]+$/, '') + '-compressed.webm', 'video-tools').catch(() => {});
           setProgress(100);
           addNotification(`Compressed: ${formatBytes(file.size)} -> ${formatBytes(blob.size)}`, 'success');
           setProcessing(false); setTimeout(() => setProgress(0), 2000);
@@ -307,6 +310,7 @@ function ConvertVideoFormats() {
           a.href = url; a.download = file.name.replace(/\.[^.]+$/, '') + '-converted.' + ext;
           document.body.appendChild(a); a.click(); document.body.removeChild(a);
           URL.revokeObjectURL(url);
+          saveToLibrary(blob, file.name.replace(/\.[^.]+$/, '') + '-converted.' + ext, 'video-tools').catch(() => {});
           setProgress(100);
           addNotification(`Video converted to ${ext.toUpperCase()}!`, 'success');
           setProcessing(false); setTimeout(() => setProgress(0), 2000);
@@ -419,6 +423,7 @@ function VideoToAudio() {
             a.href = url; a.download = file.name.replace(/\.[^.]+$/, '') + '.webm';
             document.body.appendChild(a); a.click(); document.body.removeChild(a);
             URL.revokeObjectURL(url);
+            saveToLibrary(blob, file.name.replace(/\.[^.]+$/, '') + '.webm', 'video-tools').catch(() => {});
             setProgress(100);
             addNotification(`Audio extracted: ${formatBytes(blob.size)}`, 'success');
             setProcessing(false); setTimeout(() => setProgress(0), 2000);

@@ -1,7 +1,6 @@
 const DB_NAME = 'morven-storage';
-const DB_VERSION = 1;
+const DB_VERSION = 3;
 const FILE_STORE = 'files';
-const RESUME_STORE = 'resume';
 
 let dbPromise: Promise<IDBDatabase> | null = null;
 
@@ -12,15 +11,19 @@ function openDB(): Promise<IDBDatabase> {
 
       request.onupgradeneeded = () => {
         const db = request.result;
+
         if (!db.objectStoreNames.contains(FILE_STORE)) {
           const fileStore = db.createObjectStore(FILE_STORE, { keyPath: 'id' });
           fileStore.createIndex('name', 'name', { unique: false });
           fileStore.createIndex('createdAt', 'createdAt', { unique: false });
         }
-        if (!db.objectStoreNames.contains(RESUME_STORE)) {
-          const resumeStore = db.createObjectStore(RESUME_STORE, { keyPath: 'id' });
-          resumeStore.createIndex('toolId', 'toolId', { unique: false });
-          resumeStore.createIndex('updatedAt', 'updatedAt', { unique: false });
+
+        if (db.objectStoreNames.contains('resume')) {
+          db.deleteObjectStore('resume');
+        }
+
+        if (db.objectStoreNames.contains('activity')) {
+          db.deleteObjectStore('activity');
         }
       };
 
@@ -31,4 +34,4 @@ function openDB(): Promise<IDBDatabase> {
   return dbPromise;
 }
 
-export { openDB, FILE_STORE, RESUME_STORE };
+export { openDB, FILE_STORE };

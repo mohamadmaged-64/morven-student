@@ -17,6 +17,7 @@ import { ToolHero } from '@/components/Tool/ToolHero';
 import { useAppStore } from '@/store/useAppStore';
 import { useLanguageStore } from '@/store/useLanguageStore';
 import QRCode from 'qrcode';
+import { saveToLibrary } from '@/services/savedFilesService';
 
 // =============================================================================
 // Shared helpers
@@ -1555,6 +1556,9 @@ function QrGeneratorTool() {
     a.href = qrDataUrl;
     a.download = 'qr-code.png';
     a.click();
+    fetch(qrDataUrl).then(r => r.blob()).then(blob => {
+      saveToLibrary(blob, 'qr-code.png', 'engineering-tools', 'image/png').catch(() => {});
+    }).catch(() => {});
   };
 
   return (

@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ToolHero } from '@/components/Tool/ToolHero';
 import { Input, Button, Modal, EmptyState } from '@/components/UI';

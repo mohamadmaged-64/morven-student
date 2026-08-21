@@ -6,24 +6,88 @@ import { useLanguageStore } from '@/store/useLanguageStore';
 import { useNotesStore, sortNotes } from '@/store/useNotesStore';
 import { usePomodoroStore } from '@/store/usePomodoroStore';
 import { useFileStorage } from '@/hooks/useFileStorage';
-import { useResumeLearning } from '@/hooks/useResumeLearning';
+import AchievementsPanel from '@/components/Dashboard/AchievementsPanel';
 import { formatFileSize } from '@/utils/file';
 import type { Task } from '@/types';
+import {
+  CheckSquare,
+  FolderOpen,
+  GraduationCap,
+  StickyNote,
+  ListChecks,
+  FileStack,
+  Clock,
+} from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 
-function PanelHeader({ title, action }: { title: string; action?: React.ReactNode }) {
+/* ─── Shared Components ─── */
+
+function PanelHeader({ title, action, icon: Icon, accent }: { title: string; action?: React.ReactNode; icon?: LucideIcon; accent?: string }) {
   return (
-    <div className="flex items-center justify-between mb-3">
-      <h2 className="text-sm font-semibold text-gray-800 dark:text-gray-200">{title}</h2>
-      {action}
+    <div className="relative flex items-center justify-center mb-8">
+      {Icon && (
+        <div className={`absolute start-0 top-1/2 -translate-y-1/2 w-9 h-9 rounded-xl ${accent || 'bg-primary-50'} dark:bg-white/10 flex items-center justify-center`}>
+          <Icon className={`w-[18px] h-[18px] ${accent ? accent.replace('bg-', 'text-').replace('50', '600') : 'text-primary-600 dark:text-primary-400'}`} strokeWidth={1.8} />
+        </div>
+      )}
+      <h2 className="text-lg font-bold text-gray-800 dark:text-gray-200 text-center tracking-tight">{title}</h2>
+      {action && <div className="absolute end-0 top-1/2 -translate-y-1/2">{action}</div>}
     </div>
   );
 }
 
-function PanelEmpty({ text, hint }: { text: string; hint: string }) {
+function EmptyState({ icon: Icon, text, hint, accent }: { icon: LucideIcon; text: string; hint: string; accent?: string }) {
   return (
-    <div className="flex flex-col items-center justify-center py-8 text-center">
-      <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">{text}</p>
+    <div className="flex flex-col items-center justify-center flex-1 py-10 text-center">
+      <div className={`w-14 h-14 rounded-2xl ${accent || 'bg-gray-100'} dark:bg-white/10 flex items-center justify-center mb-4`}>
+        <Icon className={`w-7 h-7 ${accent ? accent.replace('bg-', 'text-').replace('50', '500').replace('100', '400') : 'text-gray-300 dark:text-gray-400'}`} strokeWidth={1.4} />
+      </div>
+      <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-1">{text}</p>
       <p className="text-xs text-gray-400 dark:text-gray-500">{hint}</p>
+    </div>
+  );
+}
+
+/* ─── Quick Summary ─── */
+function QuickSummary() {
+  const { t } = useTranslation();
+  const tasks = useAppStore((s) => s.tasks);
+  const { files } = useFileStorage();
+  const totalFocusSeconds = usePomodoroStore((s) => s.totalFocusSeconds);
+
+  const today = new Date().toISOString().split('T')[0];
+  const tasksDueToday = useMemo(
+    () => tasks.filter((tk) => tk.dueDate === today && !tk.completed).length,
+    [tasks, today],
+  );
+  const filesCount = files.length;
+  const pomodoroHours = useMemo(() => {
+    const h = totalFocusSeconds / 3600;
+    return h >= 1 ? `${h.toFixed(1)}h` : `${Math.round(totalFocusSeconds / 60)}m`;
+  }, [totalFocusSeconds]);
+
+  const stats = [
+    { icon: ListChecks, label: t('dashboard.workspace.tasksDueToday'), value: tasksDueToday, bg: 'bg-emerald-50', bgDark: 'dark:bg-emerald-900/30', text: 'text-emerald-600', ring: 'ring-emerald-100', ringDark: 'dark:ring-emerald-800/40', compact: false },
+    { icon: Clock, label: t('dashboard.workspace.pomodoroHours'), value: pomodoroHours, bg: 'bg-amber-50', bgDark: 'dark:bg-amber-900/30', text: 'text-amber-600', ring: 'ring-amber-100', ringDark: 'dark:ring-amber-800/40', compact: false },
+    { icon: FileStack, label: t('dashboard.workspace.filesStored'), value: filesCount, bg: 'bg-sky-50', bgDark: 'dark:bg-sky-900/30', text: 'text-sky-600', ring: 'ring-sky-100', ringDark: 'dark:ring-sky-800/40', compact: true },
+  ];
+
+  return (
+    <div className="grid grid-cols-3 gap-2.5 sm:gap-4 lg:gap-6 mb-6 sm:mb-10">
+      {stats.map((s) => (
+        <div
+          key={s.label}
+          className={`flex items-center rounded-2xl border border-light-border bg-white shadow-card dark:bg-dark-surface dark:border-dark-border dark:shadow-card-dark hover:shadow-soft dark:hover:shadow-card-dark hover:-translate-y-0.5 transition-all duration-200 gap-2 px-3 py-3.5 sm:gap-4 sm:px-6 sm:py-5 ${s.compact ? 'sm:gap-2.5 sm:px-4 sm:py-3' : ''}`}
+        >
+          <div className={`rounded-xl ${s.bg} ${s.bgDark} ring-1 ${s.ring} ${s.ringDark} flex items-center justify-center shrink-0 w-9 h-9 sm:w-12 sm:h-12 ${s.compact ? 'sm:w-9 sm:h-9' : ''}`}>
+            <s.icon className={`w-4 h-4 sm:w-5 sm:h-5 ${s.text} ${s.compact ? 'sm:w-4 sm:h-4' : ''}`} strokeWidth={1.8} />
+          </div>
+          <div className="min-w-0">
+            <p className={`font-bold text-gray-900 dark:text-gray-100 leading-tight tabular-nums text-lg sm:text-2xl ${s.compact ? 'sm:text-xl' : ''}`}>{s.value}</p>
+            <p className={`font-medium text-gray-500 dark:text-gray-400 text-[11px] sm:text-xs mt-0 ${s.compact ? 'sm:text-[10px]' : 'sm:mt-0.5'}`}>{s.label}</p>
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
@@ -33,13 +97,12 @@ function TasksPanel() {
   const { t } = useTranslation();
   const tasks = useAppStore((s) => s.tasks);
   const toggleTask = useAppStore((s) => s.toggleTask);
-  const navigate = useNavigate();
 
   const today = new Date().toISOString().split('T')[0];
 
   const activeTasks = useMemo(() => {
     return tasks
-      .filter((t) => !t.completed)
+      .filter((tk) => !tk.completed)
       .sort((a, b) => {
         if (a.dueDate === today && b.dueDate !== today) return -1;
         if (a.dueDate !== today && b.dueDate === today) return 1;
@@ -52,8 +115,8 @@ function TasksPanel() {
       .slice(0, 5);
   }, [tasks, today]);
 
-  const activeCount = tasks.filter((t) => !t.completed).length;
-  const completedCount = tasks.filter((t) => t.completed).length;
+  const activeCount = tasks.filter((tk) => !tk.completed).length;
+  const completedCount = tasks.filter((tk) => tk.completed).length;
 
   const priorityColor = (p: Task['priority']) => {
     if (p === 'high') return 'bg-red-400';
@@ -62,27 +125,29 @@ function TasksPanel() {
   };
 
   return (
-    <div>
+    <div className="w-full flex flex-col">
       <PanelHeader
         title={t('dashboard.workspace.tasks')}
+        icon={CheckSquare}
+        accent="bg-emerald-50"
         action={
-          <span className="text-xs text-gray-400 dark:text-gray-500">
-            {activeCount} {t('dashboard.workspace.remaining', { count: activeCount })} · {completedCount} {t('dashboard.workspace.completed', { count: completedCount })}
+          <span className="text-xs font-medium text-gray-400 bg-gray-100 dark:bg-white/10 px-2.5 py-1 rounded-full">
+            {activeCount}/{activeCount + completedCount}
           </span>
         }
       />
       {activeTasks.length === 0 ? (
-        <PanelEmpty text={t('dashboard.workspace.noTasks')} hint={t('dashboard.workspace.noTasksHint')} />
+        <EmptyState icon={CheckSquare} text={t('dashboard.workspace.noTasks')} hint={t('dashboard.workspace.noTasksHint')} accent="bg-emerald-50" />
       ) : (
-        <div className="space-y-1.5">
+        <div className="space-y-1">
           {activeTasks.map((task) => (
             <div
               key={task.id}
-              className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface transition-colors group"
+              className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-dark-hover transition-colors group"
             >
               <button
                 onClick={() => toggleTask(task.id)}
-                className="w-4 h-4 rounded border-2 border-gray-300 dark:border-gray-600 hover:border-primary-400 dark:hover:border-primary-500 transition-colors shrink-0 flex items-center justify-center"
+                className="w-5 h-5 rounded-md border-2 border-gray-300 dark:border-gray-600 hover:border-primary-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500 transition-colors shrink-0 flex items-center justify-center"
                 aria-label={t('tasks.markComplete')}
               >
                 {task.completed && (
@@ -91,10 +156,10 @@ function TasksPanel() {
                   </svg>
                 )}
               </button>
-              <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${priorityColor(task.priority)}`} />
-              <span className="text-sm text-gray-700 dark:text-gray-300 truncate flex-1">{task.title}</span>
+              <div className={`w-2 h-2 rounded-full shrink-0 ${priorityColor(task.priority)}`} />
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate flex-1">{task.title}</span>
               {task.dueDate && (
-                <span className={`text-xs shrink-0 ${task.dueDate < today ? 'text-red-500' : task.dueDate === today ? 'text-amber-500 font-medium' : 'text-gray-400 dark:text-gray-500'}`}>
+                <span className={`text-xs font-medium shrink-0 px-2 py-0.5 rounded-full ${task.dueDate < today ? 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400' : task.dueDate === today ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400' : 'bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400'}`}>
                   {task.dueDate === today
                     ? t('dashboard.workspace.today')
                     : task.dueDate < today
@@ -108,7 +173,7 @@ function TasksPanel() {
       )}
       <Link
         to="/tool/task-manager"
-        className="block mt-3 text-center text-xs font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 py-1.5 rounded-lg hover:bg-primary-50 dark:hover:bg-primary-900/10 transition-colors"
+        className="block mt-4 text-center text-xs font-semibold text-primary-600 hover:text-primary-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500 py-2 rounded-xl hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors"
       >
         {t('dashboard.workspace.viewAll')} →
       </Link>
@@ -145,15 +210,17 @@ function FilesPanel() {
   const recentFiles = files.slice(0, 5);
 
   return (
-    <div>
+    <div className="w-full flex flex-col">
       <PanelHeader
         title={t('dashboard.workspace.files')}
+        icon={FolderOpen}
+        accent="bg-sky-50"
         action={
           <>
             <input ref={inputRef} type="file" multiple className="hidden" onChange={handleUpload} />
             <button
               onClick={() => inputRef.current?.click()}
-              className="text-xs font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors"
+              className="text-xs font-semibold text-primary-600 hover:text-primary-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500 transition-colors"
             >
               {t('dashboard.workspace.uploadFile')}
             </button>
@@ -161,28 +228,29 @@ function FilesPanel() {
         }
       />
       {recentFiles.length === 0 ? (
-        <PanelEmpty text={t('dashboard.workspace.noFiles')} hint={t('dashboard.workspace.noFilesHint')} />
+        <EmptyState icon={FolderOpen} text={t('dashboard.workspace.noFiles')} hint={t('dashboard.workspace.noFilesHint')} accent="bg-sky-100" />
       ) : (
-        <div className="space-y-1.5">
+        <div className="space-y-1">
           {recentFiles.map((f) => (
             <div
               key={f.id}
-              className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface transition-colors"
+              className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-dark-hover transition-colors group"
             >
-              <div className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-dark-hover flex items-center justify-center text-gray-400 shrink-0">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <div className="w-10 h-10 rounded-xl bg-sky-50 dark:bg-sky-900/30 flex items-center justify-center text-sky-500 shrink-0">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
                   <polyline points="14 2 14 8 20 8" />
                 </svg>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm text-gray-700 dark:text-gray-300 truncate">{f.name}</p>
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">{f.name}</p>
                 <p className="text-xs text-gray-400 dark:text-gray-500">{formatFileSize(f.size)}</p>
               </div>
-              <div className="flex items-center gap-0.5 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button
                   onClick={() => handleDownload(f)}
-                  className="p-1 rounded text-gray-400 hover:text-primary-500 transition-colors"
+                  className="p-1.5 rounded-lg text-gray-400 hover:text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500 transition-colors"
+                  aria-label={t('ui.download')}
                   title={t('ui.download')}
                 >
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -193,7 +261,8 @@ function FilesPanel() {
                 </button>
                 <button
                   onClick={() => remove(f.id)}
-                  className="p-1 rounded text-gray-400 hover:text-red-500 transition-colors"
+                  className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500 transition-colors"
+                  aria-label={t('ui.delete')}
                   title={t('ui.delete')}
                 >
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -239,63 +308,64 @@ function PomodoroPanel() {
   const modeRingColor = mode === 'focus' ? 'text-blue-500' : mode === 'break' ? 'text-emerald-500' : 'text-purple-500';
 
   return (
-    <div>
-      <PanelHeader title={t('dashboard.workspace.pomodoro')} />
-      <div className="flex items-center gap-5">
-        {/* Small circular timer */}
-        <div className="relative w-24 h-24 shrink-0">
+    <div className="w-full flex flex-col">
+      <PanelHeader title={t('dashboard.workspace.pomodoro')} icon={Clock} accent="bg-blue-50" />
+      <div className="flex items-center gap-6">
+        <div className="relative w-28 h-28 shrink-0">
           <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-            <circle cx="50" cy="50" r="44" fill="none" stroke="currentColor" strokeWidth="4" className="text-gray-200 dark:text-gray-700" />
+            <circle cx="50" cy="50" r="44" fill="none" stroke="currentColor" strokeWidth="5" className="text-gray-100 dark:text-gray-800" />
             <circle
               cx="50" cy="50" r="44"
               fill="none"
-              strokeWidth="4"
+              strokeWidth="5"
               strokeLinecap="round"
               stroke="currentColor"
               className={modeRingColor}
               strokeDasharray={circumference}
               strokeDashoffset={strokeDashoffset}
-              style={{ transition: 'stroke-dashoffset 0.5s linear' }}
+              style={{ transition: 'stroke-dashoffset 0.5s linear', animation: 'none' }}
             />
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-lg font-bold text-gray-800 dark:text-white tabular-nums">
+            <span className="text-2xl font-bold text-gray-800 dark:text-gray-100 tabular-nums tracking-tight" aria-live="polite" aria-atomic="true">
               {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
             </span>
           </div>
         </div>
 
-        {/* Controls */}
         <div className="flex-1 min-w-0">
-          <p className={`text-sm font-medium mb-1 ${
-            mode === 'focus' ? 'text-blue-600 dark:text-blue-400' :
-            mode === 'break' ? 'text-emerald-600 dark:text-emerald-400' :
-            'text-purple-600 dark:text-purple-400'
+          <p className={`text-sm font-bold mb-1 ${
+            mode === 'focus' ? 'text-blue-600' :
+            mode === 'break' ? 'text-emerald-600' :
+            'text-purple-600'
           }`}>
             {modeLabel}
           </p>
-          <p className="text-xs text-gray-400 dark:text-gray-500 mb-3">
+          <p className="text-xs text-gray-400 mb-4">
             {t('pomodoro.sessionCount', { current: currentSession + 1, total: settings.sessionsUntilLongBreak })}
           </p>
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-2">
             {!isRunning ? (
               <button
                 onClick={timeRemaining > 0 && timeRemaining < totalDuration ? resume : start}
-                className="px-3 py-1.5 rounded-lg bg-primary-500 hover:bg-primary-600 text-white text-xs font-medium transition-colors"
+                className="px-4 py-2 rounded-xl bg-primary-600 hover:bg-primary-700 text-white text-xs font-semibold shadow-sm shadow-primary-600/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500 transition-all"
+                aria-label={timeRemaining > 0 && timeRemaining < totalDuration ? t('ui.resume') : t('ui.start')}
               >
                 {timeRemaining > 0 && timeRemaining < totalDuration ? t('ui.resume') : t('ui.start')}
               </button>
             ) : (
               <button
                 onClick={pause}
-                className="px-3 py-1.5 rounded-lg bg-gray-200 dark:bg-dark-hover hover:bg-gray-300 dark:hover:bg-dark-border text-gray-700 dark:text-gray-300 text-xs font-medium transition-colors"
+                className="px-4 py-2 rounded-xl bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/15 text-gray-700 dark:text-gray-300 text-xs font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500 transition-all"
+                aria-label={t('ui.pause')}
               >
                 {t('ui.pause')}
               </button>
             )}
             <button
               onClick={reset}
-              className="px-3 py-1.5 rounded-lg bg-gray-200 dark:bg-dark-hover hover:bg-gray-300 dark:hover:bg-dark-border text-gray-700 dark:text-gray-300 text-xs font-medium transition-colors"
+              className="px-4 py-2 rounded-xl bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/15 text-gray-700 dark:text-gray-300 text-xs font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500 transition-all"
+              aria-label={t('ui.reset')}
             >
               {t('ui.reset')}
             </button>
@@ -339,41 +409,43 @@ function ExamsPanel() {
   };
 
   return (
-    <div>
+    <div className="w-full flex flex-col">
       <PanelHeader
         title={t('dashboard.workspace.exams')}
+        icon={GraduationCap}
+        accent="bg-purple-50"
         action={
           <button
             onClick={() => navigate('/tool/exam-countdown')}
-            className="text-xs font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors"
+            className="text-xs font-semibold text-primary-600 hover:text-primary-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500 transition-colors"
           >
             {t('dashboard.workspace.addExam')}
           </button>
         }
       />
       {sortedExams.length === 0 ? (
-        <PanelEmpty text={t('dashboard.workspace.noExams')} hint={t('dashboard.workspace.noExamsHint')} />
+        <EmptyState icon={GraduationCap} text={t('dashboard.workspace.noExams')} hint={t('dashboard.workspace.noExamsHint')} accent="bg-purple-100" />
       ) : (
         <div className="space-y-2">
           {sortedExams.map((exam) => {
             const days = getDays(exam.date);
             return (
-              <div key={exam.id} className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface transition-colors">
-                <div className={`w-1 h-8 rounded-full shrink-0 ${colorBar(exam.color)}`} />
+              <div key={exam.id} className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-dark-hover transition-colors">
+                <div className={`w-1.5 h-10 rounded-full shrink-0 ${colorBar(exam.color)}`} />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">{exam.name}</p>
+                  <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 truncate">{exam.name}</p>
                   <p className="text-xs text-gray-400 dark:text-gray-500">
                     {new Date(exam.date).toLocaleDateString(language === 'ar' ? 'ar-SA' : 'en-US', { month: 'short', day: 'numeric' })}
                   </p>
                 </div>
-                <span className={`text-xs font-medium shrink-0 px-2 py-0.5 rounded-full ${
+                <span className={`text-xs font-semibold shrink-0 px-2.5 py-1 rounded-full ${
                   days < 0
-                    ? 'bg-gray-100 dark:bg-dark-hover text-gray-500 dark:text-gray-400'
+                    ? 'bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400'
                     : days <= 3
-                      ? 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400'
+                      ? 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400'
                       : days <= 7
-                        ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400'
-                        : 'bg-gray-100 dark:bg-dark-hover text-gray-600 dark:text-gray-400'
+                        ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400'
+                        : 'bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-400'
                 }`}>
                   {days < 0
                     ? t('dashboard.workspace.overdue')
@@ -401,35 +473,37 @@ function NotesPanel() {
   const recentNotes = useMemo(() => sortNotes(notes).slice(0, 4), [notes]);
 
   return (
-    <div>
+    <div className="w-full flex flex-col">
       <PanelHeader
         title={t('dashboard.workspace.notes')}
+        icon={StickyNote}
+        accent="bg-amber-50"
         action={
           <button
             onClick={() => navigate('/tool/notes')}
-            className="text-xs font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors"
+            className="text-xs font-semibold text-primary-600 hover:text-primary-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500 transition-colors"
           >
             {t('dashboard.workspace.viewAll')}
           </button>
         }
       />
       {recentNotes.length === 0 ? (
-        <PanelEmpty text={t('dashboard.workspace.noNotes')} hint={t('dashboard.workspace.noNotesHint')} />
+        <EmptyState icon={StickyNote} text={t('dashboard.workspace.noNotes')} hint={t('dashboard.workspace.noNotesHint')} accent="bg-amber-100" />
       ) : (
-        <div className="space-y-1.5">
+        <div className="space-y-1">
           {recentNotes.map((note) => (
             <button
               key={note.id}
               onClick={() => navigate('/tool/notes')}
-              className="w-full text-left flex items-center gap-2.5 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface transition-colors"
+              className="w-full text-left flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-dark-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500 transition-colors"
             >
               {note.pinned && (
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" className="text-amber-400 shrink-0">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="text-amber-400 shrink-0">
                   <path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14l-5-4.87 6.91-1.01z" />
                 </svg>
               )}
               <div className="flex-1 min-w-0">
-                <p className="text-sm text-gray-700 dark:text-gray-300 truncate">
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">
                   {note.title || t('dashboard.workspace.recent')}
                 </p>
                 {note.content && (
@@ -444,84 +518,52 @@ function NotesPanel() {
   );
 }
 
-/* ─── Resume Learning Panel ─── */
-function ResumePanel() {
-  const { t } = useTranslation();
-  const { items } = useResumeLearning();
-  const navigate = useNavigate();
 
-  const recentItems = items.slice(0, 4);
-
-  return (
-    <div>
-      <PanelHeader
-        title={t('dashboard.workspace.resume')}
-        action={
-          <button
-            onClick={() => navigate('/resume')}
-            className="text-xs font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors"
-          >
-            {t('dashboard.workspace.viewAll')}
-          </button>
-        }
-      />
-      {recentItems.length === 0 ? (
-        <PanelEmpty text={t('dashboard.workspace.noResume')} hint={t('dashboard.workspace.noResumeHint')} />
-      ) : (
-        <div className="space-y-1.5">
-          {recentItems.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => navigate(`/tool/${item.toolId}`)}
-              className="w-full text-left flex items-center gap-2.5 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface transition-colors"
-            >
-              <div className="w-8 h-8 rounded-lg bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-primary-600 dark:text-primary-400 shrink-0 text-xs font-bold">
-                {item.toolId.slice(0, 2).toUpperCase()}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">{item.label}</p>
-                {typeof item.progress.note === 'string' && (
-                  <p className="text-xs text-gray-400 dark:text-gray-500 truncate">{item.progress.note}</p>
-                )}
-              </div>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-300 dark:text-gray-600 shrink-0">
-                <polyline points="9 18 15 12 9 6" />
-              </svg>
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
 
 /* ─── Dashboard ─── */
 export default function Dashboard() {
+  const { t } = useTranslation();
+  const card = 'p-7 lg:p-9 min-h-[320px] lg:min-h-[380px] flex flex-col rounded-2xl border border-light-border bg-white shadow-card dark:bg-dark-card dark:border-dark-border dark:shadow-card-dark';
+
   return (
-    <div className="max-w-6xl mx-auto px-4 py-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Row 1: Tasks | Files */}
-        <div className="p-4 rounded-2xl bg-white dark:bg-dark-card border border-light-border dark:border-dark-border shadow-card dark:shadow-card-dark">
+    <div className="px-4 md:px-8 lg:px-10 py-8 flex flex-col">
+      {/* Welcome Heading */}
+      <div className="text-center mb-10">
+        <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-gray-100 tracking-tight">
+          {t('dashboard.workspace.welcomeHeading')}
+        </h1>
+      </div>
+
+      {/* Quick Summary */}
+      <QuickSummary />
+
+      {/* Row 1: Tasks | Achievements */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 lg:gap-6 mb-5 lg:mb-6">
+        <div className={card}>
           <TasksPanel />
         </div>
-        <div className="p-4 rounded-2xl bg-white dark:bg-dark-card border border-light-border dark:border-dark-border shadow-card dark:shadow-card-dark">
-          <FilesPanel />
+        <div className={card}>
+          <AchievementsPanel />
         </div>
+      </div>
 
-        {/* Row 2: Pomodoro | Exams */}
-        <div className="p-4 rounded-2xl bg-white dark:bg-dark-card border border-light-border dark:border-dark-border shadow-card dark:shadow-card-dark">
+      {/* Row 2: Pomodoro | Exams */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 lg:gap-6 mb-5 lg:mb-6">
+        <div className={card}>
           <PomodoroPanel />
         </div>
-        <div className="p-4 rounded-2xl bg-white dark:bg-dark-card border border-light-border dark:border-dark-border shadow-card dark:shadow-card-dark">
+        <div className={card}>
           <ExamsPanel />
         </div>
+      </div>
 
-        {/* Row 3: Notes | Resume */}
-        <div className="p-4 rounded-2xl bg-white dark:bg-dark-card border border-light-border dark:border-dark-border shadow-card dark:shadow-card-dark">
+      {/* Row 3: Notes | Files */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 lg:gap-6">
+        <div className={card}>
           <NotesPanel />
         </div>
-        <div className="p-4 rounded-2xl bg-white dark:bg-dark-card border border-light-border dark:border-dark-border shadow-card dark:shadow-card-dark">
-          <ResumePanel />
+        <div className={card}>
+          <FilesPanel />
         </div>
       </div>
     </div>

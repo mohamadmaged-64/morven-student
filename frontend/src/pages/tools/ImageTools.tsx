@@ -8,6 +8,7 @@ import { FileUpload } from '@/components/UI/FileUpload';
 import { ProgressBar } from '@/components/UI/ProgressBar';
 import { EmptyState } from '@/components/UI/EmptyState';
 import { Slider } from '@/components/UI/Slider';
+import { saveToLibrary } from '@/services/savedFilesService';
 import { useAppStore } from '@/store/useAppStore';
 import { useLanguageStore } from '@/store/useLanguageStore';
 import { useNavigate } from 'react-router-dom';
@@ -32,6 +33,7 @@ function downloadCanvas(canvas: HTMLCanvasElement, filename: string) {
       a.href = url; a.download = filename;
       document.body.appendChild(a); a.click(); document.body.removeChild(a);
       URL.revokeObjectURL(url);
+      saveToLibrary(blob, filename, 'image-tools').catch(() => {});
     }
   }, 'image/png');
 }
@@ -95,6 +97,9 @@ function BackgroundRemover() {
     const a = document.createElement('a');
     a.href = processedUrl; a.download = fileNameRef.current;
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    fetch(processedUrl).then(r => r.blob()).then(blob => {
+      saveToLibrary(blob, fileNameRef.current, 'image-tools').catch(() => {});
+    }).catch(() => {});
     addNotification('Image downloaded', 'success');
   }, [processedUrl, addNotification]);
 
@@ -402,6 +407,7 @@ function ImagesToPdfTool() {
       a.href = url; a.download = 'images.pdf';
       document.body.appendChild(a); a.click(); document.body.removeChild(a);
       URL.revokeObjectURL(url);
+      saveToLibrary(blob, 'images.pdf', 'image-tools').catch(() => {});
       setProgress(100);
       addNotification(`PDF created with ${images.length} images!`, 'success');
     } catch {

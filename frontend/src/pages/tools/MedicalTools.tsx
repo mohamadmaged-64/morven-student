@@ -18,6 +18,7 @@ import {
   SearchBar,
 } from '@/components/UI';
 import { useAppStore } from '@/store/useAppStore';
+import { useStatsStore } from '@/store/useStatsStore';
 import { Notebook } from 'lucide-react';
 import { useLanguageStore } from '@/store/useLanguageStore';
 import {
@@ -1832,6 +1833,7 @@ function MedicalFlashcards() {
   const [masteredCount, setMasteredCount] = useState(0);
   const [reviewCount, setReviewCount] = useState(0);
   const [deckSearch, setDeckSearch] = useState('');
+  const incrementCardsReviewed = useStatsStore((s) => s.incrementCardsReviewed);
   const { addNotification, flashcards, addFlashcard, deleteFlashcard } = useAppStore();
   const { language, direction } = useLanguageStore();
 
@@ -1898,13 +1900,15 @@ function MedicalFlashcards() {
 
   const handleMastered = useCallback(() => {
     setMasteredCount((p) => p + 1);
+    incrementCardsReviewed();
     nextCard();
-  }, [nextCard]);
+  }, [nextCard, incrementCardsReviewed]);
 
   const handleReviewLater = useCallback(() => {
     setReviewCount((p) => p + 1);
+    incrementCardsReviewed();
     nextCard();
-  }, [nextCard]);
+  }, [nextCard, incrementCardsReviewed]);
 
   const handleAddCard = useCallback(() => {
     if (!newFront.trim() || !newBack.trim()) {
@@ -2255,6 +2259,7 @@ function MedicalMCQ() {
   const [loading, setLoading] = useState(false);
   const [quizStarted, setQuizStarted] = useState(false);
   const { addNotification } = useAppStore();
+  const incrementQuizzesCompleted = useStatsStore((s) => s.incrementQuizzesCompleted);
 
   const handleGenerate = useCallback(() => {
     if (!input.trim()) {
@@ -2301,8 +2306,9 @@ function MedicalMCQ() {
       setSelected(answers[currentQ + 1] ?? null);
     } else {
       setShowResult(true);
+      incrementQuizzesCompleted();
     }
-  }, [currentQ, questions.length, answers]);
+  }, [currentQ, questions.length, answers, incrementQuizzesCompleted]);
 
   const handlePrev = useCallback(() => {
     if (currentQ > 0) {

@@ -114,12 +114,7 @@ export interface PersistentFile {
   size: number;
   data: ArrayBuffer;
   createdAt: number;
+  toolUsed?: string;
 }
 
-export interface ResumeItem {
-  id: string;
-  toolId: string;
-  label: string;
-  progress: Record<string, unknown>;
-  updatedAt: number;
-}
+

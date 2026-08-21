@@ -11,6 +11,7 @@ import { useAppStore } from '@/store/useAppStore';
 import { useLanguageStore } from '@/store/useLanguageStore';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import { saveToLibrary } from '@/services/savedFilesService';
 type ToolId = 'qr-generator';
 
 type InputType = 'text' | 'url' | 'email' | 'phone' | 'wifi';
@@ -155,6 +156,7 @@ const handleDownload = useCallback(() => {
     document.body.removeChild(a);
 
     URL.revokeObjectURL(url);
+    saveToLibrary(blob, 'qrcode.svg', 'qrcode-tools', 'image/svg+xml').catch(() => {});
 
     addNotification(
       t('qr.notifications.svgDownloaded', 'SVG downloaded'),
@@ -169,6 +171,10 @@ const handleDownload = useCallback(() => {
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
+
+    fetch(qrDataUrl).then(r => r.blob()).then(blob => {
+      saveToLibrary(blob, 'qrcode.png', 'qrcode-tools', 'image/png').catch(() => {});
+    }).catch(() => {});
 
     addNotification(
       t('qr.notifications.pngDownloaded', 'PNG downloaded'),

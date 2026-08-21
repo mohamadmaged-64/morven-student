@@ -16,6 +16,7 @@ import { Badge } from '@/components/UI/Badge';
 import { useAppStore } from '@/store/useAppStore';
 import { useLanguageStore } from '@/store/useLanguageStore';
 import { useNavigate } from 'react-router-dom';
+import { saveToLibrary } from '@/services/savedFilesService';
 import { ToolHero } from '@/components/Tool/ToolHero';
 import { numberSlides, generatePptFromText, generatePptFromPdf, mergePowerPoint, splitPowerPoint, type SlideNumberPosition } from '@/services/conversionApi';
 import { isNetworkError } from '@/services/apiError';
@@ -137,6 +138,7 @@ function GenerateFromText({ themeColor, font }: { themeColor: string; font: stri
       const pptx = buildPptx(sections, themeColor, font); setProgress(90);
       const blob = await pptx.write({ outputType: 'blob' });
       saveAs(blob as Blob, 'presentation.pptx');
+      saveToLibrary(blob as Blob, 'presentation.pptx', 'powerpoint-tools').catch(() => {});
       setProgress(100); addNotification('Presentation generated successfully!', 'success');
     } catch { addNotification('Error generating presentation', 'error'); }
     finally { setGenerating(false); setTimeout(() => setProgress(0), 2000); }
@@ -186,6 +188,7 @@ function GenerateFromPdf({ themeColor, font }: { themeColor: string; font: strin
       const pptx = buildPptx(parseSections(extractedText), themeColor, font); setProgress(95);
       const blob = await pptx.write({ outputType: 'blob' });
       saveAs(blob as Blob, 'from-pdf.pptx');
+      saveToLibrary(blob as Blob, 'from-pdf.pptx', 'powerpoint-tools').catch(() => {});
       setProgress(100); addNotification('Presentation generated from PDF!', 'success');
     } catch { addNotification('Error generating presentation', 'error'); }
     finally { setGenerating(false); setTimeout(() => setProgress(0), 2000); }
@@ -340,6 +343,7 @@ function GeneratePptFromTextTool() {
       setResult({ blob, name });
       setDone(true);
       saveAs(blob, name);
+      saveToLibrary(blob, name, 'powerpoint-tools').catch(() => {});
       addNotification(t('Processing Complete', 'Processing Complete'), 'success');
     } catch (err) {
       if (progressRef.current) clearInterval(progressRef.current);
@@ -375,7 +379,7 @@ function GeneratePptFromTextTool() {
         <PlaceholderResult
           fileName={result.name}
           onReset={() => { setTitle(''); setContent(''); setResult(null); setDone(false); setProgress(0); }}
-          onDownload={() => saveAs(result.blob, result.name)}
+          onDownload={() => { saveAs(result.blob, result.name); saveToLibrary(result.blob, result.name, 'powerpoint-tools').catch(() => {}); }}
         />
       )}
     </div>
@@ -430,6 +434,7 @@ function GeneratePptFromPdfTool() {
       setResult({ blob, name });
       setDone(true);
       saveAs(blob, name);
+      saveToLibrary(blob, name, 'powerpoint-tools').catch(() => {});
       addNotification(t('Processing Complete', 'Processing Complete'), 'success');
     } catch (err) {
       if (progressRef.current) clearInterval(progressRef.current);
@@ -457,7 +462,7 @@ function GeneratePptFromPdfTool() {
         <PlaceholderResult
           fileName={result.name}
           onReset={() => { setUploaded(null); setResult(null); setDone(false); setProgress(0); }}
-          onDownload={() => saveAs(result.blob, result.name)}
+          onDownload={() => { saveAs(result.blob, result.name); saveToLibrary(result.blob, result.name, 'powerpoint-tools').catch(() => {}); }}
         />
       )}
     </div>
@@ -512,6 +517,7 @@ function MergePptTool() {
       setResult({ blob, name });
       setDone(true);
       saveAs(blob, name);
+      saveToLibrary(blob, name, 'powerpoint-tools').catch(() => {});
       addNotification(t('Processing Complete', 'Processing Complete'), 'success');
     } catch (err) {
       if (progressRef.current) clearInterval(progressRef.current);
@@ -541,7 +547,7 @@ function MergePptTool() {
         <PlaceholderResult
           fileName={result.name}
           onReset={() => { setFiles([]); setResult(null); setDone(false); setProgress(0); }}
-          onDownload={() => saveAs(result.blob, result.name)}
+          onDownload={() => { saveAs(result.blob, result.name); saveToLibrary(result.blob, result.name, 'powerpoint-tools').catch(() => {}); }}
         />
       )}
     </div>
@@ -598,6 +604,7 @@ function SplitPptTool() {
       setResult({ blob, name });
       setDone(true);
       saveAs(blob, name);
+      saveToLibrary(blob, name, 'powerpoint-tools').catch(() => {});
       addNotification(t('Processing Complete', 'Processing Complete'), 'success');
     } catch (err) {
       if (progressRef.current) clearInterval(progressRef.current);
@@ -633,7 +640,7 @@ function SplitPptTool() {
           fileName={result.name}
           type="ZIP"
           onReset={() => { setUploaded(null); setRanges(''); setResult(null); setDone(false); setProgress(0); }}
-          onDownload={() => saveAs(result.blob, result.name)}
+          onDownload={() => { saveAs(result.blob, result.name); saveToLibrary(result.blob, result.name, 'powerpoint-tools').catch(() => {}); }}
         />
       )}
     </div>
@@ -787,6 +794,7 @@ function NumberSlidesTool() {
       setResult({ blob, name });
       setDone(true);
       saveAs(blob, name);
+      saveToLibrary(blob, name, 'powerpoint-tools').catch(() => {});
       addNotification(t('Processing Complete', 'Processing Complete'), 'success');
     } catch (err) {
       if (progressRef.current) clearInterval(progressRef.current);
@@ -837,7 +845,7 @@ function NumberSlidesTool() {
         <PlaceholderResult
           fileName={result.name}
           onReset={() => { setUploaded(null); setResult(null); setDone(false); setProgress(0); }}
-          onDownload={() => saveAs(result.blob, result.name)}
+          onDownload={() => { saveAs(result.blob, result.name); saveToLibrary(result.blob, result.name, 'powerpoint-tools').catch(() => {}); }}
         />
       )}
     </div>

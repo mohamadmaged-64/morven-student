@@ -11,6 +11,7 @@ import { useAppStore } from '@/store/useAppStore';
 import { useLanguageStore } from '@/store/useLanguageStore';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { saveToLibrary } from '@/services/savedFilesService';
 
 
 type ToolId = 'speech-to-text';
@@ -246,6 +247,7 @@ function SpeechToTextTool() {
     a.href = url; a.download = 'transcription.txt';
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     URL.revokeObjectURL(url);
+    saveToLibrary(blob, 'transcription.txt', 'audio-tools', 'text/plain').catch(() => {});
     addNotification(t('Transcription downloaded', 'Transcription downloaded'), 'success');
   }, [transcription, addNotification]);
 
