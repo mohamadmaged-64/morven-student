@@ -119,10 +119,10 @@ export default function AchievementsPanel() {
             <Trophy className="w-7 h-7 text-amber-300 dark:text-amber-500" strokeWidth={1.4} />
           </div>
           <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-1">
-            {'لسه ما بدأت إنجازاتك'}
+            {'لم تبدأ انجازاتك بعد'}
           </p>
           <p className="text-xs text-gray-400 dark:text-gray-500 max-w-[220px]">
-            {'ابدأ باستخدام أدوات مورفن وسجل أول إنجاز لك.'}
+            {'ابدأ باستخدام الأدوات وسجل أول إنجاز لك.'}
           </p>
         </div>
       ) : (
