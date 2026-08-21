@@ -28,45 +28,37 @@ const fadeUp = {
 const securityFeatures = [
   {
     icon: Lock,
-    titleEn: 'End-to-End Privacy',
-    titleAr: 'خصوصية من طرف لطرف',
-    descEn: 'All file processing happens locally in your browser. Your data is never sent to external servers, ensuring complete privacy from start to finish.',
-    descAr: 'جميع معالجات الملفات تتم محلياً في متصفحك. لا تُرسل بياناتك إلى خوادم خارجية أبداً، مما يضمن خصوصية تامة من البداية للنهاية.',
+    title: 'خصوصية من طرف لطرف',
+    desc: 'جميع معالجات الملفات تتم محلياً في متصفحك. لا تُرسل بياناتك إلى خوادم خارجية أبداً، مما يضمن خصوصية تامة من البداية للنهاية.',
   },
   {
     icon: Server,
-    titleEn: 'Secure Server Processing',
-    titleAr: 'معالجة آمنة على الخادم',
-    descEn: 'When server-side processing is required (e.g., Office-to-PDF conversion), files are encrypted in transit and automatically deleted within seconds of processing.',
-    descAr: 'عندما تتطلب المعالجة الخادم (مثل تحويل Office إلى PDF)، تُشفّر الملفات أثناء النقل وتُحذف تلقائياً خلال ثوانٍ من المعالجة.',
+    title: 'معالجة آمنة على الخادم',
+    desc: 'عندما تتطلب المعالجة الخادم (مثل تحويل Office إلى PDF)، تُشفّر الملفات أثناء النقل وتُحذف تلقائياً خلال ثوانٍ من المعالجة.',
   },
   {
     icon: Trash2,
-    titleEn: 'Automatic File Removal',
-    titleAr: 'إزالة الملفات تلقائياً',
-    descEn: 'Any file temporarily uploaded to our servers is permanently and irreversibly deleted immediately after the conversion or processing is complete.',
-    descAr: 'أي ملف يُرفع مؤقتاً إلى خوادمنا يُحذف بشكل دائم وغير قابل للاستعادة فور اكتمال التحويل أو المعالجة.',
+    title: 'إزالة الملفات تلقائياً',
+    desc: 'أي ملف يُرفع مؤقتاً إلى خوادمنا يُحذف بشكل دائم وغير قابل للاستعادة فور اكتمال التحويل أو المعالجة.',
   },
 ];
 
 const processSteps = [
-  { icon: Upload, titleEn: 'Upload', titleAr: 'رفع', descEn: 'Select your file', descAr: 'اختر ملفك' },
-  { icon: Cog, titleEn: 'Processing', titleAr: 'معالجة', descEn: 'Securely processed', descAr: 'معالجة آمنة' },
-  { icon: FileCheck, titleEn: 'Result', titleAr: 'النتيجة', descEn: 'Download output', descAr: 'تحميل النتيجة' },
-  { icon: Trash2, titleEn: 'Auto-Delete', titleAr: 'حذف تلقائي', descEn: 'File removed', descAr: 'الملف محذوف' },
+  { icon: Upload, title: 'رفع', desc: 'اختر ملفك' },
+  { icon: Cog, title: 'معالجة', desc: 'معالجة آمنة' },
+  { icon: FileCheck, title: 'النتيجة', desc: 'تحميل النتيجة' },
+  { icon: Trash2, title: 'حذف تلقائي', desc: 'الملف محذوف' },
 ];
 
 const commitments = [
-  { en: 'Files are processed locally whenever possible', ar: 'تتم معالجة الملفات محلياً عند الإمكان' },
-  { en: 'No user data is ever sold or shared with third parties', ar: 'لا تُباع بيانات المستخدم أو تُشارك مع أطراف ثالثة أبداً' },
-  { en: 'Temporary files are deleted within seconds', ar: 'تُحذف الملفات المؤقتة خلال ثوانٍ' },
-  { en: 'Privacy is the default — not an optional setting', ar: 'الخصوصية هي الافتراضي — ليست خياراً' },
+  'تتم معالجة الملفات محلياً عند الإمكان',
+  'لا تُباع بيانات المستخدم أو تُشارك مع أطراف ثالثة أبداً',
+  'تُحذف الملفات المؤقتة خلال ثوانٍ',
+  'الخصوصية هي الافتراضي — ليست خياراً',
 ];
 
 export default function SecurityPage() {
   const navigate = useNavigate();
-  const lang = document.documentElement.lang === 'ar' ? 'ar' : 'en';
-  const isAr = lang === 'ar';
 
   return (
     <div className="max-w-6xl mx-auto pb-16">
@@ -89,7 +81,7 @@ export default function SecurityPage() {
             className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 text-xs font-semibold mb-6"
           >
             <Shield className="w-3.5 h-3.5" />
-            {isAr ? 'أمان وخصوصية' : 'Security & Privacy'}
+            أمان وخصوصية
           </motion.div>
           <motion.h1
             initial={{ opacity: 0, y: 12 }}
@@ -97,7 +89,7 @@ export default function SecurityPage() {
             transition={{ duration: 0.5, delay: 0.15 }}
             className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-4 tracking-tight leading-tight"
           >
-            {isAr ? 'بياناتك آمنة' : 'Your Data Is'}
+            بياناتك آمنة
             <br />
           </motion.h1>
           <motion.p
@@ -106,9 +98,7 @@ export default function SecurityPage() {
             transition={{ duration: 0.5, delay: 0.25 }}
             className="text-gray-500 dark:text-gray-400 max-w-xl mx-auto text-base md:text-lg leading-relaxed"
           >
-            {isAr
-              ? 'نحمي خصوصيتك ببنية أمنية مصممة من الأساس، ملفاتك لا تغادر جهازك أبداً.'
-              : 'We protect your privacy with a security architecture built from the ground up. Your files never leave your device.'}
+            نحمي خصوصيتك ببنية أمنية مصممة من الأساس، ملفاتك لا تغادر جهازك أبداً.
           </motion.p>
         </div>
       </motion.section>
@@ -123,12 +113,10 @@ export default function SecurityPage() {
           className="text-center mb-10"
         >
           <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-3">
-            {isAr ? 'كيف نحمي بياناتك' : 'How We Protect Your Data'}
+            كيف نحمي بياناتك
           </h2>
           <p className="text-gray-500 dark:text-gray-400 max-w-lg mx-auto">
-            {isAr
-              ? 'طبقات حماية متعددة لضمان خصوصيتك التامة.'
-              : 'Multiple layers of protection to ensure your complete privacy.'}
+            طبقات حماية متعددة لضمان خصوصيتك التامة.
           </p>
         </motion.div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -148,10 +136,10 @@ export default function SecurityPage() {
                   <Icon className="w-6 h-6 text-primary-600 dark:text-primary-400" />
                 </div>
                 <h3 className="font-semibold text-gray-900 dark:text-white mb-2 text-base">
-                  {isAr ? feature.titleAr : feature.titleEn}
+                  {feature.title}
                 </h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
-                  {isAr ? feature.descAr : feature.descEn}
+                  {feature.desc}
                 </p>
               </motion.div>
             );
@@ -169,12 +157,10 @@ export default function SecurityPage() {
           className="text-center mb-12"
         >
           <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-3">
-            {isAr ? 'كيف يعمل' : 'How It Works'}
+            كيف يعمل
           </h2>
           <p className="text-gray-500 dark:text-gray-400 max-w-lg mx-auto">
-            {isAr
-              ? 'عملية بسيطة وآمنة في أربع خطوات.'
-              : 'A simple and secure four-step process.'}
+            عملية بسيطة وآمنة في أربع خطوات.
           </p>
         </motion.div>
 
@@ -198,10 +184,10 @@ export default function SecurityPage() {
                     <Icon className="w-7 h-7 text-white" />
                   </div>
                   <div className="text-sm font-semibold text-gray-900 dark:text-white mb-1">
-                    {isAr ? step.titleAr : step.titleEn}
+                    {step.title}
                   </div>
                   <div className="text-xs text-gray-500 dark:text-gray-400">
-                    {isAr ? step.descAr : step.descEn}
+                    {step.desc}
                   </div>
                 </div>
                 {!isLast && (
@@ -240,10 +226,10 @@ export default function SecurityPage() {
                 </div>
                 <div className="pt-2 pb-6">
                   <div className="text-sm font-semibold text-gray-900 dark:text-white mb-0.5">
-                    {isAr ? step.titleAr : step.titleEn}
+                    {step.title}
                   </div>
                   <div className="text-xs text-gray-500 dark:text-gray-400">
-                    {isAr ? step.descAr : step.descEn}
+                    {step.desc}
                   </div>
                 </div>
               </motion.div>
@@ -262,12 +248,10 @@ export default function SecurityPage() {
           className="text-center mb-10"
         >
           <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-3">
-            {isAr ? 'التزامنا الأمني' : 'Our Security Commitment'}
+            التزامنا الأمني
           </h2>
           <p className="text-gray-500 dark:text-gray-400 max-w-lg mx-auto">
-            {isAr
-              ? 'المبادئ التي نعمل بها لحماية بياناتك.'
-              : 'The principles we follow to protect your data.'}
+            المبادئ التي نعمل بها لحماية بياناتك.
           </p>
         </motion.div>
 
@@ -293,7 +277,7 @@ export default function SecurityPage() {
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                 </div>
                 <span className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-                  {isAr ? item.ar : item.en}
+                  {item}
                 </span>
               </motion.div>
             ))}

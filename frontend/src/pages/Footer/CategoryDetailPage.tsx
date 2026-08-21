@@ -14,59 +14,59 @@ const fadeUp = {
   }),
 };
 
-const toolDetails: Record<string, { en: string; ar: string }> = {
+const toolDetails: Record<string, string> = {
   // GENERAL
-  'pomodoro-timer': { en: 'Stay focused with the proven Pomodoro Technique. This timer helps you break study sessions into 25-minute focused intervals with short breaks between them, boosting your concentration and preventing burnout during long study marathons.', ar: 'حافظ على تركيزك مع تقنية بومودورو المثبتة. يساعدك هذا المؤقت على تقسيم جلسات الدراسة إلى فترات تركيز مدتها 25 دقيقة مع فترات راحة قصيرة بينها، مما يعزز حفظك ويمنعك من الإرهاق أثناء جلسات الدراسة الطويلة.' },
-  'task-manager': { en: 'Keep your study tasks organized and track your progress effortlessly. Create, prioritize, and manage your to-do list with a clean interface designed to help you stay on top of assignments, deadlines, and study goals.', ar: 'حافظ على تنظيم مهام دراستك وتتبع تقدمك بسهولة، أنشئ وأدر قائمة مهامك بواجهة نظيفة مصممة لمساعدتك على متابعة الواجبات المواعيد النهائية وأهداف الدراسة.' },
-  'exam-countdown': { en: 'Never lose track of important exam dates. Set your exam schedule and get a clear visual countdown showing days, hours, and minutes remaining, helping you plan your study sessions effectively.', ar: 'لا تفوّت مواعيد الامتحانات المهمة، حدد جدول امتحاناتك واحصل على عد تنازلي بصري واضح يظهر الأيام والساعات والدقائق المتبقية، مما يساعدك على التخطيط لجلسات الدراسة بفعالية.' },
+  'pomodoro-timer': 'حافظ على تركيزك مع تقنية بومودورو المثبتة. يساعدك هذا المؤقت على تقسيم جلسات الدراسة إلى فترات تركيز مدتها 25 دقيقة مع فترات راحة قصيرة بينها، مما يعزز حفظك ويمنعك من الإرهاق أثناء جلسات الدراسة الطويلة.',
+  'task-manager': 'حافظ على تنظيم مهام دراستك وتتبع تقدمك بسهولة، أنشئ وأدر قائمة مهامك بواجهة نظيفة مصممة لمساعدتك على متابعة الواجبات المواعيد النهائية وأهداف الدراسة.',
+  'exam-countdown': 'لا تفوّت مواعيد الامتحانات المهمة، حدد جدول امتحاناتك واحصل على عد تنازلي بصري واضح يظهر الأيام والساعات والدقائق المتبقية، مما يساعدك على التخطيط لجلسات الدراسة بفعالية.',
 
   // PDF
-  'word-to-pdf': { en: 'Convert your Word documents to PDF format instantly while preserving all formatting, fonts, and layout. Perfect for sharing documents that look consistent across all devices and platforms.', ar: 'حوّل مستندات Word إلى صيغة PDF فوراً مع الحفاظ على جميع التنسيقات والخطوط والتخطيط. مثالي لمشاركة المستندات التي تبدو متسقة عبر جميع الأجهزة والمنصات.' },
-  'excel-to-pdf': { en: 'Transform Excel spreadsheets into professional PDF documents. Preserve tables, charts, formulas, and cell formatting to create shareable reports and financial documents.', ar: 'حوّل جداول Excel إلى مستندات PDF احترافية. احتفظ بالجداول والرسوم البيانية والصيغ وتنسيق الخلايا لإنشاء تقارير ومستندات مالية قابلة للمشاركة.' },
-  'ppt-to-pdf': { en: 'Convert PowerPoint presentations to PDF format, preserving slide layouts, animations, and design elements. Ideal for distributing presentation content without requiring PowerPoint software.', ar: 'حوّل عروض PowerPoint إلى صيغة PDF مع الحفاظ على تخطيط الشرائح والعناصر التصميمية. مثالي لتوزيع محتوى العروض التقديمية دون الحاجة لبرنامج PowerPoint.' },
-  'merge-pdfs': { en: 'Combine multiple PDF files into a single, organized document. Drag and drop to reorder pages before merging. Perfect for consolidating research papers, assignments, or report chapters.', ar: 'ادمج ملفات PDF متعددة في مستند واحد منظم. اسحب وأفلت لإعادة ترتيب الصفحات قبل الدمج. مثالي لتجميع أوراق البحث أو الواجبات أو فصول التقارير.' },
-  'split-pdf': { en: 'Split a large PDF into separate files or page ranges. Extract specific pages, divide by every N pages, or separate into individual page files. Ideal for sharing only the relevant sections you need.', ar: 'قسم ملف PDF كبير إلى ملفات أو نطاقات صفحات منفصلة. استخرج صفحات محددة أو قسم كل N صفحات أو فصل إلى ملفات صفحات فردية. مثالي لمشاركة الأقسام ذات الصلة فقط.' },
-  'delete-pages': { en: 'Remove unwanted pages from a PDF document with visual page selection. Browse thumbnails, select the pages you want to remove, and download the cleaned document instantly.', ar: 'أزل الصفحات غير المرغوب فيها من مستند PDF مع تحديد بصري للصفحات. تصفح الصور المصغرة، حدد الصفحات التي تريد إزالتها، وحمّل المستند المنظف فوراً.' },
-  'compress-pdf': { en: 'Reduce PDF file size without losing quality using smart compression algorithms. Make large files easier to share via email or messaging apps while maintaining readability.', ar: 'قلّل حجم ملف PDF دون فقدان الجودة باستخدام خوارزميات ضغط ذكية.اجعل الملفات الكبيرة أسهل في المشاركة عبر البريد الإلكتروني أو تطبيقات المراسلة مع الحفاظ على قابلية القراءة.' },
-  'reorder-pages': { en: 'Rearrange pages within a PDF document using drag and drop. Perfect for organizing multi-page documents into the correct order before printing or sharing.', ar: 'أعد ترتيب الصفحات داخل مستند PDF باستخدام السحب والإفلات. مثالي لتنظيم المستندات متعددة الصفحات بالترتيب الصحيح قبل الطباعة أو المشاركة.' },
-  'rotate-pages': { en: 'Rotate individual pages or all pages in a PDF by 90, 180, or 270 degrees. Fix scanned documents that are sideways or upside down with a single click.', ar: 'دوّر صفحات فردية أو جميع الصفحات في PDF بزاوية 90 أو 180 أو 270 درجة. صحّح المستندات الممسوحة ضوئياً التي تكون مائلة أو معكوسة بنقرة واحدة.' },
-  'password-protect': { en: 'Add password protection to your PDF files to control who can view, edit, or print your documents. Essential for sensitive academic or professional content.', ar: 'أضف حماية بكلمة مرور لملفات PDF للتحكم في من يمكنه عرض أو تحرير أو طباعة مستنداتك. ضروري للمحتوى الأكاديمي أو المهني الحساس.' },
-  'remove-password': { en: 'Remove password protection from PDF files when you no longer need the security layer. Requires the current password for authorization.', ar: 'أزل الحماية بكلمة المرور من ملفات PDF عندما لا تحتاج إلى طبقة الأمان بعد. يتطلب كلمة المرور الحالية للتفويض.' },
-  'add-watermark': { en: 'Add text or image watermarks to PDF files to mark document status, ownership, or classification. Supports custom positioning, opacity, and rotation settings.', ar: 'أضف علامات مائية نصية أو صور إلى ملفات PDF لتحديد حالة المستند أو الملكية أو التصنيف. يدعم إعدادات التموضع والشفافية والتدوير المخصصة.' },
-  'add-signature': { en: 'Add digital signatures to PDF documents for authentication and verification. Draw or upload your signature and place it exactly where needed on the document.', ar: 'أضف توقيعات رقمية إلى مستندات PDF للمصادقة والتحقق. ارسم أو ارفع توقيعك وضعه في المكان المطلوب بالضبط في المستند.' },
-  'extract-images': { en: 'Extract all images embedded in a PDF file and save them as individual image files. Useful for recovering graphics, photos, or illustrations from documents.', ar: 'استخرج جميع الصور المضمنة في ملف PDF واحفظها كملفات صور فردية. مفيد لاسترداد الرسومات أو الصور أو التوضيحات من المستندات.' },
-  'ocr': { en: 'Perform optical character recognition on scanned PDF files to make them searchable and selectable. Convert image-based documents into text-searchable PDFs.', ar: 'قم بالتعرف الضوئي على الأحرف في ملفات PDF الممسوحة ضوئياً لجعلها قابلة للبحث والتحديد. حوّل المستندات القائمة على الصور إلى PDFs قابلة للبحث بالنص.' },
-  'scan-to-text': { en: 'Convert scanned documents and images into editable text using advanced OCR technology. Extract text from photos of documents, whiteboards, or handwritten notes.', ar: 'حوّل المستندات والصور الممسوحة ضوئياً إلى نص قابل للتعديل باستخدام تكنولوجيا OCR المتقدمة. استخرج النص من صور المستندات أو السبّورات أو الملاحظات المكتوبة بخط اليد.' },
-  'compare-pdfs': { en: 'Compare two PDF files side by side and highlight all differences between them. Ideal for reviewing document revisions, contract changes, or version updates.', ar: 'قارن ملفي PDF جنباً إلى جنب وأبرز جميع الاختلافات بينهما. مثالي لمراجعة مراجعات المستندات أو تغييرات العقود أو تحديثات الإصدارات.' },
+  'word-to-pdf': 'حوّل مستندات Word إلى صيغة PDF فوراً مع الحفاظ على جميع التنسيقات والخطوط والتخطيط. مثالي لمشاركة المستندات التي تبدو متسقة عبر جميع الأجهزة والمنصات.',
+  'excel-to-pdf': 'حوّل جداول Excel إلى مستندات PDF احترافية. احتفظ بالجداول والرسوم البيانية والصيغ وتنسيق الخلايا لإنشاء تقارير ومستندات مالية قابلة للمشاركة.',
+  'ppt-to-pdf': 'حوّل عروض PowerPoint إلى صيغة PDF مع الحفاظ على تخطيط الشرائح والعناصر التصميمية. مثالي لتوزيع محتوى العروض التقديمية دون الحاجة لبرنامج PowerPoint.',
+  'merge-pdfs': 'ادمج ملفات PDF متعددة في مستند واحد منظم. اسحب وأفلت لإعادة ترتيب الصفحات قبل الدمج. مثالي لتجميع أوراق البحث أو الواجبات أو فصول التقارير.',
+  'split-pdf': 'قسم ملف PDF كبير إلى ملفات أو نطاقات صفحات منفصلة. استخرج صفحات محددة أو قسم كل N صفحات أو فصل إلى ملفات صفحات فردية. مثالي لمشاركة الأقسام ذات الصلة فقط.',
+  'delete-pages': 'أزل الصفحات غير المرغوب فيها من مستند PDF مع تحديد بصري للصفحات. تصفح الصور المصغرة، حدد الصفحات التي تريد إزالتها، وحمّل المستند المنظف فوراً.',
+  'compress-pdf': 'قلّل حجم ملف PDF دون فقدان الجودة باستخدام خوارزميات ضغط ذكية.اجعل الملفات الكبيرة أسهل في المشاركة عبر البريد الإلكتروني أو تطبيقات المراسلة مع الحفاظ على قابلية القراءة.',
+  'reorder-pages': 'أعد ترتيب الصفحات داخل مستند PDF باستخدام السحب والإفلات. مثالي لتنظيم المستندات متعددة الصفحات بالترتيب الصحيح قبل الطباعة أو المشاركة.',
+  'rotate-pages': 'دوّر صفحات فردية أو جميع الصفحات في PDF بزاوية 90 أو 180 أو 270 درجة. صحّح المستندات الممسوحة ضوئياً التي تكون مائلة أو معكوسة بنقرة واحدة.',
+  'password-protect': 'أضف حماية بكلمة مرور لملفات PDF للتحكم في من يمكنه عرض أو تحرير أو طباعة مستنداتك. ضروري للمحتوى الأكاديمي أو المهني الحساس.',
+  'remove-password': 'أزل الحماية بكلمة المرور من ملفات PDF عندما لا تحتاج إلى طبقة الأمان بعد. يتطلب كلمة المرور الحالية للتفويض.',
+  'add-watermark': 'أضف علامات مائية نصية أو صور إلى ملفات PDF لتحديد حالة المستند أو الملكية أو التصنيف. يدعم إعدادات التموضع والشفافية والتدوير المخصصة.',
+  'add-signature': 'أضف توقيعات رقمية إلى مستندات PDF للمصادقة والتحقق. ارسم أو ارفع توقيعك وضعه في المكان المطلوب بالضبط في المستند.',
+  'extract-images': 'استخرج جميع الصور المضمنة في ملف PDF واحفظها كملفات صور فردية. مفيد لاسترداد الرسومات أو الصور أو التوضيحات من المستندات.',
+  'ocr': 'قم بالتعرف الضوئي على الأحرف في ملفات PDF الممسوحة ضوئياً لجعلها قابلة للبحث والتحديد. حوّل المستندات القائمة على الصور إلى PDFs قابلة للبحث بالنص.',
+  'scan-to-text': 'حوّل المستندات والصور الممسوحة ضوئياً إلى نص قابل للتعديل باستخدام تكنولوجيا OCR المتقدمة. استخرج النص من صور المستندات أو السبّورات أو الملاحظات المكتوبة بخط اليد.',
+  'compare-pdfs': 'قارن ملفي PDF جنباً إلى جنب وأبرز جميع الاختلافات بينهما. مثالي لمراجعة مراجعات المستندات أو تغييرات العقود أو تحديثات الإصدارات.',
 
   // POWERPOINT
-  'generate-ppt-text': { en: 'Create professional PowerPoint presentations from plain text content. AI automatically structures slides, adds key points, and designs layouts.', ar: 'أنشئ عروض PowerPoint التقديمية الاحترافية من محتوى نصي عادي. ي هيكل الشرائح تلقائياً ويضيف النقاط الرئيسية ويصمم التخطيطات بالذكاء الاصطناعي.' },
-  'generate-ppt-pdf': { en: 'Convert PDF documents into PowerPoint presentations. Extract content, structure it into slides, and create a visually appealing presentation.', ar: 'حوّل مستندات PDF إلى عروض PowerPoint التقديمية. استخرج المحتوى، هيّكه إلى شرائح، وأنشئ عرضاً تقديمياً جذاباً بصرياً.' },
-  'generate-ppt-word': { en: 'Transform Word documents into polished PowerPoint presentations. Automatically extract headings, bullet points, and key information for slides.', ar: 'حوّل مستندات Word إلى عروض PowerPoint التقديمية المصقولة. استخرج العناوين والنقاط الرئيسية والمعلومات المهمة للشرائح تلقائياً.' },
-  'generate-ppt-research': { en: 'Create research presentation slides with proper academic structure. Includes introduction, methodology, results, discussion, and conclusion sections.', ar: 'أنشئ شرائح عرض تقديمي بحثية بهيكل أكاديمي صحيح. يتضمن أقسام المقدمة والمنهجية والنتائج والمناقشة والخاتمة.' },
-  'extract-ppt-text': { en: 'Extract all text content from PowerPoint files for review, editing, or repurposing. Get clean, formatted text from every slide.', ar: 'استخرج جميع المحتوى النصي من ملفات PowerPoint للمراجعة أو التعديل أو إعادة الاستخدام. احصل على نص منظّف ومُنسّق من كل شريحة.' },
-  'convert-ppt-pdf': { en: 'Convert PowerPoint presentations to PDF format for easy sharing, printing, and archiving. Preserves all visual elements and formatting.', ar: 'حوّل عروض PowerPoint التقديمية إلى صيغة PDF للمشاركة والطباعة والأرشفة بسهولة. يحافظ على جميع العناصر البصرية والتنسيق.' },
-  'improve-slides': { en: 'AI-powered improvement of your existing PowerPoint slides. Enhance design, layout, content organization, and visual appeal with smart suggestions.', ar: 'تحسين شرائح PowerPoint التقديمية الحالية بالذكاء الاصطناعي. حسّن التصميم والتخطيط وتنظيم المحتوى والجاذبية البصرية بمقترحات ذكية.' },
-  'add-images-slides': { en: 'Automatically add relevant, high-quality images to your presentation slides. AI selects images that complement your content and message.', ar: 'أضف صوراً عالية الجودة ذات صلة تلقائياً إلى شرائح عرضك التقديمي. يختار الذكاء الاصطناعي صوراً تكمّل محتواك ورسالتك.' },
-  'generate-speaker-notes': { en: 'Generate comprehensive speaker notes for your presentation slides. Includes talking points, transitions, and timing suggestions for smooth delivery.', ar: 'أنشئ ملاحظات متحدث شاملة لشرائح عرضك التقديمي. تتضمن نقاط الحديث والتنقلات واقتراحات التوقيت لتقديم سلس.' },
+  'generate-ppt-text': 'أنشئ عروض PowerPoint التقديمية الاحترافية من محتوى نصي عادي. ي هيكل الشرائح تلقائياً ويضيف النقاط الرئيسية ويصمم التخطيطات بالذكاء الاصطناعي.',
+  'generate-ppt-pdf': 'حوّل مستندات PDF إلى عروض PowerPoint التقديمية. استخرج المحتوى، هيّكه إلى شرائح، وأنشئ عرضاً تقديمياً جذاباً بصرياً.',
+  'generate-ppt-word': 'حوّل مستندات Word إلى عروض PowerPoint التقديمية المصقولة. استخرج العناوين والنقاط الرئيسية والمعلومات المهمة للشرائح تلقائياً.',
+  'generate-ppt-research': 'أنشئ شرائح عرض تقديمي بحثية بهيكل أكاديمي صحيح. يتضمن أقسام المقدمة والمنهجية والنتائج والمناقشة والخاتمة.',
+  'extract-ppt-text': 'استخرج جميع المحتوى النصي من ملفات PowerPoint للمراجعة أو التعديل أو إعادة الاستخدام. احصل على نص منظّف ومُنسّق من كل شريحة.',
+  'convert-ppt-pdf': 'حوّل عروض PowerPoint التقديمية إلى صيغة PDF للمشاركة والطباعة والأرشفة بسهولة. يحافظ على جميع العناصر البصرية والتنسيق.',
+  'improve-slides': 'تحسين شرائح PowerPoint التقديمية الحالية بالذكاء الاصطناعي. حسّن التصميم والتخطيط وتنظيم المحتوى والجاذبية البصرية بمقترحات ذكية.',
+  'add-images-slides': 'أضف صوراً عالية الجودة ذات صلة تلقائياً إلى شرائح عرضك التقديمي. يختار الذكاء الاصطناعي صوراً تكمّل محتواك ورسالتك.',
+  'generate-speaker-notes': 'أنشئ ملاحظات متحدث شاملة لشرائح عرضك التقديمي. تتضمن نقاط الحديث والتنقلات واقتراحات التوقيت لتقديم سلس.',
 
   // VIDEO
-  'extract-audio-video': { en: 'Extract the audio track from any video file and save it as a standalone audio file. Perfect for saving lectures, podcasts, or music from videos.', ar: 'استخرج المسار الصوتي من أي ملف فيديو واحفظه كملف صوتي مستقل. مثالي لحفظ المحاضرات أو البودكاست أو الموسيقى من الفيديوهات.' },
-  'compress-video': { en: 'Reduce video file sizes while maintaining quality. Compress large lecture recordings or project videos for easier storage and faster sharing.', ar: 'قلّل أحجام ملفات الفيديو مع الحفاظ على الجودة. اضغط تسجيلات المحاضرات الكبيرة أو فيديوهات المشاريع للتخزين الأسهل والمشاركة الأسرع.' },
-  'convert-video': { en: 'Convert videos between different formats like MP4, AVI, MKV, and more. Ensure compatibility with any device or platform.', ar: 'حوّل الفيديوهات بين صيغ مختلفة مثل MP4 وAVI وMKV والمزيد. تأكد من التوافق مع أي جهاز أو منصة.' },
-  'video-to-audio': { en: 'Extract audio from video files and save as MP3, WAV, or other audio formats. Great for creating audio versions of video lectures.', ar: 'استخرج الصوت من ملفات الفيديو واحفظه كـ MP3 أو WAV أو صيغ صوتية أخرى. رائع لإنشاء نسخ صوتية من محاضرات الفيديو.' },
+  'extract-audio-video': 'استخرج المسار الصوتي من أي ملف فيديو واحفظه كملف صوتي مستقل. مثالي لحفظ المحاضرات أو البودكاست أو الموسيقى من الفيديوهات.',
+  'compress-video': 'قلّل أحجام ملفات الفيديو مع الحفاظ على الجودة. اضغط تسجيلات المحاضرات الكبيرة أو فيديوهات المشاريع للتخزين الأسهل والمشاركة الأسرع.',
+  'convert-video': 'حوّل الفيديوهات بين صيغ مختلفة مثل MP4 وAVI وMKV والمزيد. تأكد من التوافق مع أي جهاز أو منصة.',
+  'video-to-audio': 'استخرج الصوت من ملفات الفيديو واحفظه كـ MP3 أو WAV أو صيغ صوتية أخرى. رائع لإنشاء نسخ صوتية من محاضرات الفيديو.',
 
   // IMAGES
-  'bg-remove': { en: 'Automatically remove backgrounds from images using AI. Create clean, professional-looking photos for presentations, documents, or profiles.', ar: 'أزل الخلفيات من الصور تلقائياً باستخدام الذكاء الاصطناعي. أنشئ صوراً نظيفة واحترافية للمستندات أو العروض التقديمية أو الملفات الشخصية.' },
-  'rotate-image': { en: 'Rotate images to any angle with precision. Fix orientation issues from scanned documents or camera captures instantly.', ar: 'دوّر الصور بأي زاوية بدقة. صحّح مشاكل التأطير من المستندات الممسوحة ضوئياً أو لقطات الكاميرا فوراً.' },
-  'blur-image': { en: 'Apply blur effects to parts or whole images. Protect privacy by blurring sensitive information or create artistic background effects.', ar: 'طبّع تأثيرات الضبابية على أجزاء أو الصورة كاملة. حمّ الخصوصية بتعتيم المعلومات الحساسة أو أنشئ تأثيرات خلفية فنية.' },
-  'images-to-pdf': { en: 'Convert multiple images into a single PDF document. Arrange pages, set margins, and create professional-looking PDFs from your photos.', ar: 'حوّل صور متعددة إلى مستند PDF واحد. رتّب الصفحات، حدد الهوامش، وأنشئ ملفات PDF احترافية من صورك.' },
+  'bg-remove': 'أزل الخلفيات من الصور تلقائياً باستخدام الذكاء الاصطناعي. أنشئ صوراً نظيفة واحترافية للمستندات أو العروض التقديمية أو الملفات الشخصية.',
+  'rotate-image': 'دوّر الصور بأي زاوية بدقة. صحّح مشاكل التأطير من المستندات الممسوحة ضوئياً أو لقطات الكاميرا فوراً.',
+  'blur-image': 'طبّع تأثيرات الضبابية على أجزاء أو الصورة كاملة. حمّ الخصوصية بتعتيم المعلومات الحساسة أو أنشئ تأثيرات خلفية فنية.',
+  'images-to-pdf': 'حوّل صور متعددة إلى مستند PDF واحد. رتّب الصفحات، حدد الهوامش، وأنشئ ملفات PDF احترافية من صورك.',
 
   // AUDIO
-  'speech-to-text': { en: 'Transcribe audio recordings into accurate text using advanced speech recognition. Perfect for converting lectures, interviews, or meetings into written notes.', ar: 'نسخ التسجيلات الصوتية إلى نص دقيق باستخدام التعرف على الكلام المتقدم. مثالي لتحويل المحاضرات أو المقابلات أو الاجتماعات إلى ملاحظات مكتوبة.' },
+  'speech-to-text': 'نسخ التسجيلات الصوتية إلى نص دقيق باستخدام التعرف على الكلام المتقدم. مثالي لتحويل المحاضرات أو المقابلات أو الاجتماعات إلى ملاحظات مكتوبة.',
 
   // QR CODE
-  'qr-generator': { en: 'Generate QR codes from text, URLs, contact info, or any data. Download in various sizes for printing on documents, posters, or business cards.', ar: 'أنشئ رموز QR من نص أو روابط أو معلومات اتصال أو أي بيانات. حمّل بأحجام مختلفة للطباعة على المستندات أو الملصقات أو بطاقات العمل.' },
+  'qr-generator': 'أنشئ رموز QR من نص أو روابط أو معلومات اتصال أو أي بيانات. حمّل بأحجام مختلفة للطباعة على المستندات أو الملصقات أو بطاقات العمل.',
 };
 
 const VALID_CATEGORIES: ToolCategory[] = [
@@ -77,25 +77,23 @@ const VALID_CATEGORIES: ToolCategory[] = [
 export default function CategoryDetailPage() {
   const { category } = useParams<{ category: string }>();
   const navigate = useNavigate();
-  const lang = document.documentElement.lang === 'ar' ? 'ar' : 'en';
-  const isAr = lang === 'ar';
 
   if (!category || !VALID_CATEGORIES.includes(category as ToolCategory)) {
     return (
       <div className="max-w-6xl mx-auto pb-16 text-center py-20">
         <AlertCircle className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-          {isAr ? 'فئة غير موجودة' : 'Category Not Found'}
+          فئة غير موجودة
         </h2>
         <p className="text-gray-500 dark:text-gray-400 mb-6">
-          {isAr ? 'الفئة التي تبحث عنها غير موجودة.' : 'The category you are looking for does not exist.'}
+          الفئة التي تبحث عنها غير موجودة.
         </p>
         <Button
           onClick={() => navigate('/our-tools')}
           variant="primary"
-          icon={<ArrowLeft className="w-4 h-4" />}
+          icon={<ArrowLeft className="w-4 h-4 rotate-180" />}
         >
-          {isAr ? 'العودة لكل الأدوات' : 'Back to All Tools'}
+          العودة لكل الأدوات
         </Button>
       </div>
     );
@@ -110,7 +108,7 @@ export default function CategoryDetailPage() {
     <div className="max-w-6xl mx-auto pb-16">
       {/* ── Back Link ── */}
       <motion.div
-        initial={{ opacity: 0, x: isAr ? 12 : -12 }}
+        initial={{ opacity: 0, x: 12 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.4 }}
         className="mb-6"
@@ -119,8 +117,8 @@ export default function CategoryDetailPage() {
           onClick={() => navigate('/our-tools')}
           className="inline-flex items-center gap-1.5 text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors font-medium"
         >
-          <ArrowLeft className={`w-4 h-4 ${isAr ? 'rotate-180' : ''}`} />
-          {isAr ? 'العودة لكل الأدوات' : 'Back to All Tools'}
+          <ArrowLeft className={`w-4 h-4 rotate-180`} />
+          العودة لكل الأدوات
         </button>
       </motion.div>
 
@@ -150,7 +148,7 @@ export default function CategoryDetailPage() {
             transition={{ duration: 0.5, delay: 0.15 }}
             className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-3 tracking-tight"
           >
-            {isAr ? meta.nameAr : meta.name}
+            {meta.name}
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 12 }}
@@ -158,9 +156,7 @@ export default function CategoryDetailPage() {
             transition={{ duration: 0.5, delay: 0.25 }}
             className="text-gray-500 dark:text-gray-400 max-w-xl mx-auto text-base md:text-lg leading-relaxed"
           >
-            {isAr
-              ? `${catTools.length} أداة متاحة`
-              : `${catTools.length} tools available`}
+            {`${catTools.length} أداة متاحة`}
           </motion.p>
         </div>
       </motion.section>
@@ -175,7 +171,7 @@ export default function CategoryDetailPage() {
           >
             <Clock className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
             <p className="text-gray-500 dark:text-gray-400 text-lg">
-              {isAr ? 'لا توجد أدوات متاحة في هذا القسم بعد.' : 'No tools available in this category yet.'}
+              لا توجد أدوات متاحة في هذا القسم بعد.
             </p>
           </motion.div>
         ) : (
@@ -200,12 +196,12 @@ export default function CategoryDetailPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <h3 className="font-semibold text-gray-900 dark:text-white text-sm">
-                          {isAr ? tool.nameAr : tool.name}
+                          {tool.name}
                         </h3>
                         {tool.comingSoon && (
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 text-[10px] font-semibold uppercase tracking-wide">
                             <Sparkles className="w-2.5 h-2.5" />
-                            {isAr ? 'قريبًا' : 'Coming Soon'}
+                            قريبًا
                           </span>
                         )}
                       </div>
@@ -213,11 +209,11 @@ export default function CategoryDetailPage() {
                   </div>
                   {detail ? (
                     <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed pl-14">
-                      {isAr ? detail.ar : detail.en}
+                      {detail}
                     </p>
                   ) : (
                     <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed pl-14">
-                      {isAr ? tool.descriptionAr : tool.description}
+                      {tool.description}
                     </p>
                   )}
                 </motion.div>
@@ -236,22 +232,20 @@ export default function CategoryDetailPage() {
         className="rounded-2xl bg-gradient-to-r from-primary-600 to-primary-700 dark:from-primary-700 dark:to-primary-800 p-8 md:p-12 text-center"
       >
         <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
-          {isAr ? 'استكشف فئات أخرى' : 'Explore More Categories'}
+          استكشف فئات أخرى
         </h2>
         <p className="text-primary-100 max-w-md mx-auto mb-8 text-sm md:text-base">
-          {isAr
-            ? 'مورفن للطلاب يقدم مجموعة أدوات شاملة.'
-            : 'Morven for Students provides a comprehensive set of tools.'}
+          مورفن للطلاب يقدم مجموعة أدوات شاملة.
         </p>
         <Button
           onClick={() => navigate('/our-tools')}
           variant="secondary"
           size="lg"
-          icon={<ArrowLeft className="w-5 h-5" />}
+          icon={<ArrowLeft className="w-5 h-5 rotate-180" />}
           iconRight={undefined}
           className="bg-white text-primary-700 hover:bg-gray-100 dark:bg-gray-900 dark:text-primary-300 dark:hover:bg-gray-800"
         >
-          {isAr ? 'العودة لكل الأدوات' : 'Back to All Tools'}
+          العودة لكل الأدوات
         </Button>
       </motion.section>
     </div>

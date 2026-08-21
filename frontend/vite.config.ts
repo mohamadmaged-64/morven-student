@@ -87,7 +87,6 @@ export default defineConfig({
           vendor: ['react', 'react-dom', 'react-router-dom'],
           pdf: ['pdf-lib', 'pdfjs-dist'],
           ui: ['framer-motion', 'zustand'],
-          i18n: ['i18next', 'react-i18next'],
         },
       },
     },

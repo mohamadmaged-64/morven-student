@@ -44,5 +44,5 @@ export function useFileStorage() {
     return fileStorage.getFile(id);
   }, []);
 
-  return { files, loading, error, upload, remove, clear, getFileData, refresh };
+  return { files, loading, error, upload, remove, clear, refresh };
 }

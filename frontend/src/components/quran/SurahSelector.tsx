@@ -1,6 +1,5 @@
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useLanguageStore } from '@/store/useLanguageStore';
 import { Book, Search, ChevronDown } from 'lucide-react';
 import type { Surah } from '@/types/quran';
 
@@ -11,7 +10,6 @@ interface SurahSelectorProps {
 }
 
 export function SurahSelector({ surahs, currentSurah, onSelect }: SurahSelectorProps) {
-  const { language } = useLanguageStore();
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
 
@@ -21,7 +19,6 @@ export function SurahSelector({ surahs, currentSurah, onSelect }: SurahSelectorP
     return surahs.filter(
       (s) =>
         s.name.toLowerCase().includes(q) ||
-        s.nameAr.includes(q) ||
         String(s.id).includes(q),
     );
   }, [surahs, search]);
@@ -30,7 +27,7 @@ export function SurahSelector({ surahs, currentSurah, onSelect }: SurahSelectorP
     <div className="space-y-2">
       <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
         <Book className="w-4 h-4" />
-        {language === 'ar' ? 'السورة' : 'Surah'}
+        السورة
       </label>
 
       <div className="relative">
@@ -45,10 +42,8 @@ export function SurahSelector({ surahs, currentSurah, onSelect }: SurahSelectorP
         >
           <span>
             {currentSurah
-              ? `(${currentSurah.id}) ${language === 'ar' ? currentSurah.nameAr : currentSurah.name}`
-              : language === 'ar'
-                ? 'اختر سورة'
-                : 'Select a Surah'}
+              ? `(${currentSurah.id}) ${currentSurah.name}`
+              : 'اختر سورة'}
           </span>
           <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
         </button>
@@ -69,7 +64,7 @@ export function SurahSelector({ surahs, currentSurah, onSelect }: SurahSelectorP
                     type="text"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    placeholder={language === 'ar' ? 'بحث...' : 'Search...'}
+                    placeholder="بحث..."
                     className="w-full pl-9 pr-3 py-2 text-sm rounded-lg bg-gray-50 dark:bg-dark-surface border border-light-border dark:border-dark-border text-gray-800 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                     autoFocus
                   />
@@ -79,7 +74,7 @@ export function SurahSelector({ surahs, currentSurah, onSelect }: SurahSelectorP
               <div className="max-h-64 overflow-y-auto overscroll-contain">
                 {filtered.length === 0 ? (
                   <div className="p-4 text-sm text-gray-400 dark:text-gray-500 text-center">
-                    {language === 'ar' ? 'لا توجد نتائج' : 'No results'}
+                    لا توجد نتائج
                   </div>
                 ) : (
                   <div className="p-1">
@@ -105,7 +100,7 @@ export function SurahSelector({ surahs, currentSurah, onSelect }: SurahSelectorP
                           </span>
                           <div className="flex-1 text-left">
                             <div className="font-medium">
-                              {language === 'ar' ? surah.nameAr : surah.name}
+                              {surah.name}
                             </div>
                           </div>
                           {surah.verses ? (

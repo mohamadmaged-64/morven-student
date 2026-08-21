@@ -1,6 +1,5 @@
 import { useState, useRef, useCallback, type DragEvent, type ChangeEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useLanguageStore } from '@/store/useLanguageStore';
 
 type UploadedFile = {
   id: string;
@@ -49,17 +48,13 @@ function FileUpload({
   description,
   readAs = 'ArrayBuffer',
 }: FileUploadProps) {
-  const { language } = useLanguageStore();
   console.log("Received label:", label);
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
    const Label =
-    label ??
-    (language === 'ar'
-      ? 'اسحب الملفات هنا أو اضغط للتصفح'
-      : 'Drop files here or click to browse');
+    label ?? 'اسحب الملفات هنا أو اضغط للتصفح';
 
   const processFiles = useCallback(
     (fileList: FileList) => {

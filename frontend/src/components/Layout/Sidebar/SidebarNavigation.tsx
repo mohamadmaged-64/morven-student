@@ -1,6 +1,5 @@
 import { NavLink } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useTranslation } from 'react-i18next';
 import { useAppStore } from '@/store/useAppStore';
 import { House } from 'lucide-react';
 import { SidebarCategory } from './SidebarCategory';
@@ -15,7 +14,6 @@ export function SidebarNavigation({
   isMobile,
   showText,
 }: SidebarNavigationProps) {
-  const { t } = useTranslation();
   const setSidebarOpen = useAppStore((s) => s.setSidebarOpen);
 
   return (
@@ -46,7 +44,7 @@ export function SidebarNavigation({
                 exit={{ opacity: 0 }}
                 className="whitespace-nowrap"
               >
-                {t('nav.dashboard')}
+                {'الصفحة الرئيسية'}
               </motion.span>
             )}
           </AnimatePresence>
@@ -61,7 +59,7 @@ export function SidebarNavigation({
             className={showText ? '' : 'mb-1'}
           >
             <div className="px-3 mb-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400 h-4">
-              {showText ? t(section.title) : ''}
+              {showText ? section.title : ''}
             </div>
 
             <div className={showText ? 'space-y-0.5' : 'space-y-0'}>

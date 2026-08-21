@@ -2,25 +2,22 @@ import { motion } from 'framer-motion';
 import { Card } from '@/components/UI/Card';
 import { Pin, PinOff, Pencil, Trash2, Calendar, Clock } from 'lucide-react';
 import type { Note } from '@/types';
-import type { Language } from '@/types';
 
 type NoteCardProps = {
   note: Note;
-  language: Language;
   onEdit: () => void;
   onDelete: () => void;
   onTogglePin: () => void;
 };
 
-function formatNoteDate(timestamp: number, language: Language): string {
-  return new Date(timestamp).toLocaleDateString(language === 'ar' ? 'ar-SA' : 'en-US', {
+function formatNoteDate(timestamp: number): string {
+  return new Date(timestamp).toLocaleDateString('ar-SA', {
     month: 'short',
     day: 'numeric',
-    ...(language === 'en' ? { year: 'numeric' as const } : {}),
   });
 }
 
-function NoteCard({ note, language, onEdit, onDelete, onTogglePin }: NoteCardProps) {
+function NoteCard({ note, onEdit, onDelete, onTogglePin }: NoteCardProps) {
   const emptyTitle = !note.title.trim();
   const hasContent = !!note.content.trim();
 
@@ -46,7 +43,7 @@ function NoteCard({ note, language, onEdit, onDelete, onTogglePin }: NoteCardPro
                 : 'text-gray-800 dark:text-white'
             }`}
           >
-            {note.title.trim() || (language === 'ar' ? 'بدون عنوان' : 'Untitled')}
+            {note.title.trim() || 'بدون عنوان'}
           </h3>
           <button
             onClick={(e) => {
@@ -58,7 +55,7 @@ function NoteCard({ note, language, onEdit, onDelete, onTogglePin }: NoteCardPro
                 ? 'text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/30'
                 : 'text-gray-300 dark:text-gray-600 hover:text-primary-500 hover:bg-primary-50 dark:hover:text-primary-400 dark:hover:bg-primary-900/30'
             }`}
-            title={language === 'ar' ? (note.pinned ? 'إلغاء التثبيت' : 'تثبيت') : note.pinned ? 'Unpin' : 'Pin'}
+            title={note.pinned ? 'إلغاء التثبيت' : 'تثبيت'}
           >
             {note.pinned ? <Pin className="w-4 h-4" /> : <PinOff className="w-4 h-4" />}
           </button>
@@ -71,19 +68,19 @@ function NoteCard({ note, language, onEdit, onDelete, onTogglePin }: NoteCardPro
         )}
         {!hasContent && (
           <p className="mt-1.5 text-sm text-gray-300 dark:text-gray-600 italic flex-1">
-            {language === 'ar' ? 'لا يوجد محتوى بعد...' : 'No content yet...'}
+            لا يوجد محتوى بعد...
           </p>
         )}
 
         <div className="mt-3 pt-3 border-t border-light-border dark:border-dark-border flex items-center justify-between gap-2">
           <div className="flex items-center gap-3 text-[11px] text-gray-400 dark:text-gray-500">
-            <span className="inline-flex items-center gap-1" title={language === 'ar' ? 'تاريخ الإنشاء' : 'Created'}>
+            <span className="inline-flex items-center gap-1" title="تاريخ الإنشاء">
               <Calendar className="w-3 h-3" />
-              {formatNoteDate(note.createdAt, language)}
+              {formatNoteDate(note.createdAt)}
             </span>
-            <span className="inline-flex items-center gap-1" title={language === 'ar' ? 'آخر تعديل' : 'Last edited'}>
+            <span className="inline-flex items-center gap-1" title="آخر تعديل">
               <Clock className="w-3 h-3" />
-              {formatNoteDate(note.updatedAt, language)}
+              {formatNoteDate(note.updatedAt)}
             </span>
           </div>
 
@@ -94,7 +91,7 @@ function NoteCard({ note, language, onEdit, onDelete, onTogglePin }: NoteCardPro
                 onEdit();
               }}
               className="p-1.5 rounded-lg text-gray-400 hover:text-primary-600 hover:bg-primary-50 dark:hover:text-primary-400 dark:hover:bg-primary-900/30 transition-colors"
-              title={language === 'ar' ? 'تحرير' : 'Edit'}
+              title="تحرير"
             >
               <Pencil className="w-3.5 h-3.5" />
             </button>
@@ -104,7 +101,7 @@ function NoteCard({ note, language, onEdit, onDelete, onTogglePin }: NoteCardPro
                 onDelete();
               }}
               className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:text-red-400 dark:hover:bg-red-900/20 transition-colors"
-              title={language === 'ar' ? 'حذف' : 'Delete'}
+              title="حذف"
             >
               <Trash2 className="w-3.5 h-3.5" />
             </button>

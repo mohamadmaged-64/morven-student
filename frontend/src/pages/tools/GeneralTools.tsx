@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import {
   Button,
@@ -11,13 +10,10 @@ import {
   Select,
   EmptyState,
   Badge,
-  Tabs,
   Tooltip,
-  Chip,
   ProgressBar,
 } from '@/components/UI';
 import { useAppStore } from '@/store/useAppStore';
-import { useLanguageStore } from '@/store/useLanguageStore';
 import { usePomodoroStore, type PomodoroMode, type PomodoroSettings } from '@/store/usePomodoroStore';
 import type { Task, ExamCountdown } from '@/types';
 import QuranPage from './Quran';
@@ -31,7 +27,6 @@ interface GeneralToolPageProps {
 }
 export default function GeneralToolPage({ toolId }: GeneralToolPageProps) {
   const navigate = useNavigate();
-  const { direction } = useLanguageStore();
 
   let content: React.ReactNode;
 
@@ -60,8 +55,8 @@ export default function GeneralToolPage({ toolId }: GeneralToolPageProps) {
       return (
         <EmptyState
           icon={<span className="text-4xl">🔧</span>}
-          title="Tool Not Found"
-          description="This tool is not available yet."
+          title="الأداة غير موجودة"
+          description="هذه الأداة غير متاحة حالياً."
         />
       );
   }
@@ -73,11 +68,7 @@ export default function GeneralToolPage({ toolId }: GeneralToolPageProps) {
         className="flex items-center gap-2 text-gray-500 hover:text-primary-500 dark:text-gray-400 dark:hover:text-primary-400 transition-colors group"
       >
         <svg
-          className={`w-5 h-5 transition-transform ${
-            direction === 'rtl'
-              ? 'rotate-180 group-hover:translate-x-1'
-              : 'group-hover:-translate-x-1'
-          }`}
+          className="w-5 h-5 transition-transform rotate-180 group-hover:translate-x-1"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -90,11 +81,7 @@ export default function GeneralToolPage({ toolId }: GeneralToolPageProps) {
           />
         </svg>
 
-        <span className="text-sm font-medium">
-          {direction === 'rtl'
-            ? 'العودة لعام '
-            : 'Back to General'}
-        </span>
+        <span className="text-sm font-medium">العودة للأدوات العامة</span>
       </button>
 
       {content}
@@ -122,27 +109,25 @@ const modeColors: Record<PomodoroMode, { ring: string; bg: string; text: string;
     bg: 'from-blue-500 to-blue-600',
     text: 'text-blue-600 dark:text-blue-400',
     glow: 'shadow-blue-500/30',
-    label: 'focus',
+    label: 'تركيز',
   },
   break: {
     ring: 'stroke-emerald-500',
     bg: 'from-emerald-500 to-emerald-600',
     text: 'text-emerald-600 dark:text-emerald-400',
     glow: 'shadow-emerald-500/30',
-    label: 'Break',
+    label: 'استراحة',
   },
   longBreak: {
     ring: 'stroke-purple-500',
     bg: 'from-purple-500 to-purple-600',
     text: 'text-purple-600 dark:text-purple-400',
     glow: 'shadow-purple-500/30',
-    label: 'Long Break',
+    label: 'استراحة طويلة',
   },
 };
 
 function PomodoroTimer() {
-  const { t } = useTranslation();
-  const { language } = useLanguageStore();
   const [showSettings, setShowSettings] = useState(false);
   const mode = usePomodoroStore((s) => s.mode);
   const timeRemaining = usePomodoroStore((s) => s.timeRemaining);
@@ -164,7 +149,7 @@ function PomodoroTimer() {
 
   const handleSaveSettings = (newSettings: PomodoroSettings) => {
     setSettings(newSettings);
-    addNotification(t('ui.saved'), 'success');
+    addNotification('تم الحفظ', 'success');
   };
 
   const minutes = Math.floor(timeRemaining / 60);
@@ -178,20 +163,15 @@ function PomodoroTimer() {
   const h = Math.floor(totalSecs / 3600);
   const m = Math.floor((totalSecs % 3600) / 60);
 
-  if (language === 'ar') {
-    if (h > 0) return `${h}س ${m}د`;
-    return `${m}د`;
-  }
-
-  if (h > 0) return `${h}h ${m}m`;
-  return `${m}m`;
+  if (h > 0) return `${h}س ${m}د`;
+  return `${m}د`;
 };
 
   const modeLabel = (() => {
     switch (currentMode) {
-      case 'focus': return t('pomodoro.focus');
-      case 'break': return t('pomodoro.break');
-      case 'longBreak': return t('pomodoro.longBreak');
+      case 'focus': return 'تركيز';
+      case 'break': return 'استراحة';
+      case 'longBreak': return 'استراحة طويلة';
     }
   })();
 
@@ -248,7 +228,7 @@ function PomodoroTimer() {
             </span>
 
             <span className="text-xs text-gray-400 dark:text-gray-500 mt-2">
-              {t('pomodoro.sessionCount', { current: Math.min(currentSession + 1, settings.sessionsUntilLongBreak), total: settings.sessionsUntilLongBreak })}
+              {`الجلسة ${Math.min(currentSession + 1, settings.sessionsUntilLongBreak)} من ${settings.sessionsUntilLongBreak}`}
             </span>
           </motion.div>
         </div>
@@ -263,24 +243,24 @@ function PomodoroTimer() {
       >
         {!isRunning && timeRemaining === totalDuration && (
           <Button size="lg" onClick={start}>
-            {t('pomodoro.start')}
+            {'ابدأ'}
           </Button>
         )}
         {isRunning && (
           <Button size="lg" variant="secondary" onClick={pause}>
-            {t('pomodoro.pause')}
+            {'إيقاف مؤقت'}
           </Button>
         )}
         {!isRunning && timeRemaining < totalDuration && timeRemaining > 0 && (
           <Button size="lg" onClick={resume}>
-            {t('ui.resume')}
+            {'استئناف'}
           </Button>
         )}
         <Button size="lg" variant="ghost" onClick={reset}>
-          {t('pomodoro.reset')}
+          {'إعادة تعيين'}
         </Button>
         <Button size="lg" variant="ghost" onClick={skip}>
-          {t('pomodoro.skip')}
+          {'تخطي'}
         </Button>
         <Button size="lg" variant="ghost" onClick={() => setShowSettings(true)}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -299,12 +279,12 @@ function PomodoroTimer() {
       >
         <div>
           <p className="text-2xl font-bold text-gray-800 dark:text-white">{completedSessions}</p>
-          <p className="text-xs text-gray-500 dark:text-gray-400">{t('pomodoro.totalSessions')}</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">{'إجمالي الجلسات'}</p>
         </div>
         <div className="w-px h-8 bg-gray-200 dark:bg-gray-700" />
         <div>
           <p className="text-2xl font-bold text-gray-800 dark:text-white">{formatTotalTime(totalFocusSeconds)}</p>
-          <p className="text-xs text-gray-500 dark:text-gray-400">{t('pomodoro.totalfocustime', 'pomodoro.totalfocustime')}</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">{'إجمالي وقت التركيز'}</p>
         </div>
       </motion.div>
 
@@ -323,9 +303,9 @@ function PomodoroTimer() {
           >
             {(() => {
               switch (mode) {
-                case 'focus': return t('pomodoro.focus');
-                case 'break': return t('pomodoro.break');
-                case 'longBreak': return t('pomodoro.longBreak');
+                case 'focus': return 'تركيز';
+                case 'break': return 'استراحة';
+                case 'longBreak': return 'استراحة طويلة';
               }
             })()}
           </button>
@@ -352,27 +332,26 @@ function PomodoroSettingsModal({
   settings: PomodoroSettings;
   onSave: (s: PomodoroSettings) => void;
 }) {
- const { t, i18n } = useTranslation();
   const [local, setLocal] = useState(settings);
 
   useEffect(() => { setLocal(settings); }, [settings]);
 
   return (
-    <Modal open={open} onClose={onClose} title={t('pomodoro.settings')} size="sm">
+    <Modal open={open} onClose={onClose} title={'الإعدادات'} size="sm">
       <div className="space-y-4">
         <Input
-          label={t('pomodoro.focusDuration')}
+          label={'مدة التركيز (دقائق)'}
           type="text"
           inputMode="numeric"
           pattern="[0-9]*"
           min={1}
           max={120}
           value={local.focusDuration}
-          lang={i18n.language === 'en' ? 'en' : 'ar'}
+          lang={'ar'}
           onChange={e => setLocal(p => ({ ...p, focusDuration: Math.max(1, parseInt(e.target.value) || 1) }))}
         />
         <Input
-          label={t('pomodoro.breakDuration')}
+          label={'مدة الاستراحة (دقائق)'}
           type="text"
           inputMode="numeric"
           pattern="[0-9]*"
@@ -382,33 +361,33 @@ function PomodoroSettingsModal({
           onChange={e => setLocal(p => ({ ...p, breakDuration: Math.max(1, parseInt(e.target.value) || 1) }))}
         />
         <Input
-          label={t('pomodoro.longBreakDuration')}
+          label={'مدة الاستراحة الطويلة (دقائق)'}
           type="text"
           inputMode="numeric"
           pattern="[0-9]*"
           min={1}
           max={60}
           value={local.longBreakDuration}
-          lang={i18n.language === 'en' ? 'en' : 'ar'}
+          lang={'ar'}
           onChange={e => setLocal(p => ({ ...p, longBreakDuration: Math.max(1, parseInt(e.target.value) || 1) }))}
         />
         <Input
-          label={t('pomodoro.sessionsUntilLongBreak')}
+          label={'الجلسات حتى الاستراحة الطويلة'}
           type="text"
           inputMode="numeric"
           pattern="[0-9]*"
           min={1}
           max={20}
           value={local.sessionsUntilLongBreak}
-          lang={i18n.language === 'en' ? 'en' : 'ar'}
+          lang={'ar'}
           onChange={e => setLocal(p => ({ ...p, sessionsUntilLongBreak: Math.max(1, parseInt(e.target.value) || 1) }))}
         />
         <div className="flex gap-3 pt-2">
           <Button variant="ghost" onClick={onClose} className="flex-1">
-            {t('ui.cancel')}
+            {'إلغاء'}
           </Button>
           <Button onClick={() => { onSave(local); onClose(); }} className="flex-1">
-            {t('ui.save')}
+            {'حفظ'}
           </Button>
         </div>
       </div>
@@ -436,8 +415,6 @@ const priorityBadge: Record<Task['priority'], 'success' | 'warning' | 'danger'> 
 };
 
 function TaskManager() {
-  const { t } = useTranslation();
-  const { language } = useLanguageStore();
   const { tasks, addTask, updateTask, deleteTask, toggleTask } = useAppStore();
 
   const [filter, setFilter] = useState<TaskFilter>('all');
@@ -539,15 +516,15 @@ function TaskManager() {
   };
 
   const taskFilterOptions = [
-    { value: 'all', label: t('tasks.allTasks') },
-    { value: 'active', label: t('tasks.activeTasks') },
-    { value: 'completed', label: t('tasks.completedTasks') },
+    { value: 'all', label: 'جميع المهام' },
+    { value: 'active', label: 'المهام النشطة' },
+    { value: 'completed', label: 'المهام المكتملة' },
   ];
 
   const sortOptions = [
-    { value: 'date', label: t('tasks.sortByDate') },
-    { value: 'priority', label: t('tasks.sortByPriority') },
-    { value: 'name', label: t('tasks.sortByName') },
+    { value: 'date', label: 'حسب التاريخ' },
+    { value: 'priority', label: 'حسب الأولوية' },
+    { value: 'name', label: 'حسب الاسم' },
   ];
 
   return (
@@ -560,9 +537,9 @@ function TaskManager() {
       >
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h2 className="text-xl font-bold text-gray-800 dark:text-white">{t('tasks.title')}</h2>
+            <h2 className="text-xl font-bold text-gray-800 dark:text-white">{'المهام'}</h2>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              {t('tasks.taskCount', { count: tasks.length })}
+              {`${tasks.length} مهام`}
             </p>
           </div>
           <Button onClick={() => setShowAddModal(true)}>
@@ -570,7 +547,7 @@ function TaskManager() {
               <line x1="12" y1="5" x2="12" y2="19" />
               <line x1="5" y1="12" x2="19" y2="12" />
             </svg>
-            {t('tasks.addTask')}
+            {'إضافة مهمة'}
           </Button>
         </div>
 
@@ -578,7 +555,7 @@ function TaskManager() {
           <Card padding="sm">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm text-gray-500 dark:text-gray-400">
-                {completedCount}/{tasks.length} {t('tasks.completed').toLowerCase()}
+                {completedCount}/{tasks.length} {'مكتملة'.toLowerCase()}
               </span>
               <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
                 {Math.round(completionPercent)}%
@@ -598,7 +575,7 @@ function TaskManager() {
           transition={{ delay: 0.1 }}
         >
           <Input
-            placeholder={language === 'ar' ? 'بحث في المهام...' : 'Search tasks...'}
+            placeholder={'بحث في المهام...'}
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             icon={
@@ -628,7 +605,7 @@ function TaskManager() {
       {completedCount > 0 && (
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="sm" onClick={handleClearCompleted}>
-            {t('tasks.clearCompleted')} ({completedCount})
+            {'مسح المكتملة'} ({completedCount})
           </Button>
         </div>
       )}
@@ -638,14 +615,14 @@ function TaskManager() {
         <EmptyState
           icon={<span className="text-4xl">📋</span>}
           title={searchQuery
-            ? (language === 'ar' ? 'لا توجد نتائج' : 'No results found')
-            : t('tasks.noTasks')
+            ? ('لا توجد نتائج')
+            : 'لا توجد مهام بعد'
           }
           description={searchQuery
-            ? (language === 'ar' ? 'جرّب البحث بكلمات مختلفة' : 'Try different search terms')
-            : t('tasks.noTasksHint')
+            ? ('جرّب البحث بكلمات مختلفة')
+            : 'أضف أول مهمة لك لتبدأ في تنظيم يومك'
           }
-          action={!searchQuery ? { label: t('tasks.addTask'), onClick: () => setShowAddModal(true) } : undefined}
+          action={!searchQuery ? { label: 'إضافة مهمة', onClick: () => setShowAddModal(true) } : undefined}
         />
       ) : (
         <div className="space-y-2">
@@ -707,7 +684,7 @@ function TaskManager() {
 
                       <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                         <span className={`inline-flex items-center px-2 py-0.5 text-[10px] font-semibold rounded-full uppercase ${priorityColors[task.priority]}`}>
-                          {t(`tasks.${task.priority}`)}
+                          {task.priority === 'high' ? 'عالية' : task.priority === 'medium' ? 'متوسطة' : 'منخفضة'}
                         </span>
 
                         {task.dueDate && (
@@ -718,7 +695,7 @@ function TaskManager() {
                             'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'
                           }`}>
                             {isOverdue(task.dueDate) && !task.completed ? '⚠ ' : ''}
-                            {new Date(task.dueDate).toLocaleDateString(language === 'ar' ? 'ar-SA' : 'en-US', { month: 'short', day: 'numeric' })}
+                            {new Date(task.dueDate).toLocaleDateString('ar-SA', { month: 'short', day: 'numeric' })}
                           </span>
                         )}
                       </div>
@@ -726,7 +703,7 @@ function TaskManager() {
 
                     {/* Actions */}
                     <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-                      <Tooltip content={language === 'ar' ? 'تحريك لأعلى' : 'Move up'}>
+                      <Tooltip content={'تحريك لأعلى'}>
                         <button
                           onClick={() => handleMoveUp(index)}
                           className="p-1 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:text-gray-300 dark:hover:bg-dark-hover transition-colors"
@@ -737,7 +714,7 @@ function TaskManager() {
                           </svg>
                         </button>
                       </Tooltip>
-                      <Tooltip content={language === 'ar' ? 'تحريك لأسفل' : 'Move down'}>
+                      <Tooltip content={'تحريك لأسفل'}>
                         <button
                           onClick={() => handleMoveDown(index)}
                           className="p-1 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:text-gray-300 dark:hover:bg-dark-hover transition-colors"
@@ -748,7 +725,7 @@ function TaskManager() {
                           </svg>
                         </button>
                       </Tooltip>
-                      <Tooltip content={t('ui.delete')}>
+                      <Tooltip content={'حذف'}>
                         <button
                           onClick={() => setDeleteConfirmId(task.id)}
                           className="p-1 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:text-red-400 dark:hover:bg-red-900/20 transition-colors"
@@ -772,46 +749,46 @@ function TaskManager() {
       <Modal
         open={showAddModal}
         onClose={() => setShowAddModal(false)}
-        title={t('tasks.addTask')}
+        title={'إضافة مهمة'}
         size="sm"
       >
         <div className="space-y-4">
           <Input
-            label={t('tasks.taskTitle')}
+            label={'عنوان المهمة'}
             value={newTitle}
             onChange={e => setNewTitle(e.target.value)}
-            placeholder={language === 'ar' ? 'عنوان المهمة' : 'Enter task title'}
+            placeholder={'عنوان المهمة'}
             autoFocus
           />
           <TextArea
-            label={t('tasks.description')}
+            label={'الوصف'}
             value={newDescription}
             onChange={e => setNewDescription(e.target.value)}
-            placeholder={language === 'ar' ? 'وصف اختياري' : 'Optional description'}
+            placeholder={'وصف اختياري'}
             rows={2}
           />
           <Select
-            label={t('tasks.priority')}
+            label={'الأولوية'}
             value={newPriority}
             onChange={e => setNewPriority(e.target.value as Task['priority'])}
             options={[
-              { value: 'low', label: t('tasks.low') },
-              { value: 'medium', label: t('tasks.medium') },
-              { value: 'high', label: t('tasks.high') },
+              { value: 'low', label: 'منخفضة' },
+              { value: 'medium', label: 'متوسطة' },
+              { value: 'high', label: 'عالية' },
             ]}
           />
           <Input
-            label={t('tasks.dueDate')}
+            label={'تاريخ الاستحقاق'}
             type="date"
             value={newDueDate}
             onChange={e => setNewDueDate(e.target.value)}
           />
           <div className="flex gap-3 pt-2">
             <Button variant="ghost" onClick={() => setShowAddModal(false)} className="flex-1">
-              {t('ui.cancel')}
+              {'إلغاء'}
             </Button>
             <Button onClick={handleAddTask} disabled={!newTitle.trim()} className="flex-1">
-              {t('tasks.addTask')}
+              {'إضافة مهمة'}
             </Button>
           </div>
         </div>
@@ -821,22 +798,22 @@ function TaskManager() {
       <Modal
         open={!!deleteConfirmId}
         onClose={() => setDeleteConfirmId(null)}
-        title={t('tasks.deleteTask')}
+        title={'حذف المهمة'}
         size="sm"
       >
         <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-          {t('tasks.deleteConfirm')}
+          {'هل أنت متأكد من حذف هذه المهمة؟'}
         </p>
         <div className="flex gap-3">
           <Button variant="ghost" onClick={() => setDeleteConfirmId(null)} className="flex-1">
-            {t('ui.cancel')}
+            {'إلغاء'}
           </Button>
           <Button
             variant="danger"
             onClick={() => { if (deleteConfirmId) { deleteTask(deleteConfirmId); setDeleteConfirmId(null); } }}
             className="flex-1"
           >
-            {t('ui.delete')}
+            {'حذف'}
           </Button>
         </div>
       </Modal>
@@ -869,19 +846,17 @@ function getDaysRemaining(dateStr: string): number {
   return Math.ceil(diff / (1000 * 60 * 60 * 24));
 }
 
-function getMotivationalMessage(days: number, language: string): string {
-  if (days < 0) return language === 'ar' ? 'انتهى موعد الامتحان!' : 'Exam has passed!';
-  if (days === 0) return language === 'ar' ? 'الامتحان اليوم! حظاً موفقاً!' : "It's today! Good luck!";
-  if (days <= 3) return language === 'ar' ? 'تحضر جيداً! أنت قريب!' : 'Study hard! You\'re almost there!';
-  if (days <= 7) return language === 'ar' ? 'أسبوع واحد متبقٍ - ركّز!' : 'One week left - focus up!';
-  if (days <= 14) return language === 'ar' ? 'أسبوعان - حان وقت المراجعة' : 'Two weeks - time to review';
-  if (days <= 30) return language === 'ar' ? 'وقت كافٍ للتحضير الجيد' : 'Enough time to prepare well';
-  return language === 'ar' ? 'استمتع بوقتك للاستعداد' : 'Enjoy your time to prepare';
+function getMotivationalMessage(days: number): string {
+  if (days < 0) return 'انتهى موعد الامتحان!';
+  if (days === 0) return 'الامتحان اليوم! حظاً موفقاً!';
+  if (days <= 3) return 'تحضر جيداً! أنت قريب!';
+  if (days <= 7) return 'أسبوع واحد متبقٍ - ركّز!';
+  if (days <= 14) return 'أسبوعان - حان وقت المراجعة';
+  if (days <= 30) return 'وقت كافٍ للتحضير الجيد';
+  return 'استمتع بوقتك للاستعداد';
 }
 
 function ExamCountdownPage() {
-  const { t } = useTranslation();
-  const { language } = useLanguageStore();
   const { exams, addExam, deleteExam } = useAppStore();
 
   const [showAddModal, setShowAddModal] = useState(false);
@@ -908,9 +883,7 @@ function ExamCountdownPage() {
     setShowAddModal(false);
   };
 
-  const examCountLabel = language === 'ar'
-    ? `${exams.length} ${exams.length === 1 ? 'امتحان' : 'امتحانات'}`
-    : `${exams.length} ${exams.length === 1 ? 'exam' : 'exams'}`;
+  const examCountLabel = `${exams.length} ${exams.length === 1 ? 'امتحان' : 'امتحانات'}`;
 
   return (
     <div className="space-y-6">
@@ -921,7 +894,7 @@ function ExamCountdownPage() {
         className="flex flex-wrap items-center justify-between gap-3"
       >
         <div>
-          <h2 className="text-xl font-bold text-gray-800 dark:text-white">{t('exams.title')}</h2>
+          <h2 className="text-xl font-bold text-gray-800 dark:text-white">{'الامتحانات القادمة'}</h2>
           <p className="text-sm text-gray-500 dark:text-gray-400">{examCountLabel}</p>
         </div>
         <Button onClick={() => setShowAddModal(true)}>
@@ -929,7 +902,7 @@ function ExamCountdownPage() {
             <line x1="12" y1="5" x2="12" y2="19" />
             <line x1="5" y1="12" x2="19" y2="12" />
           </svg>
-          {t('exams.addExam')}
+          {'إضافة امتحان'}
         </Button>
       </motion.div>
 
@@ -937,9 +910,9 @@ function ExamCountdownPage() {
       {sortedExams.length === 0 ? (
         <EmptyState
           icon={<span className="text-4xl">📚</span>}
-          title={t('exams.noExams')}
-          description={t('exams.noExamsHint')}
-          action={{ label: t('exams.addFirstExam'), onClick: () => setShowAddModal(true) }}
+          title={'لا توجد امتحانات بعد'}
+          description={'أضف امتحانك الأول لتبدأ العد التنازلي'}
+          action={{ label: 'أضف أول امتحان', onClick: () => setShowAddModal(true) }}
         />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -947,7 +920,7 @@ function ExamCountdownPage() {
             {sortedExams.map((exam, index) => {
               const days = getDaysRemaining(exam.date);
               const colorMeta = getExamColorMeta(exam.color);
-              const message = getMotivationalMessage(days, language);
+              const message = getMotivationalMessage(days);
 
               return (
                 <motion.div
@@ -967,7 +940,7 @@ function ExamCountdownPage() {
                             {exam.name}
                           </h3>
                           <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
-                            {new Date(exam.date).toLocaleDateString(language === 'ar' ? 'ar-SA' : 'en-US', {
+                            {new Date(exam.date).toLocaleDateString('ar-SA', {
                               weekday: 'long',
                               year: 'numeric',
                               month: 'long',
@@ -998,12 +971,10 @@ function ExamCountdownPage() {
                         <div>
                           <p className="text-sm font-medium text-gray-600 dark:text-gray-300">
                             {days === 0
-                              ? t('exams.today')
+                              ? 'اليوم'
                               : days < 0
-                                ? t('exams.overdue')
-                                : language === 'ar'
-                                  ? `${days} يوم متبقي`
-                                  : `${days} day${days !== 1 ? 's' : ''} left`
+                                ? 'انتهى الموعد'
+                                : `${days} يوم متبقي`
                             }
                           </p>
                         </div>
@@ -1025,19 +996,19 @@ function ExamCountdownPage() {
       <Modal
         open={showAddModal}
         onClose={() => setShowAddModal(false)}
-        title={t('exams.addExam')}
+        title={'إضافة امتحان'}
         size="sm"
       >
         <div className="space-y-4">
           <Input
-            label={t('exams.examName')}
+            label={'اسم الامتحان'}
             value={newName}
             onChange={e => setNewName(e.target.value)}
-            placeholder={language === 'ar' ? 'اسم الامتحان' : 'e.g. Mathematics Final'}
+            placeholder={'اسم الامتحان'}
             autoFocus
           />
           <Input
-            label={t('exams.examDate')}
+            label={'تاريخ الامتحان'}
             type="date"
             value={newDate}
             onChange={e => setNewDate(e.target.value)}
@@ -1045,7 +1016,7 @@ function ExamCountdownPage() {
           />
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {t('exams.examColor')}
+              {'لون الامتحان'}
             </label>
             <div className="flex gap-2 flex-wrap">
               {EXAM_COLORS.map(color => (
@@ -1062,10 +1033,10 @@ function ExamCountdownPage() {
           </div>
           <div className="flex gap-3 pt-2">
             <Button variant="ghost" onClick={() => setShowAddModal(false)} className="flex-1">
-              {t('ui.cancel')}
+              {'إلغاء'}
             </Button>
             <Button onClick={handleAddExam} disabled={!newName.trim() || !newDate} className="flex-1">
-              {t('exams.addExam')}
+              {'إضافة امتحان'}
             </Button>
           </div>
         </div>
@@ -1075,22 +1046,22 @@ function ExamCountdownPage() {
       <Modal
         open={!!deleteConfirmId}
         onClose={() => setDeleteConfirmId(null)}
-        title={t('exams.deleteExam')}
+                          title="حذف الامتحان"
         size="sm"
       >
         <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-          {language === 'ar' ? 'هل أنت متأكد من حذف هذا الامتحان؟' : 'Are you sure you want to delete this exam?'}
+          {'هل أنت متأكد من حذف هذا الامتحان؟'}
         </p>
         <div className="flex gap-3">
           <Button variant="ghost" onClick={() => setDeleteConfirmId(null)} className="flex-1">
-            {t('ui.cancel')}
+            {'إلغاء'}
           </Button>
           <Button
             variant="danger"
             onClick={() => { if (deleteConfirmId) { deleteExam(deleteConfirmId); setDeleteConfirmId(null); } }}
             className="flex-1"
           >
-            {t('ui.delete')}
+            {'حذف'}
           </Button>
         </div>
       </Modal>

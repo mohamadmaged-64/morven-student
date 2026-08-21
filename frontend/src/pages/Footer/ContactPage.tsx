@@ -21,23 +21,20 @@ const fadeUp = {
 };
 
 const processSteps = [
-  { icon: Send, titleEn: 'Send Message', titleAr: 'أرسل الرسالة', descEn: 'Fill out the form and submit.', descAr: 'املأ النموذج وأرسله.' },
-  { icon: CheckCircle2, titleEn: 'Review', titleAr: 'المراجعة', descEn: 'Our team reviews your message.', descAr: 'فريقنا يراجع رسالتك.' },
-  { icon: MessageCircle, titleEn: 'Response', titleAr: 'الرد', descEn: 'We get back to you promptly.', descAr: 'نرد عليك في أقرب وقت.' },
+  { icon: Send, title: 'أرسل الرسالة', desc: 'املأ النموذج وأرسله.' },
+  { icon: CheckCircle2, title: 'المراجعة', desc: 'فريقنا يراجع رسالتك.' },
+  { icon: MessageCircle, title: 'الرد', desc: 'نرد عليك في أقرب وقت.' },
 ];
 
 const subjects = [
-  { value: 'general', labelEn: 'General Question', labelAr: 'سؤال عام' },
-  { value: 'support', labelEn: 'Technical Support', labelAr: 'دعم فني' },
-  { value: 'bug', labelEn: 'Bug Report', labelAr: 'تقرير خطأ' },
-  { value: 'suggestion', labelEn: 'Feature Suggestion', labelAr: 'اقتراح ميزة' },
-  { value: 'other', labelEn: 'Appreciation message', labelAr: 'رسالة شكر' },
+  { value: 'general', label: 'سؤال عام' },
+  { value: 'support', label: 'دعم فني' },
+  { value: 'bug', label: 'تقرير خطأ' },
+  { value: 'suggestion', label: 'اقتراح ميزة' },
+  { value: 'other', label: 'رسالة شكر' },
 ];
 
 export default function ContactPage() {
-  const lang = document.documentElement.lang === 'ar' ? 'ar' : 'en';
-  const isAr = lang === 'ar';
-
   const [form, setForm] = useState({ name: '', email: '', subject: '', category: 'general', message: '' });
   const [submitted, setSubmitted] = useState(false);
 
@@ -71,7 +68,7 @@ export default function ContactPage() {
             className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 text-xs font-semibold mb-6"
           >
             <MessageCircle className="w-3.5 h-3.5" />
-            {isAr ? 'تواصل معنا' : 'Contact Us'}
+            تواصل معنا
           </motion.div>
           <motion.h1
             initial={{ opacity: 0, y: 12 }}
@@ -79,10 +76,10 @@ export default function ContactPage() {
             transition={{ duration: 0.5, delay: 0.15 }}
             className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-4 tracking-tight leading-tight"
           >
-            {isAr ? 'نحن هنا' : 'We Are'}
+            نحن هنا
             <br />
             <span className="text-primary-600 dark:text-primary-400">
-              {isAr ? 'لمساعدتك' : 'Here to Help'}
+              لمساعدتك
             </span>
           </motion.h1>
           <motion.p
@@ -91,9 +88,7 @@ export default function ContactPage() {
             transition={{ duration: 0.5, delay: 0.25 }}
             className="text-gray-500 dark:text-gray-400 max-w-xl mx-auto text-base md:text-lg leading-relaxed"
           >
-            {isAr
-              ? 'لديك سؤال أو اقتراح أو مشكلة؟ أرسل لنا رسالة وسنرد في أقرب وقت.'
-              : 'Have a question, suggestion, or issue? We would love to hear from you. Send us a message and we will respond as soon as possible.'}
+            لديك سؤال أو اقتراح أو مشكلة؟ أرسل لنا رسالة وسنرد في أقرب وقت.
           </motion.p>
         </div>
       </motion.section>
@@ -119,18 +114,16 @@ export default function ContactPage() {
                   <CheckCircle2 className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                  {isAr ? 'تم إرسال رسالتك!' : 'Message Sent!'}
+                  تم إرسال رسالتك!
                 </h3>
                 <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">
-                  {isAr
-                    ? 'شكراً لتواصلك معنا. سنرد في أقرب وقت ممكن.'
-                    : 'Thank you for reaching out. We will respond as soon as possible.'}
+                  شكراً لتواصلك معنا. سنرد في أقرب وقت ممكن.
                 </p>
                 <button
                   onClick={() => { setSubmitted(false); setForm({ name: '', email: '', subject: '', category: 'general', message: '' }); }}
                   className="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium transition-colors"
                 >
-                  {isAr ? 'إرسال رسالة أخرى' : 'Send Another Message'}
+                  إرسال رسالة أخرى
                 </button>
               </motion.div>
             ) : (
@@ -140,7 +133,7 @@ export default function ContactPage() {
                     <Send className="w-5 h-5 text-primary-600 dark:text-primary-400" />
                   </div>
                   <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                    {isAr ? 'أرسل لنا رسالة' : 'Send Us a Message'}
+                    أرسل لنا رسالة
                   </h2>
                 </div>
 
@@ -148,7 +141,7 @@ export default function ContactPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                        {isAr ? 'الاسم الكامل' : 'Full Name'}
+                        الاسم الكامل
                       </label>
                       <input
                         type="text"
@@ -156,13 +149,13 @@ export default function ContactPage() {
                         value={form.name}
                         onChange={handleChange}
                         required
-                        placeholder={isAr ? 'أدخل اسمك' : 'Enter your name'}
+                        placeholder="أدخل اسمك"
                         className="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-dark-surface border border-light-border dark:border-dark-border text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200"
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                        {isAr ? 'البريد الإلكتروني' : 'Email Address'}
+                        البريد الإلكتروني
                       </label>
                       <input
                         type="email"
@@ -170,7 +163,7 @@ export default function ContactPage() {
                         value={form.email}
                         onChange={handleChange}
                         required
-                        placeholder={isAr ? 'أدخل بريدك الإلكتروني' : 'Enter your email'}
+                        placeholder="أدخل بريدك الإلكتروني"
                         className="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-dark-surface border border-light-border dark:border-dark-border text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200"
                       />
                     </div>
@@ -179,7 +172,7 @@ export default function ContactPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                        {isAr ? 'الموضوع' : 'Subject'}
+                        الموضوع
                       </label>
                       <input
                         type="text"
@@ -187,13 +180,13 @@ export default function ContactPage() {
                         value={form.subject}
                         onChange={handleChange}
                         required
-                        placeholder={isAr ? 'موضوع الرسالة' : 'Message subject'}
+                        placeholder="موضوع الرسالة"
                         className="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-dark-surface border border-light-border dark:border-dark-border text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200"
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                        {isAr ? 'الفئة' : 'Category'}
+                        الفئة
                       </label>
                       <select
                         name="category"
@@ -203,7 +196,7 @@ export default function ContactPage() {
                       >
                         {subjects.map((s) => (
                           <option key={s.value} value={s.value}>
-                            {isAr ? s.labelAr : s.labelEn}
+                            {s.label}
                           </option>
                         ))}
                       </select>
@@ -212,7 +205,7 @@ export default function ContactPage() {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                      {isAr ? 'الرسالة' : 'Message'}
+                      الرسالة
                     </label>
                     <textarea
                       name="message"
@@ -220,7 +213,7 @@ export default function ContactPage() {
                       onChange={handleChange}
                       required
                       rows={5}
-                      placeholder={isAr ? 'اكتب رسالتك هنا...' : 'Write your message here...'}
+                      placeholder="اكتب رسالتك هنا..."
                       className="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-dark-surface border border-light-border dark:border-dark-border text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200 resize-none"
                     />
                   </div>
@@ -230,7 +223,7 @@ export default function ContactPage() {
                     className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-700 text-white text-sm font-medium transition-colors duration-200 shadow-md shadow-primary-600/20"
                   >
                     <Send className="w-4 h-4" />
-                    {isAr ? 'إرسال الرسالة' : 'Send Message'}
+                    إرسال الرسالة
                   </button>
                 </form>
               </>
@@ -249,7 +242,7 @@ export default function ContactPage() {
           className="text-center mb-10"
         >
           <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-3">
-            {isAr ? 'كيف نتعامل مع رسائلك' : 'How We Handle Your Messages'}
+            كيف نتعامل مع رسائلك
           </h2>
         </motion.div>
 
@@ -273,10 +266,10 @@ export default function ContactPage() {
                     <Icon className="w-7 h-7 text-white" />
                   </div>
                   <div className="text-sm font-semibold text-gray-900 dark:text-white mb-1">
-                    {isAr ? step.titleAr : step.titleEn}
+                    {step.title}
                   </div>
                   <div className="text-xs text-gray-500 dark:text-gray-400">
-                    {isAr ? step.descAr : step.descEn}
+                    {step.desc}
                   </div>
                 </div>
                 {!isLast && (
@@ -315,10 +308,10 @@ export default function ContactPage() {
                 </div>
                 <div className="pt-2 pb-6">
                   <div className="text-sm font-semibold text-gray-900 dark:text-white mb-0.5">
-                    {isAr ? step.titleAr : step.titleEn}
+                    {step.title}
                   </div>
                   <div className="text-xs text-gray-500 dark:text-gray-400">
-                    {isAr ? step.descAr : step.descEn}
+                    {step.desc}
                   </div>
                 </div>
               </motion.div>
@@ -339,12 +332,10 @@ export default function ContactPage() {
           <MessageCircle className="w-7 h-7 text-emerald-600 dark:text-emerald-400" />
         </div>
         <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-3">
-          {isAr ? 'شكراً لتواصلك' : 'Thank You for Reaching Out'}
+          شكراً لتواصلك
         </h2>
         <p className="text-gray-500 dark:text-gray-400 max-w-lg mx-auto text-sm md:text-base leading-relaxed">
-          {isAr
-            ? 'نقدر ملاحظاتك وتساؤلاتك. كل رسالة تساعدنا على تحسين مورفن.'
-            : 'We value your feedback and inquiries. Every message helps us improve Morven.'}
+          نقدر ملاحظاتك وتساؤلاتك. كل رسالة تساعدنا على تحسين مورفن.
         </p>
       </motion.section>
     </div>

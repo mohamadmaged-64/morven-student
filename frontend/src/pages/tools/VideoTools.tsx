@@ -8,9 +8,7 @@ import { ProgressBar } from '@/components/UI/ProgressBar';
 import { EmptyState } from '@/components/UI/EmptyState';
 import { Badge } from '@/components/UI/Badge';
 import { useAppStore } from '@/store/useAppStore';
-import { useLanguageStore } from '@/store/useLanguageStore';
 import { useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import { saveToLibrary } from '@/services/savedFilesService';
 
 type ToolId = 'extract-audio-video' | 'compress-video' | 'convert-video-formats' | 'video-to-audio';
@@ -46,10 +44,10 @@ function VideoPreview({ file, videoRef }: { file: File; videoRef: React.RefObjec
       </div>
       <div className="flex flex-wrap gap-2">
         <Badge variant="primary">{formatBytes(file.size)}</Badge>
-        <Badge variant="secondary">{file.type || 'unknown type'}</Badge>
+        <Badge variant="secondary">{file.type || 'نوع غير معروف'}</Badge>
         {meta && (
           <>
-            <Badge variant="info">{Math.floor(meta.duration)}s</Badge>
+            <Badge variant="info">{Math.floor(meta.duration)} ث</Badge>
             <Badge variant="neutral">{meta.width}x{meta.height}</Badge>
           </>
         )}
@@ -60,8 +58,6 @@ function VideoPreview({ file, videoRef }: { file: File; videoRef: React.RefObjec
 
 function ExtractAudioFromVideo() {
   const { addNotification } = useAppStore();
-  const { direction } = useLanguageStore();
-  const { t } = useTranslation();
   const [file, setFile] = useState<File | null>(null);
   const [processing, setProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -99,7 +95,7 @@ function ExtractAudioFromVideo() {
             document.body.appendChild(a); a.click(); document.body.removeChild(a);
             URL.revokeObjectURL(url);
             saveToLibrary(blob, file.name.replace(/\.[^.]+$/, '') + '-audio.webm', 'video-tools').catch(() => {});
-            setProgress(100); addNotification('Audio extracted successfully!', 'success');
+            setProgress(100); addNotification('تم استخراج الصوت بنجاح!', 'success');
             setProcessing(false); setTimeout(() => setProgress(0), 2000);
           };
 
@@ -115,34 +111,31 @@ function ExtractAudioFromVideo() {
       }
 
       setProgress(50);
-      addNotification('Audio track extraction requires browser MediaRecorder support. The video file has been renamed for download.', 'info');
+      addNotification('يتطلب استخراج المسار الصوتي دعم المتصفح لـ MediaRecorder. سيتم تنزيل ملف الفيديو كما هو.', 'info');
       const url = URL.createObjectURL(file);
       const a = document.createElement('a');
       a.href = url; a.download = file.name.replace(/\.[^.]+$/, '') + '-audio' + (file.name.match(/\.[^.]+$/)?.[0] || '.mp4');
       document.body.appendChild(a); a.click(); document.body.removeChild(a);
       setProgress(100);
-      addNotification('Audio file download initiated', 'success');
+      addNotification('بدأ تنزيل الملف الصوتي.', 'success');
     } catch (err) {
-      addNotification('Error extracting audio: ' + (err instanceof Error ? err.message : 'Unknown error'), 'error');
+      addNotification('خطأ في استخراج الصوت: ' + (err instanceof Error ? err.message : 'خطأ غير معروف'), 'error');
     } finally {
       setProcessing(false); setTimeout(() => setProgress(0), 2000);
     }
   }, [file, addNotification]);
 
   return (
-    <div className="space-y-4" dir={direction}>
+    <div className="space-y-4" dir="rtl">
       <FileUpload accept={['video/*']} onFilesSelected={handleFile}
-      label={t('Upload video file', 'Upload video file')}
-description={t(
-  'Supports MP4, WebM, OGG, and other video formats',
-  'Supports MP4, WebM, OGG, and other video formats'
-)}
-/>
-{file && <VideoPreview file={file} videoRef={videoRef} />}
-      {processing && <ProgressBar value={progress} color="gradient" label={t('Extracting audio...', 'Extracting audio...')} showLabel />}
+        label="ارفع ملف فيديو"
+        description="يدعم MP4 وWebM وOGG وغيرها من صيغ الفيديو."
+      />
+      {file && <VideoPreview file={file} videoRef={videoRef} />}
+      {processing && <ProgressBar value={progress} color="gradient" label="جارٍ استخراج الصوت..." showLabel />}
       {file && (
         <Button onClick={handleExtract} loading={processing} className="w-full" icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>}>
-          {t('Extract Audio from Video', 'Extract Audio from Video')}
+          استخراج الصوت من الفيديو
         </Button>
       )}
     </div>
@@ -151,8 +144,6 @@ description={t(
 
 function CompressVideo() {
   const { addNotification } = useAppStore();
-  const { direction } = useLanguageStore();
-  const { t } = useTranslation();
   const [file, setFile] = useState<File | null>(null);
   const [processing, setProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -199,7 +190,7 @@ function CompressVideo() {
           URL.revokeObjectURL(url);
           saveToLibrary(blob, file.name.replace(/\.[^.]+$/, '') + '-compressed.webm', 'video-tools').catch(() => {});
           setProgress(100);
-          addNotification(`Compressed: ${formatBytes(file.size)} -> ${formatBytes(blob.size)}`, 'success');
+          addNotification(`تم ضغط الفيديو: ${formatBytes(file.size)} ← ${formatBytes(blob.size)}`, 'success');
           setProcessing(false); setTimeout(() => setProgress(0), 2000);
         };
 
@@ -218,42 +209,39 @@ function CompressVideo() {
         return;
       }
 
-      addNotification('Video compression requires browser Canvas/MediaRecorder support. The original file is provided for download.', 'info');
+      addNotification('يتطلب ضغط الفيديو دعم المتصفح لـ Canvas/MediaRecorder. سيتم توفير الملف الأصلي للتنزيل.', 'info');
       const url = URL.createObjectURL(file);
       const a = document.createElement('a');
       a.href = url; a.download = file.name;
       document.body.appendChild(a); a.click(); document.body.removeChild(a);
       setProgress(100);
     } catch (err) {
-      addNotification('Error compressing video: ' + (err instanceof Error ? err.message : 'Unknown error'), 'error');
+      addNotification('خطأ في ضغط الفيديو: ' + (err instanceof Error ? err.message : 'خطأ غير معروف'), 'error');
     } finally {
       setProcessing(false); setTimeout(() => setProgress(0), 2000);
     }
   }, [file, addNotification]);
 
   return (
-    <div className="space-y-4" dir={direction}>
+    <div className="space-y-4" dir="rtl">
       <FileUpload accept={['video/*']} onFilesSelected={handleFile}
-       label={t('Upload video to compress', 'Upload video to compress')}
-       description={t(
-         'Videos will be re-encoded at lower resolution (640x360)',
-         'Videos will be re-encoded at lower resolution (640x360)'
-    )}
-    />
-{file && <VideoPreview file={file} videoRef={videoRef} />}
+        label="ارفع فيديو لضغطه"
+        description="سيُعاد ترميز الفيديو بدقة أقل (640×360)."
+      />
+      {file && <VideoPreview file={file} videoRef={videoRef} />}
       {file && (
         <Card padding="sm" className="bg-gray-50 dark:bg-dark-surface">
           <div className="grid grid-cols-2 gap-3 text-sm">
-            <div><span className="text-gray-500 dark:text-gray-400">{t('Original size:', 'Original size:')}:</span> <span className="font-semibold text-gray-800 dark:text-gray-200">{formatBytes(file.size)}</span></div>
-            <div><span className="text-gray-500 dark:text-gray-400">{t('Format:', 'Format:')}:</span> <span className="font-semibold text-gray-800 dark:text-gray-200">{file.type ||  t('unknown', 'unknown')}</span></div>
+            <div><span className="text-gray-500 dark:text-gray-400">الحجم الأصلي:</span> <span className="font-semibold text-gray-800 dark:text-gray-200">{formatBytes(file.size)}</span></div>
+            <div><span className="text-gray-500 dark:text-gray-400">الصيغة:</span> <span className="font-semibold text-gray-800 dark:text-gray-200">{file.type || 'غير معروف'}</span></div>
           </div>
         </Card>
       )}
-      
-      {processing && <ProgressBar value={progress} color="gradient" label={t('Compressing video...', 'Compressing video...')} showLabel />}
+
+      {processing && <ProgressBar value={progress} color="gradient" label="جارٍ ضغط الفيديو..." showLabel />}
       {file && (
         <Button onClick={handleCompress} loading={processing} className="w-full" icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg>}>
-         {t('Compress Video', 'Compress Video')}
+          ضغط الفيديو
         </Button>
       )}
     </div>
@@ -262,8 +250,6 @@ function CompressVideo() {
 
 function ConvertVideoFormats() {
   const { addNotification } = useAppStore();
-  const { direction } = useLanguageStore();
-  const { t } = useTranslation();
   const [file, setFile] = useState<File | null>(null);
   const [targetFormat, setTargetFormat] = useState('webm');
   const [processing, setProcessing] = useState(false);
@@ -295,7 +281,7 @@ function ConvertVideoFormats() {
 
         const stream = canvas.captureStream(30);
         const vStream = video.captureStream();
-        vStream.getAudioTracks().forEach((t) => stream.addTrack(t));
+        vStream.getAudioTracks().forEach((track) => stream.addTrack(track));
 
         const mimeTypes = ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'];
         const mimeType = mimeTypes.find((m) => MediaRecorder.isTypeSupported(m)) || 'video/webm';
@@ -312,7 +298,7 @@ function ConvertVideoFormats() {
           URL.revokeObjectURL(url);
           saveToLibrary(blob, file.name.replace(/\.[^.]+$/, '') + '-converted.' + ext, 'video-tools').catch(() => {});
           setProgress(100);
-          addNotification(`Video converted to ${ext.toUpperCase()}!`, 'success');
+          addNotification(`تم تحويل الفيديو إلى ${ext.toUpperCase()}!`, 'success');
           setProcessing(false); setTimeout(() => setProgress(0), 2000);
         };
 
@@ -331,52 +317,52 @@ function ConvertVideoFormats() {
         return;
       }
 
-      addNotification('Format conversion requires MediaRecorder API. File downloaded as-is.', 'info');
+      addNotification('يتطلب تحويل الصيغ دعم MediaRecorder. سيتم تنزيل الملف كما هو.', 'info');
       const url = URL.createObjectURL(file);
       const a = document.createElement('a');
       a.href = url; a.download = file.name;
       document.body.appendChild(a); a.click(); document.body.removeChild(a);
       setProgress(100);
     } catch (err) {
-      addNotification('Error converting video: ' + (err instanceof Error ? err.message : 'Unknown error'), 'error');
+      addNotification('خطأ في تحويل الفيديو: ' + (err instanceof Error ? err.message : 'خطأ غير معروف'), 'error');
     } finally {
       setProcessing(false); setTimeout(() => setProgress(0), 2000);
     }
   }, [file, targetFormat, addNotification]);
 
-  const currentExt = file?.name.split('.').pop()?.toUpperCase() || 'Unknown';
+  const currentExt = file?.name.split('.').pop()?.toUpperCase() || 'غير معروف';
 
   return (
-    <div className="space-y-4" dir={direction}>
-      <FileUpload accept={['video/*']} onFilesSelected={handleFile} label="Upload video to convert" description="Select a video file to convert" />
+    <div className="space-y-4" dir="rtl">
+      <FileUpload accept={['video/*']} onFilesSelected={handleFile} label="ارفع فيديو للتحويل" description="حدد ملف فيديو للتحويل" />
       {file && <VideoPreview file={file} videoRef={videoRef} />}
       {file && (
         <div className="grid grid-cols-2 gap-3">
           <Card padding="sm">
-            <p className="text-xs text-gray-500 dark:text-gray-400">Current Format</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">الصيغة الحالية</p>
             <p className="text-lg font-bold text-gray-800 dark:text-gray-200">{currentExt}</p>
           </Card>
           <Select
-           label={t('Target Format', 'Target Format')}
+            label="الصيغة الهدف"
             options={[
               { value: 'webm', label: 'WebM' },
-              { value: 'mp4', label: 'MP4 (WebM container)' },
-              { value: 'ogv', label: 'OGG Video' },
+              { value: 'mp4', label: 'MP4 (حاوية WebM)' },
+              { value: 'ogv', label: 'فيديو OGG' },
             ]}
             value={targetFormat}
             onChange={(e) => setTargetFormat(e.target.value)}
           />
         </div>
       )}
-      {processing && <ProgressBar value={progress} color="gradient" label={t('Converting...', 'Converting...')} showLabel />}
+      {processing && <ProgressBar value={progress} color="gradient" label="جارٍ التحويل..." showLabel />}
       {file && (
         <Button onClick={handleConvert} loading={processing} className="w-full" icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>}>
-          Convert to {targetFormat.toUpperCase()}
+          تحويل إلى {targetFormat.toUpperCase()}
         </Button>
       )}
       <Card padding="sm" className="bg-sky-50 dark:bg-sky-900/20 border-sky-200 dark:border-sky-800">
         <p className="text-sm text-sky-700 dark:text-sky-300">
-          <strong>Note:</strong> Browser-based conversion uses MediaRecorder with Canvas re-encoding. True MP4 output requires server-side processing. Output will be WebM format.
+          <strong>ملاحظة:</strong> التحويل داخل المتصفح يستخدم MediaRecorder مع إعادة ترميز عبر Canvas. إخراج MP4 الحقيقي يتطلب معالجة من جهة الخادم. سيكون الملف الناتج بصيغة WebM.
         </p>
       </Card>
     </div>
@@ -385,8 +371,6 @@ function ConvertVideoFormats() {
 
 function VideoToAudio() {
   const { addNotification } = useAppStore();
-  const { direction } = useLanguageStore();
-  const { t } = useTranslation();
   const [file, setFile] = useState<File | null>(null);
   const [processing, setProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -425,7 +409,7 @@ function VideoToAudio() {
             URL.revokeObjectURL(url);
             saveToLibrary(blob, file.name.replace(/\.[^.]+$/, '') + '.webm', 'video-tools').catch(() => {});
             setProgress(100);
-            addNotification(`Audio extracted: ${formatBytes(blob.size)}`, 'success');
+            addNotification(`تم استخراج الصوت: ${formatBytes(blob.size)}`, 'success');
             setProcessing(false); setTimeout(() => setProgress(0), 2000);
           };
           video.currentTime = 0;
@@ -438,62 +422,57 @@ function VideoToAudio() {
         }
       }
 
-      addNotification('No audio track found or browser does not support captureStream', 'warning');
+      addNotification('لم يتم العثور على مسار صوتي أو أن المتصفح لا يدعم captureStream', 'warning');
       setProcessing(false);
     } catch (err) {
-      addNotification('Error: ' + (err instanceof Error ? err.message : 'Unknown error'), 'error');
+      addNotification('خطأ: ' + (err instanceof Error ? err.message : 'خطأ غير معروف'), 'error');
     } finally {
       setProcessing(false); setTimeout(() => setProgress(0), 2000);
     }
   }, [file, addNotification]);
 
   return (
-    <div className="space-y-4" dir={direction}>
+    <div className="space-y-4" dir="rtl">
       <FileUpload accept={['video/*']} onFilesSelected={handleFile}
-       label={t('Upload video to extract audio', 'Upload video to extract audio')}
-       description={t(
-         'Convert video audio track to a standalone audio file',
-         'Convert video audio track to a standalone audio file'
-    )}
-    />
+        label="ارفع فيديو لاستخراج الصوت"
+        description="حوّل المسار الصوتي للفيديو إلى ملف صوتي مستقل."
+      />
       {file && <VideoPreview file={file} videoRef={videoRef} />}
-      {processing && <ProgressBar value={progress} color="gradient" label={t('Converting...', 'Converting...')} showLabel />}
+      {processing && <ProgressBar value={progress} color="gradient" label="جارٍ التحويل..." showLabel />}
       {file && (
         <Button onClick={handleConvert} loading={processing} className="w-full" icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>}>
-          {t('Convert Video to Audio', 'Convert Video to Audio')}
+          تحويل الفيديو إلى صوت
         </Button>
       )}
-     
+
     </div>
   );
 }
 
 function VideoToolPage({ toolId }: { toolId: string }) {
-  const { direction } = useLanguageStore();
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const configs: Record<ToolId, { title: string; description: string; icon: JSX.Element; component: JSX.Element }> = {
     'extract-audio-video': {
-      title: 'Extract Audio from Video',
-      description: 'Separate audio from video files',
+      title: 'استخراج الصوت من الفيديو',
+      description: 'فصل الصوت عن ملفات الفيديو',
       icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>,
       component: <ExtractAudioFromVideo />,
     },
     'compress-video': {
-      title: 'Compress Video',
-      description: 'Reduce video file size with re-encoding',
+      title: 'ضغط الفيديو',
+      description: 'قلّل حجم الفيديو بإعادة الترميز',
       icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg>,
       component: <CompressVideo />,
     },
     'convert-video-formats': {
-      title: 'Convert Video Formats',
-      description: 'Convert between video formats',
+      title: 'تحويل صيغ الفيديو',
+      description: 'التحويل بين صيغ الفيديو',
       icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>,
       component: <ConvertVideoFormats />,
     },
     'video-to-audio': {
-      title: 'Video to Audio',
-      description: 'Convert video files to audio format',
+      title: 'فيديو إلى صوت',
+      description: 'حوّل ملفات الفيديو إلى صيغة صوتية',
       icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>,
       component: <VideoToAudio />,
     },
@@ -505,44 +484,38 @@ function VideoToolPage({ toolId }: { toolId: string }) {
     return (
       <EmptyState
         icon={<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>}
-        title="Tool not found"
-        description="The requested video tool could not be found."
+        title="الأداة غير موجودة"
+        description="تعذر العثور على أداة الفيديو المطلوبة."
       />
     );
   }
 
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6" dir={direction}>
+    <div className="max-w-4xl mx-auto space-y-6" dir="rtl">
       <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
         <button
-        onClick={() => navigate('/category/video')}
-        className="flex items-center gap-2 text-gray-500 hover:text-primary-500 dark:text-gray-400 dark:hover:text-primary-400 transition-colors group"
-      >
-        <svg
-          className={`w-5 h-5 transition-transform ${
-            direction === 'rtl'
-              ? 'rotate-180 group-hover:translate-x-1'
-              : 'group-hover:-translate-x-1'
-          }`}
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
+          onClick={() => navigate('/category/video')}
+          className="flex items-center gap-2 text-gray-500 hover:text-primary-500 dark:text-gray-400 dark:hover:text-primary-400 transition-colors group"
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M15 19l-7-7 7-7"
-          />
-        </svg>
+          <svg
+            className="w-5 h-5 transition-transform rotate-180 group-hover:translate-x-1"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15 19l-7-7 7-7"
+            />
+          </svg>
 
-        <span className="text-sm font-medium">
-          {direction === 'rtl'
-            ? 'العودة لأدوات الفيديو'
-            : 'Back to Video Tools'}
-        </span>
-      </button>
+          <span className="text-sm font-medium">
+            العودة إلى أدوات الفيديو
+          </span>
+        </button>
 
       </motion.div>
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.1 }}>

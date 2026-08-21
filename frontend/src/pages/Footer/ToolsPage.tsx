@@ -14,22 +14,20 @@ const fadeUp = {
   }),
 };
 
-const categoryDescriptions: Record<ToolCategory, { en: string; ar: string }> = {
-  general: { en: 'Pomodoro timer, task manager, exam countdown, and productivity aids.', ar: 'مدير المهام ومنشئ الملاحظات ومؤقت البومودورو والمزيد' },
-  medical: { en: 'Medical summarizers, flashcards, drug references, and lab values for students.', ar: 'ملخصات طبية وبطاقات تعليمية ومراجع الأدوية وقيم المختبر للطلاب.' },
-  engineering: { en: 'Engineering calculators, diagrams, and design tools coming soon.', ar: 'حاسبات هندسية ورسومات وأدوات تصميم قريباً.' },
-  pdf: { en: 'Convert, merge, split, compress, and manage your PDF documents with ease.', ar: 'تحويل ودمج وتقسيم وضغط وإدارة مستندات PDF بسهولة.' },
-  powerpoint: { en: 'Create, edit, convert, and enhance PowerPoint presentations effortlessly.', ar: 'إنشاء وتحرير وتحويل وتحسين عروض PowerPoint التقديمية بسهولة.' },
-  video: { en: 'Compress, convert, and extract audio from video files in seconds.', ar: 'ضغط وتحويل واستخراج الصوت من ملفات الفيديو في ثوانٍ.' },
-  images: { en: 'Remove backgrounds, rotate, blur, and convert images with a click.', ar: 'إزالة الخلفيات وتدوير وتغيير الحجم وتحويل الصور بنقرة واحدة.' },
-  audio: { en: 'Convert audio formats and transcribe speech to text accurately.', ar: 'تحويل صيغ الصوت ونسخ الصوت إلى نص بدقة.' },
-  qrcode: { en: 'Generate QR codes for URLs, text, and any data you need instantly.', ar: 'إنشاء رموز QR للروابط والنصوص وأي بيانات تحتاجها فوراً.' },
+const categoryDescriptions: Record<ToolCategory, string> = {
+  general: 'مدير المهام ومنشئ الملاحظات ومؤقت البومودورو والمزيد',
+  medical: 'ملخصات طبية وبطاقات تعليمية ومراجع الأدوية وقيم المختبر للطلاب.',
+  engineering: 'حاسبات هندسية ورسومات وأدوات تصميم قريباً.',
+  pdf: 'تحويل ودمج وتقسيم وضغط وإدارة مستندات PDF بسهولة.',
+  powerpoint: 'إنشاء وتحرير وتحويل وتحسين عروض PowerPoint التقديمية بسهولة.',
+  video: 'ضغط وتحويل واستخراج الصوت من ملفات الفيديو في ثوانٍ.',
+  images: 'إزالة الخلفيات وتدوير وتغيير الحجم وتحويل الصور بنقرة واحدة.',
+  audio: 'تحويل صيغ الصوت ونسخ الصوت إلى نص بدقة.',
+  qrcode: 'إنشاء رموز QR للروابط والنصوص وأي بيانات تحتاجها فوراً.',
  };
 
 export default function ToolsPage() {
   const navigate = useNavigate();
-  const lang = document.documentElement.lang === 'ar' ? 'ar' : 'en';
-  const isAr = lang === 'ar';
 
   const activeCategories = categoryOrder.filter((cat) => {
     const catTools = getToolsByCategory(cat);
@@ -57,7 +55,7 @@ export default function ToolsPage() {
             className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 text-xs font-semibold mb-6"
           >
             <Wrench className="w-3.5 h-3.5" />
-            {isAr ? 'جميع أدواتنا' : 'All Our Tools'}
+            جميع أدواتنا
           </motion.div>
           <motion.h1
             initial={{ opacity: 0, y: 12 }}
@@ -65,10 +63,10 @@ export default function ToolsPage() {
             transition={{ duration: 0.5, delay: 0.15 }}
             className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-4 tracking-tight leading-tight"
           >
-            {isAr ? 'استكشف' : 'Explore Our'}
+            استكشف
             <br />
             <span className="text-primary-600 dark:text-primary-400">
-              {isAr ? 'جميع الأدوات' : 'Complete Toolkit'}
+              جميع الأدوات
             </span>
           </motion.h1>
           <motion.p
@@ -77,9 +75,7 @@ export default function ToolsPage() {
             transition={{ duration: 0.5, delay: 0.25 }}
             className="text-gray-500 dark:text-gray-400 max-w-xl mx-auto mb-8 text-base md:text-lg leading-relaxed"
           >
-            {isAr
-              ? 'مورفن للطلاب يوفر مجموعة شاملة من الأدوات المصممة لمساعدتك على الدراسة بكفاءة وسرعة.'
-              : 'Morven for Students provides a comprehensive toolkit designed to help you study efficiently and fastly.'}
+            مورفن للطلاب يوفر مجموعة شاملة من الأدوات المصممة لمساعدتك على الدراسة بكفاءة وسرعة.
           </motion.p>
           <motion.div
             initial={{ opacity: 0, y: 12 }}
@@ -94,7 +90,7 @@ export default function ToolsPage() {
               icon={<ArrowRight className="w-5 h-5" />}
               iconRight={undefined}
             >
-              {isAr ? 'اكتشف الميزات' : 'Discover Features'}
+              اكتشف الميزات
             </Button>
           </motion.div>
         </div>
@@ -110,12 +106,10 @@ export default function ToolsPage() {
           className="text-center mb-10"
         >
           <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-3">
-            {isAr ? 'هل تريد شرح مفصل للأدوات؟' : 'Do you need a detailed explanation of the tools?'}
+            هل تريد شرح مفصل للأدوات؟
           </h2>
           <p className="text-gray-500 dark:text-gray-400 max-w-lg mx-auto">
-            {isAr
-              ? 'اختر فئة لمعرفة التفاصيل '
-              : 'Choose a category to read the details'}
+            اختر فئة لمعرفة التفاصيل
           </p>
         </motion.div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -141,18 +135,18 @@ export default function ToolsPage() {
                     <Icon className="w-6 h-6 text-primary-600 dark:text-primary-400" />
                   </div>
                   <span className="text-xs font-medium text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-800 px-2.5 py-1 rounded-full">
-                    {toolCount} {isAr ? 'أدوات' : 'tools'}
+                    {toolCount} أدوات
                   </span>
                 </div>
                 <h3 className="font-semibold text-gray-900 dark:text-white mb-2 text-base">
-                  {isAr ? meta.nameAr : meta.name}
+                  {meta.name}
                 </h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed mb-4">
-                  {isAr ? desc.ar : desc.en}
+                  {desc}
                 </p>
                 <div className="flex items-center text-primary-600 dark:text-primary-400 text-sm font-medium group-hover:gap-2 transition-all duration-300">
-                  {isAr ? 'استكشف' : 'Explore'}
-                  <ChevronRight className={`w-4 h-4 ${isAr ? 'mr-1 rotate-180' : 'ml-1'} transition-transform duration-300 group-hover:translate-x-1`} />
+                  استكشف
+                  <ChevronRight className={`w-4 h-4 mr-1 rotate-180 transition-transform duration-300 group-hover:-translate-x-1`} />
                 </div>
               </motion.div>
             );

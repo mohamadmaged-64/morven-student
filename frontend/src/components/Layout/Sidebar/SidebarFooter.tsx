@@ -1,5 +1,3 @@
-import { LanguageSwitcher } from '@/components/UI/LanguageSwitcher';
-
 interface SidebarFooterProps {
   showText: boolean;
 }
@@ -12,7 +10,6 @@ export function SidebarFooter({ showText }: SidebarFooterProps) {
           showText ? 'justify-between' : 'justify-center'
         } px-2`}
       >
-        <LanguageSwitcher />
       </div>
     </div>
   );

@@ -17,67 +17,53 @@ const fadeUp = {
 
 type FaqCategory = 'all' | 'general' | 'pdf' | 'privacy' | 'account';
 
-const faqCategories: { id: FaqCategory; labelEn: string; labelAr: string; icon: React.ElementType }[] = [
-  { id: 'all', labelEn: 'All', labelAr: 'الكل', icon: HelpCircle },
-  { id: 'general', labelEn: 'General', labelAr: 'عام', icon: HelpCircle },
-  { id: 'account', labelEn: 'Account & Usage', labelAr: 'الحساب والاستخدام', icon: User },
+const faqCategories: { id: FaqCategory; label: string; icon: React.ElementType }[] = [
+  { id: 'all', label: 'الكل', icon: HelpCircle },
+  { id: 'general', label: 'عام', icon: HelpCircle },
+  { id: 'account', label: 'الحساب والاستخدام', icon: User },
 ];
 
 interface FaqItem {
   id: string;
   category: FaqCategory;
-  questionEn: string;
-  questionAr: string;
-  answerEn: string;
-  answerAr: string;
+  question: string;
+  answer: string;
 }
 
 const faqData: FaqItem[] = [
   // GENERAL
   {
     id: 'gen-1', category: 'general',
-    questionEn: 'What is Morven for Students?',
-    questionAr: 'ما هو مورفن للطلاب؟',
-    answerEn: 'Morven for Students is an all-in-one web-based toolkit designed specifically for students. It offers a wide range of tools including PDF editing, study aids, presentation tools, video and audio utilities, and more — all accessible directly from your browser.',
-    answerAr: 'مورفن للطلاب هو حقيبة أدوات شاملة تعمل على الويب ومصممة خصيصاً للطلاب. يوفر مجموعة واسعة من الأدوات بما في ذلك تحرير PDF ومساعدات الدراسة وأدوات العروض التقديمية وأدوات الفيديو والصوت والمزيد — الكل متاح مباشرة من متصفحك.',
+    question: 'ما هو مورفن للطلاب؟',
+    answer: 'مورفن للطلاب هو حقيبة أدوات شاملة تعمل على الويب ومصممة خصيصاً للطلاب. يوفر مجموعة واسعة من الأدوات بما في ذلك تحرير PDF ومساعدات الدراسة وأدوات العروض التقديمية وأدوات الفيديو والصوت والمزيد — الكل متاح مباشرة من متصفحك.',
   },
   {
     id: 'gen-4', category: 'general',
-    questionEn: 'Which languages are supported?',
-    questionAr: 'أي اللغات مدعومة؟',
-    answerEn: 'Morven fully supports both English and Arabic. The interface automatically adapts to your selected language, including full right-to-left (RTL) layout support for Arabic.',
-    answerAr: 'يدعم مورفن بالكامل الإنجليزية والعربية. تتكيف الواجهة تلقائياً مع لغتك المختارة، بما في ذلك دعم تخطيط اليمين لليسار بالكامل للعربية.',
+    question: 'ما اللغة المدعومة؟',
+    answer: 'مورفن متوفر باللغة العربية بالكامل، مع دعم كامل لتخطيط اليمين لليسار (RTL) في جميع صفحات الموقع.',
   },
 
   // ACCOUNT & USAGE
   {
     id: 'acc-1', category: 'account',
-    questionEn: 'Are there any file size limits?',
-    questionAr: 'هل هناك حد لحجم الملفات؟',
-    answerEn: 'File size limits depend on the tool and your device\'s capabilities. Client-side tools (like PDF merge and split) are limited mainly by your browser\'s memory. Server-side tools (like Office-to-PDF) have a limit of approximately 100 MB per file.',
-    answerAr: 'تعتمد أحجام الملفات على الأداة وقدرات جهازك. الأدوات جانب العميل (مثل دمج وتقسيم PDF) محدودة بشكل أساسي بذاكرة متصفحك. الأدوات جانب الخادم (مثل Office إلى PDF) لها حد تقريبي 100 ميجابايت لكل ملف.',
+    question: 'هل هناك حد لحجم الملفات؟',
+    answer: 'تعتمد أحجام الملفات على الأداة وقدرات جهازك. الأدوات جانب العميل (مثل دمج وتقسيم PDF) محدودة بشكل أساسي بذاكرة متصفحك. الأدوات جانب الخادم (مثل Office إلى PDF) لها حد تقريبي 100 ميجابايت لكل ملف.',
   },
   {
     id: 'acc-2', category: 'account',
-    questionEn: 'Can I use Morven on mobile devices?',
-    questionAr: 'هل يمكنني استخدام مورفن على الأجهزة المحمولة؟',
-    answerEn: 'Yes. Morven is fully responsive and works on smartphones and tablets. However, some advanced tools may work best on a desktop or laptop due to screen size and file management requirements.',
-    answerAr: 'نعم. مورفن متجاوب بالكامل ويعمل على الهواتف الذكية والأجهزة اللوحية. ومع ذلك، قد تعمل بعض الأدوات المتقدمة بشكل أفضل على سطح المكتب أو الحاسوب المحمول بسبب حجم الشاشة ومتطلبات إدارة الملفات.',
+    question: 'هل يمكنني استخدام مورفن على الأجهزة المحمولة؟',
+    answer: 'نعم. مورفن متجاوب بالكامل ويعمل على الهواتف الذكية والأجهزة اللوحية. ومع ذلك، قد تعمل بعض الأدوات المتقدمة بشكل أفضل على سطح المكتب أو الحاسوب المحمول بسبب حجم الشاشة ومتطلبات إدارة الملفات.',
   },
   {
     id: 'acc-3', category: 'account',
-    questionEn: 'How often are new tools added?',
-    questionAr: 'كم مرة تُضاف أدوات جديدة؟',
-    answerEn: 'We regularly add new tools and features based on student feedback and requests. Tools marked as "Coming Soon" are actively in development. Stay tuned by checking the site periodically for updates.',
-    answerAr: 'نضيف أدوات وميزات جديدة بانتظام بناءً على ملاحظات وطلبات الطلاب. الأدوات المميزة بـ "قريبًا" قيد التطوير النشط. تابعنا بالتحقق من الموقع بشكل دوري للحصول على التحديثات.',
+    question: 'كم مرة تُضاف أدوات جديدة؟',
+    answer: 'نضيف أدوات وميزات جديدة بانتظام بناءً على ملاحظات وطلبات الطلاب. الأدوات المميزة بـ "قريبًا" قيد التطوير النشط. تابعنا بالتحقق من الموقع بشكل دوري للحصول على التحديثات.',
   },
-  
+
 ];
 
 export default function FAQPage() {
   const navigate = useNavigate();
-  const lang = document.documentElement.lang === 'ar' ? 'ar' : 'en';
-  const isAr = lang === 'ar';
 
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<FaqCategory>('all');
@@ -93,10 +79,8 @@ export default function FAQPage() {
       const q = searchQuery.toLowerCase().trim();
       result = result.filter(
         (item) =>
-          item.questionEn.toLowerCase().includes(q) ||
-          item.questionAr.includes(q) ||
-          item.answerEn.toLowerCase().includes(q) ||
-          item.answerAr.includes(q),
+          item.question.includes(q) ||
+          item.answer.includes(q),
       );
     }
 
@@ -105,8 +89,8 @@ export default function FAQPage() {
 
   const accordionItems: AccordionItem[] = filteredFaqs.map((faq) => ({
     id: faq.id,
-    title: isAr ? faq.questionAr : faq.questionEn,
-    content: isAr ? faq.answerAr : faq.answerEn,
+    title: faq.question,
+    content: faq.answer,
   }));
 
   return (
@@ -130,7 +114,7 @@ export default function FAQPage() {
             className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 text-xs font-semibold mb-6"
           >
             <HelpCircle className="w-3.5 h-3.5" />
-            {isAr ? 'الأسئلة الشائعة' : 'Frequently Asked Questions'}
+            الأسئلة الشائعة
           </motion.div>
           <motion.h1
             initial={{ opacity: 0, y: 12 }}
@@ -138,14 +122,14 @@ export default function FAQPage() {
             transition={{ duration: 0.5, delay: 0.15 }}
             className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-4 tracking-tight leading-tight"
           >
-            {isAr ? 'كيف يمكننا' : 'How Can We'}
+            كيف يمكننا
             <br />
             <span className="text-primary-600 dark:text-primary-400">
-              {isAr ? 'مساعدتك؟' : 'Help You?'}
+              مساعدتك؟
             </span>
           </motion.h1>
-        
-     
+
+
         </div>
       </motion.section>
 
@@ -172,7 +156,7 @@ export default function FAQPage() {
                 ].join(' ')}
               >
                 <Icon className="w-4 h-4" />
-                {isAr ? cat.labelAr : cat.labelEn}
+                {cat.label}
               </button>
             );
           })}
@@ -189,12 +173,10 @@ export default function FAQPage() {
           >
             <HelpCircle className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
             <p className="text-gray-500 dark:text-gray-400 text-lg mb-2">
-              {isAr ? 'لم يتم العثور على نتائج' : 'No results found'}
+              لم يتم العثور على نتائج
             </p>
             <p className="text-gray-400 dark:text-gray-500 text-sm">
-              {isAr
-                ? 'جرّب البحث بكلمات مختلفة أو تصفح الفئات.'
-                : 'Try searching with different words or browse categories.'}
+              جرّب البحث بكلمات مختلفة أو تصفح الفئات.
             </p>
           </motion.div>
         ) : (
@@ -220,20 +202,18 @@ export default function FAQPage() {
           <MessageCircle className="w-7 h-7 text-primary-600 dark:text-primary-400" />
         </div>
         <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-3">
-          {isAr ? 'لم تجد إجابة؟' : "Didn't Find Your Answer?"}
+          لم تجد إجابة؟
         </h2>
         <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto mb-8 text-sm md:text-base leading-relaxed">
-          {isAr
-            ? 'فريقنا جاهز لمساعدتك. تواصل معنا وسنرد في أقرب وقت ممكن.'
-            : 'Our team is ready to help. Reach out to us and we will respond as soon as possible.'}
+          فريقنا جاهز لمساعدتك. تواصل معنا وسنرد في أقرب وقت ممكن.
         </p>
         <Button
           onClick={() => navigate('/contact')}
           variant="primary"
           size="lg"
-          icon={<ChevronRight className={`w-5 h-5 ${isAr ? 'rotate-180' : ''}`} />}
+          icon={<ChevronRight className={`w-5 h-5 rotate-180`} />}
         >
-          {isAr ? 'تواصل معنا' : 'Contact Us'}
+          تواصل معنا
         </Button>
       </motion.section>
     </div>

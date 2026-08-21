@@ -1,12 +1,30 @@
 import { NavLink } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useTranslation } from 'react-i18next';
 import { FileIcon } from 'lucide-react';
-import { useLanguageStore } from '@/store/useLanguageStore';
 import { categories } from '@/data/categories';
 import { iconMap } from './iconMap';
 import { itemVariants } from './itemVariants';
 import { Badge } from '@/components/UI/Badge'
+
+const categoryNames: Record<string, string> = {
+  dashboard: 'الصفحة الرئيسية',
+  pdf: 'أدوات الPDF',
+  powerpoint: 'أدوات الPowerPoint',
+  video: 'أدوات الفيديو',
+  audio: 'أدوات الصوت',
+  images: 'أدوات الصور',
+  qrcode: 'رمز QR',
+  general: 'عام',
+  medical: 'القسم الطبي',
+  engineering: 'القسم الهندسي',
+  favorites: 'المفضلة',
+  recent: 'الأدوات الأخيرة',
+  allTools: 'جميع الأدوات',
+  studentSection: 'القسم الطلابي',
+  tools: 'الأدوات',
+  studyTools: 'القسم الدراسي',
+  productivityTools: 'القسم الانتاجي',
+};
 
 interface SidebarCategoryProps {
   category: string;
@@ -23,8 +41,6 @@ export function SidebarCategory({
   isMobile,
   onNavigate,
 }: SidebarCategoryProps) {
-  const { t } = useTranslation();
-
   const meta = categories[category as keyof typeof categories];
   if (!meta) return null;
 
@@ -32,8 +48,7 @@ export function SidebarCategory({
     typeof meta.icon === 'string'
       ? (iconMap[meta.icon as keyof typeof iconMap] || FileIcon)
       : meta.icon;
-const language = useLanguageStore((s) => s.language);
-  const isComingSoon = meta.comingSoon;
+  const isComingSoon = category !== 'engineering' && meta.comingSoon;
   const isLocked = isComingSoon === true;
 
   const content = (
@@ -48,11 +63,11 @@ const language = useLanguageStore((s) => s.language);
             className="flex items-center justify-between flex-1 min-w-0"
           >
             <span className="truncate whitespace-nowrap text-start">
-              {t(`nav.${category}`)}
+              {categoryNames[category] || category}
             </span>
             {isComingSoon && (
               <Badge variant="warning" size="sm">
-                {language === 'ar' ? 'قريبًا' : 'Coming Soon'}
+                {'قريبًا'}
               </Badge>
             )}
           </motion.div>

@@ -1,14 +1,14 @@
 export const sidebarSections = [
   {
-    title: 'nav.studentSection',
+    title: 'القسم الطلابي',
     categories: ['general', 'medical', 'engineering'],
   },
   {
-    title: 'nav.studyTools',
+    title: 'القسم الدراسي',
     categories: ['pdf', 'powerpoint'],
   },
   {
-    title: 'nav.productivityTools',
+    title: 'القسم الانتاجي',
     categories: ['video', 'images', 'audio', 'qrcode'],
   },
 ];

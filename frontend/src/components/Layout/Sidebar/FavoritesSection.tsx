@@ -1,7 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { FileIcon } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
 
 interface FavoritesProps {
   favTools: any[];
@@ -14,14 +13,12 @@ export function Favorites({
   showText,
   iconMap,
 }: FavoritesProps) {
-  const { t } = useTranslation();
-
   if (favTools.length === 0) return null;
 
   return (
     <div className="mt-5 pt-4 border-t border-light-border dark:border-dark-border w-full">
       <div className="px-3 mb-2 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 h-4">
-        {showText ? t('nav.favorites') : ''}
+        {showText ? 'المفضلة' : ''}
       </div>
 
       <div className="space-y-0.5 w-full">

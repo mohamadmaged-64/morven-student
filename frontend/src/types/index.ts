@@ -1,15 +1,11 @@
 import { LucideIcon } from "lucide-react";
 
 export type Theme = 'light' | 'dark';
-export type Language = 'en' | 'ar';
-export type Direction = 'ltr' | 'rtl';
 
 export interface Tool {
   id: string;
   name: string;
-  nameAr: string;
   description: string;
-  descriptionAr: string;
   icon: LucideIcon;
   category: ToolCategory;
   isFavorite?: boolean;
@@ -57,25 +53,11 @@ export interface ExamCountdown {
   createdAt: number;
 }
 
-export interface PomodoroSession {
-  workDuration: number;
-  breakDuration: number;
-  longBreakDuration: number;
-  sessionsUntilLongBreak: number;
-}
-
 export interface Notification {
   id: string;
   message: string;
   type: 'success' | 'error' | 'info' | 'warning';
   duration?: number;
-}
-
-export interface ClipboardEntry {
-  id: string;
-  content: string;
-  timestamp: number;
-  type: 'text' | 'image' | 'file';
 }
 
 export interface Note {
@@ -116,5 +98,3 @@ export interface PersistentFile {
   createdAt: number;
   toolUsed?: string;
 }
-
-

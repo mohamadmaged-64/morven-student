@@ -3,14 +3,12 @@ import { motion } from 'framer-motion';
 import { Play, Pause, SkipBack, SkipForward } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-import { useLanguageStore } from '@/store/useLanguageStore';
 import { useQuranStore } from '@/store/quranStore';
 import { useQuranData } from '@/services/quranApi';
 
 export function HeaderQuranPlayer() {
   const navigate = useNavigate();
 
-  const { language } = useLanguageStore();
   const { surahs } = useQuranData();
   const { currentSurah, currentReciter, isPlaying, play, pause, setSurah } =
     useQuranStore();
@@ -101,18 +99,16 @@ export function HeaderQuranPlayer() {
       {hasSelection ? (
         <>
           <p className="truncate text-sm font-semibold leading-tight text-gray-900 dark:text-white">
-            {language === 'ar' ? currentSurah?.nameAr : currentSurah?.name}
+            {currentSurah?.name}
           </p>
 
           <p className="truncate text-[11px] leading-tight text-gray-500 dark:text-gray-400">
-            {language === 'ar'
-              ? currentReciter?.nameAr
-              : currentReciter?.name}
+            {currentReciter?.name}
           </p>
         </>
       ) : (
         <p className="truncate text-sm font-medium text-gray-700 dark:text-gray-300">
-          {language === 'ar' ? 'ابدأ التلاوة' : 'Start Recitation'}
+          ابدأ التلاوة
         </p>
       )}
     </div>
@@ -121,7 +117,7 @@ export function HeaderQuranPlayer() {
     <div className="flex items-center gap-0.5">
       <button
         onClick={handlePrevious}
-        aria-label={language === 'ar' ? 'السورة السابقة' : 'Previous Surah'}
+        aria-label="السورة السابقة"
         className="
           flex h-7 w-7 items-center justify-center rounded-full
           text-gray-500 dark:text-gray-400
@@ -135,7 +131,7 @@ export function HeaderQuranPlayer() {
 
       <button
         onClick={handlePlayPause}
-        aria-label={language === 'ar' ? 'تشغيل / إيقاف' : 'Play / Pause'}
+        aria-label="تشغيل / إيقاف"
         className="
           flex h-9 w-9 items-center justify-center rounded-full
           bg-primary-500 text-white
@@ -153,7 +149,7 @@ export function HeaderQuranPlayer() {
 
       <button
         onClick={handleNext}
-        aria-label={language === 'ar' ? 'السورة التالية' : 'Next Surah'}
+        aria-label="السورة التالية"
         className="
           flex h-7 w-7 items-center justify-center rounded-full
           text-gray-500 dark:text-gray-400

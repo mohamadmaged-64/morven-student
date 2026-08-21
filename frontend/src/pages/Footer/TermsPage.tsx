@@ -29,55 +29,41 @@ const fadeUp = {
 const overviewCards = [
   {
     icon: CheckCircle,
-    titleEn: 'Acceptable Use',
-    titleAr: 'الاستخدام المقبول',
-    descEn: 'Use Morven responsibly and only for lawful purposes.',
-    descAr: 'استخدم مورفن بمسؤولية وأغراض مشروعة فقط.',
+    title: 'الاستخدام المقبول',
+    desc: 'استخدم مورفن بمسؤولية وأغراض مشروعة فقط.',
   },
   {
     icon: UserCheck,
-    titleEn: 'User Responsibilities',
-    titleAr: 'مسؤوليات المستخدم',
-    descEn: 'You are responsible for your actions and the content you process.',
-    descAr: 'أنت مسؤول عن أفعالك والمحتوى الذي تعالجه.',
+    title: 'مسؤوليات المستخدم',
+    desc: 'أنت مسؤول عن أفعالك والمحتوى الذي تعالجه.',
   },
   {
     icon: Globe,
-    titleEn: 'Service Availability',
-    titleAr: 'توفر الخدمة',
-    descEn: 'We strive to keep Morven available at all times.',
-    descAr: 'نسعى للحفاظ على توفر مورفن في جميع الأوقات.',
+    title: 'توفر الخدمة',
+    desc: 'نسعى للحفاظ على توفر مورفن في جميع الأوقات.',
   },
-    {
+  {
     icon: RefreshCw,
-    titleEn: 'Changes to These Terms',
-    titleAr: 'تغييرات على هذه الشروط',
-    descEn: 'When changes are made, the "Last updated" date at the top of this page will be revised.',
-    descAr: 'عند إجراء تغييرات، سيتم مراجعة تاريخ "آخر تحديث" في أعلى هذه الصفحة.',
+    title: 'تغييرات على هذه الشروط',
+    desc: 'عند إجراء تغييرات، سيتم مراجعة تاريخ "آخر تحديث" في أعلى هذه الصفحة.',
   },
 ];
 
 const termsSections = [
   {
     icon: FileText,
-    titleEn: 'Acceptance of Terms',
-    titleAr: 'قبول الشروط',
-    contentEn: 'By accessing or using Morven for Students, you agree to be bound by these Terms of Service. If you do not agree with any part of these terms, you should not use the service. These terms apply to all visitors and users of the platform.',
-    contentAr: 'باستخدام مورفن للطلاب ، أنت توافق على الالتزام بشروط الخدمة هذه. إذا لم توافق على أي جزء من هذه الشروط، يجب عليك عدم استخدام الخدمة. تنطبق هذه الشروط على جميع الزوار والمستخدمين للمنصة.',
+    title: 'قبول الشروط',
+    content: 'باستخدام مورفن للطلاب ، أنت توافق على الالتزام بشروط الخدمة هذه. إذا لم توافق على أي جزء من هذه الشروط، يجب عليك عدم استخدام الخدمة. تنطبق هذه الشروط على جميع الزوار والمستخدمين للمنصة.',
   },
   {
     icon: CheckCircle,
-    titleEn: 'Use of the Services',
-    titleAr: 'استخدام الخدمات',
-    contentEn: 'Morven provides free online tools for students, including PDF processing, study aids, presentation tools, and media utilities. You may use these tools for personal, educational, or non-commercial purposes. You agree not to use the services for any unlawful purpose, to attempt to disrupt or overload the infrastructure, or to circumvent any usage limitations.',
-    contentAr: 'يقدم مورفن أدوات مجانية عبر الإنترنت للطلاب، بما في ذلك معالجة PDF ومساعدات الدراسة وأدوات العروض التقديمية وأدوات الوسائط. يمكنك استخدام هذه الأدوات لأغراض شخصية أو تعليمية أو غير تجارية. أنت توافق على عدم استخدام الخدمات لأي غرض غير قانوني، أو محاولة إعاقة أو حمل البنية التحتية، أو التحايل على أي قيود استخدام.',
+    title: 'استخدام الخدمات',
+    content: 'يقدم مورفن أدوات مجانية عبر الإنترنت للطلاب، بما في ذلك معالجة PDF ومساعدات الدراسة وأدوات العروض التقديمية وأدوات الوسائط. يمكنك استخدام هذه الأدوات لأغراض شخصية أو تعليمية أو غير تجارية. أنت توافق على عدم استخدام الخدمات لأي غرض غير قانوني، أو محاولة إعاقة أو حمل البنية التحتية، أو التحايل على أي قيود استخدام.',
   },
 ];
 
 export default function TermsPage() {
   const navigate = useNavigate();
-  const lang = document.documentElement.lang === 'ar' ? 'ar' : 'en';
-  const isAr = lang === 'ar';
 
   return (
     <div className="max-w-6xl mx-auto pb-16">
@@ -100,7 +86,7 @@ export default function TermsPage() {
             className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 text-xs font-semibold mb-6"
           >
             <Scale className="w-3.5 h-3.5" />
-            {isAr ? 'شروط الخدمة' : 'Terms of Service'}
+            شروط الخدمة
           </motion.div>
           <motion.h1
             initial={{ opacity: 0, y: 12 }}
@@ -108,10 +94,10 @@ export default function TermsPage() {
             transition={{ duration: 0.5, delay: 0.15 }}
             className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-4 tracking-tight leading-tight"
           >
-            {isAr ? 'شروط' : 'Terms of'}
+            شروط
             <br />
             <span className="text-primary-600 dark:text-primary-400">
-              {isAr ? 'الخدمة' : 'Service'}
+              الخدمة
             </span>
           </motion.h1>
           <motion.p
@@ -120,9 +106,7 @@ export default function TermsPage() {
             transition={{ duration: 0.5, delay: 0.25 }}
             className="text-gray-500 dark:text-gray-400 max-w-xl mx-auto text-base md:text-lg leading-relaxed"
           >
-            {isAr
-              ? 'يرجى قراءة شروط الخدمة هذه بعناية قبل استخدام مورفن، لأن استخدامك للخدمة يعني قبولك لهذه الشروط.'
-              : 'Please read these Terms of Service carefully before using Morven. Your use of the service constitutes acceptance of these terms.'}
+            يرجى قراءة شروط الخدمة هذه بعناية قبل استخدام مورفن، لأن استخدامك للخدمة يعني قبولك لهذه الشروط.
           </motion.p>
           <motion.div
             initial={{ opacity: 0 }}
@@ -131,7 +115,7 @@ export default function TermsPage() {
             className="mt-6 inline-flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500"
           >
             <Calendar className="w-3.5 h-3.5" />
-            {isAr ? 'آخر تحديث: يوليو 2026' : 'Last updated: July 2026'}
+            آخر تحديث: يوليو 2026
           </motion.div>
         </div>
       </motion.section>
@@ -155,10 +139,10 @@ export default function TermsPage() {
                   <Icon className="w-5.5 h-5.5 text-primary-600 dark:text-primary-400" />
                 </div>
                 <h3 className="font-semibold text-gray-900 dark:text-white mb-1.5 text-sm">
-                  {isAr ? card.titleAr : card.titleEn}
+                  {card.title}
                 </h3>
                 <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
-                  {isAr ? card.descAr : card.descEn}
+                  {card.desc}
                 </p>
               </motion.div>
             );
@@ -185,12 +169,12 @@ export default function TermsPage() {
                   <Icon className="w-5 h-5 text-primary-600 dark:text-primary-400" />
                 </div>
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white pt-1.5">
-                  {isAr ? section.titleAr : section.titleEn}
+                  {section.title}
                 </h2>
               </div>
               <div className="pl-0 md:pl-14">
                 <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed whitespace-pre-line">
-                  {isAr ? section.contentAr : section.contentEn}
+                  {section.content}
                 </p>
               </div>
             </motion.div>

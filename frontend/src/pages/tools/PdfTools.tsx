@@ -1,7 +1,6 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useTranslation } from 'react-i18next';
 import JSZip from 'jszip';
 import { v4 as uuid } from 'uuid';
 import { Button } from '@/components/UI/Button';
@@ -15,7 +14,6 @@ import { ProgressBar } from '@/components/UI/ProgressBar';
 import { Modal } from '@/components/UI/Modal';
 import { useAppStore } from '@/store/useAppStore';
 import { useThemeStore } from '@/store/useThemeStore';
-import { useLanguageStore } from '@/store/useLanguageStore';
 import { useNavigate } from 'react-router-dom';
 import { saveToLibrary } from '@/services/savedFilesService';
 import {
@@ -85,9 +83,7 @@ import type { LucideIcon } from 'lucide-react';
 interface ToolConfig {
   id: string;
   name: string;
-  nameAr: string;
   description: string;
-  descriptionAr: string;
   icon: LucideIcon;
   accepts: string[];
   multiple?: boolean;
@@ -100,10 +96,8 @@ const TOOLS: Record<string, ToolConfig> = {
  
   'word-to-pdf': {
     id: 'word-to-pdf',
-    name: 'Word to PDF',
-    nameAr: 'Word إلى PDF',
-    description: 'Convert Word documents to PDF format',
-    descriptionAr: 'تحويل مستندات Word إلى تنسيق PDF',
+    name: 'Word إلى PDF',
+    description: 'تحويل مستندات Word إلى صيغة PDF',
     icon: File,
     accepts: ['.docx', '.doc'],
     category: 'conversion',
@@ -111,10 +105,8 @@ const TOOLS: Record<string, ToolConfig> = {
   },
   'excel-to-pdf': {
     id: 'excel-to-pdf',
-    name: 'Excel to PDF',
-    nameAr: 'Excel إلى PDF',
-    description: 'Convert Excel spreadsheets to PDF format',
-    descriptionAr: 'تحويل جداول Excel إلى تنسيق PDF',
+    name: 'Excel إلى PDF',
+    description: 'تحويل جداول Excel إلى PDF',
     icon: FileSpreadsheet,
     accepts: ['.xlsx', '.xls', '.csv'],
     category: 'conversion',
@@ -122,10 +114,8 @@ const TOOLS: Record<string, ToolConfig> = {
   },
   'ppt-to-pdf': {
     id: 'ppt-to-pdf',
-    name: 'PowerPoint to PDF',
-    nameAr: 'PowerPoint إلى PDF',
-    description: 'Convert PowerPoint presentations to PDF',
-    descriptionAr: 'تحويل عروض PowerPoint إلى PDF',
+    name: 'PPT إلى PDF',
+    description: 'تحويل عروض PowerPoint إلى PDF',
     icon: Presentation,
     accepts: ['.pptx', '.ppt'],
     category: 'conversion',
@@ -133,10 +123,8 @@ const TOOLS: Record<string, ToolConfig> = {
   },
   'merge-pdfs': {
     id: 'merge-pdfs',
-    name: 'Merge PDFs',
-    nameAr: 'دمج ملفات PDF',
-    description: 'Combine multiple PDF files into one document',
-    descriptionAr: 'دمج ملفات PDF متعددة في مستند واحد',
+    name: 'دمج PDF',
+    description: 'دمج ملفات PDF متعددة في مستند واحد',
     icon: Files,
     accepts: ['.pdf'],
     multiple: true,
@@ -146,10 +134,8 @@ const TOOLS: Record<string, ToolConfig> = {
   },
   'split-pdf': {
     id: 'split-pdf',
-    name: 'Split PDF',
-    nameAr: 'تقسيم PDF',
-    description: 'Extract specific pages from a PDF document',
-    descriptionAr: 'استخراج صفحات محددة من مستند PDF',
+    name: 'تقسيم PDF',
+    description: 'تقسيم ملف PDF إلى صفحات أو نطاقات منفصلة',
     icon: Scissors,
     accepts: ['.pdf'],
     category: 'pdf',
@@ -157,10 +143,8 @@ const TOOLS: Record<string, ToolConfig> = {
   },
   'compress-pdf': {
     id: 'compress-pdf',
-    name: 'Compress PDF',
-    nameAr: 'ضغط PDF',
-    description: 'Reduce PDF file size while maintaining quality',
-    descriptionAr: 'تقليل حجم ملف PDF مع الحفاظ على الجودة',
+    name: 'ضغط PDF',
+    description: 'تقليل حجم ملف PDF دون فقدان الجودة',
     icon: Archive,
     accepts: ['.pdf'],
     category: 'pdf',
@@ -168,10 +152,8 @@ const TOOLS: Record<string, ToolConfig> = {
   },
   'delete-pages': {
     id: 'delete-pages',
-    name: 'Delete PDF Pages',
-    nameAr: 'حذف صفحات PDF',
-    description: 'Remove unwanted pages from a PDF document',
-    descriptionAr: 'إزالة الصفحات غير المرغوب فيها من مستند PDF',
+    name: 'حذف صفحات',
+    description: 'إزالة الصفحات غير المرغوب فيها من مستند PDF',
     icon: Trash2,
     accepts: ['.pdf'],
     category: 'pdf',
@@ -179,10 +161,8 @@ const TOOLS: Record<string, ToolConfig> = {
   },
   'reorder-pages': {
     id: 'reorder-pages',
-    name: 'Reorder PDF Pages',
-    nameAr: 'إعادة ترتيب صفحات PDF',
-    description: 'Change the order of pages in a PDF document',
-    descriptionAr: 'تغيير ترتيب الصفحات في مستند PDF',
+    name: 'إعادة ترتيب الصفحات',
+    description: 'إعادة ترتيب الصفحات في مستند PDF',
     icon: ArrowUpDown,
     accepts: ['.pdf'],
     category: 'pdf',
@@ -190,10 +170,8 @@ const TOOLS: Record<string, ToolConfig> = {
   },
   'rotate-pages': {
     id: 'rotate-pages',
-    name: 'Rotate PDF Pages',
-    nameAr: 'تدوير صفحات PDF',
-    description: 'Rotate specific pages in a PDF document',
-    descriptionAr: 'تدوير صفحات محددة في مستند PDF',
+    name: 'تدوير الصفحات',
+    description: 'تدوير صفحات فردية في PDF',
     icon: RotateCw,
     accepts: ['.pdf'],
     category: 'pdf',
@@ -201,10 +179,8 @@ const TOOLS: Record<string, ToolConfig> = {
   },
   'password-protect': {
     id: 'password-protect',
-    name: 'Password Protect PDF',
-    nameAr: 'حماية PDF بكلمة مرور',
-    description: 'Add password protection to a PDF document',
-    descriptionAr: 'إضافة حماية بكلمة مرور لمستند PDF',
+    name: 'حماية بكلمة مرور',
+    description: 'إضافة حماية بكلمة مرور لملفات PDF',
     icon: Lock,
     accepts: ['.pdf'],
     category: 'pdf',
@@ -227,8 +203,7 @@ interface UploadedFileData {
 
 // ─── Utility Sub-Components ─────────────────────────────────────────
  
-function ToolHeader({ tool, isDark, isRtl }: { tool: ToolConfig; isDark: boolean; isRtl: boolean }) {
-  const { t } = useTranslation();
+function ToolHeader({ tool, isDark }: { tool: ToolConfig; isDark: boolean }) {
   const navigate = useNavigate();
   const Icon = tool.icon;
   return (
@@ -238,9 +213,7 @@ function ToolHeader({ tool, isDark, isRtl }: { tool: ToolConfig; isDark: boolean
   className="flex items-center gap-2 text-gray-500 hover:text-primary-500 dark:text-gray-400 dark:hover:text-primary-400 transition-colors mb-6 group"
 >
   <svg
-    className={`w-5 h-5 transition-transform ${
-      isRtl ? 'rotate-180' : ''
-    } group-hover:-translate-x-1`}
+    className="w-5 h-5 transition-transform rotate-180 group-hover:-translate-x-1"
     fill="none"
     viewBox="0 0 24 24"
     stroke="currentColor"
@@ -254,7 +227,7 @@ function ToolHeader({ tool, isDark, isRtl }: { tool: ToolConfig; isDark: boolean
   </svg>
 
   <span className="text-sm font-medium">
-    {isRtl ? 'العودة لأدوات الPDF' : 'Back to PDF Tools'}
+    {'العودة إلى أدوات الـPDF'}
   </span>
 </button>
     <motion.div
@@ -266,12 +239,12 @@ function ToolHeader({ tool, isDark, isRtl }: { tool: ToolConfig; isDark: boolean
        <div className="w-16 h-16 rounded-2xl bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
   <Icon className="w-8 h-8 text-primary-600 dark:text-primary-400" />
 </div>
-        <div className={isRtl ? 'text-right' : ''}>
+        <div className="text-right">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            {isRtl ? tool.nameAr : tool.name}
+            {tool.name}
           </h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            {isRtl ? tool.descriptionAr : tool.description}
+            {tool.description}
           </p>
         </div>
       </div>
@@ -305,7 +278,6 @@ function SuccessResult({
   originalSize,
   onReset,
   isDark,
-  isRtl,
   originalFileName,
 }: {
   result: Blob | string;
@@ -313,10 +285,8 @@ function SuccessResult({
   originalSize?: number;
   onReset: () => void;
   isDark: boolean;
-  isRtl: boolean;
   originalFileName?: string;
 }) {
-  const { t } = useTranslation();
   const isText = typeof result === 'string';
   const [copied, setCopied] = useState(false);
 
@@ -343,7 +313,7 @@ function SuccessResult({
           </div>
           <div>
             <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
-              {t('Processing Complete', 'Processing Complete')}
+              {'اكتملت المعالجة'}
             </h3>
             {!isText && result instanceof Blob && originalSize && (
               <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -383,7 +353,7 @@ function SuccessResult({
                 </svg>
               }
             >
-              {t('Download', 'Download')}
+              {'تنزيل'}
             </Button>
           )}
           {isText && (
@@ -402,7 +372,7 @@ function SuccessResult({
                 </svg>
               }
             >
-              {t('Download TXT', 'Download TXT')}
+              {'تنزيل TXT'}
             </Button>
           )}
           {isText && (
@@ -422,11 +392,11 @@ function SuccessResult({
                 )
               }
             >
-              {copied ? t('Copied!', 'Copied!') : t('Copy Text', 'Copy Text')}
+              {copied ? 'تم النسخ!' : 'نسخ النص'}
             </Button>
           )}
           <Button variant="ghost" onClick={onReset}>
-            {t('Start Over', 'Start Over')}
+            {'البدء من جديد'}
           </Button>
         </div>
       </Card>
@@ -437,18 +407,17 @@ function SuccessResult({
 // ─── PDF Page Thumbnails ────────────────────────────────────────────
 
 function MergePdfWorkspace({ files, processing, progress, result, error, onAdd, onMove, onRemove, onMerge, onReset }: { files: UploadedFileData[]; processing: boolean; progress: number; result: Blob | string | null; error: string | null; onAdd: (files: File[]) => void; onMove: (from: number, to: number) => void; onRemove: (index: number) => void; onMerge: () => void; onReset: () => void }) {
-  const { t } = useTranslation();
   const [dragged, setDragged] = useState<number | null>(null);
   const totalSize = files.reduce((total, item) => total + item.file.size, 0);
   if (result instanceof Blob) return <Card className="max-w-2xl mx-auto p-6 sm:p-8 text-center"><div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400"><CheckCircle2 className="h-8 w-8" /></div><h2 className="text-xl font-bold text-gray-900 dark:text-white">
-  {t('pdf.merge.ready')}
+  {'اكتمل الدمج!'}
 </h2>
 
 <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-  {t('pdf.merge.mergedCount', { count: files.length })}
+  {`تم دمج ${files.length} ملف بنجاح`}
 </p>
 <div className="mt-6 flex items-center gap-3 rounded-xl border border-light-border bg-gray-50 p-4 text-left dark:border-dark-border dark:bg-dark-surface"><FileText className="h-5 w-5 text-primary-600" /><div><p className="text-sm font-semibold text-gray-900 dark:text-white">merged-pdfs.pdf</p><p className="text-xs text-gray-500 dark:text-gray-400">{formatFileSize(result.size)}</p></div></div><div className="mt-6 flex flex-col-reverse justify-center gap-3 sm:flex-row"><Button variant="ghost" onClick={onReset}>
-  {t('common.startAgain')}
+  {'البدء من جديد'}
 </Button><Button
   variant="primary"
   onClick={() => {
@@ -457,16 +426,16 @@ function MergePdfWorkspace({ files, processing, progress, result, error, onAdd, 
   }}
   icon={<Download className="h-4 w-4" />}
 >
-  {t('pdf.merge.download')}
+  {'تنزيل'}
 </Button>
 </div>
 </Card>;
   return <div className="space-y-5"> {files.length > 0 && <Card className="p-4 sm:p-6"><div className="mb-4 flex items-center justify-between gap-3"><div><h2 className="text-base font-semibold text-gray-900 dark:text-white">
-  {t('pdf.merge.arrange')}
+  {'رتّب الملفات'}
 </h2>
 
 <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-  {t('pdf.merge.orderHint')}
+  {'اسحب الملفات لإعادة ترتيبها قبل الدمج'}
 </p>
 </div>
 </div>
@@ -479,8 +448,8 @@ function MergePdfWorkspace({ files, processing, progress, result, error, onAdd, 
       multiple
       maxFiles={20}
       onFilesSelected={(selected) => onAdd(selected.map((s) => s.file))}
-      label={t('fileUpload.dropPdf')}
-      description={t('fileUpload.pdfOnly')}
+      label={'اسحب ملف PDF هنا أو انقر للاختيار'}
+      description={'يُقبل ملفات PDF فقط'}
     />
   </div>
 </Card>{error && <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-900/10 dark:text-red-400">{error}</div>}
@@ -493,7 +462,7 @@ function MergePdfWorkspace({ files, processing, progress, result, error, onAdd, 
         color="gradient"
         size="sm"
         showLabel
-        label={t('pdf.merge.merging')}
+        label={'جاري الدمج...'}
         className="w-full mb-2"
       />
     )}
@@ -511,11 +480,11 @@ function MergePdfWorkspace({ files, processing, progress, result, error, onAdd, 
                   }
     >
      {processing
- ? t('pdf.merge.mergingButton')
- : t('pdf.merge.mergeButton')}
+ ? 'جاري الدمج...'
+ : 'دمج PDF'}
     </Button>
      <Button variant="ghost" onClick={onReset}>
-                  {t('Cancel', 'Cancel')}
+                  {'إلغاء'}
                 </Button>
   </div>
 )}
@@ -523,11 +492,11 @@ function MergePdfWorkspace({ files, processing, progress, result, error, onAdd, 
 }
 type SplitMode = 'every-page' | 'every-n' | 'ranges' | 'extract';
 
-const SPLIT_MODES: [SplitMode, string, string][] = [
-  ['every-page', 'Split every page', 'فصل كل صفحة'],
-  ['every-n', 'Split every n pages', 'فصل عدد مخصص من الصفحات'],
-  ['ranges', 'Split by page ranges', 'فصل حسب نطاق الصفحات'],
-  ['extract', 'Extract specific pages', 'استخراج صفحات محددة'],
+const SPLIT_MODES: [SplitMode, string][] = [
+  ['every-page', 'فصل كل صفحة'],
+  ['every-n', 'فصل عدد مخصص من الصفحات'],
+  ['ranges', 'فصل حسب نطاق الصفحات'],
+  ['extract', 'استخراج صفحات محددة'],
 ];
  
 function SplitPdfWorkspace({
@@ -557,9 +526,7 @@ function SplitPdfWorkspace({
   onProcess: () => void;
   onReset: () => void;
 }) {
-  const { t } = useTranslation();
-  const { direction } = useLanguageStore();
-  const isRtl = direction === 'rtl';
+
 
   const handleFileDrop = (f: File) => {
     if (f.type !== 'application/pdf' && !f.name.toLowerCase().endsWith('.pdf')) return;
@@ -573,30 +540,30 @@ function SplitPdfWorkspace({
           <CheckCircle2 className="h-8 w-8" />
         </div>
         <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-          {t('pdf.split.ready')}
+          {'تم تقسيم PDF بنجاح'}
         </h2>
         <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-          {t('pdf.split.resultHint', '{{count}} files were created from {{pages}} pages.', { count: result.count, pages: result.pages })}
+          {`تم إنشاء ${result.count} ملف من ${result.pages} صفحة`}
         </p>
 
         <div className="mt-6 grid grid-cols-3 gap-3 text-left">
           <div className="rounded-xl bg-gray-50 p-3 dark:bg-dark-surface">
-            <p className="text-xs text-gray-500">{t('pdf.split.files')}</p>
+            <p className="text-xs text-gray-500">{'الملفات'}</p>
             <p className="mt-1 font-semibold text-gray-900 dark:text-white">{result.count}</p>
           </div>
           <div className="rounded-xl bg-gray-50 p-3 dark:bg-dark-surface">
-            <p className="text-xs text-gray-500">{t('pdf.split.pages')}</p>
+            <p className="text-xs text-gray-500">{'الصفحات'}</p>
             <p className="mt-1 font-semibold text-gray-900 dark:text-white">{result.pages}</p>
           </div>
           <div className="rounded-xl bg-gray-50 p-3 dark:bg-dark-surface">
-            <p className="text-xs text-gray-500">{t('pdf.split.time')}</p>
-            <p className="mt-1 font-semibold text-gray-900 dark:text-white">{(result.duration / 1000).toFixed(1)} {t('common.seconds')}</p>
+            <p className="text-xs text-gray-500">{'الوقت المستغرق'}</p>
+            <p className="mt-1 font-semibold text-gray-900 dark:text-white">{(result.duration / 1000).toFixed(1)} {'ثانية'}</p>
           </div>
         </div>
 
         <div className="mt-6 flex flex-col-reverse justify-center gap-3 sm:flex-row">
           <Button variant="ghost" onClick={onReset}>
-            {t('common.startAgain')}
+            {'البدء من جديد'}
           </Button>
           <Button
             variant="primary"
@@ -606,7 +573,7 @@ function SplitPdfWorkspace({
             }}
             icon={<Download className="h-4 w-4" />}
           >
-            {t('pdf.split.download')}
+            {'تنزيل'}
           </Button>
         </div>
       </Card>
@@ -623,8 +590,8 @@ function SplitPdfWorkspace({
             <FileUpload
               accept={['.pdf', 'application/pdf']}
               onFilesSelected={(selected) => { if (selected[0]) handleFileDrop(selected[0].file); }}
-              label={t('fileUpload.dropPdf')}
-              description={t('fileUpload.pdfOnly')}
+              label={'اسحب ملف PDF هنا أو انقر للاختيار'}
+              description={'يُقبل ملفات PDF فقط'}
             />
           ) : (
             <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-dark-surface border border-light-border dark:border-dark-border">
@@ -633,14 +600,14 @@ function SplitPdfWorkspace({
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">{file.file.name}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">{pageCount} {t(pageCount === 1 ? 'pdf.split.page' : 'pdf.split.pages')}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{pageCount} {pageCount === 1 ? 'صفحة' : 'صفحات'}</p>
               </div>
               <button
                 type="button"
                 className="text-xs text-primary-600 hover:underline dark:text-primary-400"
                 onClick={() => onRemove()}
               >
-                {t('pdf.split.replace')}
+                {'استبدال'}
               </button>
             </div>
           )}
@@ -651,26 +618,26 @@ function SplitPdfWorkspace({
       {file && (
         <Card className="p-5 sm:p-6">
           <h2 className="text-base font-semibold text-gray-900 dark:text-white">
-            {t('pdf.split.method')}
+            {'طريقة التقسيم'}
           </h2>
           <div className="mt-4 grid gap-2">
-            {SPLIT_MODES.map(([value, label, labelAr]) => (
+            {SPLIT_MODES.map(([value, label]) => (
               <button
                 key={value}
                 type="button"
                 disabled={processing}
                 onClick={() => onMode(value)}
-                dir={isRtl ? 'rtl' : 'ltr'}
+                dir="rtl"
                 className={
                     `rounded-xl border px-3 py-2.5 text-sm transition-colors ${
-                   isRtl ? 'text-right' : 'text-left'
+                   'text-right'
                     } `+
                     (mode === value
                     ? 'border-primary-500 bg-primary-50 font-semibold text-primary-700 dark:bg-primary-900/20 dark:text-primary-300'
                     : 'border-light-border text-gray-600 hover:border-primary-300 dark:border-dark-border dark:text-gray-300')
                 }
               >
-                {isRtl ? labelAr : t('pdf.split.' + value)}
+                {label}
               </button>
             ))}
           </div>
@@ -678,7 +645,7 @@ function SplitPdfWorkspace({
           {mode === 'every-n' && (
             <div className="mt-4">
               <Input
-                label={t('pdf.split.nLabel')}
+                label={'عدد الصفحات في كل ملف'}
                 type="number"
                 min={1}
                 max={pageCount || 1}
@@ -691,13 +658,13 @@ function SplitPdfWorkspace({
           {(mode === 'ranges' || mode === 'extract') && (
             <div className="mt-4">
               <TextArea
-                label={mode === 'ranges' ? t('pdf.split.rangeLabel') : t('pdf.split.extractLabel')}
+                label={mode === 'ranges' ? 'نطاقات الصفحات' : 'الصفحات المراد استخراجها'}
                 value={ranges}
                 onChange={(e) => onRanges(e.target.value)}
                placeholder={
                 mode === 'ranges'
-                   ? t('pdf.split.rangePlaceholder')
-                   : t('pdf.split.extractPlaceholder')
+                   ? 'مثال: 1-3، 5، 8-10'
+                   : 'مثال: 1، 3، 5-7'
                   }
                 />
               {validationError && (
@@ -714,14 +681,14 @@ function SplitPdfWorkspace({
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-base font-semibold text-gray-900 dark:text-white">
-                {t('pdf.split.preview')}
+                {'المعاينة'}
               </h2>
               <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                {t('pdf.split.previewHint')}
+                {'معاينة الملفات التي سيتم إنشاؤها'}
               </p>
             </div>
             <span className="rounded-full bg-primary-100 px-3 py-1 text-xs font-semibold text-primary-700 dark:bg-primary-900/30">
-             {preview.length} {t(preview.length === 1 ? 'pdf.split.file' : 'pdf.split.files')}
+             {preview.length} {preview.length === 1 ? 'ملف' : 'ملفات'}
              </span>
           </div>
 
@@ -744,7 +711,7 @@ function SplitPdfWorkspace({
                   className="rounded-xl border border-light-border bg-gray-50 p-3 dark:border-dark-border dark:bg-dark-surface"
                 >
                   <p className="text-sm font-medium text-gray-900 dark:text-white">
-                    {t('pdf.split.file')} {index + 1}
+                    {'ملف'} {index + 1}
                   </p>
                   <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{group.label}</p>
                 </div>
@@ -754,7 +721,7 @@ function SplitPdfWorkspace({
 
           {preview.length > 6 && (
             <p className="mt-3 text-xs text-gray-500">
-              +{preview.length - 6} {t('pdf.split.more')}
+              +{preview.length - 6} {'و{{count}} أخرى'}
             </p>
           )}
 
@@ -783,10 +750,10 @@ function SplitPdfWorkspace({
                     </svg>
                   }
             >
-              {processing ? status : t('pdf.split.action')}
+              {processing ? status : 'تقسيم PDF'}
             </Button>
              <Button variant="ghost" onClick={onReset}>
-                  {t('Cancel', 'Cancel')}
+                  {'إلغاء'}
                 </Button>
           </div>
       )}
@@ -816,9 +783,7 @@ function DeletePdfWorkspace({
   onProcess: () => void;
   onReset: () => void;
 }) {
-  const { t } = useTranslation();
-  const { direction } = useLanguageStore();
-  const isRtl = direction === 'rtl';
+
 
   const handleFileDrop = (f: File) => {
     if (f.type !== 'application/pdf' && !f.name.toLowerCase().endsWith('.pdf')) return;
@@ -834,30 +799,30 @@ function DeletePdfWorkspace({
           <CheckCircle2 className="h-8 w-8" />
         </div>
         <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-          {t('pdf.delete.ready')}
+          {'تم الحذف!'}
         </h2>
         <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-          {t('pdf.delete.resultHint', '{{deleted}} pages deleted, {{remaining}} remaining.', { deleted: result.deleted, remaining: result.remaining })}
+          {`تم حذف ${result.deleted} صفحة، ويتبقى ${result.remaining} صفحة`}
         </p>
 
         <div className="mt-6 grid grid-cols-3 gap-3 text-left">
           <div className="rounded-xl bg-gray-50 p-3 dark:bg-dark-surface">
-            <p className="text-xs text-gray-500">{t('pdf.delete.remaining')}</p>
+            <p className="text-xs text-gray-500">{'المتبقي'}</p>
             <p className="mt-1 font-semibold text-gray-900 dark:text-white">{result.remaining}</p>
           </div>
           <div className="rounded-xl bg-gray-50 p-3 dark:bg-dark-surface">
-            <p className="text-xs text-gray-500">{t('pdf.delete.deletedLabel')}</p>
+            <p className="text-xs text-gray-500">{'المحذوف'}</p>
             <p className="mt-1 font-semibold text-gray-900 dark:text-white">{result.deleted}</p>
           </div>
           <div className="rounded-xl bg-gray-50 p-3 dark:bg-dark-surface">
-            <p className="text-xs text-gray-500">{t('pdf.split.time')}</p>
-            <p className="mt-1 font-semibold text-gray-900 dark:text-white">{(result.duration / 1000).toFixed(1)} {t('common.seconds')}</p>
+            <p className="text-xs text-gray-500">{'الوقت المستغرق'}</p>
+            <p className="mt-1 font-semibold text-gray-900 dark:text-white">{(result.duration / 1000).toFixed(1)} {'ثانية'}</p>
           </div>
         </div>
 
         <div className="mt-6 flex flex-col-reverse justify-center gap-3 sm:flex-row">
           <Button variant="ghost" onClick={onReset}>
-            {t('common.startAgain')}
+            {'البدء من جديد'}
           </Button>
           <Button
             variant="primary"
@@ -868,7 +833,7 @@ function DeletePdfWorkspace({
             }}
             icon={<Download className="h-4 w-4" />}
           >
-            {t('pdf.delete.download')}
+            {'تنزيل PDF'}
           </Button>
         </div>
       </Card>
@@ -885,8 +850,8 @@ function DeletePdfWorkspace({
             <FileUpload
               accept={['.pdf', 'application/pdf']}
               onFilesSelected={(selected) => { if (selected[0]) handleFileDrop(selected[0].file); }}
-              label={t('fileUpload.dropPdf')}
-              description={t('fileUpload.pdfOnly')}
+              label={'اسحب ملف PDF هنا أو انقر للاختيار'}
+              description={'يُقبل ملفات PDF فقط'}
             />
           ) : (
             <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-dark-surface border border-light-border dark:border-dark-border">
@@ -895,14 +860,14 @@ function DeletePdfWorkspace({
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">{file.file.name}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">{pageCount} {pageCount === 1 ? t('pdf.split.page') : t('pdf.split.pages')}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{pageCount} {pageCount === 1 ? 'صفحة' : 'الصفحات'}</p>
               </div>
               <button
                 type="button"
                 className="text-xs text-primary-600 hover:underline dark:text-primary-400"
                 onClick={() => onRemove()}
               >
-                {t('pdf.split.replace')}
+                {'استبدال'}
               </button>
             </div>
           )}
@@ -915,18 +880,18 @@ function DeletePdfWorkspace({
           <div className="flex items-center justify-between mb-2">
             <div>
               <h2 className="text-base font-semibold text-gray-900 dark:text-white">
-                {t('pdf.delete.selectTitle')}
+                {'حدد الصفحات للحذف'}
               </h2>
               <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                {t('pdf.delete.selectHint')}
+                {'انقر على الصفحات لتحديد ما تريد حذفه'}
               </p>
             </div>
             <div className="flex gap-2">
               <Button variant="ghost" size="sm" onClick={onSelectAll} disabled={processing}>
-                {t('pdf.delete.selectAll')}
+                {'تحديد الكل'}
               </Button>
               <Button variant="ghost" size="sm" onClick={onClearSelection} disabled={processing}>
-                {t('pdf.delete.clear')}
+                {'مسح التحديد'}
               </Button>
             </div>
           </div>
@@ -945,17 +910,17 @@ function DeletePdfWorkspace({
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-base font-semibold text-gray-900 dark:text-white">
-                {t('pdf.delete.preview')}
+                {'المعاينة'}
               </h2>
               <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                 {hasSelection
-                  ? t('pdf.delete.previewHint', '{{remaining}} pages will remain after deletion.', { remaining: pageCount - selectedPages.length })
-                  : t('pdf.delete.noSelection')}
+                  ? `سيتبقى ${pageCount - selectedPages.length} صفحة بعد الحذف`
+                  : 'الرجاء تحديد صفحة واحدة على الأقل'}
               </p>
             </div>
             {hasSelection && (
               <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
-                {selectedPages.length} {t('pdf.delete.toDelete')}
+                {selectedPages.length} {'للحذف'}
               </span>
             )}
           </div>
@@ -969,7 +934,7 @@ function DeletePdfWorkspace({
                 className="mt-4 rounded-xl border border-light-border bg-gray-50 p-4 dark:border-dark-border dark:bg-dark-surface"
               >
                 <p className="text-sm font-medium text-gray-900 dark:text-white">
-                  {t('pdf.delete.pagesWillBeRemoved')}
+                  {'الصفحات المحددة ستُحذف نهائياً من المستند'}
                 </p>
                 <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                   {selectedPages.sort((a, b) => a - b).map((p) => p + 1).join(', ')}
@@ -1009,10 +974,10 @@ function DeletePdfWorkspace({
                     </svg>
                   }
             >
-              {processing ? status : t('pdf.delete.action')}
+              {processing ? status : 'حذف الصفحات المحددة'}
             </Button>
              <Button variant="ghost" onClick={onReset}>
-                  {t('Cancel', 'Cancel')}
+                  {'إلغاء'}
                 </Button>
           </div>
       )}
@@ -1130,9 +1095,7 @@ function ReorderPdfWorkspace({
   onProcess: () => void;
   onReset: () => void;
 }) {
-  const { t } = useTranslation();
-  const { direction } = useLanguageStore();
-  const isRtl = direction === 'rtl';
+
   const [dragged, setDragged] = useState<number | null>(null);
   const [thumbnails, setThumbnails] = useState<Map<number, string>>(new Map());
 
@@ -1180,30 +1143,30 @@ function ReorderPdfWorkspace({
           <CheckCircle2 className="h-8 w-8" />
         </div>
         <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-          {t('pdf.reorder.ready')}
+          {'اكتملت إعادة الترتيب!'}
         </h2>
         <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-          {t('pdf.reorder.resultHint', '{{pages}} pages were reordered successfully.', { pages: result.pages })}
+          {`تمت إعادة ترتيب ${result.pages} صفحة بنجاح`}
         </p>
 
         <div className="mt-6 grid grid-cols-3 gap-3 text-left">
           <div className="rounded-xl bg-gray-50 p-3 dark:bg-dark-surface">
-            <p className="text-xs text-gray-500">{t('pdf.reorder.files')}</p>
+            <p className="text-xs text-gray-500">{'الملفات'}</p>
             <p className="mt-1 font-semibold text-gray-900 dark:text-white">1</p>
           </div>
           <div className="rounded-xl bg-gray-50 p-3 dark:bg-dark-surface">
-            <p className="text-xs text-gray-500">{t('pdf.reorder.pages')}</p>
+            <p className="text-xs text-gray-500">{'الصفحات'}</p>
             <p className="mt-1 font-semibold text-gray-900 dark:text-white">{result.pages}</p>
           </div>
           <div className="rounded-xl bg-gray-50 p-3 dark:bg-dark-surface">
-            <p className="text-xs text-gray-500">{t('pdf.split.time')}</p>
-            <p className="mt-1 font-semibold text-gray-900 dark:text-white">{(result.duration / 1000).toFixed(1)} {t('common.seconds')}</p>
+            <p className="text-xs text-gray-500">{'الوقت المستغرق'}</p>
+            <p className="mt-1 font-semibold text-gray-900 dark:text-white">{(result.duration / 1000).toFixed(1)} {'ثانية'}</p>
           </div>
         </div>
 
         <div className="mt-6 flex flex-col-reverse justify-center gap-3 sm:flex-row">
           <Button variant="ghost" onClick={onReset}>
-            {t('common.startAgain')}
+            {'البدء من جديد'}
           </Button>
           <Button
             variant="primary"
@@ -1214,7 +1177,7 @@ function ReorderPdfWorkspace({
             }}
             icon={<Download className="h-4 w-4" />}
           >
-            {t('pdf.reorder.download')}
+            {'تنزيل PDF'}
           </Button>
         </div>
       </Card>
@@ -1231,8 +1194,8 @@ function ReorderPdfWorkspace({
             <FileUpload
               accept={['.pdf', 'application/pdf']}
               onFilesSelected={(selected) => { if (selected[0]) handleFileDrop(selected[0].file); }}
-              label={t('fileUpload.dropPdf')}
-              description={t('fileUpload.pdfOnly')}
+              label={'اسحب ملف PDF هنا أو انقر للاختيار'}
+              description={'يُقبل ملفات PDF فقط'}
             />
           ) : (
             <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-dark-surface border border-light-border dark:border-dark-border">
@@ -1241,14 +1204,14 @@ function ReorderPdfWorkspace({
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">{file.file.name}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">{pageCount} {pageCount === 1 ? t('pdf.split.page') : t('pdf.split.pages')}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{pageCount} {pageCount === 1 ? 'صفحة' : 'الصفحات'}</p>
               </div>
               <button
                 type="button"
                 className="text-xs text-primary-600 hover:underline dark:text-primary-400"
                 onClick={() => onRemove()}
               >
-                {t('pdf.split.replace')}
+                {'استبدال'}
               </button>
             </div>
           )}
@@ -1261,14 +1224,14 @@ function ReorderPdfWorkspace({
           <div className="flex items-center justify-between mb-2">
             <div>
               <h2 className="text-base font-semibold text-gray-900 dark:text-white">
-                {t('pdf.reorder.title')}
+                {'إعادة ترتيب الصفحات'}
               </h2>
               <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                {t('pdf.reorder.hint')}
+                {'اسحب الصفحات أو استخدم الأسهم لإعادة ترتيبها'}
               </p>
             </div>
             <Button variant="ghost" size="sm" onClick={onResetOrder} disabled={processing || isDefaultOrder}>
-              {t('pdf.reorder.reset')}
+              {'إعادة تعيين'}
             </Button>
           </div>
 
@@ -1323,14 +1286,14 @@ function ReorderPdfWorkspace({
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-base font-semibold text-gray-900 dark:text-white">
-                {t('pdf.reorder.preview')}
+                {'المعاينة'}
               </h2>
               <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                {t('pdf.reorder.previewHint')}
+                {'اسحب الصفحات لتغيير ترتيبها'}
               </p>
             </div>
             <span className="rounded-full bg-primary-100 px-3 py-1 text-xs font-semibold text-primary-700 dark:bg-primary-900/30">
-              {order.length} {t('pdf.reorder.pages')}
+              {order.length} {'الصفحات'}
             </span>
           </div>
 
@@ -1342,7 +1305,7 @@ function ReorderPdfWorkspace({
               className="mt-4 rounded-xl border border-light-border bg-gray-50 p-4 dark:border-dark-border dark:bg-dark-surface"
             >
               <p className="text-sm font-medium text-gray-900 dark:text-white">
-                {t('pdf.reorder.newOrder')}
+                {'الترتيب الجديد'}
               </p>
               <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                 {order.map((p) => p + 1).join(', ')}
@@ -1382,10 +1345,10 @@ function ReorderPdfWorkspace({
               </svg>
             }
           >
-            {processing ? status : t('pdf.reorder.action')}
+            {processing ? status : 'إعادة الترتيب'}
           </Button>
           <Button variant="ghost" onClick={onReset}>
-            {t('Cancel', 'Cancel')}
+            {'إلغاء'}
           </Button>
         </div>
       )}
@@ -1403,12 +1366,10 @@ export default function PdfToolPage({ toolId: propToolId }: { toolId?: string })
   const toolId = propToolId || routeToolId || '';
   const tool = TOOLS[toolId];
 
-  const { t } = useTranslation();
   const { addNotification, addFile } = useAppStore();
   const { theme } = useThemeStore();
-  const { direction } = useLanguageStore();
   const isDark = theme === 'dark';
-  const isRtl = direction === 'rtl';
+
 
   const [step, setStep] = useState<Step>('upload');
   const [files, setFiles] = useState<UploadedFileData[]>([]);
@@ -1489,8 +1450,8 @@ export default function PdfToolPage({ toolId: propToolId }: { toolId?: string })
     return (
       <div className="min-h-screen flex items-center justify-center bg-light-bg dark:bg-dark-bg">
         <EmptyState
-          title={t('Tool Not Found', 'Tool Not Found')}
-          description={t('The requested tool could not be found.', 'The requested tool could not be found.')}
+          title={'الأداة غير موجودة'}
+          description={'تعذر العثور على الأداة المطلوبة.'}
           icon={
             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="10" />
@@ -1544,7 +1505,7 @@ export default function PdfToolPage({ toolId: propToolId }: { toolId?: string })
 
         case 'split-pdf':
           setProgress(30);
-          if (selectedPages.length === 0) throw new Error(t('pdf.delete.selectAtLeastOnePage'));
+          if (selectedPages.length === 0) throw new Error('الرجاء تحديد صفحة واحدة على الأقل');
           output = await splitPDF(firstFile, selectedPages);
           break;
 
@@ -1555,7 +1516,7 @@ export default function PdfToolPage({ toolId: propToolId }: { toolId?: string })
 
         case 'delete-pages':
           setProgress(30);
-          if (selectedPages.length === 0) throw new Error(t('pdf.delete.selectPages'));
+          if (selectedPages.length === 0) throw new Error('الرجاء تحديد الصفحات المراد حذفها');
           output = await deletePDFPages(firstFile, selectedPages);
           break;
 
@@ -1624,7 +1585,7 @@ export default function PdfToolPage({ toolId: propToolId }: { toolId?: string })
           const comparison = await comparePDFs(files[0].file, files[1].file);
           setCompareResult(comparison);
           setProcessState('done');
-          addNotification(t('Comparison complete', 'Comparison complete'), 'success');
+          addNotification('اكتملت المقارنة', 'success');
           return;
         case 'word-to-pdf':
         case 'excel-to-pdf':
@@ -1648,15 +1609,13 @@ export default function PdfToolPage({ toolId: propToolId }: { toolId?: string })
       );
       addFile(fileItem);
       addNotification(
-        t('Processing complete', 'Processing complete'),
+        'اكتملت المعالجة',
         'success',
       );
     } catch (err) {
       let msg = err instanceof Error ? err.message : 'An error occurred';
       if (isNetworkError(err)) {
-        msg = isRtl
-          ? 'أنت غير متصل بالإنترنت. تتطلب هذه الأداة اتصالاً بالإنترنت. حاول مرة أخرى عند توفر الاتصال.'
-          : 'You are offline. This tool requires an internet connection. Try again once you are back online.';
+        msg = 'أنت غير متصل بالإنترنت. تتطلب هذه الأداة اتصالاً بالإنترنت. حاول مرة أخرى عند توفر الاتصال.';
       }
       setError(msg);
       setProcessState('error');
@@ -1680,22 +1639,22 @@ export default function PdfToolPage({ toolId: propToolId }: { toolId?: string })
     if (!splitPageCount) return [];
     try {
       if (splitMode === 'every-page')
-  return createPDFPageGroups(splitPageCount, 1, t('pdf.split.pages'));
+  return createPDFPageGroups(splitPageCount, 1, 'الصفحات');
       if (splitMode === 'every-n')
-  return createPDFPageGroups(splitPageCount, splitEvery, t('pdf.split.pages'));
+  return createPDFPageGroups(splitPageCount, splitEvery, 'الصفحات');
       if (splitMode === 'ranges')
-  return parsePDFPageRanges(splitRanges, splitPageCount, t('pdf.split.pages'));
+  return parsePDFPageRanges(splitRanges, splitPageCount, 'الصفحات');
       const pages = parsePDFPageExpression(splitRanges, splitPageCount);
       return pages.length
   ? [{
-      label: `${isRtl ? 'الصفحات' : 'Pages'} ${pages.map((page) => page + 1).join(', ')}`,
+      label: `الصفحات ${pages.map((page) => page + 1).join(', ')}`,
       pages,
     }]
   : [];}
      catch {
       return [];
     }
-  }, [splitEvery, splitMode, splitPageCount, splitRanges, isRtl]);
+  }, [splitEvery, splitMode, splitPageCount, splitRanges]);
 
   const addSplitFile = async (file: File) => {
     if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
@@ -1755,7 +1714,7 @@ export default function PdfToolPage({ toolId: propToolId }: { toolId?: string })
       setSplitStatus('Done');
       setSplitResult({ blob, count: outputs.length, pages: outputs.reduce((total, output) => total + output.pages.length, 0), duration: performance.now() - started });
       setProcessState('done');
-      addNotification(t('PDF split successfully', 'تم تقسيم الملف بنجاح'), 'success');
+      addNotification('تم تقسيم PDF بنجاح', 'success');
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unable to split this PDF.';
       setError(message);
@@ -1769,14 +1728,14 @@ export default function PdfToolPage({ toolId: propToolId }: { toolId?: string })
     try {
       setError(null);
       setDeleteResult(null);
-      setDeleteStatus(t('pdf.delete.reading'));
+      setDeleteStatus('جاري قراءة PDF...');
       const data = await fileToArrayBuffer(file);
       const pageCount = await getPDFPageCount(file);
       setFiles([{ id: 'delete-' + Date.now(), file, data, pageCount }]);
       setDeletePageCount(pageCount);
       setDeleteSelectedPages([]);
     } catch {
-      setError(t('pdf.delete.readError'));
+      setError('تعذر قراءة ملف PDF');
     }
   };
 
@@ -1797,7 +1756,7 @@ export default function PdfToolPage({ toolId: propToolId }: { toolId?: string })
     setError(null);
     setProcessState('processing');
     try {
-      setDeleteStatus(t('pdf.delete.processing'));
+      setDeleteStatus('جاري الحذف...');
       setProgress(30);
       const output = await deletePDFPages(source, deleteSelectedPages);
       setProgress(100);
@@ -1809,9 +1768,9 @@ export default function PdfToolPage({ toolId: propToolId }: { toolId?: string })
         duration: performance.now() - started,
       });
       setProcessState('done');
-      addNotification(t('pdf.delete.success'), 'success');
+      addNotification('تم حذف الصفحات بنجاح', 'success');
     } catch (err) {
-      const message = err instanceof Error ? err.message : t('pdf.delete.error');
+      const message = err instanceof Error ? err.message : 'فشل حذف الصفحات';
       setError(message);
       setProcessState('error');
       addNotification(message, 'error');
@@ -1823,14 +1782,14 @@ export default function PdfToolPage({ toolId: propToolId }: { toolId?: string })
     try {
       setError(null);
       setReorderResult(null);
-      setReorderStatus(t('pdf.reorder.reading'));
+      setReorderStatus('جاري قراءة PDF...');
       const data = await fileToArrayBuffer(file);
       const pageCount = await getPDFPageCount(file);
       setFiles([{ id: 'reorder-' + Date.now(), file, data, pageCount }]);
       setReorderPageCount(pageCount);
       setPageOrder(Array.from({ length: pageCount }, (_, i) => i));
     } catch {
-      setError(t('pdf.reorder.readError'));
+      setError('تعذر قراءة ملف PDF');
     }
   };
 
@@ -1851,7 +1810,7 @@ export default function PdfToolPage({ toolId: propToolId }: { toolId?: string })
     setError(null);
     setProcessState('processing');
     try {
-      setReorderStatus(t('pdf.reorder.processing'));
+      setReorderStatus('جاري إعادة الترتيب...');
       setProgress(30);
       const output = await reorderPDFPages(source, pageOrder);
       setProgress(100);
@@ -1862,9 +1821,9 @@ export default function PdfToolPage({ toolId: propToolId }: { toolId?: string })
         duration: performance.now() - started,
       });
       setProcessState('done');
-      addNotification(t('pdf.reorder.success'), 'success');
+      addNotification('تمت إعادة ترتيب الصفحات بنجاح', 'success');
     } catch (err) {
-      const message = err instanceof Error ? err.message : t('pdf.reorder.error');
+      const message = err instanceof Error ? err.message : 'فشلت إعادة ترتيب الصفحات';
       setError(message);
       setProcessState('error');
       addNotification(message, 'error');
@@ -1912,9 +1871,9 @@ export default function PdfToolPage({ toolId: propToolId }: { toolId?: string })
 
   if (tool.id === 'merge-pdfs') {
     return (
-      <div className={'min-h-screen bg-light-bg dark:bg-dark-bg ' + (isRtl ? 'rtl' : 'ltr')}>
+      <div className={'min-h-screen bg-light-bg dark:bg-dark-bg rtl'}>
         <div className="max-w-4xl mx-auto px-4 py-8">
-          <ToolHeader tool={tool} isDark={isDark} isRtl={isRtl} />
+          <ToolHeader tool={tool} isDark={isDark} />
           <MergePdfWorkspace
             files={files}
             processing={processState === 'processing'}
@@ -1934,9 +1893,9 @@ export default function PdfToolPage({ toolId: propToolId }: { toolId?: string })
 
   if (tool.id === 'split-pdf') {
     return (
-      <div className={'min-h-screen bg-light-bg dark:bg-dark-bg ' + (isRtl ? 'rtl' : 'ltr')}>
+      <div className={'min-h-screen bg-light-bg dark:bg-dark-bg rtl'}>
         <div className="max-w-4xl mx-auto px-4 py-8">
-          <ToolHeader tool={tool} isDark={isDark} isRtl={isRtl} />
+          <ToolHeader tool={tool} isDark={isDark} />
           <SplitPdfWorkspace
             file={files[0] || null}
             pageCount={splitPageCount}
@@ -1974,9 +1933,9 @@ export default function PdfToolPage({ toolId: propToolId }: { toolId?: string })
 
   if (tool.id === 'delete-pages') {
     return (
-      <div className={'min-h-screen bg-light-bg dark:bg-dark-bg ' + (isRtl ? 'rtl' : 'ltr')}>
+      <div className={'min-h-screen bg-light-bg dark:bg-dark-bg rtl'}>
         <div className="max-w-4xl mx-auto px-4 py-8">
-          <ToolHeader tool={tool} isDark={isDark} isRtl={isRtl} />
+          <ToolHeader tool={tool} isDark={isDark} />
           <DeletePdfWorkspace
             file={files[0] || null}
             pageCount={deletePageCount}
@@ -2001,9 +1960,9 @@ export default function PdfToolPage({ toolId: propToolId }: { toolId?: string })
 
   if (tool.id === 'reorder-pages') {
     return (
-      <div className={'min-h-screen bg-light-bg dark:bg-dark-bg ' + (isRtl ? 'rtl' : 'ltr')}>
+      <div className={'min-h-screen bg-light-bg dark:bg-dark-bg rtl'}>
         <div className="max-w-4xl mx-auto px-4 py-8">
-          <ToolHeader tool={tool} isDark={isDark} isRtl={isRtl} />
+          <ToolHeader tool={tool} isDark={isDark} />
           <ReorderPdfWorkspace
             file={files[0] || null}
             pageCount={reorderPageCount}
@@ -2026,9 +1985,9 @@ export default function PdfToolPage({ toolId: propToolId }: { toolId?: string })
   }
 
   return (
-    <div className={`min-h-screen bg-light-bg dark:bg-dark-bg ${isRtl ? 'rtl' : 'ltr'}`}>
+    <div className="min-h-screen bg-light-bg dark:bg-dark-bg rtl">
       <div className="max-w-4xl mx-auto px-4 py-8">
-        <ToolHeader tool={tool} isDark={isDark} isRtl={isRtl} />
+        <ToolHeader tool={tool} isDark={isDark} />
 
         <AnimatePresence mode="wait">
           {/* Upload Step */}
@@ -2046,8 +2005,8 @@ export default function PdfToolPage({ toolId: propToolId }: { toolId?: string })
                   maxFiles={tool.maxFiles || 10}
                   onFilesSelected={onFilesSelected}
                   onFileRemove={handleRemoveFile}
-                  label={tool.accepts.includes('.pdf') ? t('fileUpload.dropPdf') : t('fileUpload.dropLabel', 'Drop files here or click to browse')}
-                  description={tool.accepts.includes('.pdf') ? t('fileUpload.pdfOnly') : tool.accepts.map((a) => a.toUpperCase()).join(', ')}
+                  label={tool.accepts.includes('.pdf') ? 'اسحب ملف PDF هنا أو انقر للاختيار' : 'اسحب الملفات هنا أو انقر للاختيار'}
+                  description={tool.accepts.includes('.pdf') ? 'يُقبل ملفات PDF فقط' : tool.accepts.map((a) => a.toUpperCase()).join(', ')}
                 />
               </Card>
             </motion.div>
@@ -2081,7 +2040,7 @@ export default function PdfToolPage({ toolId: propToolId }: { toolId?: string })
                     </p>
                   </div>
                   <Button variant="ghost" size="sm" onClick={() => { setStep('upload'); setFiles([]); }}>
-                    {t('Change', 'Change')}
+                    {'تغيير'}
                   </Button>
                 </div>
               </Card>
@@ -2092,11 +2051,11 @@ export default function PdfToolPage({ toolId: propToolId }: { toolId?: string })
               {(tool.id === 'password-protect' || tool.id === 'remove-password') && (
                 <Card className="p-6">
                   <Input
-                    label={tool.id === 'password-protect' ? t('Set Password', 'Set Password') : t('Enter Current Password', 'Enter Current Password')}
+                    label={tool.id === 'password-protect' ? 'تعيين كلمة المرور' : 'أدخل كلمة المرور الحالية'}
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder={t('Enter password...', 'Enter password...')}
+                    placeholder={'أدخل كلمة المرور...'}
                     icon={
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
@@ -2113,10 +2072,10 @@ export default function PdfToolPage({ toolId: propToolId }: { toolId?: string })
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
                       {tool.id === 'split-pdf'
-                        ? t('Select pages to extract', 'Select pages to extract')
+                        ? 'حدد الصفحات لاستخراجها'
                         : tool.id === 'delete-pages'
-                          ? t('Select pages to delete', 'Select pages to delete')
-                          : t('Select pages to rotate', 'Select pages to rotate')}
+                          ? 'حدد الصفحات للحذف'
+                          : 'حدد الصفحات لتدويرها'}
                     </h3>
                     <div className="flex gap-2">
                       <Button
@@ -2135,10 +2094,10 @@ export default function PdfToolPage({ toolId: propToolId }: { toolId?: string })
                           }
                         }}
                       >
-                        {t('Select All', 'Select All')}
+                        {'تحديد الكل'}
                       </Button>
                       <Button variant="ghost" size="sm" onClick={() => setSelectedPages([])}>
-                        {t('Clear', 'Clear')}
+                        {'مسح'}
                       </Button>
                     </div>
                   </div>
@@ -2157,7 +2116,7 @@ export default function PdfToolPage({ toolId: propToolId }: { toolId?: string })
               {tool.id === 'rotate-pages' && (
                 <Card className="p-6">
                   <Select
-                    label={t('Rotation Angle', 'Rotation Angle')}
+                    label={'زاوية الدوران'}
                     value={String(rotationDegrees)}
                     onChange={(e) => setRotationDegrees(Number(e.target.value))}
                     options={[
@@ -2196,10 +2155,10 @@ export default function PdfToolPage({ toolId: propToolId }: { toolId?: string })
                     </svg>
                   }
                 >
-                  {t('Process', 'Process')}
+                  {'معالجة'}
                 </Button>
                 <Button variant="ghost" onClick={reset}>
-                  {t('Cancel', 'Cancel')}
+                  {'إلغاء'}
                 </Button>
               </div>
             </motion.div>
@@ -2218,7 +2177,7 @@ export default function PdfToolPage({ toolId: propToolId }: { toolId?: string })
                 
                   <div className="mt-4">
                     <Button variant="ghost" onClick={reset}>
-                      {t('Start Over', 'Start Over')}
+                      {'البدء من جديد'}
                     </Button>
                   </div>
                 </>
@@ -2229,7 +2188,6 @@ export default function PdfToolPage({ toolId: propToolId }: { toolId?: string })
                   originalSize={files[0]?.file.size}
                   onReset={reset}
                   isDark={isDark}
-                  isRtl={isRtl}
                   originalFileName={files[0]?.file.name}
                 />
               ) : null}
@@ -2240,7 +2198,7 @@ export default function PdfToolPage({ toolId: propToolId }: { toolId?: string })
 
       <AnimatePresence>
         {processState === 'processing' && (
-          <ProcessingOverlay progress={progress} message={t('Processing your files...', 'Processing your files...')} />
+          <ProcessingOverlay progress={progress} message={'جاري معالجة ملفاتك...'} />
         )}
       </AnimatePresence>
     </div>

@@ -5,7 +5,6 @@ import { tools, categoryOrder, searchTools } from '@/data/tools';
 import { Card } from '@/components/UI/Card';
 import { Badge } from '@/components/UI/Badge';
 import { useAppStore } from '@/store/useAppStore';
-import { useLanguageStore } from '@/store/useLanguageStore';
 import type { ToolCategory, Tool } from '@/types';
 import { categories } from '@/data/categories';
 import { CategoryMeta } from '@/data/categories';
@@ -41,9 +40,8 @@ const badgeVariantMap: Record<string, 'primary' | 'success' | 'warning' | 'info'
 };
 
 export function AllToolsPage() {
-  console.log("🔥 ALL TOOLS PAGE LOADED");
   const navigate = useNavigate();
-  const { language, direction } = useLanguageStore();
+  const direction = 'rtl' as const;
   const { favoriteTools, toggleFavorite } = useAppStore();
 
   const [query, setQuery] = useState('');
@@ -92,10 +90,10 @@ export function AllToolsPage() {
         className="mb-6"
       >
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-          {language === 'ar' ? 'جميع الأدوات' : 'All Tools'}
+          جميع الأدوات
         </h1>
         <p className="text-gray-500 dark:text-gray-400">
-          {filteredTools.length} {language === 'ar' ? 'أداة متاحة' : 'tools available'}
+          {filteredTools.length} أداة متاحة
         </p>
       </motion.div>
 
@@ -123,11 +121,7 @@ export function AllToolsPage() {
             type="text"
             value={query}
             onChange={(e) => handleSearch(e.target.value)}
-            placeholder={
-              language === 'ar'
-                ? 'ابحث عن أداة...'
-                : 'Search for a tool...'
-            }
+            placeholder="ابحث عن أداة..."
             className="w-full pl-12 pr-4 py-3 bg-white dark:bg-dark-card border border-gray-200 dark:border-dark-border rounded-xl text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
           />
           {query && (
@@ -158,7 +152,7 @@ export function AllToolsPage() {
                 : 'bg-white dark:bg-dark-card text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-dark-border hover:border-primary-300 dark:hover:border-primary-700'
             }`}
           >
-            {language === 'ar' ? 'الكل' : 'All'}
+            الكل
           </button>
           {categoryOrder.map((cat) => {
             const meta = categories[cat];
@@ -174,8 +168,8 @@ export function AllToolsPage() {
                     : 'bg-white dark:bg-dark-card text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-dark-border hover:border-primary-300 dark:hover:border-primary-700'
                 }`}
               >
-                
-                <span>{language === 'ar' ? meta.nameAr : meta.name}</span>
+
+                <span>{meta.name}</span>
               </button>
             );
           })}
@@ -190,12 +184,10 @@ export function AllToolsPage() {
         >
           <div className="text-6xl mb-4">🔍</div>
           <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-2">
-            {language === 'ar' ? 'لا توجد نتائج' : 'No tools found'}
+            لا توجد نتائج
           </h3>
           <p className="text-gray-500 dark:text-gray-400">
-            {language === 'ar'
-              ? 'جرب البحث بكلمات مختلفة'
-              : 'Try searching with different keywords'}
+            جرب البحث بكلمات مختلفة
           </p>
         </motion.div>
       ) : groupedTools ? (
@@ -212,9 +204,9 @@ export function AllToolsPage() {
                 transition={{ duration: 0.4 }}
               >
                 <div className="flex items-center gap-3 mb-4">
-                   
+
                   <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200">
-                    {language === 'ar' ? meta.nameAr : meta.name}
+                    {meta.name}
                   </h2>
                   <Badge variant={badgeVariantMap[cat] || 'neutral'} size="sm">
                     {catTools.length}
@@ -234,71 +226,69 @@ export function AllToolsPage() {
                     return (
                       <motion.div key={tool.id} variants={itemVariants}>
                         <Card
-  hoverable
-onClick={() => {
-  if (!tool.comingSoon) {
-    navigate(`/tool/${tool.id}`);
-  }
-}}
-  className={`h-full group ${
-    tool.comingSoon
-      ? 'cursor-not-allowed opacity-75'
-      : 'cursor-pointer'
-  }`}
->
-  <div className="flex flex-col h-full">
+                          hoverable
+                          onClick={() => {
+                            if (!tool.comingSoon) {
+                              navigate(`/tool/${tool.id}`);
+                            }
+                          }}
+                          className={`h-full group ${
+                            tool.comingSoon
+                              ? 'cursor-not-allowed opacity-75'
+                              : 'cursor-pointer'
+                            }`}
+                        >
+                          <div className="flex flex-col h-full">
 
-    <div className="flex items-start justify-between mb-3">
-      <ToolIcon className="w-9 h-9 group-hover:scale-110 transition-transform duration-200" />
+                            <div className="flex items-start justify-between mb-3">
+                              <ToolIcon className="w-9 h-9 group-hover:scale-110 transition-transform duration-200" />
 
-      <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-2">
 
-        {tool.comingSoon && (
-          <Badge variant="warning" size="sm">
-            {language === 'ar' ? 'قريبًا' : 'Coming Soon'}
-          </Badge>
-        )}
+                                {tool.comingSoon && (
+                                  <Badge variant="warning" size="sm">
+                                    قريبًا
+                                  </Badge>
+                                )}
 
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            toggleFavorite(tool.id);
-          }}
-          className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-surface transition-colors"
-        >
-          <svg
-            className={`w-5 h-5 ${
-              isFavorite
-                ? 'text-amber-500 fill-amber-500'
-                : 'text-gray-300 dark:text-gray-600 hover:text-amber-400'
-            }`}
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
-            />
-          </svg>
-        </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    toggleFavorite(tool.id);
+                                  }}
+                                  className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-surface transition-colors"
+                                >
+                                  <svg
+                                    className={`w-5 h-5 ${
+                                      isFavorite
+                                        ? 'text-amber-500 fill-amber-500'
+                                        : 'text-gray-300 dark:text-gray-600 hover:text-amber-400'
+                                    }`}
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                    strokeWidth={2}
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
+                                    />
+                                  </svg>
+                                </button>
 
-      </div>
-    </div>
+                              </div>
+                            </div>
 
-    <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-1 group-hover:text-primary-600 transition-colors">
-      {language === 'ar' ? tool.nameAr : tool.name}
-    </h3>
+                            <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-1 group-hover:text-primary-600 transition-colors">
+                              {tool.name}
+                            </h3>
 
-    <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 flex-1">
-      {language === 'ar'
-        ? tool.descriptionAr
-        : tool.description}
-    </p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 flex-1">
+                              {tool.description}
+                            </p>
 
-  </div>
-</Card>
+                          </div>
+                        </Card>
                       </motion.div>
                     );
                   })}
@@ -308,7 +298,7 @@ onClick={() => {
           })}
         </div>
       ) : (
-        
+
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -323,18 +313,18 @@ onClick={() => {
                 <Card
                   hoverable
                   onClick={() => {
-  if (!tool.comingSoon) {
-    navigate(`/tool/${tool.id}`);
-  }
-}}
+                    if (!tool.comingSoon) {
+                      navigate(`/tool/${tool.id}`);
+                    }
+                  }}
                   className="h-full cursor-pointer group"
                 >
                   <div className="flex flex-col h-full">
-                    
+
                     <div className="flex items-start justify-between mb-3">
                       <span className="group-hover:scale-110 transition-transform duration-200">
-        <ToolIcon className="w-9 h-9" />
-      </span>
+                        <ToolIcon className="w-9 h-9" />
+                      </span>
                       <button
                         onClick={() => {
                           if (!tool.comingSoon) {
@@ -342,7 +332,7 @@ onClick={() => {
                           }
                         }}
                         className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-surface transition-colors"
-                        aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+                        aria-label={isFavorite ? 'إزالة من المفضلة' : 'إضافة إلى المفضلة'}
                       >
                         <svg
                           className={`w-5 h-5 transition-colors ${
@@ -365,16 +355,16 @@ onClick={() => {
 
                     <div className="mb-2">
                       <Badge variant={badgeVariantMap[tool.category] || 'neutral'} size="sm">
-                        {language === 'ar' ? categories[tool.category].nameAr : categories[tool.category].name}
+                        {categories[tool.category].name}
                       </Badge>
                     </div>
 
                     <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-1 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
-                      {language === 'ar' ? tool.nameAr : tool.name}
+                      {tool.name}
                     </h3>
 
                     <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 flex-1">
-                      {language === 'ar' ? tool.descriptionAr : tool.description}
+                      {tool.description}
                     </p>
                   </div>
                 </Card>

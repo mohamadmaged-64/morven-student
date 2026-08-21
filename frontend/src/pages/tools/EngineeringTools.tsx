@@ -1,6 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useTranslation } from 'react-i18next';
 import { getToolById } from '@/data/tools';
 import {
   Button,
@@ -15,7 +14,6 @@ import {
 import { ToolLayout } from '@/components/Tool/ToolLayout';
 import { ToolHero } from '@/components/Tool/ToolHero';
 import { useAppStore } from '@/store/useAppStore';
-import { useLanguageStore } from '@/store/useLanguageStore';
 import QRCode from 'qrcode';
 import { saveToLibrary } from '@/services/savedFilesService';
 
@@ -36,15 +34,14 @@ function ResultBox({
   mono?: boolean;
   onClear?: () => void;
 }) {
-  const { t } = useTranslation();
   const { addNotification } = useAppStore();
 
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(value);
-      addNotification(t('Copied to clipboard', 'Copied to clipboard'), 'success');
+      addNotification('تم النسخ إلى الحافظة', 'success');
     } catch {
-      addNotification(t('Copy failed', 'Copy failed'), 'error');
+      addNotification('فشل النسخ', 'error');
     }
   };
 
@@ -55,12 +52,12 @@ function ResultBox({
         <div className="flex items-center gap-2">
           {value && (
             <Button variant="secondary" size="sm" onClick={handleCopy}>
-              {t('Copy', 'Copy')}
+              {'نسخ'}
             </Button>
           )}
           {onClear && (
             <Button variant="ghost" size="sm" onClick={onClear}>
-              {t('Clear', 'Clear')}
+              {'مسح'}
             </Button>
           )}
         </div>
@@ -71,7 +68,7 @@ function ResultBox({
           mono ? 'font-mono' : ''
         } text-gray-800 dark:text-gray-100 whitespace-pre-wrap break-words`}
       >
-        {value || placeholder || t('Result placeholder', 'Result placeholder')}
+        {value || placeholder || 'ستظهر النتيجة هنا'}
       </pre>
     </Card>
   );
@@ -88,7 +85,6 @@ function FieldLabel({ children }: { children: React.ReactNode }) {
 // =============================================================================
 
 function JsonFormatter() {
-  const { t } = useTranslation();
   const { addNotification } = useAppStore();
   const [input, setInput] = useState('{\n  "name": "Morven",\n  "version": 1\n}');
   const [indent, setIndent] = useState('2');
@@ -101,12 +97,12 @@ function JsonFormatter() {
       const size = parseInt(indent, 10);
       setOutput(JSON.stringify(parsed, null, size));
       setError('');
-      addNotification(t('JSON formatted successfully', 'JSON formatted successfully'), 'success');
+      addNotification('تم تنسيق JSON بنجاح', 'success');
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       setError(msg);
       setOutput('');
-      addNotification(t('Invalid JSON', 'Invalid JSON'), 'error');
+      addNotification('JSON غير صالح', 'error');
     }
   };
 
@@ -114,7 +110,7 @@ function JsonFormatter() {
     <div className="space-y-5">
       <Card className="space-y-4">
         <TextArea
-          label={t('Input JSON', 'Input JSON')}
+          label={'إدخال JSON'}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           rows={8}
@@ -123,18 +119,18 @@ function JsonFormatter() {
         />
         <div className="flex flex-wrap items-end gap-3">
           <Select
-            label={t('Indentation', 'Indentation')}
+            label={'المسافة البادئة'}
             options={[
-              { value: '2', label: '2 ' + t('spaces', 'spaces') },
-              { value: '4', label: '4 ' + t('spaces', 'spaces') },
-              { value: '0', label: t('Minified', 'Minified') },
+              { value: '2', label: '2 ' + 'فراغات' },
+              { value: '4', label: '4 ' + 'فراغات' },
+              { value: '0', label: 'مصغر' },
             ]}
             value={indent}
             onChange={(e) => setIndent(e.target.value)}
             wrapperClassName="sm:w-44"
           />
           <Button onClick={handleFormat} className="flex-1 sm:flex-none">
-            {t('Format', 'Format')}
+            {'التنسيق'}
           </Button>
         </div>
         {error && (
@@ -144,7 +140,7 @@ function JsonFormatter() {
         )}
       </Card>
       <ResultBox
-        title={t('Formatted JSON', 'Formatted JSON')}
+        title={'JSON منسق'}
         value={output}
         onClear={() => setOutput('')}
       />
@@ -157,7 +153,6 @@ function JsonFormatter() {
 // =============================================================================
 
 function JsonValidator() {
-  const { t } = useTranslation();
   const [input, setInput] = useState('');
   const [result, setResult] = useState<'valid' | 'invalid' | null>(null);
   const [message, setMessage] = useState('');
@@ -166,7 +161,7 @@ function JsonValidator() {
     try {
       JSON.parse(input);
       setResult('valid');
-      setMessage(t('Valid JSON', 'Valid JSON'));
+      setMessage('JSON صالح');
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       setResult('invalid');
@@ -178,7 +173,7 @@ function JsonValidator() {
     <div className="space-y-5">
       <Card className="space-y-4">
         <TextArea
-          label={t('Input JSON', 'Input JSON')}
+          label={'إدخال JSON'}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           rows={10}
@@ -186,7 +181,7 @@ function JsonValidator() {
           placeholder='{ "key": "value" }'
         />
         <Button onClick={handleValidate} disabled={!input.trim()}>
-          {t('Validate', 'Validate')}
+          {'تحقق'}
         </Button>
       </Card>
       {result && (
@@ -207,7 +202,7 @@ function JsonValidator() {
                       result === 'valid' ? 'text-emerald-700 dark:text-emerald-400' : 'text-red-700 dark:text-red-400'
                     }`}
                   >
-                    {result === 'valid' ? t('Valid JSON', 'Valid JSON') : t('Invalid JSON', 'Invalid JSON')}
+                    {result === 'valid' ? 'JSON صالح' : 'JSON غير صالح'}
                   </p>
                   {result === 'invalid' && (
                     <p className="mt-1 text-sm text-red-600 dark:text-red-400 break-words" dir="ltr">
@@ -229,7 +224,6 @@ function JsonValidator() {
 // =============================================================================
 
 function RegexTester() {
-  const { t } = useTranslation();
   const [pattern, setPattern] = useState('\\b\\w+\\b');
   const [flags, setFlags] = useState('gi');
   const [text, setText] = useState('The quick brown fox jumps over the lazy dog.');
@@ -253,7 +247,7 @@ function RegexTester() {
       <Card className="space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Input
-            label={t('Regular Expression', 'Regular Expression')}
+            label={'التعبير النمطي'}
             value={pattern}
             onChange={(e) => setPattern(e.target.value)}
             className="font-mono"
@@ -261,7 +255,7 @@ function RegexTester() {
             placeholder="\d+"
           />
           <Input
-            label={t('Flags', 'Flags')}
+            label={'الأعلام'}
             value={flags}
             onChange={(e) => setFlags(e.target.value)}
             className="font-mono"
@@ -270,16 +264,16 @@ function RegexTester() {
           />
         </div>
         <TextArea
-          label={t('Test text', 'Test text')}
+          label={'نص التجربة'}
           value={text}
           onChange={(e) => setText(e.target.value)}
           rows={6}
         />
         <div className="flex items-center gap-3">
-          <Button onClick={handleTest}>{t('Test', 'Test')}</Button>
+          <Button onClick={handleTest}>{'اختبار'}</Button>
           {matches.length > 0 && (
             <Badge variant="success">
-              {t('Match count', 'Match count')}: {matches.length}
+              {'عدد التطابقات'}: {matches.length}
             </Badge>
           )}
         </div>
@@ -291,7 +285,7 @@ function RegexTester() {
       </Card>
       {matches.length > 0 && (
         <Card className="space-y-3">
-          <FieldLabel>{t('Matches', 'Matches')}</FieldLabel>
+          <FieldLabel>{'التطابقات'}</FieldLabel>
           <div className="flex flex-wrap gap-2">
             {matches.map((m, i) => (
               <Badge key={i} variant="primary">
@@ -319,7 +313,6 @@ function generateUuid(): string {
 }
 
 function UuidGenerator() {
-  const { t } = useTranslation();
   const [count, setCount] = useState(5);
   const [uuids, setUuids] = useState<string[]>([]);
 
@@ -332,7 +325,7 @@ function UuidGenerator() {
       <Card className="space-y-4">
         <div className="flex flex-wrap items-end gap-3">
           <Input
-            label={t('Count', 'Count')}
+            label={'العدد'}
             type="number"
             inputMode="numeric"
             min={1}
@@ -341,12 +334,12 @@ function UuidGenerator() {
             onChange={(e) => setCount(Math.max(1, Math.min(100, parseInt(e.target.value) || 1)))}
             wrapperClassName="sm:w-40"
           />
-          <Button onClick={handleGenerate}>{t('Generate UUIDs', 'Generate UUIDs')}</Button>
+          <Button onClick={handleGenerate}>{'توليد UUIDs'}</Button>
         </div>
       </Card>
       {uuids.length > 0 && (
         <Card className="space-y-3">
-          <FieldLabel>{t('Generated UUIDs', 'Generated UUIDs')}</FieldLabel>
+          <FieldLabel>{'UUIDs المولدة'}</FieldLabel>
           <div className="space-y-1.5">
             {uuids.map((uuid, i) => (
               <div
@@ -369,7 +362,6 @@ function UuidGenerator() {
 // =============================================================================
 
 function Base64Tool() {
-  const { t } = useTranslation();
   const { addNotification } = useAppStore();
   const [mode, setMode] = useState<'encode' | 'decode'>('encode');
   const [input, setInput] = useState('');
@@ -384,7 +376,7 @@ function Base64Tool() {
       }
     } catch {
       setOutput('');
-      addNotification(t('Invalid Base64 input', 'Invalid Base64 input'), 'error');
+      addNotification('إدخال Base64 غير صالح', 'error');
     }
   };
 
@@ -392,10 +384,10 @@ function Base64Tool() {
     <div className="space-y-5">
       <Card className="space-y-4">
         <Select
-          label={t('Mode', 'Mode')}
+          label={'الوضع'}
           options={[
-            { value: 'encode', label: t('Encode', 'Encode') },
-            { value: 'decode', label: t('Decode', 'Decode') },
+            { value: 'encode', label: 'تشفير' },
+            { value: 'decode', label: 'فك التشفير' },
           ]}
           value={mode}
           onChange={(e) => {
@@ -404,18 +396,18 @@ function Base64Tool() {
           }}
         />
         <TextArea
-          label={mode === 'encode' ? t('Plain text', 'Plain text') : t('Base64 string', 'Base64 string')}
+          label={mode === 'encode' ? 'نص عادي' : 'نص Base64'}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           rows={5}
           className="font-mono"
         />
         <Button onClick={handleConvert} disabled={!input.trim()}>
-          {t('Convert', 'Convert')}
+          {'تحويل'}
         </Button>
       </Card>
       <ResultBox
-        title={mode === 'encode' ? t('Base64 output', 'Base64 output') : t('Decoded text', 'Decoded text')}
+        title={mode === 'encode' ? 'مخرجات Base64' : 'النص المفكوك'}
         value={output}
         onClear={() => setOutput('')}
       />
@@ -434,7 +426,6 @@ function toHex(buffer: ArrayBuffer): string {
 }
 
 function HashGenerator() {
-  const { t } = useTranslation();
   const { addNotification } = useAppStore();
   const [input, setInput] = useState('');
   const [algorithm, setAlgorithm] = useState('SHA-256');
@@ -445,9 +436,9 @@ function HashGenerator() {
       const data = new TextEncoder().encode(input);
       const buf = await crypto.subtle.digest(algorithm, data);
       setOutput(toHex(buf));
-      addNotification(t('Hash generated', 'Hash generated'), 'success');
+      addNotification('تم توليد البصمة', 'success');
     } catch {
-      addNotification(t('Error generating hash', 'Error generating hash'), 'error');
+      addNotification('خطأ في توليد البصمة', 'error');
     }
   };
 
@@ -455,14 +446,14 @@ function HashGenerator() {
     <div className="space-y-5">
       <Card className="space-y-4">
         <TextArea
-          label={t('Input text', 'Input text')}
+          label={'النص المدخل'}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           rows={5}
         />
         <div className="flex flex-wrap items-end gap-3">
           <Select
-            label={t('Algorithm', 'Algorithm')}
+            label={'الخوارزمية'}
             options={[
               { value: 'SHA-1', label: 'SHA-1' },
               { value: 'SHA-256', label: 'SHA-256' },
@@ -474,12 +465,12 @@ function HashGenerator() {
             wrapperClassName="sm:w-44"
           />
           <Button onClick={handleGenerate} disabled={!input.trim()}>
-            {t('Generate hash', 'Generate hash')}
+            {'توليد البصمة'}
           </Button>
         </div>
       </Card>
       <ResultBox
-        title={`${algorithm} ${t('Hash', 'Hash')}`}
+        title={`${algorithm} ${'البصمة'}`}
         value={output}
         onClear={() => setOutput('')}
       />
@@ -492,7 +483,6 @@ function HashGenerator() {
 // =============================================================================
 
 function PasswordGeneratorTool() {
-  const { t } = useTranslation();
   const { addNotification } = useAppStore();
   const [length, setLength] = useState(16);
   const [uppercase, setUppercase] = useState(true);
@@ -508,7 +498,7 @@ function PasswordGeneratorTool() {
     if (numbers) sets.push('0123456789');
     if (symbols) sets.push('!@#$%^&*()_+-=[]{}|;:,.<>?');
     if (sets.length === 0) {
-      addNotification(t('Select at least one character set', 'Select at least one character set'), 'warning');
+      addNotification('اختر مجموعة أحرف واحدة على الأقل', 'warning');
       return;
     }
     const all = sets.join('');
@@ -536,14 +526,14 @@ function PasswordGeneratorTool() {
           max={64}
           value={length}
           onChange={setLength}
-          label={t('Length', 'Length')}
+          label={'الطول'}
         />
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {[
-            { key: 'uppercase', label: t('Uppercase', 'Uppercase'), value: uppercase, set: setUppercase },
-            { key: 'lowercase', label: t('Lowercase', 'Lowercase'), value: lowercase, set: setLowercase },
-            { key: 'numbers', label: t('Numbers', 'Numbers'), value: numbers, set: setNumbers },
-            { key: 'symbols', label: t('Symbols', 'Symbols'), value: symbols, set: setSymbols },
+            { key: 'uppercase', label: 'أحرف كبيرة', value: uppercase, set: setUppercase },
+            { key: 'lowercase', label: 'أحرف صغيرة', value: lowercase, set: setLowercase },
+            { key: 'numbers', label: 'أرقام', value: numbers, set: setNumbers },
+            { key: 'symbols', label: 'رموز', value: symbols, set: setSymbols },
           ].map((opt) => (
             <label
               key={opt.key}
@@ -560,11 +550,11 @@ function PasswordGeneratorTool() {
           ))}
         </div>
         <Button onClick={generate} disabled={!uppercase && !lowercase && !numbers && !symbols}>
-          {t('Generate password', 'Generate password')}
+          {'توليد كلمة المرور'}
         </Button>
       </Card>
       {password && (
-        <ResultBox title={t('Password', 'Password')} value={password} onClear={() => setPassword('')} />
+        <ResultBox title={'كلمة المرور'} value={password} onClear={() => setPassword('')} />
       )}
     </div>
   );
@@ -575,7 +565,6 @@ function PasswordGeneratorTool() {
 // =============================================================================
 
 function HtmlPreview() {
-  const { t } = useTranslation();
   const [html, setHtml] = useState(
     '<h1>Hello Morven!</h1>\n<p>This is a live <strong>HTML</strong> preview.</p>',
   );
@@ -587,19 +576,19 @@ function HtmlPreview() {
     <div className="space-y-5">
       <Card className="space-y-4">
         <TextArea
-          label={t('HTML code', 'HTML code')}
+          label={'كود HTML'}
           value={html}
           onChange={(e) => setHtml(e.target.value)}
           rows={10}
           className="font-mono"
         />
-        <Button onClick={() => setSrcDoc(html)}>{t('Update preview', 'Update preview')}</Button>
+        <Button onClick={() => setSrcDoc(html)}>{'تحديث المعاينة'}</Button>
       </Card>
       <Card className="space-y-3">
-        <FieldLabel>{t('Preview', 'Preview')}</FieldLabel>
+        <FieldLabel>{'معاينة'}</FieldLabel>
         <div className="rounded-xl border border-light-border dark:border-dark-border overflow-hidden bg-white">
           <iframe
-            title={t('HTML preview', 'HTML preview')}
+            title={'معاينة HTML'}
             srcDoc={srcDoc}
             className="w-full min-h-[280px] bg-white"
             sandbox="allow-same-origin"
@@ -615,7 +604,6 @@ function HtmlPreview() {
 // =============================================================================
 
 function SvgViewer() {
-  const { t } = useTranslation();
   const [svg, setSvg] = useState(
     '<svg width="200" height="100" xmlns="http://www.w3.org/2000/svg">\n  <rect x="10" y="10" width="120" height="60" rx="8" fill="#4f46e5" />\n  <circle cx="160" cy="40" r="28" fill="#f59e0b" />\n</svg>',
   );
@@ -624,7 +612,7 @@ function SvgViewer() {
     <div className="space-y-5">
       <Card className="space-y-4">
         <TextArea
-          label={t('SVG code', 'SVG code')}
+          label={'كود SVG'}
           value={svg}
           onChange={(e) => setSvg(e.target.value)}
           rows={10}
@@ -632,7 +620,7 @@ function SvgViewer() {
         />
       </Card>
       <Card className="space-y-3">
-        <FieldLabel>{t('Preview', 'Preview')}</FieldLabel>
+        <FieldLabel>{'معاينة'}</FieldLabel>
         <div className="rounded-xl border border-light-border dark:border-dark-border overflow-hidden bg-white flex items-center justify-center min-h-[280px] p-6">
           <div dangerouslySetInnerHTML={{ __html: svg }} />
         </div>
@@ -653,7 +641,6 @@ function hexToRgb(hex: string): { r: number; g: number; b: number } {
 }
 
 function ColorPicker() {
-  const { t } = useTranslation();
   const [color, setColor] = useState('#4f46e5');
   const rgb = hexToRgb(color);
   const hsl = (() => {
@@ -686,7 +673,7 @@ function ColorPicker() {
           className="w-16 h-16 rounded-xl cursor-pointer border border-light-border dark:border-dark-border"
         />
         <div>
-          <FieldLabel>{t('Pick a color', 'Pick a color')}</FieldLabel>
+          <FieldLabel>{'اختر لوناً'}</FieldLabel>
           <p className="text-sm text-gray-500 dark:text-gray-400 font-mono" dir="ltr">
             {color}
           </p>
@@ -706,7 +693,6 @@ function ColorPicker() {
 // =============================================================================
 
 function GradientGenerator() {
-  const { t } = useTranslation();
   const [from, setFrom] = useState('#4f46e5');
   const [to, setTo] = useState('#ec4899');
   const [angle, setAngle] = useState(135);
@@ -717,7 +703,7 @@ function GradientGenerator() {
       <Card className="space-y-5">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <FieldLabel>{t('From color', 'From color')}</FieldLabel>
+            <FieldLabel>{'من اللون'}</FieldLabel>
             <input
               type="color"
               value={from}
@@ -726,7 +712,7 @@ function GradientGenerator() {
             />
           </div>
           <div>
-            <FieldLabel>{t('To color', 'To color')}</FieldLabel>
+            <FieldLabel>{'إلى اللون'}</FieldLabel>
             <input
               type="color"
               value={to}
@@ -740,7 +726,7 @@ function GradientGenerator() {
           max={360}
           value={angle}
           onChange={setAngle}
-          label={t('Angle (deg)', 'Angle (deg)')}
+          label={'الزاوية (درجة)'}
           minLabel="0°"
           maxLabel="360°"
         />
@@ -749,7 +735,7 @@ function GradientGenerator() {
           style={{ background: css }}
         />
       </Card>
-      <ResultBox title={t('CSS code', 'CSS code')} value={`background: ${css};`} onClear={() => undefined} />
+      <ResultBox title={'كود CSS'} value={`background: ${css};`} onClear={() => undefined} />
     </div>
   );
 }
@@ -780,7 +766,6 @@ function parseCsv(csv: string): string[][] {
 }
 
 function CsvJson() {
-  const { t } = useTranslation();
   const { addNotification } = useAppStore();
   const [mode, setMode] = useState<'csvToJson' | 'jsonToCsv'>('csvToJson');
   const [input, setInput] = useState('name,age,city\nAlice,25,Cairo\nBob,30,Alexandria');
@@ -815,7 +800,7 @@ function CsvJson() {
     } catch {
       setOutput('');
       addNotification(
-        mode === 'csvToJson' ? t('Invalid CSV input', 'Invalid CSV input') : t('Invalid JSON input', 'Invalid JSON input'),
+        mode === 'csvToJson' ? 'إدخال CSV غير صالح' : 'إدخال JSON غير صالح',
         'error',
       );
     }
@@ -825,10 +810,10 @@ function CsvJson() {
     <div className="space-y-5">
       <Card className="space-y-4">
         <Select
-          label={t('Mode', 'Mode')}
+          label={'الوضع'}
           options={[
-            { value: 'csvToJson', label: t('CSV to JSON', 'CSV to JSON') },
-            { value: 'jsonToCsv', label: t('JSON to CSV', 'JSON to CSV') },
+            { value: 'csvToJson', label: 'CSV إلى JSON' },
+            { value: 'jsonToCsv', label: 'JSON إلى CSV' },
           ]}
           value={mode}
           onChange={(e) => {
@@ -837,18 +822,18 @@ function CsvJson() {
           }}
         />
         <TextArea
-          label={mode === 'csvToJson' ? t('CSV data', 'CSV data') : t('JSON data', 'JSON data')}
+          label={mode === 'csvToJson' ? 'بيانات CSV' : 'بيانات JSON'}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           rows={8}
           className="font-mono"
         />
         <Button onClick={handleConvert} disabled={!input.trim()}>
-          {t('Convert', 'Convert')}
+          {'تحويل'}
         </Button>
       </Card>
       <ResultBox
-        title={mode === 'csvToJson' ? t('JSON output', 'JSON output') : t('CSV output', 'CSV output')}
+        title={mode === 'csvToJson' ? 'مخرجات JSON' : 'مخرجات CSV'}
         value={output}
         onClear={() => setOutput('')}
       />
@@ -919,7 +904,6 @@ function markdownToHtml(md: string): string {
 }
 
 function MarkdownToHtml() {
-  const { t } = useTranslation();
   const [md, setMd] = useState('# Hello\n\nThis is **bold** and *italic*.\n\n- Item one\n- Item two');
   const html = markdownToHtml(md);
 
@@ -927,16 +911,16 @@ function MarkdownToHtml() {
     <div className="space-y-5">
       <Card className="space-y-4">
         <TextArea
-          label={t('Markdown input', 'Markdown input')}
+          label={'إدخال Markdown'}
           value={md}
           onChange={(e) => setMd(e.target.value)}
           rows={10}
           className="font-mono"
         />
       </Card>
-      <ResultBox title={t('HTML output', 'HTML output')} value={html} onClear={() => setMd('')} />
+      <ResultBox title={'مخرجات HTML'} value={html} onClear={() => setMd('')} />
       <Card className="space-y-3">
-        <FieldLabel>{t('Preview', 'Preview')}</FieldLabel>
+        <FieldLabel>{'معاينة'}</FieldLabel>
         <div
           className="prose prose-sm max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 dark:prose-headings:text-white dark:prose-p:text-gray-300 min-h-[120px] rounded-xl border border-light-border dark:border-dark-border bg-white dark:bg-dark-surface p-4"
           dangerouslySetInnerHTML={{ __html: html }}
@@ -951,7 +935,6 @@ function MarkdownToHtml() {
 // =============================================================================
 
 function UrlEncoder() {
-  const { t } = useTranslation();
   const { addNotification } = useAppStore();
   const [mode, setMode] = useState<'encode' | 'decode'>('encode');
   const [input, setInput] = useState('https://example.com/?q=hello world');
@@ -966,7 +949,7 @@ function UrlEncoder() {
       }
     } catch {
       setOutput('');
-      addNotification(t('Invalid input', 'Invalid input'), 'error');
+      addNotification('إدخال غير صالح', 'error');
     }
   };
 
@@ -974,10 +957,10 @@ function UrlEncoder() {
     <div className="space-y-5">
       <Card className="space-y-4">
         <Select
-          label={t('Mode', 'Mode')}
+          label={'الوضع'}
           options={[
-            { value: 'encode', label: t('Encode', 'Encode') },
-            { value: 'decode', label: t('Decode', 'Decode') },
+            { value: 'encode', label: 'تشفير' },
+            { value: 'decode', label: 'فك التشفير' },
           ]}
           value={mode}
           onChange={(e) => {
@@ -986,18 +969,18 @@ function UrlEncoder() {
           }}
         />
         <TextArea
-          label={t('Input', 'Input')}
+          label={'الإدخال'}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           rows={4}
           className="font-mono"
         />
         <Button onClick={handleConvert} disabled={!input.trim()}>
-          {t('Convert', 'Convert')}
+          {'تحويل'}
         </Button>
       </Card>
       <ResultBox
-        title={mode === 'encode' ? t('Encoded URL', 'Encoded URL') : t('Decoded URL', 'Decoded URL')}
+        title={mode === 'encode' ? 'الرابط المشفر' : 'الرابط المفكوك'}
         value={output}
         onClear={() => setOutput('')}
       />
@@ -1031,8 +1014,6 @@ const HTTP_STATUS_CODES: { code: number; name: string; category: string; descrip
 ];
 
 function HttpStatusCodes() {
-  const { t } = useTranslation();
-  const { language } = useLanguageStore();
   const [query, setQuery] = useState('');
 
   const filtered = HTTP_STATUS_CODES.filter(
@@ -1045,10 +1026,10 @@ function HttpStatusCodes() {
     <div className="space-y-5">
       <Card className="space-y-4">
         <Input
-          label={t('Search', 'Search')}
+          label={'بحث'}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder={language === 'ar' ? 'بحث...' : 'e.g. 404 or Not Found'}
+          placeholder={'بحث...'}
         />
       </Card>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -1070,7 +1051,7 @@ function HttpStatusCodes() {
       {filtered.length === 0 && (
         <EmptyState
           icon={<span className="text-4xl">🔍</span>}
-          title={language === 'ar' ? 'لا توجد نتائج' : 'No results found'}
+          title={'لا توجد نتائج'}
         />
       )}
     </div>
@@ -1092,10 +1073,6 @@ const REST_METHODS: { method: string; purpose: string; safe: boolean; idempotent
 ];
 
 function RestMethods() {
-  const { t } = useTranslation();
-  const { language } = useLanguageStore();
-  const isRtl = language === 'ar';
-
   return (
     <div className="space-y-3">
       {REST_METHODS.map((m) => (
@@ -1107,10 +1084,10 @@ function RestMethods() {
             </div>
             <div className="flex gap-2">
               <Badge variant={m.safe ? 'success' : 'warning'} size="sm">
-                {isRtl ? (m.safe ? 'آمن' : 'غير آمن') : m.safe ? 'Safe' : 'Unsafe'}
+                {m.safe ? 'آمن' : 'غير آمن'}
               </Badge>
               <Badge variant={m.idempotent ? 'info' : 'neutral'} size="sm">
-                {isRtl ? (m.idempotent ? 'تكرار آمن' : 'غير قابل للتكرار') : m.idempotent ? 'Idempotent' : 'Non-idempotent'}
+                {m.idempotent ? 'تكرار آمن' : 'غير قابل للتكرار'}
               </Badge>
             </div>
           </div>
@@ -1144,7 +1121,6 @@ function csvToSql(csv: string, tableName: string): string {
 }
 
 function CsvToSql() {
-  const { t } = useTranslation();
   const { addNotification } = useAppStore();
   const [csv, setCsv] = useState('name,age,city\nAlice,25,Cairo\nBob,30,Alexandria');
   const [tableName, setTableName] = useState('users');
@@ -1152,14 +1128,14 @@ function CsvToSql() {
 
   const handleGenerate = () => {
     if (!tableName.trim()) {
-      addNotification(t('Enter a table name', 'Enter a table name'), 'warning');
+      addNotification('أدخل اسم الجدول', 'warning');
       return;
     }
     try {
       setSql(csvToSql(csv, tableName.trim().replace(/[^A-Za-z0-9_]/g, '_')));
     } catch {
       setSql('');
-      addNotification(t('Invalid CSV input', 'Invalid CSV input'), 'error');
+      addNotification('إدخال CSV غير صالح', 'error');
     }
   };
 
@@ -1167,24 +1143,24 @@ function CsvToSql() {
     <div className="space-y-5">
       <Card className="space-y-4">
         <Input
-          label={t('Table name', 'Table name')}
+          label={'اسم الجدول'}
           value={tableName}
           onChange={(e) => setTableName(e.target.value)}
           className="font-mono"
           dir="ltr"
         />
         <TextArea
-          label={t('CSV data', 'CSV data')}
+          label={'بيانات CSV'}
           value={csv}
           onChange={(e) => setCsv(e.target.value)}
           rows={8}
           className="font-mono"
         />
         <Button onClick={handleGenerate} disabled={!csv.trim()}>
-          {t('Generate SQL', 'Generate SQL')}
+          {'توليد SQL'}
         </Button>
       </Card>
-      <ResultBox title={t('SQL output', 'SQL output')} value={sql} onClear={() => setSql('')} />
+      <ResultBox title={'مخرجات SQL'} value={sql} onClear={() => setSql('')} />
     </div>
   );
 }
@@ -1194,7 +1170,6 @@ function CsvToSql() {
 // =============================================================================
 
 function JsonToSql() {
-  const { t } = useTranslation();
   const { addNotification } = useAppStore();
   const [json, setJson] = useState('[\n  { "name": "Alice", "age": 25 },\n  { "name": "Bob", "age": 30 }\n]');
   const [tableName, setTableName] = useState('users');
@@ -1202,7 +1177,7 @@ function JsonToSql() {
 
   const handleGenerate = () => {
     if (!tableName.trim()) {
-      addNotification(t('Enter a table name', 'Enter a table name'), 'warning');
+      addNotification('أدخل اسم الجدول', 'warning');
       return;
     }
     try {
@@ -1222,7 +1197,7 @@ function JsonToSql() {
       setSql(insertRows.join('\n'));
     } catch {
       setSql('');
-      addNotification(t('Invalid JSON input', 'Invalid JSON input'), 'error');
+      addNotification('إدخال JSON غير صالح', 'error');
     }
   };
 
@@ -1230,24 +1205,24 @@ function JsonToSql() {
     <div className="space-y-5">
       <Card className="space-y-4">
         <Input
-          label={t('Table name', 'Table name')}
+          label={'اسم الجدول'}
           value={tableName}
           onChange={(e) => setTableName(e.target.value)}
           className="font-mono"
           dir="ltr"
         />
         <TextArea
-          label={t('JSON data', 'JSON data')}
+          label={'بيانات JSON'}
           value={json}
           onChange={(e) => setJson(e.target.value)}
           rows={8}
           className="font-mono"
         />
         <Button onClick={handleGenerate} disabled={!json.trim()}>
-          {t('Generate SQL', 'Generate SQL')}
+          {'توليد SQL'}
         </Button>
       </Card>
-      <ResultBox title={t('SQL output', 'SQL output')} value={sql} onClear={() => setSql('')} />
+      <ResultBox title={'مخرجات SQL'} value={sql} onClear={() => setSql('')} />
     </div>
   );
 }
@@ -1257,7 +1232,6 @@ function JsonToSql() {
 // =============================================================================
 
 function CheatSheet({ groups }: { groups: { title: string; items: { cmd: string; desc: string }[] }[] }) {
-  const { language } = useLanguageStore();
   return (
     <div className="space-y-4">
       {groups.map((g) => (
@@ -1270,9 +1244,7 @@ function CheatSheet({ groups }: { groups: { title: string; items: { cmd: string;
                   {item.cmd}
                 </p>
                 <p className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">
-                  {language === 'ar' && (item as { descAr?: string }).descAr
-                    ? (item as { descAr?: string }).descAr
-                    : item.desc}
+                  {item.desc}
                 </p>
               </div>
             ))}
@@ -1287,38 +1259,38 @@ const GIT_CHEATSHEET = [
   {
     title: 'Setup',
     items: [
-      { cmd: 'git config --global user.name "Name"', desc: 'Set your global username', descAr: 'تعيين اسم المستخدم العام' },
-      { cmd: 'git config --global user.email "email"', desc: 'Set your global email', descAr: 'تعيين البريد الإلكتروني العام' },
-      { cmd: 'git init', desc: 'Initialize a new repository', descAr: 'تهيئة مستودع جديد' },
+      { cmd: 'git config --global user.name "Name"', desc: 'تعيين اسم المستخدم العام' },
+      { cmd: 'git config --global user.email "email"', desc: 'تعيين البريد الإلكتروني العام' },
+      { cmd: 'git init', desc: 'تهيئة مستودع جديد' },
     ],
   },
   {
     title: 'Working with changes',
     items: [
-      { cmd: 'git status', desc: 'Show the working tree status', descAr: 'عرض حالة شجرة العمل' },
-      { cmd: 'git add <file>', desc: 'Stage a file', descAr: 'إضافة ملف إلى المرحلة' },
-      { cmd: 'git add .', desc: 'Stage all changes', descAr: 'إضافة جميع التغييرات' },
-      { cmd: 'git commit -m "message"', desc: 'Commit staged changes', descAr: 'حفظ التغييرات المرحّلة' },
-      { cmd: 'git diff', desc: 'Show unstaged changes', descAr: 'عرض التغييرات غير المرحّلة' },
-      { cmd: 'git log', desc: 'Show commit history', descAr: 'عرض سجل الحفظ' },
+      { cmd: 'git status', desc: 'عرض حالة شجرة العمل' },
+      { cmd: 'git add <file>', desc: 'إضافة ملف إلى المرحلة' },
+      { cmd: 'git add .', desc: 'إضافة جميع التغييرات' },
+      { cmd: 'git commit -m "message"', desc: 'حفظ التغييرات المرحّلة' },
+      { cmd: 'git diff', desc: 'عرض التغييرات غير المرحّلة' },
+      { cmd: 'git log', desc: 'عرض سجل الحفظ' },
     ],
   },
   {
     title: 'Branches',
     items: [
-      { cmd: 'git branch', desc: 'List local branches', descAr: 'عرض الفروع المحلية' },
-      { cmd: 'git branch <name>', desc: 'Create a new branch', descAr: 'إنشاء فرع جديد' },
-      { cmd: 'git checkout -b <name>', desc: 'Create and switch to a branch', descAr: 'إنشاء فرع والانتقال إليه' },
-      { cmd: 'git merge <branch>', desc: 'Merge a branch into current', descAr: 'دمج فرع في الفرع الحالي' },
+      { cmd: 'git branch', desc: 'عرض الفروع المحلية' },
+      { cmd: 'git branch <name>', desc: 'إنشاء فرع جديد' },
+      { cmd: 'git checkout -b <name>', desc: 'إنشاء فرع والانتقال إليه' },
+      { cmd: 'git merge <branch>', desc: 'دمج فرع في الفرع الحالي' },
     ],
   },
   {
     title: 'Remote',
     items: [
-      { cmd: 'git remote add origin <url>', desc: 'Add a remote repository', descAr: 'إضافة مستودع بعيد' },
-      { cmd: 'git push -u origin main', desc: 'Push and set upstream', descAr: 'رفع وتحديد الفرع الأساسي' },
-      { cmd: 'git pull', desc: 'Fetch and merge changes', descAr: 'جلب ودمج التغييرات' },
-      { cmd: 'git clone <url>', desc: 'Clone a repository', descAr: 'استنساخ مستودع' },
+      { cmd: 'git remote add origin <url>', desc: 'إضافة مستودع بعيد' },
+      { cmd: 'git push -u origin main', desc: 'رفع وتحديد الفرع الأساسي' },
+      { cmd: 'git pull', desc: 'جلب ودمج التغييرات' },
+      { cmd: 'git clone <url>', desc: 'استنساخ مستودع' },
     ],
   },
 ];
@@ -1327,33 +1299,33 @@ const LINUX_CHEATSHEET = [
   {
     title: 'Navigation',
     items: [
-      { cmd: 'ls -la', desc: 'List all files with details', descAr: 'عرض جميع الملفات بالتفاصيل' },
-      { cmd: 'cd <dir>', desc: 'Change directory', descAr: 'تغيير الدليل' },
-      { cmd: 'pwd', desc: 'Print working directory', descAr: 'عرض الدليل الحالي' },
-      { cmd: 'mkdir <dir>', desc: 'Create a directory', descAr: 'إنشاء دليل' },
-      { cmd: 'rm -rf <dir>', desc: 'Remove a directory recursively', descAr: 'حذف دليل بالكامل' },
+      { cmd: 'ls -la', desc: 'عرض جميع الملفات بالتفاصيل' },
+      { cmd: 'cd <dir>', desc: 'تغيير الدليل' },
+      { cmd: 'pwd', desc: 'عرض الدليل الحالي' },
+      { cmd: 'mkdir <dir>', desc: 'إنشاء دليل' },
+      { cmd: 'rm -rf <dir>', desc: 'حذف دليل بالكامل' },
     ],
   },
   {
     title: 'File operations',
     items: [
-      { cmd: 'cp <src> <dest>', desc: 'Copy files', descAr: 'نسخ الملفات' },
-      { cmd: 'mv <src> <dest>', desc: 'Move or rename files', descAr: 'نقل أو إعادة تسمية الملفات' },
-      { cmd: 'cat <file>', desc: 'Print file content', descAr: 'عرض محتوى الملف' },
-      { cmd: 'less <file>', desc: 'View file page by page', descAr: 'عرض الملف صفحة بصفحة' },
-      { cmd: 'head / tail <file>', desc: 'View the start / end of a file', descAr: 'عرض بداية أو نهاية الملف' },
-      { cmd: 'chmod 755 <file>', desc: 'Change file permissions', descAr: 'تغيير صلاحيات الملف' },
+      { cmd: 'cp <src> <dest>', desc: 'نسخ الملفات' },
+      { cmd: 'mv <src> <dest>', desc: 'نقل أو إعادة تسمية الملفات' },
+      { cmd: 'cat <file>', desc: 'عرض محتوى الملف' },
+      { cmd: 'less <file>', desc: 'عرض الملف صفحة بصفحة' },
+      { cmd: 'head / tail <file>', desc: 'عرض بداية أو نهاية الملف' },
+      { cmd: 'chmod 755 <file>', desc: 'تغيير صلاحيات الملف' },
     ],
   },
   {
     title: 'System',
     items: [
-      { cmd: 'ps aux', desc: 'List running processes', descAr: 'عرض العمليات الجارية' },
-      { cmd: 'top / htop', desc: 'Monitor system resources', descAr: 'مراقبة موارد النظام' },
-      { cmd: 'df -h', desc: 'Show disk usage', descAr: 'عرض استخدام القرص' },
-      { cmd: 'free -h', desc: 'Show memory usage', descAr: 'عرض استخدام الذاكرة' },
-      { cmd: 'sudo <cmd>', desc: 'Run a command as root', descAr: 'تشغيل أمر بصلاحيات المدير' },
-      { cmd: 'grep <pattern> <file>', desc: 'Search text in files', descAr: 'البحث عن نص في الملفات' },
+      { cmd: 'ps aux', desc: 'عرض العمليات الجارية' },
+      { cmd: 'top / htop', desc: 'مراقبة موارد النظام' },
+      { cmd: 'df -h', desc: 'عرض استخدام القرص' },
+      { cmd: 'free -h', desc: 'عرض استخدام الذاكرة' },
+      { cmd: 'sudo <cmd>', desc: 'تشغيل أمر بصلاحيات المدير' },
+      { cmd: 'grep <pattern> <file>', desc: 'البحث عن نص في الملفات' },
     ],
   },
 ];
@@ -1362,38 +1334,38 @@ const REGEX_CHEATSHEET = [
   {
     title: 'Anchors',
     items: [
-      { cmd: '^', desc: 'Start of a line', descAr: 'بداية السطر' },
-      { cmd: '$', desc: 'End of a line', descAr: 'نهاية السطر' },
-      { cmd: '\\b', desc: 'Word boundary', descAr: 'حدود الكلمة' },
+      { cmd: '^', desc: 'بداية السطر' },
+      { cmd: '$', desc: 'نهاية السطر' },
+      { cmd: '\\b', desc: 'حدود الكلمة' },
     ],
   },
   {
     title: 'Character classes',
     items: [
-      { cmd: '\\d', desc: 'Any digit (0-9)', descAr: 'أي رقم (0-9)' },
-      { cmd: '\\w', desc: 'Word character', descAr: 'حرف كلمة' },
-      { cmd: '\\s', desc: 'Whitespace', descAr: 'مسافة بيضاء' },
-      { cmd: '.', desc: 'Any character', descAr: 'أي حرف' },
-      { cmd: '[abc]', desc: 'Any of a, b, or c', descAr: 'أي من الأحرف a أو b أو c' },
+      { cmd: '\\d', desc: 'أي رقم (0-9)' },
+      { cmd: '\\w', desc: 'حرف كلمة' },
+      { cmd: '\\s', desc: 'مسافة بيضاء' },
+      { cmd: '.', desc: 'أي حرف' },
+      { cmd: '[abc]', desc: 'أي من الأحرف a أو b أو c' },
     ],
   },
   {
     title: 'Quantifiers',
     items: [
-      { cmd: '*', desc: 'Zero or more', descAr: 'صفر أو أكثر' },
-      { cmd: '+', desc: 'One or more', descAr: 'واحد أو أكثر' },
-      { cmd: '?', desc: 'Zero or one', descAr: 'صفر أو واحد' },
-      { cmd: '{n}', desc: 'Exactly n times', descAr: 'n مرة بالضبط' },
-      { cmd: '{n,m}', desc: 'Between n and m times', descAr: 'بين n وm مرة' },
+      { cmd: '*', desc: 'صفر أو أكثر' },
+      { cmd: '+', desc: 'واحد أو أكثر' },
+      { cmd: '?', desc: 'صفر أو واحد' },
+      { cmd: '{n}', desc: 'n مرة بالضبط' },
+      { cmd: '{n,m}', desc: 'بين n وm مرة' },
     ],
   },
   {
     title: 'Groups & alternation',
     items: [
-      { cmd: '(abc)', desc: 'Capture group', descAr: 'مجموعة التقاط' },
-      { cmd: '(?:abc)', desc: 'Non-capturing group', descAr: 'مجموعة بدون التقاط' },
-      { cmd: 'a|b', desc: 'Alternation (a or b)', descAr: 'بديل (a أو b)' },
-      { cmd: '\\1', desc: 'Backreference', descAr: 'مرجع خلفي' },
+      { cmd: '(abc)', desc: 'مجموعة التقاط' },
+      { cmd: '(?:abc)', desc: 'مجموعة بدون التقاط' },
+      { cmd: 'a|b', desc: 'بديل (a أو b)' },
+      { cmd: '\\1', desc: 'مرجع خلفي' },
     ],
   },
 ];
@@ -1423,7 +1395,6 @@ const HTML_ENTITIES: { entity: string; char: string; name: string }[] = [
 // =============================================================================
 
 function AsciiTable() {
-  const { language } = useLanguageStore();
   const rows = Array.from({ length: 128 }, (_, i) => i);
 
   return (
@@ -1431,10 +1402,10 @@ function AsciiTable() {
       <table className="w-full text-sm" dir="ltr">
         <thead>
           <tr className="border-b border-light-border dark:border-dark-border">
-            <th className="text-start py-2 px-3 font-semibold text-gray-700 dark:text-gray-300">{language === 'ar' ? 'عشري' : 'Dec'}</th>
+            <th className="text-start py-2 px-3 font-semibold text-gray-700 dark:text-gray-300">{'عشري'}</th>
             <th className="text-start py-2 px-3 font-semibold text-gray-700 dark:text-gray-300">Hex</th>
-            <th className="text-start py-2 px-3 font-semibold text-gray-700 dark:text-gray-300">{language === 'ar' ? 'ثنائي' : 'Bin'}</th>
-            <th className="text-start py-2 px-3 font-semibold text-gray-700 dark:text-gray-300">{language === 'ar' ? 'الحرف' : 'Char'}</th>
+            <th className="text-start py-2 px-3 font-semibold text-gray-700 dark:text-gray-300">{'ثنائي'}</th>
+            <th className="text-start py-2 px-3 font-semibold text-gray-700 dark:text-gray-300">{'الحرف'}</th>
           </tr>
         </thead>
         <tbody>
@@ -1459,8 +1430,6 @@ function AsciiTable() {
 // =============================================================================
 
 function UnixTimestamp() {
-  const { t } = useTranslation();
-  const { language } = useLanguageStore();
   const [timestamp, setTimestamp] = useState(() => String(Math.floor(Date.now() / 1000)));
   const [dateString, setDateString] = useState(() => new Date().toISOString().slice(0, 16));
   const [now, setNow] = useState(() => Math.floor(Date.now() / 1000));
@@ -1474,7 +1443,7 @@ function UnixTimestamp() {
   const handleTimestampToDate = () => {
     const ts = parseInt(timestamp, 10);
     if (isNaN(ts)) return;
-    setConvertedDate(new Date(ts * 1000).toLocaleString(language === 'ar' ? 'ar-SA' : 'en-US'));
+    setConvertedDate(new Date(ts * 1000).toLocaleString('ar-SA'));
   };
 
   const handleDateToTimestamp = () => {
@@ -1487,7 +1456,7 @@ function UnixTimestamp() {
     <div className="space-y-5">
       <Card className="space-y-4">
         <div className="rounded-xl bg-primary-50 dark:bg-primary-900/20 border border-primary-500/20 p-4">
-          <p className="text-sm text-gray-500 dark:text-gray-400">{t('Current Unix timestamp', 'Current Unix timestamp')}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{'طابع Unix الزمني الحالي'}</p>
           <p className="font-mono text-2xl font-bold text-primary-600 dark:text-primary-400" dir="ltr">
             {now}
           </p>
@@ -1495,27 +1464,27 @@ function UnixTimestamp() {
         <div className="space-y-4">
           <div className="flex flex-col sm:flex-row gap-3 items-end">
             <Input
-              label={t('Timestamp (seconds)', 'Timestamp (seconds)')}
+              label={'الطابع الزمني (ثوانٍ)'}
               value={timestamp}
               onChange={(e) => setTimestamp(e.target.value)}
               className="font-mono"
               dir="ltr"
               wrapperClassName="flex-1"
             />
-            <Button onClick={handleTimestampToDate}>{t('To date', 'To date')}</Button>
+            <Button onClick={handleTimestampToDate}>{'إلى تاريخ'}</Button>
           </div>
           {convertedDate && (
             <p className="text-sm font-medium text-gray-700 dark:text-gray-300">{convertedDate}</p>
           )}
           <div className="flex flex-col sm:flex-row gap-3 items-end">
             <Input
-              label={t('Date & time', 'Date & time')}
+              label={'التاريخ والوقت'}
               type="datetime-local"
               value={dateString}
               onChange={(e) => setDateString(e.target.value)}
               wrapperClassName="flex-1"
             />
-            <Button onClick={handleDateToTimestamp}>{t('To timestamp', 'To timestamp')}</Button>
+            <Button onClick={handleDateToTimestamp}>{'إلى طابع زمني'}</Button>
           </div>
         </div>
       </Card>
@@ -1528,7 +1497,6 @@ function UnixTimestamp() {
 // =============================================================================
 
 function QrGeneratorTool() {
-  const { t } = useTranslation();
   const { addNotification } = useAppStore();
   const [text, setText] = useState('https://morven.app');
   const [qrDataUrl, setQrDataUrl] = useState('');
@@ -1536,7 +1504,7 @@ function QrGeneratorTool() {
 
   const handleGenerate = useCallback(async () => {
     if (!text.trim()) {
-      addNotification(t('Please enter content', 'Please enter content'), 'warning');
+      addNotification('الرجاء إدخال المحتوى', 'warning');
       return;
     }
     setGenerating(true);
@@ -1544,11 +1512,11 @@ function QrGeneratorTool() {
       const dataUrl = await QRCode.toDataURL(text.trim(), { width: 320, margin: 2, errorCorrectionLevel: 'M' });
       setQrDataUrl(dataUrl);
     } catch {
-      addNotification(t('Error generating QR code', 'Error generating QR code'), 'error');
+      addNotification('خطأ في توليد رمز QR', 'error');
     } finally {
       setGenerating(false);
     }
-  }, [text, addNotification, t]);
+  }, [text, addNotification]);
 
   const handleDownload = () => {
     if (!qrDataUrl) return;
@@ -1565,21 +1533,21 @@ function QrGeneratorTool() {
     <div className="space-y-5">
       <Card className="space-y-4">
         <TextArea
-          label={t('Text or URL', 'Text or URL')}
+          label={'نص أو رابط'}
           value={text}
           onChange={(e) => setText(e.target.value)}
           rows={3}
         />
         <Button onClick={handleGenerate} loading={generating} disabled={!text.trim()}>
-          {t('Generate QR code', 'Generate QR code')}
+          {'توليد رمز QR'}
         </Button>
       </Card>
       {qrDataUrl && (
         <Card className="space-y-4 items-center text-center">
-          <FieldLabel>{t('QR Code', 'QR Code')}</FieldLabel>
+          <FieldLabel>{'رمز QR'}</FieldLabel>
           <img src={qrDataUrl} alt="QR Code" className="mx-auto w-56 h-56 rounded-xl" />
           <Button variant="secondary" onClick={handleDownload}>
-            {t('Download PNG', 'Download PNG')}
+            {'تنزيل PNG'}
           </Button>
         </Card>
       )}
@@ -1603,7 +1571,6 @@ const LOREM_WORDS = [
 ];
 
 function LoremIpsum() {
-  const { t } = useTranslation();
   const [paragraphs, setParagraphs] = useState(3);
   const [wordsPer, setWordsPer] = useState(30);
   const [output, setOutput] = useState('');
@@ -1631,7 +1598,7 @@ function LoremIpsum() {
       <Card className="space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Input
-            label={t('Paragraphs', 'Paragraphs')}
+            label={'الفقرات'}
             type="number"
             inputMode="numeric"
             min={1}
@@ -1640,7 +1607,7 @@ function LoremIpsum() {
             onChange={(e) => setParagraphs(Math.max(1, Math.min(20, parseInt(e.target.value) || 1)))}
           />
           <Input
-            label={t('Words per paragraph', 'Words per paragraph')}
+            label={'الكلمات لكل فقرة'}
             type="number"
             inputMode="numeric"
             min={5}
@@ -1649,9 +1616,9 @@ function LoremIpsum() {
             onChange={(e) => setWordsPer(Math.max(5, Math.min(200, parseInt(e.target.value) || 5)))}
           />
         </div>
-        <Button onClick={handleGenerate}>{t('Generate text', 'Generate text')}</Button>
+        <Button onClick={handleGenerate}>{'توليد نص'}</Button>
       </Card>
-      <ResultBox title={t('Lorem Ipsum', 'Lorem Ipsum')} value={output} onClear={() => setOutput('')} />
+      <ResultBox title={'Lorem Ipsum'} value={output} onClear={() => setOutput('')} />
     </div>
   );
 }
@@ -1666,8 +1633,6 @@ const CITIES = ['Cairo', 'Alexandria', 'Riyadh', 'Dubai', 'Beirut', 'Amman', 'Da
 const WORDS = ['student', 'engineer', 'doctor', 'teacher', 'designer', 'developer', 'analyst', 'manager', 'researcher', 'writer', 'artist', 'nurse', 'accountant', 'architect'];
 
 function RandomData() {
-  const { t } = useTranslation();
-  const { language } = useLanguageStore();
   const [type, setType] = useState<'names' | 'emails' | 'phones' | 'numbers' | 'words'>('names');
   const [count, setCount] = useState(5);
   const [output, setOutput] = useState('');
@@ -1700,11 +1665,11 @@ function RandomData() {
   };
 
   const typeOptions = [
-    { value: 'names', label: t('Names', 'Names') },
-    { value: 'emails', label: t('Emails', 'Emails') },
-    { value: 'phones', label: t('Phone numbers', 'Phone numbers') },
-    { value: 'numbers', label: t('Numbers', 'Numbers') },
-    { value: 'words', label: t('Words & sentences', 'Words & sentences') },
+    { value: 'names', label: 'الأسماء' },
+    { value: 'emails', label: 'البريد الإلكتروني' },
+    { value: 'phones', label: 'أرقام الهاتف' },
+    { value: 'numbers', label: 'أرقام' },
+    { value: 'words', label: 'الكلمات والجمل' },
   ];
 
   return (
@@ -1712,13 +1677,13 @@ function RandomData() {
       <Card className="space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Select
-            label={t('Data type', 'Data type')}
+            label={'نوع البيانات'}
             options={typeOptions}
             value={type}
             onChange={(e) => setType(e.target.value as typeof type)}
           />
           <Input
-            label={t('Count', 'Count')}
+            label={'العدد'}
             type="number"
             inputMode="numeric"
             min={1}
@@ -1727,9 +1692,9 @@ function RandomData() {
             onChange={(e) => setCount(Math.max(1, Math.min(100, parseInt(e.target.value) || 1)))}
           />
         </div>
-        <Button onClick={handleGenerate}>{language === 'ar' ? 'توليد' : t('Generate', 'Generate')}</Button>
+        <Button onClick={handleGenerate}>{'توليد'}</Button>
       </Card>
-      <ResultBox title={t('Generated data', 'Generated data')} value={output} onClear={() => setOutput('')} />
+      <ResultBox title={'البيانات المولدة'} value={output} onClear={() => setOutput('')} />
     </div>
   );
 }
@@ -1739,8 +1704,6 @@ function RandomData() {
 // =============================================================================
 
 function PasswordStrength() {
-  const { t } = useTranslation();
-  const { language } = useLanguageStore();
   const [password, setPassword] = useState('');
 
   const analyze = (pwd: string) => {
@@ -1755,17 +1718,17 @@ function PasswordStrength() {
 
   const score = analyze(password);
   const percent = (score / 5) * 100;
-  const labels = [t('Very weak', 'Very weak'), t('Weak', 'Weak'), t('Fair', 'Fair'), t('Good', 'Good'), t('Strong', 'Strong')];
+  const labels = ['ضعيفة جداً', 'ضعيفة', 'مقبول', 'جيد', 'قوية'];
   const label = password ? labels[Math.max(0, score - 1)] : '';
   const color =
     score <= 1 ? 'bg-red-500' : score <= 2 ? 'bg-orange-500' : score <= 3 ? 'bg-amber-500' : score <= 4 ? 'bg-emerald-500' : 'bg-green-600';
 
   const suggestions = (() => {
     const list: string[] = [];
-    if (password.length < 12) list.push(language === 'ar' ? 'استخدم 12 حرفاً على الأقل' : 'Use at least 12 characters');
-    if (!/[A-Z]/.test(password) || !/[a-z]/.test(password)) list.push(language === 'ar' ? 'امزج الأحرف الكبيرة والصغيرة' : 'Mix uppercase and lowercase letters');
-    if (!/\d/.test(password)) list.push(language === 'ar' ? 'أضف أرقاماً' : 'Add numbers');
-    if (!/[^A-Za-z0-9]/.test(password)) list.push(language === 'ar' ? 'أضف رموزاً خاصة' : 'Add special symbols');
+    if (password.length < 12) list.push('استخدم 12 حرفاً على الأقل');
+    if (!/[A-Z]/.test(password) || !/[a-z]/.test(password)) list.push('امزج الأحرف الكبيرة والصغيرة');
+    if (!/\d/.test(password)) list.push('أضف أرقاماً');
+    if (!/[^A-Za-z0-9]/.test(password)) list.push('أضف رموزاً خاصة');
     return list;
   })();
 
@@ -1773,17 +1736,17 @@ function PasswordStrength() {
     <div className="space-y-5">
       <Card className="space-y-4">
         <Input
-          label={t('Password', 'Password')}
+          label={'كلمة المرور'}
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder={language === 'ar' ? 'اكتب كلمة مرور لتحليلها' : 'Type a password to analyze'}
+          placeholder={'اكتب كلمة مرور لتحليلها'}
         />
         {password && (
           <>
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('Strength', 'Strength')}</span>
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{'القوة'}</span>
                 <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">{label}</span>
               </div>
               <div className="h-2 rounded-full bg-gray-200 dark:bg-dark-border overflow-hidden">
@@ -1816,8 +1779,6 @@ function PasswordStrength() {
 // =============================================================================
 
 function HashVerifier() {
-  const { t } = useTranslation();
-  const { language } = useLanguageStore();
   const [text, setText] = useState('');
   const [expected, setExpected] = useState('');
   const [algorithm, setAlgorithm] = useState('SHA-256');
@@ -1840,14 +1801,14 @@ function HashVerifier() {
     <div className="space-y-5">
       <Card className="space-y-4">
         <TextArea
-          label={t('Input text', 'Input text')}
+          label={'النص المدخل'}
           value={text}
           onChange={(e) => setText(e.target.value)}
           rows={4}
         />
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Input
-            label={t('Expected hash', 'Expected hash')}
+            label={'البصمة المتوقعة'}
             value={expected}
             onChange={(e) => setExpected(e.target.value)}
             className="font-mono"
@@ -1855,7 +1816,7 @@ function HashVerifier() {
             placeholder="e3b0c44298fc..."
           />
           <Select
-            label={t('Algorithm', 'Algorithm')}
+            label={'الخوارزمية'}
             options={[
               { value: 'SHA-1', label: 'SHA-1' },
               { value: 'SHA-256', label: 'SHA-256' },
@@ -1867,7 +1828,7 @@ function HashVerifier() {
           />
         </div>
         <Button onClick={handleVerify} disabled={!text.trim() || !expected.trim()}>
-          {t('Verify', 'Verify')}
+          {'تحقق'}
         </Button>
       </Card>
       {status !== 'idle' && (
@@ -1883,8 +1844,8 @@ function HashVerifier() {
             <div className="flex-1">
               <p className={`font-semibold ${status === 'match' ? 'text-emerald-700 dark:text-emerald-400' : 'text-red-700 dark:text-red-400'}`}>
                 {status === 'match'
-                  ? (language === 'ar' ? 'التجزئة متطابقة!' : 'Hash matches!')
-                  : (language === 'ar' ? 'التجزئة غير متطابقة' : 'Hash does not match')}
+                  ? ('التجزئة متطابقة!')
+                  : ('التجزئة غير متطابقة')}
               </p>
               {actual && (
                 <p className="mt-1 text-xs font-mono text-gray-500 dark:text-gray-400 break-all" dir="ltr">
@@ -1904,7 +1865,6 @@ function HashVerifier() {
 // =============================================================================
 
 function HmacGenerator() {
-  const { t } = useTranslation();
   const { addNotification } = useAppStore();
   const [text, setText] = useState('');
   const [secret, setSecret] = useState('');
@@ -1913,7 +1873,7 @@ function HmacGenerator() {
 
   const handleGenerate = async () => {
     if (!text.trim() || !secret.trim()) {
-      addNotification(t('Enter both text and secret key', 'Enter both text and secret key'), 'warning');
+      addNotification('أدخل النص والمفتاح السري معاً', 'warning');
       return;
     }
     try {
@@ -1929,7 +1889,7 @@ function HmacGenerator() {
       setOutput(toHex(sig));
     } catch {
       setOutput('');
-      addNotification(t('Error generating HMAC', 'Error generating HMAC'), 'error');
+      addNotification('خطأ في توليد HMAC', 'error');
     }
   };
 
@@ -1937,21 +1897,21 @@ function HmacGenerator() {
     <div className="space-y-5">
       <Card className="space-y-4">
         <TextArea
-          label={t('Input text', 'Input text')}
+          label={'النص المدخل'}
           value={text}
           onChange={(e) => setText(e.target.value)}
           rows={4}
         />
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Input
-            label={t('Secret key', 'Secret key')}
+            label={'المفتاح السري'}
             type="password"
             value={secret}
             onChange={(e) => setSecret(e.target.value)}
             dir="ltr"
           />
           <Select
-            label={t('Algorithm', 'Algorithm')}
+            label={'الخوارزمية'}
             options={[
               { value: 'SHA-1', label: 'SHA-1' },
               { value: 'SHA-256', label: 'SHA-256' },
@@ -1962,7 +1922,7 @@ function HmacGenerator() {
             onChange={(e) => setAlgorithm(e.target.value)}
           />
         </div>
-        <Button onClick={handleGenerate}>{t('Generate HMAC', 'Generate HMAC')}</Button>
+        <Button onClick={handleGenerate}>{'توليد HMAC'}</Button>
       </Card>
       <ResultBox title="HMAC" value={output} onClear={() => setOutput('')} />
     </div>
@@ -1974,15 +1934,14 @@ function HmacGenerator() {
 // =============================================================================
 
 function ComingSoonTool() {
-  const { t } = useTranslation();
   return (
     <Card className="text-center py-16">
       <div className="text-5xl mb-4">🔧</div>
       <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-2">
-        {t('Coming Soon', 'Coming Soon')}
+        {'قريباً'}
       </h3>
       <p className="text-sm text-gray-500 dark:text-gray-400">
-        {t('This engineering tool is under development.', 'This engineering tool is under development.')}
+        {'هذه الأداة الهندسية قيد التطوير.'}
       </p>
     </Card>
   );
@@ -1997,8 +1956,6 @@ interface EngineeringToolPageProps {
 }
 
 export default function EngineeringToolPage({ toolId }: EngineeringToolPageProps) {
-  const { t } = useTranslation();
-  const { language } = useLanguageStore();
   const tool = getToolById(toolId);
 
   let content: React.ReactNode;
@@ -2074,8 +2031,8 @@ export default function EngineeringToolPage({ toolId }: EngineeringToolPageProps
             <thead>
               <tr className="border-b border-light-border dark:border-dark-border">
                 <th className="text-start py-2 px-3 font-semibold text-gray-700 dark:text-gray-300">Entity</th>
-                <th className="text-start py-2 px-3 font-semibold text-gray-700 dark:text-gray-300">{t('Character', 'Character')}</th>
-                <th className="text-start py-2 px-3 font-semibold text-gray-700 dark:text-gray-300">{t('Name', 'Name')}</th>
+                <th className="text-start py-2 px-3 font-semibold text-gray-700 dark:text-gray-300">{'الحرف'}</th>
+                <th className="text-start py-2 px-3 font-semibold text-gray-700 dark:text-gray-300">{'الاسم'}</th>
               </tr>
             </thead>
             <tbody>
@@ -2123,13 +2080,13 @@ export default function EngineeringToolPage({ toolId }: EngineeringToolPageProps
   return (
     <ToolLayout
       backTo="/category/engineering"
-      backLabel={language === 'ar' ? 'العودة للأدوات الهندسية' : 'Back to Engineering Tools'}
+      backLabel={'العودة للأدوات الهندسية'}
     >
       {tool && (
         <ToolHero
           icon={<tool.icon className="w-8 h-8 text-primary-600 dark:text-primary-400" />}
-          title={language === 'ar' ? tool.nameAr : tool.name}
-          description={language === 'ar' ? tool.descriptionAr : tool.description}
+          title={tool.name}
+          description={tool.description}
         />
       )}
       {content}

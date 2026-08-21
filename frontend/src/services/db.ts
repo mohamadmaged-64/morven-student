@@ -17,14 +17,6 @@ function openDB(): Promise<IDBDatabase> {
           fileStore.createIndex('name', 'name', { unique: false });
           fileStore.createIndex('createdAt', 'createdAt', { unique: false });
         }
-
-        if (db.objectStoreNames.contains('resume')) {
-          db.deleteObjectStore('resume');
-        }
-
-        if (db.objectStoreNames.contains('activity')) {
-          db.deleteObjectStore('activity');
-        }
       };
 
       request.onsuccess = () => resolve(request.result);

@@ -1,5 +1,4 @@
 import { useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useAppStore } from '@/store/useAppStore';
 import { usePomodoroStore } from '@/store/usePomodoroStore';
 import { useNotesStore } from '@/store/useNotesStore';
@@ -16,9 +15,6 @@ import {
 } from 'lucide-react';
 
 export default function AchievementsPanel() {
-  const { t, i18n } = useTranslation();
-  const ar = i18n.language === 'ar';
-
   const tasks = useAppStore((s) => s.tasks);
   const flashcards = useAppStore((s) => s.flashcards);
   const completedSessions = usePomodoroStore((s) => s.completedSessions);
@@ -52,7 +48,7 @@ export default function AchievementsPanel() {
     {
       icon: CheckSquare,
       value: completedTasks,
-      label: ar ? 'مهمة مكتملة' : 'Tasks Completed',
+      label: 'مهمة مكتملة',
       accent: 'bg-emerald-50',
       accentDark: 'dark:bg-emerald-900/30',
       iconColor: 'text-emerald-600',
@@ -60,7 +56,7 @@ export default function AchievementsPanel() {
     {
       icon: Brain,
       value: cardsReviewed,
-      label: ar ? 'بطاقة تمت مراجعتها' : 'Cards Reviewed',
+      label: 'بطاقة تمت مراجعتها',
       accent: 'bg-violet-50',
       accentDark: 'dark:bg-violet-900/30',
       iconColor: 'text-violet-600',
@@ -68,7 +64,7 @@ export default function AchievementsPanel() {
     {
       icon: Timer,
       value: completedSessions,
-      label: ar ? 'جلسة بومودورو' : 'Pomodoro Sessions',
+      label: 'جلسة بومودورو',
       accent: 'bg-blue-50',
       accentDark: 'dark:bg-blue-900/30',
       iconColor: 'text-blue-600',
@@ -76,7 +72,7 @@ export default function AchievementsPanel() {
     {
       icon: StickyNote,
       value: meaningfulNotes,
-      label: ar ? 'ملاحظة' : 'Notes',
+      label: 'ملاحظة',
       accent: 'bg-amber-50',
       accentDark: 'dark:bg-amber-900/30',
       iconColor: 'text-amber-600',
@@ -84,7 +80,7 @@ export default function AchievementsPanel() {
     {
       icon: FolderOpen,
       value: files.length,
-      label: ar ? 'ملف محفوظ' : 'Saved Files',
+      label: 'ملف محفوظ',
       accent: 'bg-sky-50',
       accentDark: 'dark:bg-sky-900/30',
       iconColor: 'text-sky-600',
@@ -92,7 +88,7 @@ export default function AchievementsPanel() {
     {
       icon: Sparkles,
       value: quizzesCompleted,
-      label: ar ? 'اختبار مكتمل' : 'Quizzes Done',
+      label: 'اختبار مكتمل',
       accent: 'bg-rose-50',
       accentDark: 'dark:bg-rose-900/30',
       iconColor: 'text-rose-600',
@@ -101,11 +97,9 @@ export default function AchievementsPanel() {
 
   const hasAny = totalAchievements > 0;
 
-  const motivationalKey = hasAny
-    ? totalAchievements >= 100
-      ? 'dashboard.achievements.milestone100'
-      : 'dashboard.achievements.motivation'
-    : 'dashboard.achievements.emptyMotivation';
+  const motivationalMessage = totalAchievements >= 100
+    ? 'ممتاز! وصلت إلى 100 إنجاز!'
+    : 'استمر، فإنجازاتك تزيد يومًا بعد يوم.';
 
   return (
     <div className="w-full flex flex-col">
@@ -115,7 +109,7 @@ export default function AchievementsPanel() {
           <Trophy className="w-[18px] h-[18px] text-amber-600" strokeWidth={1.8} />
         </div>
         <h2 className="text-lg font-bold text-gray-800 dark:text-gray-200 text-center tracking-tight">
-          {t('dashboard.achievements.title')}
+          {'إنجازاتك'}
         </h2>
       </div>
 
@@ -125,10 +119,10 @@ export default function AchievementsPanel() {
             <Trophy className="w-7 h-7 text-amber-300 dark:text-amber-500" strokeWidth={1.4} />
           </div>
           <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-1">
-            {t('dashboard.achievements.empty')}
+            {'لسه ما بدأت إنجازاتك'}
           </p>
           <p className="text-xs text-gray-400 dark:text-gray-500 max-w-[220px]">
-            {t('dashboard.achievements.emptyHint')}
+            {'ابدأ باستخدام أدوات مورفن وسجل أول إنجاز لك.'}
           </p>
         </div>
       ) : (
@@ -155,7 +149,7 @@ export default function AchievementsPanel() {
           <div className="flex items-center gap-2.5 rounded-xl bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 px-4 py-3">
             <Sparkles className="w-4 h-4 text-amber-500 shrink-0" />
             <p className="text-xs font-medium text-amber-700 dark:text-amber-300">
-              {t(motivationalKey)}
+              {motivationalMessage}
             </p>
           </div>
         </>

@@ -1,8 +1,8 @@
 export const itemVariants = {
-  hidden: (direction: 'ltr' | 'rtl') => ({
+  hidden: {
     opacity: 0,
-    x: direction === 'rtl' ? 16 : -16,
-  }),
+    x: 16,
+  },
 
   visible: (i: number) => ({
     opacity: 1,

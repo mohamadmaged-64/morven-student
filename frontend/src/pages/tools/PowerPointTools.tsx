@@ -1,6 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useTranslation } from 'react-i18next';
 import { Download, CheckCircle2, Presentation, FileText } from 'lucide-react';
 import PptxGenJS from 'pptxgenjs';
 import { saveAs } from 'file-saver';
@@ -14,18 +13,13 @@ import { ProgressBar } from '@/components/UI/ProgressBar';
 import { EmptyState } from '@/components/UI/EmptyState';
 import { Badge } from '@/components/UI/Badge';
 import { useAppStore } from '@/store/useAppStore';
-import { useLanguageStore } from '@/store/useLanguageStore';
 import { useNavigate } from 'react-router-dom';
 import { saveToLibrary } from '@/services/savedFilesService';
 import { ToolHero } from '@/components/Tool/ToolHero';
 import { numberSlides, generatePptFromText, generatePptFromPdf, mergePowerPoint, splitPowerPoint, type SlideNumberPosition } from '@/services/conversionApi';
 import { isNetworkError } from '@/services/apiError';
 
-function networkErrorMessage(direction: string): string {
-  return direction === 'rtl'
-    ? 'أنت غير متصل بالإنترنت. تتطلب هذه الأداة اتصالاً بالإنترنت. حاول مرة أخرى عند توفر الاتصال.'
-    : 'You are offline. This tool requires an internet connection. Try again once you are back online.';
-}
+const NETWORK_ERROR_MESSAGE = 'أنت غير متصل بالإنترنت. تتطلب هذه الأداة اتصالاً بالإنترنت. حاول مرة أخرى عند توفر الاتصال.';
 
 type OldToolId =
   | 'ppt-from-text'
@@ -43,14 +37,14 @@ type NewToolId =
 type ToolId = OldToolId | NewToolId;
 
 const THEME_COLORS = [
-  { value: '1B5E20', label: 'Green' },
-  { value: '0D47A1', label: 'Blue' },
-  { value: 'B71C1C', label: 'Red' },
-  { value: '4A148C', label: 'Purple' },
-  { value: 'E65100', label: 'Orange' },
-  { value: '263238', label: 'Dark' },
-  { value: '004D40', label: 'Teal' },
-  { value: '880E4F', label: 'Pink' },
+  { value: '1B5E20', label: 'أخضر' },
+  { value: '0D47A1', label: 'أزرق' },
+  { value: 'B71C1C', label: 'أحمر' },
+  { value: '4A148C', label: 'بنفسجي' },
+  { value: 'E65100', label: 'برتقالي' },
+  { value: '263238', label: 'غامق' },
+  { value: '004D40', label: 'تركوازي' },
+  { value: '880E4F', label: 'وردي' },
 ];
 
 const FONTS = [
@@ -65,7 +59,7 @@ function parseSections(text: string): { title: string; bullets: string[] }[] {
   const sections = text.split(/\n\n+/).filter((s) => s.trim());
   return sections.map((section) => {
     const lines = section.trim().split('\n').filter((l) => l.trim());
-    const title = lines[0]?.replace(/^#+\s*/, '').trim() || 'Untitled';
+    const title = lines[0]?.replace(/^#+\s*/, '').trim() || 'بدون عنوان';
     const bullets = lines.slice(1).map((l) => l.replace(/^[-*]\s*/, '').trim()).filter(Boolean);
     return { title, bullets };
   });
@@ -107,7 +101,7 @@ function extractPptxText(data: ArrayBuffer): Promise<{ text: string; count: numb
       xmls.forEach((xml, idx) => {
         const matches = xml.match(/<a:t>([^<]+)<\/a:t>/g) || [];
         const texts = matches.map((m) => m.replace(/<\/?a:t>/g, ''));
-        text += `--- Slide ${idx + 1} ---\n${texts.join(' ')}\n\n`;
+        text += `--- شريحة ${idx + 1} ---\n${texts.join(' ')}\n\n`;
       });
       return { text, count: slideFiles.length };
     });
@@ -117,21 +111,20 @@ function extractPptxText(data: ArrayBuffer): Promise<{ text: string; count: numb
 function ThemeOptions({ themeColor, setThemeColor, font, setFont }: { themeColor: string; setThemeColor: (v: string) => void; font: string; setFont: (v: string) => void }) {
   return (
     <div className="grid grid-cols-2 gap-3">
-      <Select label="Theme Color" options={THEME_COLORS} value={themeColor} onChange={(e) => setThemeColor(e.target.value)} />
-      <Select label="Font" options={FONTS} value={font} onChange={(e) => setFont(e.target.value)} />
+      <Select label="لون السمة" options={THEME_COLORS} value={themeColor} onChange={(e) => setThemeColor(e.target.value)} />
+      <Select label="الخط" options={FONTS} value={font} onChange={(e) => setFont(e.target.value)} />
     </div>
   );
 }
 
 function GenerateFromText({ themeColor, font }: { themeColor: string; font: string }) {
   const { addNotification } = useAppStore();
-  const { direction } = useLanguageStore();
   const [content, setContent] = useState('');
   const [progress, setProgress] = useState(0);
   const [generating, setGenerating] = useState(false);
 
   const handleGenerate = useCallback(async () => {
-    if (!content.trim()) { addNotification('Please enter content', 'warning'); return; }
+    if (!content.trim()) { addNotification('يرجى إدخال المحتوى', 'warning'); return; }
     setGenerating(true); setProgress(20);
     try {
       const sections = parseSections(content); setProgress(60);
@@ -139,23 +132,22 @@ function GenerateFromText({ themeColor, font }: { themeColor: string; font: stri
       const blob = await pptx.write({ outputType: 'blob' });
       saveAs(blob as Blob, 'presentation.pptx');
       saveToLibrary(blob as Blob, 'presentation.pptx', 'powerpoint-tools').catch(() => {});
-      setProgress(100); addNotification('Presentation generated successfully!', 'success');
-    } catch { addNotification('Error generating presentation', 'error'); }
+      setProgress(100); addNotification('تم إنشاء العرض التقديمي بنجاح!', 'success');
+    } catch { addNotification('حدث خطأ أثناء إنشاء العرض التقديمي.', 'error'); }
     finally { setGenerating(false); setTimeout(() => setProgress(0), 2000); }
   }, [content, themeColor, font, addNotification]);
 
   return (
-    <div className="space-y-4" dir={direction}>
-      <TextArea label="Enter your content" placeholder={"Title of first slide\n\nFirst bullet point\nSecond bullet point\nThird bullet point\n\nTitle of second slide\n\nAnother bullet point"} value={content} onChange={(e) => setContent(e.target.value)} className="min-h-[250px]" />
-      {progress > 0 && <ProgressBar value={progress} color="gradient" label="Generating..." showLabel />}
-      <Button onClick={handleGenerate} loading={generating} disabled={!content.trim()} className="w-full">Generate & Download PPTX</Button>
+    <div className="space-y-4" dir="rtl">
+      <TextArea label="أدخل المحتوى" placeholder={"عنوان الشريحة الأولى\n\nنقطة أولى\nنقطة ثانية\nنقطة ثالثة\n\nعنوان الشريحة الثانية\n\nنقطة أخرى"} value={content} onChange={(e) => setContent(e.target.value)} className="min-h-[250px]" />
+      {progress > 0 && <ProgressBar value={progress} color="gradient" label="جارٍ الإنشاء..." showLabel />}
+      <Button onClick={handleGenerate} loading={generating} disabled={!content.trim()} className="w-full">إنشاء وتنزيل PPTX</Button>
     </div>
   );
 }
 
 function GenerateFromPdf({ themeColor, font }: { themeColor: string; font: string }) {
   const { addNotification } = useAppStore();
-  const { direction } = useLanguageStore();
   const [extractedText, setExtractedText] = useState('');
   const [progress, setProgress] = useState(0);
   const [processing, setProcessing] = useState(false);
@@ -176,8 +168,8 @@ function GenerateFromPdf({ themeColor, font }: { themeColor: string; font: strin
         text += content.items.map((item) => ('str' in item ? item.str : '')).join(' ') + '\n\n';
       }
       setExtractedText(text); setProgress(70);
-      addNotification('Text extracted from PDF', 'success');
-    } catch { addNotification('Error extracting text from PDF', 'error'); }
+      addNotification('تم استخراج النص من PDF.', 'success');
+    } catch { addNotification('حدث خطأ أثناء استخراج النص من PDF.', 'error'); }
     finally { setProcessing(false); setTimeout(() => setProgress(0), 500); }
   }, [addNotification]);
 
@@ -189,20 +181,20 @@ function GenerateFromPdf({ themeColor, font }: { themeColor: string; font: strin
       const blob = await pptx.write({ outputType: 'blob' });
       saveAs(blob as Blob, 'from-pdf.pptx');
       saveToLibrary(blob as Blob, 'from-pdf.pptx', 'powerpoint-tools').catch(() => {});
-      setProgress(100); addNotification('Presentation generated from PDF!', 'success');
-    } catch { addNotification('Error generating presentation', 'error'); }
+      setProgress(100); addNotification('تم إنشاء العرض التقديمي من PDF!', 'success');
+    } catch { addNotification('حدث خطأ أثناء إنشاء العرض التقديمي.', 'error'); }
     finally { setGenerating(false); setTimeout(() => setProgress(0), 2000); }
   }, [extractedText, themeColor, font, addNotification]);
 
   return (
-    <div className="space-y-4" dir={direction}>
-      <FileUpload accept={['application/pdf']} onFilesSelected={handleFile} label="Upload PDF file" description="Supports PDF files up to 50MB" />
-      {processing && <ProgressBar value={progress} color="primary" label="Extracting text..." showLabel />}
+    <div className="space-y-4" dir="rtl">
+      <FileUpload accept={['application/pdf']} onFilesSelected={handleFile} label="ارفع ملف PDF" description="يدعم ملفات PDF حتى 50 ميغابايت." />
+      {processing && <ProgressBar value={progress} color="primary" label="جارٍ استخراج النص..." showLabel />}
       {extractedText && (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-          <TextArea label="Extracted text (editable)" value={extractedText} onChange={(e) => setExtractedText(e.target.value)} className="min-h-[200px]" />
-          {progress > 0 && !processing && <ProgressBar value={progress} color="gradient" label="Generating..." showLabel />}
-          <Button onClick={handleGenerate} loading={generating} className="w-full mt-3">Generate PPTX from PDF</Button>
+          <TextArea label="النص المستخرج (قابل للتعديل)" value={extractedText} onChange={(e) => setExtractedText(e.target.value)} className="min-h-[200px]" />
+          {progress > 0 && !processing && <ProgressBar value={progress} color="gradient" label="جارٍ الإنشاء..." showLabel />}
+          <Button onClick={handleGenerate} loading={generating} className="w-full mt-3">إنشاء PPTX من PDF</Button>
         </motion.div>
       )}
     </div>
@@ -227,7 +219,6 @@ const THEME_TOOL_IDS: OldToolId[] = [
 ];
 
 function useSimulatedProcess() {
-  const { t } = useTranslation();
   const { addNotification } = useAppStore();
   const [processing, setProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -249,12 +240,12 @@ function useSimulatedProcess() {
         setProgress(100);
         setProcessing(false);
         setDone(true);
-        addNotification(t('Processing Complete', 'Processing Complete'), 'success');
+        addNotification('اكتملت المعالجة', 'success');
       } else {
         setProgress(p);
       }
     }, 200);
-  }, [addNotification, t]);
+  }, [addNotification]);
 
   const reset = useCallback(() => {
     if (intervalRef.current) clearInterval(intervalRef.current);
@@ -267,7 +258,6 @@ function useSimulatedProcess() {
 }
 
 function PlaceholderResult({ fileName, type = 'PPTX', onReset, onDownload }: { fileName: string; type?: string; onReset: () => void; onDownload?: () => void }) {
-  const { t } = useTranslation();
   const { addNotification } = useAppStore();
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
@@ -277,8 +267,8 @@ function PlaceholderResult({ fileName, type = 'PPTX', onReset, onDownload }: { f
             <CheckCircle2 className="h-5 w-5" />
           </span>
           <div>
-            <p className="font-semibold text-gray-900 dark:text-white">{t('Processing Complete', 'Processing Complete')}</p>
-            <p className="text-sm text-gray-500 dark:text-gray-400">{t('Your file is ready to download', 'Your file is ready to download')}</p>
+            <p className="font-semibold text-gray-900 dark:text-white">اكتملت المعالجة</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">ملفك جاهز للتنزيل</p>
           </div>
         </div>
         <div className="flex items-center justify-between rounded-xl border border-light-border dark:border-dark-border p-3 mt-4">
@@ -291,17 +281,17 @@ function PlaceholderResult({ fileName, type = 'PPTX', onReset, onDownload }: { f
               <p className="text-xs text-gray-500 dark:text-gray-400">{type}</p>
             </div>
           </div>
-          <Badge variant="success" dot>{t('Ready', 'Ready')}</Badge>
+          <Badge variant="success" dot>جاهز</Badge>
         </div>
         <div className="flex gap-3 mt-4">
           <Button
             className="flex-1"
             icon={<Download className="h-4 w-4" />}
-            onClick={onDownload ?? (() => addNotification(t('Download will be available soon', 'Download will be available soon'), 'info'))}
+            onClick={onDownload ?? (() => addNotification('سيكون التنزيل متاحًا قريبًا', 'info'))}
           >
-            {t('Download', 'Download')}
+            تنزيل
           </Button>
-          <Button variant="ghost" onClick={onReset}>{t('Start Over', 'Start Over')}</Button>
+          <Button variant="ghost" onClick={onReset}>البدء من جديد</Button>
         </div>
       </Card>
     </motion.div>
@@ -309,8 +299,6 @@ function PlaceholderResult({ fileName, type = 'PPTX', onReset, onDownload }: { f
 }
 
 function GeneratePptFromTextTool() {
-  const { direction } = useLanguageStore();
-  const { t } = useTranslation();
   const { addNotification } = useAppStore();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -323,7 +311,7 @@ function GeneratePptFromTextTool() {
   useEffect(() => () => { if (progressRef.current) clearInterval(progressRef.current); }, []);
 
   const handleGenerate = useCallback(async () => {
-    if (!content.trim()) { addNotification(t('Please enter slide content', 'Please enter slide content'), 'warning'); return; }
+    if (!content.trim()) { addNotification('يرجى إدخال محتوى الشرائح', 'warning'); return; }
     setResult(null);
     setDone(false);
     setProgress(0);
@@ -344,35 +332,35 @@ function GeneratePptFromTextTool() {
       setDone(true);
       saveAs(blob, name);
       saveToLibrary(blob, name, 'powerpoint-tools').catch(() => {});
-      addNotification(t('Processing Complete', 'Processing Complete'), 'success');
+      addNotification('اكتملت المعالجة', 'success');
     } catch (err) {
       if (progressRef.current) clearInterval(progressRef.current);
       setProcessing(false);
       setDone(false);
-      const msg = isNetworkError(err) ? networkErrorMessage(direction) : (err instanceof Error ? err.message : 'Failed to generate presentation');
+      const msg = isNetworkError(err) ? NETWORK_ERROR_MESSAGE : (err instanceof Error ? err.message : 'تعذر إنشاء العرض التقديمي.');
       addNotification(msg, 'error');
     }
-  }, [title, content, addNotification, t]);
+  }, [title, content, addNotification]);
 
   return (
-    <div className="space-y-4" dir={direction}>
+    <div className="space-y-4" dir="rtl">
       <Input
-        label={t('Presentation Title (optional)', 'Presentation Title (optional)')}
+        label="عنوان العرض (اختياري)"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
-        placeholder={t('e.g. My Presentation', 'e.g. My Presentation')}
+        placeholder="مثال: عرضي التقديمي"
       />
       <TextArea
-        label={t('Slide content', 'Slide content')}
-        placeholder={t('Title of first slide, then bullet points. Leave a blank line between slides.', 'Title of first slide, then bullet points. Leave a blank line between slides.')}
+        label="محتوى الشرائح"
+        placeholder="عنوان الشريحة الأولى ثم النقاط. اترك سطرًا فارغًا بين الشرائح."
         value={content}
         onChange={(e) => setContent(e.target.value)}
         className="min-h-[250px]"
       />
-      {processing && <ProgressBar value={progress} color="gradient" label={t('Generating presentation...', 'Generating presentation...')} showLabel />}
+      {processing && <ProgressBar value={progress} color="gradient" label="جارٍ إنشاء العرض..." showLabel />}
       {!done && (
         <Button onClick={handleGenerate} loading={processing} disabled={!content.trim()} className="w-full">
-          {t('Generate Presentation', 'Generate Presentation')}
+          إنشاء العرض التقديمي
         </Button>
       )}
       {done && result && (
@@ -387,8 +375,6 @@ function GeneratePptFromTextTool() {
 }
 
 function GeneratePptFromPdfTool() {
-  const { direction } = useLanguageStore();
-  const { t } = useTranslation();
   const { addNotification } = useAppStore();
   const [uploaded, setUploaded] = useState<File | null>(null);
   const [processing, setProcessing] = useState(false);
@@ -412,7 +398,7 @@ function GeneratePptFromPdfTool() {
 
   const handleGenerate = useCallback(async () => {
     if (!uploaded) {
-      addNotification(t('Select at least one file', 'Select at least one file'), 'warning');
+      addNotification('حدد ملفًا واحدًا على الأقل', 'warning');
       return;
     }
 
@@ -435,28 +421,28 @@ function GeneratePptFromPdfTool() {
       setDone(true);
       saveAs(blob, name);
       saveToLibrary(blob, name, 'powerpoint-tools').catch(() => {});
-      addNotification(t('Processing Complete', 'Processing Complete'), 'success');
+      addNotification('اكتملت المعالجة', 'success');
     } catch (err) {
       if (progressRef.current) clearInterval(progressRef.current);
       setProcessing(false);
       setDone(false);
-      const msg = isNetworkError(err) ? networkErrorMessage(direction) : (err instanceof Error ? err.message : 'Failed to convert PDF to presentation');
+      const msg = isNetworkError(err) ? NETWORK_ERROR_MESSAGE : (err instanceof Error ? err.message : 'تعذر تحويل PDF إلى عرض تقديمي.');
       addNotification(msg, 'error');
     }
-  }, [uploaded, addNotification, t]);
+  }, [uploaded, addNotification]);
 
   return (
-    <div className="space-y-4" dir={direction}>
+    <div className="space-y-4" dir="rtl">
       <FileUpload
         accept={['application/pdf', '.pdf']}
         onFilesSelected={handleFile}
         onFileRemove={handleRemove}
-        label={t('Upload PDF to generate presentation', 'Upload PDF to generate presentation')}
-        description={t('Select a PDF file up to 50MB', 'Select a PDF file up to 50MB')}
+        label="ارفع ملف PDF لإنشاء عرض تقديمي"
+        description="حدد ملف PDF بحجم يصل إلى 50 ميغابايت"
       />
-      {processing && <ProgressBar value={progress} color="gradient" label={t('Generating presentation...', 'Generating presentation...')} showLabel />}
+      {processing && <ProgressBar value={progress} color="gradient" label="جارٍ إنشاء العرض..." showLabel />}
       {!done && uploaded && (
-        <Button onClick={handleGenerate} loading={processing} className="w-full">{t('Generate Presentation', 'Generate Presentation')}</Button>
+        <Button onClick={handleGenerate} loading={processing} className="w-full">إنشاء العرض التقديمي</Button>
       )}
       {done && result && (
         <PlaceholderResult
@@ -470,8 +456,6 @@ function GeneratePptFromPdfTool() {
 }
 
 function MergePptTool() {
-  const { direction } = useLanguageStore();
-  const { t } = useTranslation();
   const { addNotification } = useAppStore();
   const [files, setFiles] = useState<File[]>([]);
   const [processing, setProcessing] = useState(false);
@@ -495,7 +479,7 @@ function MergePptTool() {
 
   const handleProcess = useCallback(async () => {
     if (files.length < 2) {
-      addNotification(t('Select at least 2 presentations', 'Select at least 2 presentations'), 'warning');
+      addNotification('حدد عرضين تقديميين على الأقل', 'warning');
       return;
     }
 
@@ -518,30 +502,30 @@ function MergePptTool() {
       setDone(true);
       saveAs(blob, name);
       saveToLibrary(blob, name, 'powerpoint-tools').catch(() => {});
-      addNotification(t('Processing Complete', 'Processing Complete'), 'success');
+      addNotification('اكتملت المعالجة', 'success');
     } catch (err) {
       if (progressRef.current) clearInterval(progressRef.current);
       setProcessing(false);
       setDone(false);
-      const msg = isNetworkError(err) ? networkErrorMessage(direction) : (err instanceof Error ? err.message : 'Failed to merge presentations');
+      const msg = isNetworkError(err) ? NETWORK_ERROR_MESSAGE : (err instanceof Error ? err.message : 'تعذر دمج العروض التقديمية.');
       addNotification(msg, 'error');
     }
-  }, [files, addNotification, t]);
+  }, [files, addNotification]);
 
   return (
-    <div className="space-y-4" dir={direction}>
+    <div className="space-y-4" dir="rtl">
       <FileUpload
         accept={['.pptx', '.ppt']}
         multiple
         maxFiles={20}
         onFilesSelected={handleFile}
         onFileRemove={handleRemove}
-        label={t('Upload presentations to merge', 'Upload presentations to merge')}
-        description={t('Select at least 2 presentations', 'Select at least 2 presentations')}
+        label="ارفع العروض التقديمية للدمج"
+        description="حدد عرضين تقديميين على الأقل"
       />
-      {processing && <ProgressBar value={progress} color="gradient" label={t('Merging presentations...', 'Merging presentations...')} showLabel />}
+      {processing && <ProgressBar value={progress} color="gradient" label="جارٍ دمج العروض التقديمية..." showLabel />}
       {!done && files.length > 0 && (
-        <Button onClick={handleProcess} loading={processing} className="w-full">{t('Merge Presentations', 'Merge Presentations')}</Button>
+        <Button onClick={handleProcess} loading={processing} className="w-full">دمج العروض التقديمية</Button>
       )}
       {done && result && (
         <PlaceholderResult
@@ -555,8 +539,6 @@ function MergePptTool() {
 }
 
 function SplitPptTool() {
-  const { direction } = useLanguageStore();
-  const { t } = useTranslation();
   const { addNotification } = useAppStore();
   const [uploaded, setUploaded] = useState<File | null>(null);
   const [ranges, setRanges] = useState('');
@@ -582,7 +564,7 @@ function SplitPptTool() {
 
   const handleProcess = useCallback(async () => {
     if (!uploaded) {
-      addNotification(t('Select at least one file', 'Select at least one file'), 'warning');
+      addNotification('حدد ملفًا واحدًا على الأقل', 'warning');
       return;
     }
 
@@ -605,35 +587,35 @@ function SplitPptTool() {
       setDone(true);
       saveAs(blob, name);
       saveToLibrary(blob, name, 'powerpoint-tools').catch(() => {});
-      addNotification(t('Processing Complete', 'Processing Complete'), 'success');
+      addNotification('اكتملت المعالجة', 'success');
     } catch (err) {
       if (progressRef.current) clearInterval(progressRef.current);
       setProcessing(false);
       setDone(false);
-      const msg = isNetworkError(err) ? networkErrorMessage(direction) : (err instanceof Error ? err.message : 'Failed to split presentation');
+      const msg = isNetworkError(err) ? NETWORK_ERROR_MESSAGE : (err instanceof Error ? err.message : 'تعذر تقسيم العرض التقديمي.');
       addNotification(msg, 'error');
     }
-  }, [uploaded, ranges, addNotification, t]);
+  }, [uploaded, ranges, addNotification]);
 
   return (
-    <div className="space-y-4" dir={direction}>
+    <div className="space-y-4" dir="rtl">
       <FileUpload
         accept={['.pptx', '.ppt']}
         onFilesSelected={handleFile}
         onFileRemove={handleRemove}
-        label={t('Upload a presentation to split', 'Upload a presentation to split')}
+        label="ارفع عرضًا تقديميًا لتقسيمه"
       />
       {uploaded && !done && (
         <Input
-          label={t('Page ranges (optional)', 'Page ranges (optional)')}
-          placeholder={t('Example 1-3, 5, 8-10', 'Example 1-3, 5, 8-10')}
+          label="نطاقات الشرائح (اختياري)"
+          placeholder="مثال: 1-3، 5، 8-10"
           value={ranges}
           onChange={(e) => setRanges(e.target.value)}
         />
       )}
-      {processing && <ProgressBar value={progress} color="gradient" label={t('Splitting presentation...', 'Splitting presentation...')} showLabel />}
+      {processing && <ProgressBar value={progress} color="gradient" label="جارٍ تقسيم العرض التقديمي..." showLabel />}
       {!done && uploaded && (
-        <Button onClick={handleProcess} loading={processing} className="w-full">{t('Process', 'Process')}</Button>
+        <Button onClick={handleProcess} loading={processing} className="w-full">معالجة</Button>
       )}
       {done && result && (
         <PlaceholderResult
@@ -648,8 +630,6 @@ function SplitPptTool() {
 }
 
 function CompressPptTool() {
-  const { direction } = useLanguageStore();
-  const { t } = useTranslation();
   const { addNotification } = useAppStore();
   const [hasFile, setHasFile] = useState(false);
   const [quality, setQuality] = useState('medium');
@@ -662,33 +642,33 @@ function CompressPptTool() {
   const handleRemove = useCallback(() => { setHasFile(false); reset(); }, [reset]);
 
   const handleProcess = useCallback(() => {
-    if (!hasFile) { addNotification(t('Select at least one file', 'Select at least one file'), 'warning'); return; }
+    if (!hasFile) { addNotification('حدد ملفًا واحدًا على الأقل', 'warning'); return; }
     start();
-  }, [hasFile, addNotification, t, start]);
+  }, [hasFile, addNotification, start]);
 
   return (
-    <div className="space-y-4" dir={direction}>
+    <div className="space-y-4" dir="rtl">
       <FileUpload
         accept={['.pptx', '.ppt']}
         onFilesSelected={handleFile}
         onFileRemove={handleRemove}
-        label={t('Upload a presentation to compress', 'Upload a presentation to compress')}
+        label="ارفع عرضًا تقديميًا لضغطه"
       />
       {hasFile && !done && (
         <Select
-          label={t('Compression Level', 'Compression Level')}
+          label="مستوى الضغط"
           value={quality}
           onChange={(e) => setQuality(e.target.value)}
           options={[
-            { value: 'low', label: t('Low', 'Low') },
-            { value: 'medium', label: t('Medium', 'Medium') },
-            { value: 'high', label: t('High', 'High') },
+            { value: 'low', label: 'منخفض' },
+            { value: 'medium', label: 'متوسط' },
+            { value: 'high', label: 'مرتفع' },
           ]}
         />
       )}
-      {processing && <ProgressBar value={progress} color="gradient" label={t('Compressing presentation...', 'Compressing presentation...')} showLabel />}
+      {processing && <ProgressBar value={progress} color="gradient" label="جارٍ ضغط العرض التقديمي..." showLabel />}
       {!done && hasFile && (
-        <Button onClick={handleProcess} loading={processing} className="w-full">{t('Process', 'Process')}</Button>
+        <Button onClick={handleProcess} loading={processing} className="w-full">معالجة</Button>
       )}
       {done && <PlaceholderResult fileName="compressed-presentation.pptx" onReset={() => { setHasFile(false); reset(); }} />}
     </div>
@@ -696,8 +676,6 @@ function CompressPptTool() {
 }
 
 function ProtectPptTool() {
-  const { direction } = useLanguageStore();
-  const { t } = useTranslation();
   const { addNotification } = useAppStore();
   const [hasFile, setHasFile] = useState(false);
   const [password, setPassword] = useState('');
@@ -710,31 +688,31 @@ function ProtectPptTool() {
   const handleRemove = useCallback(() => { setHasFile(false); setPassword(''); reset(); }, [reset]);
 
   const handleProcess = useCallback(() => {
-    if (!hasFile) { addNotification(t('Select at least one file', 'Select at least one file'), 'warning'); return; }
-    if (!password) { addNotification(t('Enter a password', 'Enter a password'), 'warning'); return; }
+    if (!hasFile) { addNotification('حدد ملفًا واحدًا على الأقل', 'warning'); return; }
+    if (!password) { addNotification('أدخل كلمة المرور', 'warning'); return; }
     start();
-  }, [hasFile, password, addNotification, t, start]);
+  }, [hasFile, password, addNotification, start]);
 
   return (
-    <div className="space-y-4" dir={direction}>
+    <div className="space-y-4" dir="rtl">
       <FileUpload
         accept={['.pptx', '.ppt']}
         onFilesSelected={handleFile}
         onFileRemove={handleRemove}
-        label={t('Upload a presentation to protect', 'Upload a presentation to protect')}
+        label="ارفع عرضًا تقديميًا لحمايته"
       />
       {hasFile && !done && (
         <Input
-          label={t('Set Password', 'Set Password')}
+          label="تعيين كلمة المرور"
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder={t('Enter password...', 'Enter password...')}
+          placeholder="أدخل كلمة المرور..."
         />
       )}
-      {processing && <ProgressBar value={progress} color="gradient" label={t('Protecting presentation...', 'Protecting presentation...')} showLabel />}
+      {processing && <ProgressBar value={progress} color="gradient" label="جارٍ حماية العرض التقديمي..." showLabel />}
       {!done && hasFile && (
-        <Button onClick={handleProcess} loading={processing} className="w-full">{t('Process', 'Process')}</Button>
+        <Button onClick={handleProcess} loading={processing} className="w-full">معالجة</Button>
       )}
       {done && <PlaceholderResult fileName="protected-presentation.pptx" onReset={() => { setHasFile(false); setPassword(''); reset(); }} />}
     </div>
@@ -742,8 +720,6 @@ function ProtectPptTool() {
 }
 
 function NumberSlidesTool() {
-  const { direction } = useLanguageStore();
-  const { t } = useTranslation();
   const { addNotification } = useAppStore();
   const [uploaded, setUploaded] = useState<File | null>(null);
   const [startNumber, setStartNumber] = useState('1');
@@ -769,7 +745,7 @@ function NumberSlidesTool() {
 
   const handleProcess = useCallback(async () => {
     if (!uploaded) {
-      addNotification(t('Select at least one file', 'Select at least one file'), 'warning');
+      addNotification('حدد ملفًا واحدًا على الأقل', 'warning');
       return;
     }
 
@@ -795,51 +771,51 @@ function NumberSlidesTool() {
       setDone(true);
       saveAs(blob, name);
       saveToLibrary(blob, name, 'powerpoint-tools').catch(() => {});
-      addNotification(t('Processing Complete', 'Processing Complete'), 'success');
+      addNotification('اكتملت المعالجة', 'success');
     } catch (err) {
       if (progressRef.current) clearInterval(progressRef.current);
       setProcessing(false);
       setDone(false);
-      const msg = isNetworkError(err) ? networkErrorMessage(direction) : (err instanceof Error ? err.message : 'Failed to add slide numbers');
+      const msg = isNetworkError(err) ? NETWORK_ERROR_MESSAGE : (err instanceof Error ? err.message : 'تعذر إضافة أرقام الشرائح.');
       addNotification(msg, 'error');
     }
-  }, [uploaded, startNumber, position, addNotification, t]);
+  }, [uploaded, startNumber, position, addNotification]);
 
   return (
-    <div className="space-y-4" dir={direction}>
+    <div className="space-y-4" dir="rtl">
       <FileUpload
         accept={['.pptx', '.ppt']}
         onFilesSelected={handleFile}
         onFileRemove={handleRemove}
-        label={t('Upload a presentation to add slide numbers', 'Upload a presentation to add slide numbers')}
+        label="ارفع عرضًا تقديميًا لإضافة أرقام الشرائح"
       />
       {uploaded && !done && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Input
-            label={t('Start Number', 'Start Number')}
+            label="رقم البداية"
             type="number"
             min={1}
             value={startNumber}
             onChange={(e) => setStartNumber(e.target.value)}
           />
           <Select
-            label={t('Position', 'Position')}
+            label="الموضع"
             value={position}
             onChange={(e) => setPosition(e.target.value as SlideNumberPosition)}
             options={[
-              { value: 'bottom-right', label: t('Bottom Right', 'Bottom Right') },
-              { value: 'bottom-center', label: t('Bottom Center', 'Bottom Center') },
-              { value: 'bottom-left', label: t('Bottom Left', 'Bottom Left') },
-              { value: 'top-right', label: t('Top Right', 'Top Right') },
-              { value: 'top-center', label: t('Top Center', 'Top Center') },
-              { value: 'top-left', label: t('Top Left', 'Top Left') },
+              { value: 'bottom-right', label: 'أسفل اليمين' },
+              { value: 'bottom-center', label: 'أسفل الوسط' },
+              { value: 'bottom-left', label: 'أسفل اليسار' },
+              { value: 'top-right', label: 'أعلى اليمين' },
+              { value: 'top-center', label: 'أعلى الوسط' },
+              { value: 'top-left', label: 'أعلى اليسار' },
             ]}
           />
         </div>
       )}
-      {processing && <ProgressBar value={progress} color="gradient" label={t('Adding slide numbers...', 'Adding slide numbers...')} showLabel />}
+      {processing && <ProgressBar value={progress} color="gradient" label="جارٍ إضافة أرقام الشرائح..." showLabel />}
       {!done && uploaded && (
-        <Button onClick={handleProcess} loading={processing} className="w-full">{t('Apply Numbering', 'Apply Numbering')}</Button>
+        <Button onClick={handleProcess} loading={processing} className="w-full">تطبيق الترقيم</Button>
       )}
       {done && result && (
         <PlaceholderResult
@@ -854,58 +830,56 @@ function NumberSlidesTool() {
 
 const TOOL_CONFIGS: Record<OldToolId, { title: string; description: string; icon: JSX.Element }> = {
   'ppt-from-text': {
-    title: 'Generate PPT from Text', description: 'Convert your text into a professional presentation',
+    title: 'إنشاء عرض من نص', description: 'حوّل نصك إلى عرض تقديمي احترافي',
     icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>,
   },
   'ppt-from-pdf': {
-    title: 'Generate PPT from PDF', description: 'Extract text from PDF and create slides',
+    title: 'إنشاء عرض من PDF', description: 'استخرج النص من PDF وأنشئ شرائح',
     icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>,
   },
- 
+
 };
 
 function PowerPointToolPage({ toolId }: { toolId: string }) {
   const navigate = useNavigate();
-  const { t } = useTranslation();
-  const { direction } = useLanguageStore();
   const [themeColor, setThemeColor] = useState('0D47A1');
   const [font, setFont] = useState('Arial');
 
   const newToolConfigs: Record<NewToolId, { title: string; description: string; icon: JSX.Element }> = {
     'generate-ppt-text': {
-      title: t('Generate PPT from Text', 'Generate PPT from Text'),
-      description: t('Create a presentation from text content', 'Create a presentation from text content'),
+      title: 'إنشاء عرض من نص',
+      description: 'أنشئ عرضًا تقديميًا من محتوى نصي',
       icon: <FileText className="w-8 h-8 text-primary-600 dark:text-primary-400" />,
     },
     'generate-ppt-pdf': {
-      title: t('Generate PPT from PDF', 'Generate PPT from PDF'),
-      description: t('Convert PDF to a PowerPoint presentation', 'Convert PDF to a PowerPoint presentation'),
+      title: 'إنشاء عرض من PDF',
+      description: 'حوّل ملف PDF إلى عرض PowerPoint',
       icon: <FileText className="w-8 h-8 text-primary-600 dark:text-primary-400" />,
     },
     'merge-ppt': {
-      title: t('Merge PowerPoint', 'Merge PowerPoint'),
-      description: t('Combine multiple PowerPoint presentations into one', 'Combine multiple PowerPoint presentations into one'),
+      title: 'دمج عروض PowerPoint',
+      description: 'ادمج عدة عروض PowerPoint في عرض واحد',
       icon: <Presentation className="w-8 h-8 text-primary-600 dark:text-primary-400" />,
     },
     'split-ppt': {
-      title: t('Split PowerPoint', 'Split PowerPoint'),
-      description: t('Split a presentation into multiple files', 'Split a presentation into multiple files'),
+      title: 'تقسيم عرض PowerPoint',
+      description: 'قسّم العرض التقديمي إلى عدة ملفات',
       icon: <Presentation className="w-8 h-8 text-primary-600 dark:text-primary-400" />,
     },
     'compress-ppt': {
-      title: t('Compress PowerPoint', 'Compress PowerPoint'),
-      description: t('Reduce the size of your PowerPoint presentation', 'Reduce the size of your PowerPoint presentation'),
+      title: 'ضغط عرض PowerPoint',
+      description: 'قلّل حجم عرضك التقديمي',
       icon: <Presentation className="w-8 h-8 text-primary-600 dark:text-primary-400" />,
     },
     'protect-ppt': {
-      title: t('Protect PowerPoint', 'Protect PowerPoint'),
-      description: t('Add password protection to your presentation', 'Add password protection to your presentation'),
+      title: 'حماية عرض PowerPoint',
+      description: 'أضف حماية بكلمة مرور إلى عرضك التقديمي',
       icon: <Presentation className="w-8 h-8 text-primary-600 dark:text-primary-400" />,
     },
 
     'number-slides': {
-      title: t('Number Slides', 'Number Slides'),
-      description: t('Automatically add slide numbers to your presentation', 'Automatically add slide numbers to your presentation'),
+      title: 'ترقيم الشرائح',
+      description: 'أضف أرقام الشرائح تلقائيًا إلى عرضك التقديمي',
       icon: <Presentation className="w-8 h-8 text-primary-600 dark:text-primary-400" />,
     },
   };
@@ -920,8 +894,8 @@ function PowerPointToolPage({ toolId }: { toolId: string }) {
     return (
       <EmptyState
         icon={<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>}
-        title={t('Tool not found', 'Tool not found')}
-        description={t('The requested PowerPoint tool could not be found.', 'The requested PowerPoint tool could not be found.')}
+        title="الأداة غير موجودة"
+        description="تعذر العثور على أداة PowerPoint المطلوبة."
       />
     );
   }
@@ -935,44 +909,42 @@ function PowerPointToolPage({ toolId }: { toolId: string }) {
     'split-ppt': <SplitPptTool />,
     'compress-ppt': <CompressPptTool />,
     'protect-ppt': <ProtectPptTool />,
-    
+
     'number-slides': <NumberSlidesTool />,
   };
 
-  return (
-    <div className="max-w-4xl mx-auto space-y-6" dir={direction}>
-      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
-        <Card>
-          <button
-        onClick={() => navigate('/category/powerpoint')}
-        className="flex items-center gap-2 text-gray-500 hover:text-primary-500 dark:text-gray-400 dark:hover:text-primary-400 transition-colors mb-6 group"
-      >
-        <svg
-          className={`w-5 h-5 transition-transform ${
-            direction === 'rtl'
-              ? 'rotate-180 group-hover:translate-x-1'
-              : 'group-hover:-translate-x-1'
-          }`}
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
+    return (
+      <div className="max-w-4xl mx-auto space-y-6" dir="rtl">
+        <button
+          onClick={() => navigate('/category/powerpoint')}
+          className="flex items-center gap-2 text-gray-500 hover:text-primary-500 dark:text-gray-400 dark:hover:text-primary-400 transition-colors mb-6 group"
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M15 19l-7-7 7-7"
-          />
-        </svg>
+          <svg
+            className="w-5 h-5 transition-transform rotate-180 group-hover:-translate-x-1"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15 19l-7-7 7-7"
+            />
+          </svg>
 
-        <span className="text-sm font-medium">
-          {t('Back to PowerPoint Tools', 'Back to PowerPoint Tools')}
-        </span>
-      </button>
-          {needsTheme && <ThemeOptions themeColor={themeColor} setThemeColor={setThemeColor} font={font} setFont={setFont} />}
-        </Card>
-      </motion.div>
-      <ToolHero icon={config.icon} title={config.title} description={config.description} />
+          <span className="text-sm font-medium">
+            العودة إلى أدوات PowerPoint
+          </span>
+        </button>
+        {needsTheme && (
+          <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+          <Card>
+            <ThemeOptions themeColor={themeColor} setThemeColor={setThemeColor} font={font} setFont={setFont} />
+          </Card>
+          </motion.div>
+        )}
+        <ToolHero icon={config.icon} title={config.title} description={config.description} />
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.1 }}>
         <Card>{toolComponents[toolId as ToolId]}</Card>
       </motion.div>

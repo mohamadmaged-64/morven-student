@@ -1,6 +1,5 @@
 ﻿import { useState, useCallback, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import {
   Button,
@@ -12,7 +11,6 @@ import {
   EmptyState,
   Badge,
   Tabs,
-  Tooltip,
   Chip,
   ProgressBar,
   SearchBar,
@@ -20,7 +18,6 @@ import {
 import { useAppStore } from '@/store/useAppStore';
 import { useStatsStore } from '@/store/useStatsStore';
 import { Notebook } from 'lucide-react';
-import { useLanguageStore } from '@/store/useLanguageStore';
 import {
   summarizeText,
   extractKeyIdeas,
@@ -1514,8 +1511,6 @@ interface MedicalToolPageProps {
 
 export function MedicalToolPage({ toolId }: MedicalToolPageProps) {
   const navigate = useNavigate();
-  const { direction } = useLanguageStore();
-  const { t } = useTranslation();
 
   let content: JSX.Element;
 
@@ -1556,8 +1551,8 @@ export function MedicalToolPage({ toolId }: MedicalToolPageProps) {
       return (
         <EmptyState
           icon={<span className="text-4xl">⚕️</span>}
-          title="Tool Not Found"
-          description="This medical tool is not available yet."
+          title="الأداة غير موجودة"
+          description="هذه الأداة الطبية غير متاحة حالياً."
         />
       );
   }
@@ -1569,11 +1564,7 @@ export function MedicalToolPage({ toolId }: MedicalToolPageProps) {
         className="flex items-center gap-2 text-gray-500 hover:text-primary-500 dark:text-gray-400 dark:hover:text-primary-400 transition-colors group"
       >
         <svg
-          className={`w-5 h-5 transition-transform ${
-            direction === 'rtl'
-              ? 'rotate-180 group-hover:translate-x-1'
-              : 'group-hover:-translate-x-1'
-          }`}
+          className="w-5 h-5 transition-transform rotate-180 group-hover:translate-x-1"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -1587,7 +1578,7 @@ export function MedicalToolPage({ toolId }: MedicalToolPageProps) {
         </svg>
 
         <span className="text-sm font-medium">
-          {t('Back to Medical Tools', 'Back to Medical Tools')}
+          {'العودة للأدوات الطبية'}
         </span>
       </button>
 
@@ -1602,7 +1593,6 @@ export function MedicalToolPage({ toolId }: MedicalToolPageProps) {
 // =============================================================================
 
 function MedicalSummarizer() {
-  const { t } = useTranslation();
   const [input, setInput] = useState('');
   const [summary, setSummary] = useState('');
   const [keyIdeas, setKeyIdeas] = useState<string[]>([]);
@@ -1638,10 +1628,10 @@ function MedicalSummarizer() {
   }, [input, addNotification]);
 
   const tabs = [
-    { id: 'summary', label: t('Summary', 'Summary') },
-    { id: 'key-ideas', label: t('Key Ideas', 'Key Ideas') },
-    { id: 'terminology', label: t('Terminology', 'Terminology') },
-    { id: 'simplified', label: t('Simplified', 'Simplified') },
+    { id: 'summary', label: 'الملخص' },
+    { id: 'key-ideas', label: 'الأفكار الرئيسية' },
+    { id: 'terminology', label: 'المصطلحات' },
+    { id: 'simplified', label: 'مبسط' },
   ];
 
   const hasResult = summary || keyIdeas.length > 0;
@@ -1649,17 +1639,17 @@ function MedicalSummarizer() {
   return (
     <motion.div {...fadeIn} className="space-y-6">
       <Card className="p-6">
-        <h2 className="text-2xl font-bold mb-2 dark:text-white">{t('Medical Text Summarizer', 'Medical Text Summarizer')}</h2>
-        <p className="text-gray-500 dark:text-gray-400 mb-4">{t('Paste medical text to generate a summary, key ideas, terminology, and a simplified explanation.', 'Paste medical text to generate a summary, key ideas, terminology, and a simplified explanation.')}</p>
+        <h2 className="text-2xl font-bold mb-2 dark:text-white">{'تلخيص النصوص الطبية'}</h2>
+        <p className="text-gray-500 dark:text-gray-400 mb-4">{'الصق النص الطبي لتوليد ملخص وأفكار رئيسية ومصطلحات وشرح مبسط.'}</p>
         <TextArea
           value={input}
           onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setInput(e.target.value)}
-          placeholder={t('Paste medical text here...', 'Paste medical text here...')}
+          placeholder={'الصق النص الطبي هنا...'}
           rows={10}
           className="mb-4"
         />
         <Button onClick={handleProcess} disabled={loading || !input.trim()} className="w-full sm:w-auto">
-          {loading ? t('Processing...', 'Processing...') : t('Process Text', 'Process Text')}
+          {loading ? 'جاري المعالجة...' : 'معالجة النص'}
         </Button>
       </Card>
 
@@ -1667,7 +1657,7 @@ function MedicalSummarizer() {
         <Card className="p-6">
           <div className="flex items-center justify-center gap-3 py-8">
             <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-            <span className="text-gray-500 dark:text-gray-400">{t('Analyzing medical text...', 'Analyzing medical text...')}</span>
+            <span className="text-gray-500 dark:text-gray-400">{'جاري تحليل النص الطبي...'}</span>
           </div>
         </Card>
       )}
@@ -1681,7 +1671,7 @@ function MedicalSummarizer() {
               <div className="mt-4">
                 {activeTab === 'summary' && summary && (
                   <motion.div {...fadeIn}>
-                    <h3 className="text-lg font-semibold mb-2 dark:text-white">{t('Summary', 'Summary')}</h3>
+                    <h3 className="text-lg font-semibold mb-2 dark:text-white">{'الملخص'}</h3>
                     <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
                       <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{summary}</p>
                     </div>
@@ -1690,7 +1680,7 @@ function MedicalSummarizer() {
 
                 {activeTab === 'key-ideas' && keyIdeas.length > 0 && (
                   <motion.div {...fadeIn}>
-                    <h3 className="text-lg font-semibold mb-2 dark:text-white">{t('Key Ideas', 'Key Ideas')}</h3>
+                    <h3 className="text-lg font-semibold mb-2 dark:text-white">{'الأفكار الرئيسية'}</h3>
                     <div className="space-y-2">
                       {keyIdeas.map((idea, i) => (
                         <div key={i} className="flex items-start gap-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3">
@@ -1704,7 +1694,7 @@ function MedicalSummarizer() {
 
                 {activeTab === 'terminology' && terminology.length > 0 && (
                   <motion.div {...fadeIn}>
-                    <h3 className="text-lg font-semibold mb-2 dark:text-white">{t('Medical Terminology', 'Medical Terminology')}</h3>
+                    <h3 className="text-lg font-semibold mb-2 dark:text-white">{'المصطلحات الطبية'}</h3>
                     <div className="space-y-2">
                       {terminology.map((item, i) => (
                         <div key={i} className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-3">
@@ -1719,7 +1709,7 @@ function MedicalSummarizer() {
 
                 {activeTab === 'simplified' && simplified && (
                   <motion.div {...fadeIn}>
-                    <h3 className="text-lg font-semibold mb-2 dark:text-white">{t('Simplified Explanation', 'Simplified Explanation')}</h3>
+                    <h3 className="text-lg font-semibold mb-2 dark:text-white">{'شرح مبسط'}</h3>
                     <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
                       <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{simplified}</p>
                     </div>
@@ -1819,7 +1809,6 @@ const DECK_THEMES: Record<string, DeckTheme> = {
 const DEFAULT_DECK_THEME = DECK_THEMES.custom;
 
 function MedicalFlashcards() {
-  const { t } = useTranslation();
   const [mode, setMode] = useState<FlashcardMode>('decks');
   const [selectedDeck, setSelectedDeck] = useState<string | null>(null);
   const [studyIndex, setStudyIndex] = useState(0);
@@ -1835,7 +1824,6 @@ function MedicalFlashcards() {
   const [deckSearch, setDeckSearch] = useState('');
   const incrementCardsReviewed = useStatsStore((s) => s.incrementCardsReviewed);
   const { addNotification, flashcards, addFlashcard, deleteFlashcard } = useAppStore();
-  const { language, direction } = useLanguageStore();
 
   useEffect(() => {
     setCustomCards(loadCustomFlashcards());
@@ -1945,15 +1933,15 @@ function MedicalFlashcards() {
     const deckName = allDecks.find((d) => d.id === selectedDeck)?.name ?? '';
 
     return (
-      <motion.div {...fadeIn} dir={direction} className="mx-auto flex min-h-[70vh] w-full max-w-3xl flex-col">
+      <motion.div {...fadeIn} dir="rtl" className="mx-auto flex min-h-[70vh] w-full max-w-3xl flex-col">
         {/* Header */}
         <div className="flex items-center justify-between gap-3">
           <button
             onClick={() => setMode('decks')}
             className="flex items-center gap-2 rounded-full border border-light-border dark:border-dark-border bg-white px-3.5 py-2 text-sm font-medium text-gray-600 shadow-sm transition-all duration-200 hover:bg-gray-50 hover:text-primary-600 dark:bg-dark-card dark:text-gray-300 dark:hover:bg-dark-hover dark:hover:text-primary-300"
           >
-            <ArrowLeft className={`h-4 w-4 transition-transform ${direction === 'rtl' ? 'rotate-180' : ''}`} />
-            <span className="hidden sm:inline">{t('Back', 'Back')}</span>
+            <ArrowLeft className={`h-4 w-4 transition-transform ${'rotate-180'}`} />
+            <span className="hidden sm:inline">{'رجوع'}</span>
           </button>
 
           <div className="flex flex-col items-center">
@@ -1990,7 +1978,7 @@ function MedicalFlashcards() {
             >
               <span className="mb-6 inline-flex items-center gap-1.5 rounded-full bg-primary-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary-600 dark:bg-primary-500/10 dark:text-primary-300">
                 <BookOpen className="h-3.5 w-3.5" />
-                {t('Question', 'Question')}
+                {'السؤال'}
               </span>
               <p className="text-center text-2xl font-semibold leading-snug text-gray-900 dark:text-white sm:text-[28px]">
                 {card.front}
@@ -2004,7 +1992,7 @@ function MedicalFlashcards() {
             >
               <span className="mb-6 inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-300">
                 <CheckCircle2 className="h-3.5 w-3.5" />
-                {t('Answer', 'Answer')}
+                {'الإجابة'}
               </span>
               <p className="max-h-[240px] overflow-y-auto text-center text-lg font-medium leading-relaxed text-gray-800 dark:text-gray-200 sm:text-xl">
                 {card.back}
@@ -2018,15 +2006,15 @@ function MedicalFlashcards() {
           {isFlipped ? (
             <motion.div {...fadeIn} className="flex flex-wrap items-center justify-center gap-3">
               <Button variant="secondary" onClick={handleReviewLater} className="px-6">
-                {t('Review Again', 'Review Again')}
+                {'مراجعة مرة أخرى'}
               </Button>
               <Button variant="success" onClick={handleMastered} className="px-6">
-                {t('Mastered!', 'Mastered!')}
+                {'أتقنتها!'}
               </Button>
             </motion.div>
           ) : (
             <p className="text-sm text-gray-400 dark:text-gray-500">
-              {t('Tap the card to reveal the answer', 'Tap the card to reveal the answer')}
+              {'انقر على البطاقة لعرض الإجابة'}
             </p>
           )}
         </div>
@@ -2038,8 +2026,8 @@ function MedicalFlashcards() {
             disabled={studyIndex === 0}
             className="flex h-12 items-center gap-2 rounded-full border border-light-border dark:border-dark-border bg-white px-4 text-sm font-medium text-gray-700 shadow-card transition-all duration-200 hover:-translate-y-0.5 hover:text-primary-600 dark:bg-dark-card dark:text-gray-300 dark:hover:text-primary-300 disabled:cursor-not-allowed disabled:opacity-40 sm:px-5"
           >
-            <ChevronLeft className={`h-5 w-5 ${direction === 'rtl' ? 'rotate-180' : ''}`} />
-            <span className="hidden sm:inline">{t('Previous', 'Previous')}</span>
+            <ChevronLeft className={`h-5 w-5 ${'rotate-180'}`} />
+            <span className="hidden sm:inline">{'السابق'}</span>
           </button>
 
           <motion.button
@@ -2049,29 +2037,29 @@ function MedicalFlashcards() {
             className="flex h-12 items-center gap-2 rounded-full bg-primary-600 px-6 text-sm font-semibold text-white shadow-md shadow-primary-600/30 transition-colors hover:bg-primary-700"
           >
             <RefreshCw className={`h-5 w-5 transition-transform duration-300 ${isFlipped ? 'rotate-180' : ''}`} />
-            {t('Flip', 'Flip')}
+            {'اقلب'}
           </motion.button>
 
           <button
             onClick={nextCard}
             className="flex h-12 items-center gap-2 rounded-full border border-light-border dark:border-dark-border bg-white px-4 text-sm font-medium text-gray-700 shadow-card transition-all duration-200 hover:-translate-y-0.5 hover:text-primary-600 dark:bg-dark-card dark:text-gray-300 dark:hover:text-primary-300 sm:px-5"
           >
-            <span className="hidden sm:inline">{t('Next', 'Next')}</span>
-            <ChevronRight className={`h-5 w-5 ${direction === 'rtl' ? 'rotate-180' : ''}`} />
+            <span className="hidden sm:inline">{'التالي'}</span>
+            <ChevronRight className={`h-5 w-5 ${'rotate-180'}`} />
           </button>
         </div>
 
         {/* Session stats */}
         <div className="mt-6 flex items-center justify-center gap-3">
-          <Chip variant="success" label={`${t('Mastered', 'Mastered')}: ${masteredCount}`} />
-          <Chip variant="warning" label={`${t('Review', 'Review')}: ${reviewCount}`} />
+          <Chip variant="success" label={`${'أتقنتها'}: ${masteredCount}`} />
+          <Chip variant="warning" label={`${'مراجعة'}: ${reviewCount}`} />
         </div>
       </motion.div>
     );
   }
 
   return (
-    <motion.div {...fadeIn} dir={direction} className="space-y-8">
+    <motion.div {...fadeIn} dir="rtl" className="space-y-8">
       {/* Hero */}
       <div className="relative overflow-hidden rounded-3xl border border-light-border dark:border-dark-border bg-gradient-to-br from-primary-50 via-white to-white px-6 py-10 shadow-card dark:from-primary-900/20 dark:via-dark-card dark:to-dark-card sm:px-10 sm:py-12">
         <div className="pointer-events-none absolute -end-20 -top-24 h-64 w-64 rounded-full bg-primary-500/10 blur-3xl" />
@@ -2084,10 +2072,10 @@ function MedicalFlashcards() {
             </span>
             <div>
               <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
-                {t('Medical Flashcards', 'Medical Flashcards')}
+                {'البطاقات التعليمية الطبية'}
               </h1>
               <p className="mt-1.5 max-w-xl text-sm text-gray-500 dark:text-gray-400 sm:text-base">
-                {t('Master medical concepts with interactive flashcards across key topics.', 'Master medical concepts with interactive flashcards across key topics.')}
+                {'أتقن المفاهيم الطبية عبر بطاقات تعليمية تفاعلية في المواضيع الرئيسية.'}
               </p>
             </div>
           </div>
@@ -2096,16 +2084,16 @@ function MedicalFlashcards() {
             <SearchBar
               value={deckSearch}
               onChange={setDeckSearch}
-              placeholder={t('Search decks...', 'Search decks...')}
+              placeholder={'ابحث في المجموعات...'}
               shortcut=""
               className="w-full sm:max-w-sm"
             />
             <div className="flex items-center gap-2 text-sm">
               <span className="font-semibold text-gray-900 dark:text-white tabular-nums">{filteredDecks.length}</span>
-              <span className="text-gray-500 dark:text-gray-400">{t('Decks', 'Decks')}</span>
+              <span className="text-gray-500 dark:text-gray-400">{'المجموعات'}</span>
               <span className="text-gray-300 dark:text-gray-600">•</span>
               <span className="font-semibold text-gray-900 dark:text-white tabular-nums">{totalCards}</span>
-              <span className="text-gray-500 dark:text-gray-400">{t('cards', 'cards')}</span>
+              <span className="text-gray-500 dark:text-gray-400">{'بطاقة'}</span>
             </div>
           </div>
         </div>
@@ -2124,7 +2112,7 @@ function MedicalFlashcards() {
                   : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
               }`}
             >
-              {m === 'decks' ? t('Decks', 'Decks') : t('Create Card', 'Create Card')}
+              {m === 'decks' ? 'المجموعات' : 'إنشاء بطاقة'}
             </button>
           ))}
         </div>
@@ -2134,44 +2122,44 @@ function MedicalFlashcards() {
         {mode === 'create' && (
           <motion.div key="create" {...fadeIn} className="space-y-6">
             <Card className="p-6 sm:p-8">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white">{t('Create New Flashcard', 'Create New Flashcard')}</h3>
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white">{'إنشاء بطاقة تعليمية جديدة'}</h3>
               <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                {t('Add your own cards to the custom deck for personalized study.', 'Add your own cards to the custom deck for personalized study.')}
+                {'أضف بطاقاتك الخاصة إلى المجموعة المخصصة لدراسة مخصصة تناسبك.'}
               </p>
               <div className="mt-5 space-y-5">
                 <div>
-                  <label className="block text-sm font-medium mb-1.5 text-gray-700 dark:text-gray-300">{t('Front (Question)', 'Front (Question)')}</label>
+                  <label className="block text-sm font-medium mb-1.5 text-gray-700 dark:text-gray-300">{'الوجه (السؤال)'}</label>
                   <TextArea
                     value={newFront}
                     onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setNewFront(e.target.value)}
-                    placeholder={t('Enter the question or prompt...', 'Enter the question or prompt...')}
+                    placeholder={'أدخل السؤال أو التلميح...'}
                     rows={3}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1.5 text-gray-700 dark:text-gray-300">{t('Back (Answer)', 'Back (Answer)')}</label>
+                  <label className="block text-sm font-medium mb-1.5 text-gray-700 dark:text-gray-300">{'الظهر (الإجابة)'}</label>
                   <TextArea
                     value={newBack}
                     onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setNewBack(e.target.value)}
-                    placeholder={t('Enter the answer or explanation...', 'Enter the answer or explanation...')}
+                    placeholder={'أدخل الإجابة أو الشرح...'}
                     rows={3}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1.5 text-gray-700 dark:text-gray-300">{t('Deck', 'Deck')}</label>
+                  <label className="block text-sm font-medium mb-1.5 text-gray-700 dark:text-gray-300">{'المجموعة'}</label>
                   <Input
                     value={newDeck}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewDeck(e.target.value)}
                     placeholder="Custom"
                   />
                 </div>
-                <Button onClick={handleAddCard} className="w-full sm:w-auto">{t('Add Flashcard', 'Add Flashcard')}</Button>
+                <Button onClick={handleAddCard} className="w-full sm:w-auto">{'إضافة بطاقة'}</Button>
               </div>
             </Card>
 
             {customCards.length > 0 && (
               <Card className="p-6 sm:p-8">
-                <h3 className="text-lg font-bold mb-4 text-gray-900 dark:text-white">{t('Your Custom Cards ({count})', { count: customCards.length, defaultValue: `Your Custom Cards (${customCards.length})` })}</h3>
+                <h3 className="text-lg font-bold mb-4 text-gray-900 dark:text-white">{`بطاقاتك المخصصة (${customCards.length})`}</h3>
                 <div className="space-y-2">
                   {customCards.map((card) => (
                     <div key={card.id} className="flex items-center justify-between rounded-xl bg-gray-50 p-3 transition-colors hover:bg-gray-100 dark:bg-dark-surface dark:hover:bg-dark-hover">
@@ -2195,8 +2183,8 @@ function MedicalFlashcards() {
             {filteredDecks.length === 0 ? (
               <EmptyState
                 icon={<Search className="h-8 w-8" />}
-                title={t('No decks found', 'No decks found')}
-                description={t('Try a different search term.', 'Try a different search term.')}
+                title={'لا توجد مجموعات'}
+                description={'جرب مصطلح بحث مختلف.'}
               />
             ) : (
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -2219,15 +2207,15 @@ function MedicalFlashcards() {
                             onClick={(e) => { e.stopPropagation(); startStudy(deck.id); }}
                             className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all duration-200 hover:scale-105 ${theme.studyBtn}`}
                           >
-                            {t('Study', 'Study')}
-                            <ArrowRight className={`h-3.5 w-3.5 ${direction === 'rtl' ? 'rotate-180' : ''}`} />
+                            {'دراسة'}
+                            <ArrowRight className={`h-3.5 w-3.5 ${'rotate-180'}`} />
                           </button>
                         </div>
 
                         <div className="relative mt-6">
                           <h3 className="text-lg font-bold text-gray-900 dark:text-white">{deck.name}</h3>
                           <p className={`mt-1 text-sm font-medium tabular-nums ${theme.count}`}>
-                            {deck.cards.length} {t('cards', 'cards')}
+                            {deck.cards.length} {'بطاقة'}
                           </p>
                         </div>
                       </div>
@@ -2248,8 +2236,6 @@ function MedicalFlashcards() {
 // =============================================================================
 
 function MedicalMCQ() {
-  const { t } = useTranslation();
-  const { direction } = useLanguageStore();
   const [input, setInput] = useState('');
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [currentQ, setCurrentQ] = useState(0);
@@ -2350,11 +2336,11 @@ function MedicalMCQ() {
   }, [input]);
 
   const getPerformanceMessage = useCallback((pct: number) => {
-    if (pct >= 90) return t('Outstanding!', 'Outstanding!');
-    if (pct >= 70) return t('Great job!', 'Great job!');
-    if (pct >= 50) return t('Good effort!', 'Good effort!');
-    return t('Keep practicing!', 'Keep practicing!');
-  }, [t]);
+    if (pct >= 90) return 'ممتاز!';
+    if (pct >= 70) return 'عمل رائع!';
+    if (pct >= 50) return 'مجهود جيد!';
+    return 'واصل التدريب!';
+  }, []);
 
   if (quizStarted && questions.length > 0 && showResult) {
     const pct = Math.round((score / questions.length) * 100);
@@ -2362,7 +2348,7 @@ function MedicalMCQ() {
     const wrongCount = questions.length - score;
     const good = pct >= 70;
     return (
-      <motion.div {...fadeIn} dir={direction} className="mx-auto max-w-3xl">
+      <motion.div {...fadeIn} dir="rtl" className="mx-auto max-w-3xl">
         <div className="relative overflow-hidden rounded-3xl border border-light-border dark:border-dark-border bg-gradient-to-br from-emerald-50 via-white to-white px-6 py-10 text-center shadow-card dark:from-emerald-900/20 dark:via-dark-card dark:to-dark-card sm:px-10">
           <div className="pointer-events-none absolute -end-16 -top-16 h-48 w-48 rounded-full bg-emerald-400/10 blur-3xl" />
           <div className="pointer-events-none absolute -bottom-16 -start-16 h-48 w-48 rounded-full bg-primary-500/10 blur-3xl" />
@@ -2379,7 +2365,7 @@ function MedicalMCQ() {
             </motion.div>
 
             <h2 className="mt-4 text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-3xl">
-              {t('Quiz Complete!', 'Quiz Complete!')}
+              {'اكتمل الاختبار!'}
             </h2>
             <p className="mt-1 text-sm font-medium text-primary-600 dark:text-primary-300">{getPerformanceMessage(pct)}</p>
 
@@ -2389,29 +2375,29 @@ function MedicalMCQ() {
                   <span className={good ? 'text-emerald-500 dark:text-emerald-300' : 'text-amber-500 dark:text-amber-300'}>{score}</span>
                   <span className="text-2xl text-gray-400 dark:text-gray-500"> / {questions.length}</span>
                 </div>
-                <p className="mt-1 text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">{t('Score', 'Score')}</p>
+                <p className="mt-1 text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">{'النتيجة'}</p>
               </div>
               <div className="h-16 w-px bg-gray-200 dark:bg-dark-border" aria-hidden="true" />
               <div className="text-center">
                 <div className="text-5xl font-extrabold tabular-nums text-gray-900 dark:text-white">{pct}%</div>
-                <p className="mt-1 text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">{t('Accuracy', 'Accuracy')}</p>
+                <p className="mt-1 text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">{'الدقة'}</p>
               </div>
             </div>
 
             <ProgressBar value={pct} color={good ? 'success' : pct >= 50 ? 'warning' : 'danger'} className="mx-auto mt-6 max-w-md" />
 
             <div className="mt-6 flex items-center justify-center gap-3">
-              <Chip variant="success" icon={<CheckCircle2 className="h-3.5 w-3.5" />} label={`${correctCount} ${t('Correct', 'Correct')}`} />
-              <Chip variant="danger" icon={<XCircle className="h-3.5 w-3.5" />} label={`${wrongCount} ${t('Wrong', 'Wrong')}`} />
+              <Chip variant="success" icon={<CheckCircle2 className="h-3.5 w-3.5" />} label={`${correctCount} ${'صحيح'}`} />
+              <Chip variant="danger" icon={<XCircle className="h-3.5 w-3.5" />} label={`${wrongCount} ${'خطأ'}`} />
             </div>
 
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Button onClick={restartQuiz} className="w-full sm:w-auto">
-                <RefreshCw className={`me-2 h-4 w-4 ${direction === 'rtl' ? 'rotate-180' : ''}`} />
-                {t('Restart Quiz', 'Restart Quiz')}
+                <RefreshCw className={`me-2 h-4 w-4 ${'rotate-180'}`} />
+                {'إعادة الاختبار'}
               </Button>
               <Button variant="secondary" onClick={reset} className="w-full sm:w-auto">
-                {t('New Quiz', 'New Quiz')}
+                {'اختبار جديد'}
               </Button>
             </div>
           </div>
@@ -2420,7 +2406,7 @@ function MedicalMCQ() {
         <div className="mt-8">
           <h3 className="mb-3 flex items-center gap-2 text-base font-semibold text-gray-900 dark:text-white">
             <BookOpen className="h-4 w-4 text-primary-500" />
-            {t('Review your answers', 'Review your answers')}
+            {'راجع إجاباتك'}
           </h3>
           <div className="space-y-3">
             {questions.map((q, i) => {
@@ -2442,11 +2428,11 @@ function MedicalMCQ() {
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-semibold leading-snug text-gray-900 dark:text-white">{i + 1}. {q.question}</p>
                       <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">
-                        {t('Your answer', 'Your answer')}: {q.options[answers[i] ?? 0]}
+                        {'إجابتك'}: {q.options[answers[i] ?? 0]}
                       </p>
                       {answers[i] !== q.correct && (
                         <p className="mt-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
-                          {t('Correct', 'Correct')}: {q.options[q.correct]}
+                          {'صحيح'}: {q.options[q.correct]}
                         </p>
                       )}
                     </div>
@@ -2466,20 +2452,20 @@ function MedicalMCQ() {
     const singleCategory = detectedCategories.length === 1 ? formatCategoryName(detectedCategories[0]) : null;
     const isAnswered = selected !== null;
     return (
-      <motion.div {...fadeIn} dir={direction} className="mx-auto flex min-h-[70vh] w-full max-w-3xl flex-col">
+      <motion.div {...fadeIn} dir="rtl" className="mx-auto flex min-h-[70vh] w-full max-w-3xl flex-col">
         <div className="flex items-center justify-between gap-3">
           <button
             onClick={reset}
             className="flex items-center gap-2 rounded-full border border-light-border dark:border-dark-border bg-white px-3.5 py-2 text-sm font-medium text-gray-600 shadow-sm transition-all duration-200 hover:bg-gray-50 hover:text-primary-600 dark:bg-dark-card dark:text-gray-300 dark:hover:bg-dark-hover dark:hover:text-primary-300"
           >
-            <ArrowLeft className={`h-4 w-4 transition-transform ${direction === 'rtl' ? 'rotate-180' : ''}`} />
-            <span className="hidden sm:inline">{t('Back', 'Back')}</span>
+            <ArrowLeft className={`h-4 w-4 transition-transform ${'rotate-180'}`} />
+            <span className="hidden sm:inline">{'رجوع'}</span>
           </button>
 
           <div className="flex flex-col items-center">
-            <h2 className="text-sm font-semibold text-gray-900 dark:text-white sm:text-base">{singleCategory ?? t('Medical Quiz', 'Medical Quiz')}</h2>
+            <h2 className="text-sm font-semibold text-gray-900 dark:text-white sm:text-base">{singleCategory ?? 'اختبار طبي'}</h2>
             <p className="text-xs font-medium text-gray-500 dark:text-gray-400 tabular-nums">
-              {t('Question', 'Question')} {currentQ + 1} / {total}
+              {'السؤال'} {currentQ + 1} / {total}
             </p>
           </div>
 
@@ -2492,7 +2478,7 @@ function MedicalMCQ() {
           <div className="pointer-events-none absolute -end-12 -top-12 h-32 w-32 rounded-full bg-primary-500/10 blur-3xl" />
           <span className="relative inline-flex items-center gap-1.5 rounded-full bg-primary-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary-600 dark:bg-primary-500/10 dark:text-primary-300">
             <ClipboardList className="h-3.5 w-3.5" />
-            {t('Question', 'Question')} {currentQ + 1}
+            {'السؤال'} {currentQ + 1}
           </span>
           <motion.h3
             key={currentQ}
@@ -2552,18 +2538,18 @@ function MedicalMCQ() {
 
         <div className="mt-6 flex min-h-[56px] items-center justify-between gap-3">
           <Button variant="secondary" onClick={handlePrev} disabled={currentQ === 0} className="px-5">
-            <ChevronLeft className={`me-1 h-4 w-4 ${direction === 'rtl' ? 'rotate-180' : ''}`} />
-            {t('Previous', 'Previous')}
+            <ChevronLeft className={`me-1 h-4 w-4 ${'rotate-180'}`} />
+            {'السابق'}
           </Button>
           {isAnswered ? (
             <motion.div {...fadeIn}>
               <Button onClick={handleNext} className="px-6">
-                {currentQ < total - 1 ? t('Next Question', 'Next Question') : t('See Results', 'See Results')}
-                <ArrowRight className={`ms-2 h-4 w-4 ${direction === 'rtl' ? 'rotate-180' : ''}`} />
+                {currentQ < total - 1 ? 'السؤال التالي' : 'عرض النتائج'}
+                <ArrowRight className={`ms-2 h-4 w-4 ${'rotate-180'}`} />
               </Button>
             </motion.div>
           ) : (
-            <p className="text-sm text-gray-400 dark:text-gray-500">{t('Select an answer to continue', 'Select an answer to continue')}</p>
+            <p className="text-sm text-gray-400 dark:text-gray-500">{'اختر إجابة للمتابعة'}</p>
           )}
         </div>
       </motion.div>
@@ -2571,7 +2557,7 @@ function MedicalMCQ() {
   }
 
   return (
-    <motion.div {...fadeIn} dir={direction} className="space-y-8">
+    <motion.div {...fadeIn} dir="rtl" className="space-y-8">
       <div className="relative overflow-hidden rounded-3xl border border-light-border dark:border-dark-border bg-gradient-to-br from-primary-50 via-white to-white px-6 py-10 shadow-card dark:from-primary-900/20 dark:via-dark-card dark:to-dark-card sm:px-10 sm:py-12">
         <div className="pointer-events-none absolute -end-20 -top-24 h-64 w-64 rounded-full bg-primary-500/10 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-24 -start-16 h-56 w-56 rounded-full bg-emerald-400/10 blur-3xl" />
@@ -2583,10 +2569,10 @@ function MedicalMCQ() {
             </span>
             <div>
               <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
-                {t('Medical MCQ', 'Medical MCQ')}
+                {'أسئلة طبية متعددة الخيارات'}
               </h1>
               <p className="mt-1.5 max-w-xl text-sm text-gray-500 dark:text-gray-400 sm:text-base">
-                {t('Generate interactive multiple-choice questions from your medical notes and test yourself.', 'Generate interactive multiple-choice questions from your medical notes and test yourself.')}
+                {'ولّد أسئلة متعددة الخيارات تفاعلية من ملاحظاتك الطبية واختبر نفسك.'}
               </p>
             </div>
           </div>
@@ -2595,12 +2581,12 @@ function MedicalMCQ() {
             <span className="flex items-center gap-1.5 rounded-full bg-white px-3.5 py-1.5 font-semibold text-gray-900 shadow-sm dark:bg-dark-card dark:text-white">
               <Sparkles className="h-4 w-4 text-primary-500" />
               5
-              <span className="font-normal text-gray-500 dark:text-gray-400">{t('questions per quiz', 'questions per quiz')}</span>
+              <span className="font-normal text-gray-500 dark:text-gray-400">{'أسئلة لكل اختبار'}</span>
             </span>
             <span className="flex items-center gap-1.5 rounded-full bg-white px-3.5 py-1.5 font-semibold text-gray-900 shadow-sm dark:bg-dark-card dark:text-white">
               <Layers className="h-4 w-4 text-emerald-500" />
               {detectedCategories.length}
-              <span className="font-normal text-gray-500 dark:text-gray-400">{t('Topics', 'Topics')}</span>
+              <span className="font-normal text-gray-500 dark:text-gray-400">{'المواضيع'}</span>
             </span>
           </div>
         </div>
@@ -2609,16 +2595,16 @@ function MedicalMCQ() {
       <Card className="p-6 sm:p-8">
         <div className="flex items-center gap-2">
           <BookOpen className="h-5 w-5 text-primary-500" />
-          <h2 className="text-lg font-bold text-gray-900 dark:text-white">{t('Create your quiz', 'Create your quiz')}</h2>
+          <h2 className="text-lg font-bold text-gray-900 dark:text-white">{'أنشئ اختبارك'}</h2>
         </div>
         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-          {t('Paste medical text below and we will generate a 5-question quiz from it.', 'Paste medical text below and we will generate a 5-question quiz from it.')}
+          {'الصق النص الطبي أدناه وسنقوم بتوليد اختبار من 5 أسئلة منه.'}
         </p>
         <div className="mt-5 space-y-5">
           <TextArea
             value={input}
             onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setInput(e.target.value)}
-            placeholder={t('Paste medical text here to generate quiz questions...', 'Paste medical text here to generate quiz questions...')}
+            placeholder={'الصق النص الطبي هنا لتوليد أسئلة الاختبار...'}
             rows={8}
             className="text-base"
           />
@@ -2631,11 +2617,11 @@ function MedicalMCQ() {
                   return <Chip key={cat} variant="primary" icon={<CatIcon className="h-3.5 w-3.5" />} label={formatCategoryName(cat)} />;
                 })
               ) : (
-                <p className="text-xs text-gray-400 dark:text-gray-500">{t('Detected topics will appear here', 'Detected topics will appear here')}</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500">{'ستظهر المواضيع المكتشفة هنا'}</p>
               )}
             </div>
             <Button onClick={handleGenerate} disabled={loading || !input.trim()} className="shrink-0">
-              {loading ? t('Generating...', 'Generating...') : t('Generate Quiz', 'Generate Quiz')}
+              {loading ? 'جاري التوليد...' : 'توليد الاختبار'}
             </Button>
           </div>
         </div>
@@ -2716,7 +2702,6 @@ function DiseaseCategoryCard({
   diseaseCount: number;
   onClick: () => void;
 }) {
-  const { t } = useTranslation();
   const Icon = getCategoryIcon(category);
 
   return (
@@ -2726,7 +2711,7 @@ function DiseaseCategoryCard({
       </div>
       <h3 className="font-semibold dark:text-white">{formatCategoryName(category)}</h3>
       <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-        {t('diseases', { count: diseaseCount, defaultValue: '{{count}} diseases' })}
+        {`${diseaseCount} مرض`}
       </p>
     </Card>
   );
@@ -2846,8 +2831,6 @@ function DiseaseInfoSection({
 // =============================================================================
 
 function DiseaseExplain() {
-  const { t } = useTranslation();
-  const { direction } = useLanguageStore();
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedDisease, setSelectedDisease] = useState<string | null>(null);
@@ -2891,14 +2874,11 @@ function DiseaseExplain() {
 
     <div>
       <h2 className="text-2xl font-bold dark:text-white">
-        {t('Disease Encyclopedia', 'Disease Encyclopedia')}
+        {'موسوعة الأمراض'}
       </h2>
 
       <p className="text-gray-500 dark:text-gray-400">
-        {t(
-          'Search and learn about medical diseases, their symptoms, causes, and treatments.',
-          'Search and learn about medical diseases, their symptoms, causes, and treatments.'
-        )}
+        {'ابحث وتعلم عن الأمراض الطبية وأعراضها وأسبابها وطرق علاجها.'}
       </p>
     </div>
   </div>
@@ -2909,7 +2889,7 @@ function DiseaseExplain() {
     <Input
       value={search}
       onChange={handleSearchChange}
-      placeholder={t('Search diseases...', 'Search diseases...')}
+      placeholder={'ابحث عن الأمراض...'}
       className="ps-10"
     />
   </div>
@@ -2919,14 +2899,14 @@ function DiseaseExplain() {
         <motion.div {...fadeIn}>
           <div className="flex items-center justify-between mb-3">
   <p className="text-sm text-gray-500 dark:text-gray-400">
-    {t('medical categories found', { count: categoryGroups.length, defaultValue: '{{count}} medical categories found' })}
+    {`${categoryGroups.length} فئات طبية`}
   </p>
 </div>
           {categoryGroups.length === 0 ? (
             <EmptyState
               icon={<span className="text-4xl">🔍</span>}
-              title={t('No categories found', 'No categories found')}
-              description={t('No medical categories match your search.', 'No medical categories match your search.')}
+              title={'لا توجد فئات'}
+              description={'لا توجد فئات طبية تطابق بحثك.'}
             />
           ) : (
             <motion.div variants={staggerContainer} initial="initial" animate="animate" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -2950,12 +2930,12 @@ function DiseaseExplain() {
             <Button
               variant="ghost"
               onClick={() => setSelectedCategory(null)}
-              icon={<ArrowLeft className={`w-4 h-4 ${direction === 'rtl' ? 'rotate-180' : ''}`} />}
+              icon={<ArrowLeft className={`w-4 h-4 ${'rotate-180'}`} />}
             >
-              {t('Back to categories', 'Back to categories')}
+              {'العودة إلى الفئات'}
             </Button>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              {t('diseases found', { count: categoryDiseases.length, defaultValue: '{{count}} diseases found' })}
+              {`${categoryDiseases.length} مرض`}
             </p>
           </div>
           <motion.div variants={staggerContainer} initial="initial" animate="animate" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -2978,10 +2958,10 @@ function DiseaseExplain() {
             <Button
               variant="ghost"
               onClick={() => setSelectedDisease(null)}
-              icon={<ArrowLeft className={`w-4 h-4 ${direction === 'rtl' ? 'rotate-180' : ''}`} />}
+              icon={<ArrowLeft className={`w-4 h-4 ${'rotate-180'}`} />}
               className="mb-2"
             >
-              {t('Back to list', 'Back to list')}
+              {'العودة إلى القائمة'}
             </Button>
 
             <motion.div
@@ -3006,9 +2986,9 @@ function DiseaseExplain() {
                 </p>
 
                 <div className="mt-8 flex flex-wrap gap-3">
-                  <DiseaseStatPill icon={Stethoscope} count={disease.symptoms.length} label={t('Symptoms', 'Symptoms')} accent="red" />
-                  <DiseaseStatPill icon={TriangleAlert} count={disease.causes.length} label={t('Causes', 'Causes')} accent="amber" />
-                  <DiseaseStatPill icon={Pill} count={disease.treatment.length} label={t('Treatment', 'Treatment')} accent="emerald" />
+                  <DiseaseStatPill icon={Stethoscope} count={disease.symptoms.length} label={'الأعراض'} accent="red" />
+                  <DiseaseStatPill icon={TriangleAlert} count={disease.causes.length} label={'الأسباب'} accent="amber" />
+                  <DiseaseStatPill icon={Pill} count={disease.treatment.length} label={'العلاج'} accent="emerald" />
                 </div>
               </div>
             </motion.div>
@@ -3019,9 +2999,9 @@ function DiseaseExplain() {
               animate="animate"
               className="grid grid-cols-1 gap-5 md:grid-cols-3"
             >
-              <DiseaseInfoSection icon={Stethoscope} title={t('Symptoms', 'Symptoms')} items={disease.symptoms} accent="red" />
-              <DiseaseInfoSection icon={TriangleAlert} title={t('Causes', 'Causes')} items={disease.causes} accent="amber" />
-              <DiseaseInfoSection icon={Pill} title={t('Treatment', 'Treatment')} items={disease.treatment} accent="emerald" />
+              <DiseaseInfoSection icon={Stethoscope} title={'الأعراض'} items={disease.symptoms} accent="red" />
+              <DiseaseInfoSection icon={TriangleAlert} title={'الأسباب'} items={disease.causes} accent="amber" />
+              <DiseaseInfoSection icon={Pill} title={'العلاج'} items={disease.treatment} accent="emerald" />
             </motion.div>
 
             <motion.div
@@ -3033,11 +3013,8 @@ function DiseaseExplain() {
                 <span className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/40">
                   <Info className="h-4 w-4 text-amber-600 dark:text-amber-400" />
                 </span>
-                <p dir="ltr" className="pt-1 text-left text-sm leading-6 text-amber-800/90 dark:text-amber-200">
-                  {t(
-                    'This tool is intended for educational purposes only. Medical information may change over time.',
-                    'This tool is intended for educational purposes only. Medical information may change over time.'
-                  )}
+                <p className="pt-1 text-sm leading-6 text-amber-800/90 dark:text-amber-200">
+                  {"هذه الأداة مخصصة للأغراض التعليمية فقط، وقد تتغير المعلومات الطبية مع مرور الوقت."}
                 </p>
               </div>
             </motion.div>
@@ -3053,7 +3030,6 @@ function DiseaseExplain() {
 // =============================================================================
 
 function DiseaseCompare() {
-  const { t } = useTranslation();
   const [disease1, setDisease1] = useState('');
   const [disease2, setDisease2] = useState('');
 
@@ -3068,23 +3044,23 @@ function DiseaseCompare() {
   return (
     <motion.div {...fadeIn} className="space-y-6">
       <Card className="p-6">
-        <h2 className="text-2xl font-bold mb-2 dark:text-white">{t('Disease Comparison', 'Disease Comparison')}</h2>
-        <p className="text-gray-500 dark:text-gray-400 mb-4">{t('Select two diseases to compare their symptoms, causes, and treatments side by side.', 'Select two diseases to compare their symptoms, causes, and treatments side by side.')}</p>
+        <h2 className="text-2xl font-bold mb-2 dark:text-white">{'مقارنة الأمراض'}</h2>
+        <p className="text-gray-500 dark:text-gray-400 mb-4">{'اختر مرضين لمقارنة الأعراض والأسباب والعلاجات جنباً إلى جنب.'}</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium mb-1 dark:text-gray-300">{t('Disease 1', 'Disease 1')}</label>
+            <label className="block text-sm font-medium mb-1 dark:text-gray-300">{'المرض الأول'}</label>
             <Select
               value={disease1}
               onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setDisease1(e.target.value)}
-              options={[{ value: '', label: t('Select disease...', 'Select disease...') }, ...diseaseOptions]}
+              options={[{ value: '', label: 'اختر مرضاً...' }, ...diseaseOptions]}
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1 dark:text-gray-300">{t('Disease 2', 'Disease 2')}</label>
+            <label className="block text-sm font-medium mb-1 dark:text-gray-300">{'المرض الثاني'}</label>
             <Select
               value={disease2}
               onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setDisease2(e.target.value)}
-              options={[{ value: '', label: t('Select disease...', 'Select disease...') }, ...diseaseOptions]}
+              options={[{ value: '', label: 'اختر مرضاً...' }, ...diseaseOptions]}
             />
           </div>
         </div>
@@ -3100,7 +3076,7 @@ function DiseaseCompare() {
 
                 <div className="space-y-4">
                   <div>
-                    <h4 className="font-semibold text-red-600 dark:text-red-400 mb-1">🩺 {t('Symptoms', 'Symptoms')}</h4>
+                    <h4 className="font-semibold text-red-600 dark:text-red-400 mb-1">🩺 {'الأعراض'}</h4>
                     <div className="flex flex-wrap gap-1">
                       {d.symptoms.map((s, i) => (
                         <Chip key={i} variant="danger" className="text-xs" label={s} />
@@ -3109,7 +3085,7 @@ function DiseaseCompare() {
                   </div>
 
                   <div>
-                    <h4 className="font-semibold text-amber-600 dark:text-amber-400 mb-1">⚡ {t('Causes', 'Causes')}</h4>
+                    <h4 className="font-semibold text-amber-600 dark:text-amber-400 mb-1">⚡ {'الأسباب'}</h4>
                     <div className="flex flex-wrap gap-1">
                       {d.causes.map((c, i) => (
                         <Chip key={i} variant="warning" className="text-xs" label={c} />
@@ -3118,7 +3094,7 @@ function DiseaseCompare() {
                   </div>
 
                   <div>
-                    <h4 className="font-semibold text-green-600 dark:text-green-400 mb-1">💊 {t('Treatment', 'Treatment')}</h4>
+                    <h4 className="font-semibold text-green-600 dark:text-green-400 mb-1">💊 {'العلاج'}</h4>
                     <div className="flex flex-wrap gap-1">
                       {d.treatment.map((tr, i) => (
                         <Chip key={i} variant="success" className="text-xs" label={tr} />
@@ -3131,29 +3107,29 @@ function DiseaseCompare() {
           </div>
 
           <Card className="p-6 mt-4">
-            <h3 className="text-lg font-bold mb-3 dark:text-white">{t('Comparison Summary', 'Comparison Summary')}</h3>
+            <h3 className="text-lg font-bold mb-3 dark:text-white">{'ملخص المقارنة'}</h3>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b dark:border-gray-700">
-                    <th className="text-left py-2 ps-0 dark:text-gray-300">{t('Feature', 'Feature')}</th>
+                    <th className="text-left py-2 ps-0 dark:text-gray-300">{'الميزة'}</th>
                     <th className="text-left py-2 dark:text-gray-300">{d1.name}</th>
                     <th className="text-left py-2 pe-0 dark:text-gray-300">{d2.name}</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr className="border-b dark:border-gray-700">
-                    <td className="py-2 ps-0 font-medium dark:text-gray-300">{t('Symptom Count', 'Symptom Count')}</td>
+                    <td className="py-2 ps-0 font-medium dark:text-gray-300">{'عدد الأعراض'}</td>
                     <td className="py-2 dark:text-gray-400">{d1.symptoms.length}</td>
                     <td className="py-2 pe-0 dark:text-gray-400">{d2.symptoms.length}</td>
                   </tr>
                   <tr className="border-b dark:border-gray-700">
-                    <td className="py-2 ps-0 font-medium dark:text-gray-300">{t('Cause Count', 'Cause Count')}</td>
+                    <td className="py-2 ps-0 font-medium dark:text-gray-300">{'عدد الأسباب'}</td>
                     <td className="py-2 dark:text-gray-400">{d1.causes.length}</td>
                     <td className="py-2 pe-0 dark:text-gray-400">{d2.causes.length}</td>
                   </tr>
                   <tr>
-                    <td className="py-2 ps-0 font-medium dark:text-gray-300">{t('Treatment Options', 'Treatment Options')}</td>
+                    <td className="py-2 ps-0 font-medium dark:text-gray-300">{'خيارات العلاج'}</td>
                     <td className="py-2 dark:text-gray-400">{d1.treatment.length}</td>
                     <td className="py-2 pe-0 dark:text-gray-400">{d2.treatment.length}</td>
                   </tr>
@@ -3172,7 +3148,6 @@ function DiseaseCompare() {
 // =============================================================================
 
 function DrugSummary() {
-  const { t } = useTranslation();
   const [search, setSearch] = useState('');
   const [selectedDrug, setSelectedDrug] = useState<string | null>(null);
 
@@ -3192,18 +3167,18 @@ function DrugSummary() {
   return (
     <motion.div {...fadeIn} className="space-y-6">
       <Card className="p-6">
-        <h2 className="text-2xl font-bold mb-2 dark:text-white">{t('Drug Reference', 'Drug Reference')}</h2>
-        <p className="text-gray-500 dark:text-gray-400 mb-4">{t('Search drugs to learn about their class, indications, side effects, and contraindications.', 'Search drugs to learn about their class, indications, side effects, and contraindications.')}</p>
+        <h2 className="text-2xl font-bold mb-2 dark:text-white">{'مرجع الأدوية'}</h2>
+        <p className="text-gray-500 dark:text-gray-400 mb-4">{"ابحث عن الأدوية لمعرفة فئتها ودواعي استعمالها وآثارها الجانبية وموانع استعمالها."}</p>
         <Input
           value={search}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => { setSearch(e.target.value); setSelectedDrug(null); }}
-          placeholder={t('Search drugs by name or class...', 'Search drugs by name or class...')}
+          placeholder={'ابحث عن الأدوية بالاسم أو الفئة...'}
         />
       </Card>
 
       {!selectedDrug && (
         <motion.div {...fadeIn}>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">{filteredDrugs.length} {t('drugs found', 'drugs found')}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">{filteredDrugs.length} دواء</p>
           <motion.div variants={staggerContainer} initial="initial" animate="animate" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {filteredDrugs.map((key) => (
               <motion.div key={key} variants={staggerItem}>
@@ -3221,7 +3196,7 @@ function DrugSummary() {
         {drug && (
           <motion.div {...fadeIn}>
             <Button variant="ghost" onClick={() => setSelectedDrug(null)} className="mb-2">
-              ← {t('Back to list', 'Back to list')}
+              ← {'العودة إلى القائمة'}
             </Button>
             <Card className="p-6">
               <h2 className="text-2xl font-bold mb-1 dark:text-white">{drug.name}</h2>
@@ -3229,7 +3204,7 @@ function DrugSummary() {
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
-                  <h3 className="font-bold text-blue-700 dark:text-blue-300 mb-2">📋 {t('Indications', 'Indications')}</h3>
+                  <h3 className="font-bold text-blue-700 dark:text-blue-300 mb-2">📋 {'دواعي الاستعمال'}</h3>
                   <ul className="space-y-1">
                     {drug.indications.map((ind, i) => (
                       <li key={i} className="text-sm text-gray-700 dark:text-gray-300 flex items-start gap-1">
@@ -3240,7 +3215,7 @@ function DrugSummary() {
                 </div>
 
                 <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4">
-                  <h3 className="font-bold text-amber-700 dark:text-amber-300 mb-2">⚠️ {t('Side Effects', 'Side Effects')}</h3>
+                  <h3 className="font-bold text-amber-700 dark:text-amber-300 mb-2">⚠️ {'الآثار الجانبية'}</h3>
                   <ul className="space-y-1">
                     {drug.sideEffects.map((se, i) => (
                       <li key={i} className="text-sm text-gray-700 dark:text-gray-300 flex items-start gap-1">
@@ -3251,7 +3226,7 @@ function DrugSummary() {
                 </div>
 
                 <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4">
-                  <h3 className="font-bold text-red-700 dark:text-red-300 mb-2">🚫 {t('Contraindications', 'Contraindications')}</h3>
+                  <h3 className="font-bold text-red-700 dark:text-red-300 mb-2">🚫 {'موانع الاستعمال'}</h3>
                   <ul className="space-y-1">
                     {drug.contraindications.map((ci, i) => (
                       <li key={i} className="text-sm text-gray-700 dark:text-gray-300 flex items-start gap-1">
@@ -3289,7 +3264,6 @@ const CATEGORY_COLORS: Record<string, string> = {
 };
 
 function LabValuesTool() {
-  const { t } = useTranslation();
   const [category, setCategory] = useState('All');
   const [search, setSearch] = useState('');
 
@@ -3306,14 +3280,14 @@ function LabValuesTool() {
   return (
     <motion.div {...fadeIn} className="space-y-6">
       <Card className="p-6">
-        <h2 className="text-2xl font-bold mb-2 dark:text-white">{t('Laboratory Reference Values', 'Laboratory Reference Values')}</h2>
-        <p className="text-gray-500 dark:text-gray-400 mb-4">{t('Comprehensive table of common laboratory test reference ranges and critical values.', 'Comprehensive table of common laboratory test reference ranges and critical values.')}</p>
+        <h2 className="text-2xl font-bold mb-2 dark:text-white">{'القيم المرجعية للمختبر'}</h2>
+        <p className="text-gray-500 dark:text-gray-400 mb-4">{'جدول شامل للقيم المرجعية لفحوصات المختبر الشائعة والقيم الحرجة.'}</p>
 
         <div className="flex flex-col sm:flex-row gap-3 mb-4">
           <Input
             value={search}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearch(e.target.value)}
-            placeholder={t('Search tests...', 'Search tests...')}
+            placeholder={'ابحث عن الفحوصات...'}
           />
         </div>
 
@@ -3328,7 +3302,7 @@ function LabValuesTool() {
                   : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
               }`}
             >
-              {cat === 'All' ? t('All', 'All') : cat}
+              {cat === 'All' ? 'الكل' : cat}
             </button>
           ))}
         </div>
@@ -3339,11 +3313,11 @@ function LabValuesTool() {
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-gray-50 dark:bg-gray-800 border-b dark:border-gray-700">
-                <th className="text-left py-3 px-4 font-semibold dark:text-gray-300">{t('Test', 'Test')}</th>
-                <th className="text-left py-3 px-4 font-semibold dark:text-gray-300">{t('Category', 'Category')}</th>
-                <th className="text-left py-3 px-4 font-semibold dark:text-gray-300">{t('Unit', 'Unit')}</th>
-                <th className="text-left py-3 px-4 font-semibold dark:text-gray-300">{t('Normal Range', 'Normal Range')}</th>
-                <th className="text-left py-3 px-4 font-semibold dark:text-gray-300">{t('Critical Value', 'Critical Value')}</th>
+                <th className="text-left py-3 px-4 font-semibold dark:text-gray-300">{'اختبار'}</th>
+                <th className="text-left py-3 px-4 font-semibold dark:text-gray-300">{'الفئة'}</th>
+                <th className="text-left py-3 px-4 font-semibold dark:text-gray-300">{'الوحدة'}</th>
+                <th className="text-left py-3 px-4 font-semibold dark:text-gray-300">{'المعدل الطبيعي'}</th>
+                <th className="text-left py-3 px-4 font-semibold dark:text-gray-300">{'القيمة الحرجة'}</th>
               </tr>
             </thead>
             <tbody>
@@ -3376,7 +3350,7 @@ function LabValuesTool() {
         </div>
         {filtered.length === 0 && (
           <div className="py-8 text-center text-gray-400 dark:text-gray-500">
-            {t('No lab values found matching your criteria.', 'No lab values found matching your criteria.')}
+            {'لا توجد قيم مخبرية تطابق معاييرك.'}
           </div>
         )}
       </Card>
@@ -3412,7 +3386,6 @@ const NOTE_TEMPLATES = [
 ];
 
 function MedicalNotesTool() {
-  const { t } = useTranslation();
   const [notes, setNotes] = useState<MedicalNote[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
@@ -3448,7 +3421,7 @@ function MedicalNotesTool() {
 
   const saveNote = useCallback(() => {
     if (!editTitle.trim() || !editContent.trim()) {
-      addNotification(t('Please fill in both title and content.', 'Please fill in both title and content.'), 'warning');
+      addNotification('الرجاء ملء العنوان والمحتوى معاً.', 'warning');
       return;
     }
 
@@ -3460,7 +3433,7 @@ function MedicalNotesTool() {
             : n
         )
       );
-      addNotification(t('Note updated!', 'Note updated!'), 'success');
+      addNotification('تم تحديث الملاحظة!', 'success');
     } else {
       const newNote: MedicalNote = {
         id: `note-${Date.now()}`,
@@ -3471,7 +3444,7 @@ function MedicalNotesTool() {
         updatedAt: Date.now(),
       };
       setNotes((prev) => [newNote, ...prev]);
-      addNotification(t('Note created!', 'Note created!'), 'success');
+      addNotification('تم إنشاء الملاحظة!', 'success');
     }
     setIsCreating(false);
     setEditingId(null);
@@ -3479,7 +3452,7 @@ function MedicalNotesTool() {
 
   const deleteNote = useCallback((id: string) => {
     setNotes((prev) => prev.filter((n) => n.id !== id));
-    addNotification(t('Note deleted.', 'Note deleted.'), 'info');
+    addNotification('تم حذف الملاحظة.', 'info');
   }, [addNotification]);
 
   const applyTemplate = useCallback((templateId: string) => {
@@ -3495,25 +3468,25 @@ function MedicalNotesTool() {
     return (
       <motion.div {...fadeIn} className="space-y-6">
         <div className="flex items-center gap-3">
-          <Button variant="ghost" onClick={() => { setIsCreating(false); setEditingId(null); }}>← {t('Back', 'Back')}</Button>
+          <Button variant="ghost" onClick={() => { setIsCreating(false); setEditingId(null); }}>← {'رجوع'}</Button>
           <h2 className="text-xl font-bold dark:text-white">
-            {editingId ? t('Edit Note', 'Edit Note') : t('New Note', 'New Note')}
+            {editingId ? 'تعديل الملاحظة' : 'ملاحظة جديدة'}
           </h2>
         </div>
 
         <Card className="p-6">
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-1 dark:text-gray-300">{t('Title', 'Title')}</label>
+              <label className="block text-sm font-medium mb-1 dark:text-gray-300">{'العنوان'}</label>
               <Input
                 value={editTitle}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditTitle(e.target.value)}
-                placeholder={t('Note title...', 'Note title...')}
+                placeholder={'عنوان الملاحظة...'}
               />
             </div>
             <div className="flex items-center gap-3">
               <div className="flex-1">
-                <label className="block text-sm font-medium mb-1 dark:text-gray-300">{t('Category', 'Category')}</label>
+                <label className="block text-sm font-medium mb-1 dark:text-gray-300">{'الفئة'}</label>
                 <Select
                   value={editCategory}
                   onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setEditCategory(e.target.value)}
@@ -3529,33 +3502,33 @@ function MedicalNotesTool() {
               {!editingId && (
                 <div className="pt-5">
                   <Button variant="ghost" onClick={() => setTemplateModal(true)}>
-                    📋 {t('Use Template', 'Use Template')}
+                    📋 {'استخدام القالب'}
                   </Button>
                 </div>
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1 dark:text-gray-300">{t('Content', 'Content')}</label>
+              <label className="block text-sm font-medium mb-1 dark:text-gray-300">{'المحتوى'}</label>
               <TextArea
                 value={editContent}
                 onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setEditContent(e.target.value)}
-                placeholder={t('Write your note here...', 'Write your note here...')}
+                placeholder={'اكتب ملاحظتك هنا...'}
                 rows={20}
                 className="font-mono text-sm"
               />
             </div>
             <div className="flex gap-3">
               <Button onClick={saveNote} className="px-6">
-                {editingId ? t('Update Note', 'Update Note') : t('Save Note', 'Save Note')}
+                {editingId ? 'تحديث الملاحظة' : 'حفظ الملاحظة'}
               </Button>
               <Button variant="ghost" onClick={() => { setIsCreating(false); setEditingId(null); }}>
-                {t('Cancel', 'Cancel')}
+                {'إلغاء'}
               </Button>
             </div>
           </div>
         </Card>
 
-        <Modal open={templateModal} onClose={() => setTemplateModal(false)} title={t('Select Template', 'Select Template')}>
+        <Modal open={templateModal} onClose={() => setTemplateModal(false)} title={'اختر قالباً'}>
           <div className="space-y-3">
             {NOTE_TEMPLATES.map((tmpl) => (
               <Card key={tmpl.id} className="p-4 cursor-pointer hover:shadow-md transition-shadow" onClick={() => applyTemplate(tmpl.id)}>
@@ -3573,17 +3546,17 @@ function MedicalNotesTool() {
     <motion.div {...fadeIn} className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold dark:text-white">{t('Medical Notes', 'Medical Notes')}</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400">{t('Create and manage clinical notes with templates (SOAP, H&P, Progress, Discharge).', 'Create and manage clinical notes with templates (SOAP, H&P, Progress, Discharge).')}</p>
+          <h2 className="text-2xl font-bold dark:text-white">{'الملاحظات الطبية'}</h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{'أنشئ وأدر ملاحظات سريرية باستخدام قوالب جاهزة (SOAP، H&P، متابعة، خروج).'}</p>
         </div>
-        <Button onClick={startCreate}>+ {t('New Note', 'New Note')}</Button>
+        <Button onClick={startCreate}>+ {'ملاحظة جديدة'}</Button>
       </div>
 
       {notes.length === 0 ? (
         <EmptyState
           icon={<span className="text-4xl">📝</span>}
-          title={t('No Notes Yet', 'No Notes Yet')}
-          description={t('Create your first medical note using our professional templates.', 'Create your first medical note using our professional templates.')}
+          title={'لا توجد ملاحظات بعد'}
+          description={'أنشئ أول ملاحظة طبية لك باستخدام قوالمنا الاحترافية.'}
         />
       ) : (
         <motion.div variants={staggerContainer} initial="initial" animate="animate" className="space-y-3">
@@ -3602,7 +3575,7 @@ function MedicalNotesTool() {
                     <p className="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-wrap line-clamp-3 font-mono">{note.content}</p>
                   </div>
                   <div className="flex gap-1 shrink-0">
-                    <Button variant="ghost" size="sm" onClick={() => startEdit(note)}>{t('Edit', 'Edit')}</Button>
+                    <Button variant="ghost" size="sm" onClick={() => startEdit(note)}>{'تعديل'}</Button>
                     <Button variant="ghost" size="sm" onClick={() => deleteNote(note.id)} className="text-red-500">✕</Button>
                   </div>
                 </div>

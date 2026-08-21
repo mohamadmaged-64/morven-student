@@ -28,64 +28,52 @@ const fadeUp = {
 const feedbackCategories = [
   {
     icon: Bug,
-    titleEn: 'Report a Bug',
-    titleAr: 'الإبلاغ عن خطأ',
-    descEn: 'Found something broken or not working as expected? Report it so we can fix it.',
-    descAr: 'وجدت شيئاً معطلاً أو لا يعمل كما هو متوقع؟ أبلغنا لنصلحه.',
+    title: 'الإبلاغ عن خطأ',
+    desc: 'وجدت شيئاً معطلاً أو لا يعمل كما هو متوقع؟ أبلغنا لنصلحه.',
   },
   {
     icon: Lightbulb,
-    titleEn: 'Suggest a Feature',
-    titleAr: 'اقتراح ميزة',
-    descEn: 'Have an idea that could make Morven better? We are always listening.',
-    descAr: 'لديك فكرة قد تجعل مورfen أفضل؟ نحن دائماً نستمع.',
+    title: 'اقتراح ميزة',
+    desc: 'لديك فكرة قد تجعل مورفن أفضل؟ نحن دائماً نستمع.',
   },
   {
     icon: AlertOctagon,
-    titleEn: 'Submit a Complaint',
-    titleAr: 'تقديم شكوى',
-    descEn: 'Something not meeting your expectations? Let us know so we can address it.',
-    descAr: 'شيء لا يلبي توقعاتك؟ أخبرنا لنعالجه.',
+    title: 'تقديم شكوى',
+    desc: 'شيء لا يلبي توقعاتك؟ أخبرنا لنعالجه.',
   },
   {
     icon: MessageSquare,
-    titleEn: 'General Feedback',
-    titleAr: 'ملاحظات عامة',
-    descEn: 'Any thoughts, ideas, or comments about Morven are welcome.',
-    descAr: 'كل الأفكار أو التعليقات حول مورفن مرحب بها.',
+    title: 'ملاحظات عامة',
+    desc: 'كل الأفكار أو التعليقات حول مورفن مرحب بها.',
   },
 ];
 
 const processSteps = [
-  { icon: Send, titleEn: 'Submit Feedback', titleAr: 'إرسال الملاحظات', descEn: 'Fill and submit the form.', descAr: 'املأ النموذج وأرسله.' },
-  { icon: Search, titleEn: 'Review', titleAr: 'المراجعة', descEn: 'Our team reviews your input.', descAr: 'فريقنا يراجع مدخلاتك.' },
-  { icon: Rocket, titleEn: 'Improvement', titleAr: 'التحسين', descEn: 'Your feedback drives real changes.', descAr: 'ملاحظاتك تدفع تغييرات حقيقية.' },
+  { icon: Send, title: 'إرسال الملاحظات', desc: 'املأ النموذج وأرسله.' },
+  { icon: Search, title: 'المراجعة', desc: 'فريقنا يراجع مدخلاتك.' },
+  { icon: Rocket, title: 'التحسين', desc: 'ملاحظاتك تدفع تغييرات حقيقية.' },
 ];
 
 const feedbackTypes = [
-  { value: 'feature', labelEn: 'Feature Suggestion', labelAr: 'اقتراح ميزة' },
-  { value: 'complaint', labelEn: 'Complaint', labelAr: 'شكوى' },
-  { value: 'feedback', labelEn: 'General Feedback', labelAr: 'ملاحظات عامة' },
-  { value: 'other', labelEn: 'Other', labelAr: 'أخرى' },
+  { value: 'feature', label: 'اقتراح ميزة' },
+  { value: 'complaint', label: 'شكوى' },
+  { value: 'feedback', label: 'ملاحظات عامة' },
+  { value: 'other', label: 'أخرى' },
 ];
 
 const priorities = [
-  { value: 'low', labelEn: 'Low', labelAr: 'منخفضة', color: 'text-gray-500 dark:text-gray-400' },
-  { value: 'medium', labelEn: 'Medium', labelAr: 'متوسطة', color: 'text-amber-500' },
-  { value: 'high', labelEn: 'High', labelAr: 'عالية', color: 'text-red-500' },
+  { value: 'low', label: 'منخفضة', color: 'text-gray-500 dark:text-gray-400' },
+  { value: 'medium', label: 'متوسطة', color: 'text-amber-500' },
+  { value: 'high', label: 'عالية', color: 'text-red-500' },
 ];
 
 const commitments = [
-  { en: 'Every piece of feedback is reviewed by our team', ar: 'تمت مراجعة كل ملاحظة من قبل فريقنا' },
-  { en: 'Your input directly influences which features we build next', ar: 'مدخلاتك تؤثر مباشرة على الميزات التي نبنيها التالي' },
-  { en: 'Bug reports are addressed as quickly as possible', ar: 'تتم معالجة تقارير الأخطاء بأسرع وقت ممكن' },
- 
+  'تمت مراجعة كل ملاحظة من قبل فريقنا',
+  'مدخلاتك تؤثر مباشرة على الميزات التي نبنيها التالي',
+  'تتم معالجة تقارير الأخطاء بأسرع وقت ممكن',
 ];
 
 export default function ComplaintsPage() {
-  const lang = document.documentElement.lang === 'ar' ? 'ar' : 'en';
-  const isAr = lang === 'ar';
-
   const [form, setForm] = useState({
     name: '', email: '', type: 'bug', subject: '', description: '', priority: 'medium',
   });
@@ -121,7 +109,7 @@ export default function ComplaintsPage() {
             className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 text-xs font-semibold mb-6"
           >
             <MessageSquare className="w-3.5 h-3.5" />
-            {isAr ? 'شكاوى واقتراحات' : 'Complaints & Suggestions'}
+            شكاوى واقتراحات
           </motion.div>
           <motion.h1
             initial={{ opacity: 0, y: 12 }}
@@ -129,10 +117,10 @@ export default function ComplaintsPage() {
             transition={{ duration: 0.5, delay: 0.15 }}
             className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-4 tracking-tight leading-tight"
           >
-            {isAr ? 'رأيك' : 'Your Voice'}
+            رأيك
             <br />
             <span className="text-primary-600 dark:text-primary-400">
-              {isAr ? 'يهمنا' : 'Matters'}
+              يهمنا
             </span>
           </motion.h1>
           <motion.p
@@ -141,14 +129,12 @@ export default function ComplaintsPage() {
             transition={{ duration: 0.5, delay: 0.25 }}
             className="text-gray-500 dark:text-gray-400 max-w-xl mx-auto text-base md:text-lg leading-relaxed"
           >
-            {isAr
-              ? 'نقدر ملاحظاتك وشكاويك واقتراحاتك.'
-              : 'We value your complaints, suggestions and bug reports.'}
+            نقدر ملاحظاتك وشكاويك واقتراحاتك.
           </motion.p>
         </div>
       </motion.section>
 
- 
+
 
       {/* ── Feedback Form ── */}
       <section className="mb-20">
@@ -170,18 +156,16 @@ export default function ComplaintsPage() {
                   <CheckCircle2 className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                  {isAr ? 'تم إرسال ملاحظاتك!' : 'Feedback Submitted!'}
+                  تم إرسال ملاحظاتك!
                 </h3>
                 <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">
-                  {isAr
-                    ? 'شكراً لمساهمتك. ملاحظاتك تساعدنا على تحسين مورفن.'
-                    : 'Thank you for your contribution. Your feedback helps us improve Morven.'}
+                  شكراً لمساهمتك. ملاحظاتك تساعدنا على تحسين مورفن.
                 </p>
                 <button
                   onClick={() => { setSubmitted(false); setForm({ name: '', email: '', type: 'bug', subject: '', description: '', priority: 'medium' }); }}
                   className="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium transition-colors"
                 >
-                  {isAr ? 'إرسال ملاحظات أخرى' : 'Submit Another Feedback'}
+                  إرسال ملاحظات أخرى
                 </button>
               </motion.div>
             ) : (
@@ -191,7 +175,7 @@ export default function ComplaintsPage() {
                     <Send className="w-5 h-5 text-primary-600 dark:text-primary-400" />
                   </div>
                   <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                    {isAr ? 'أرسل ملاحظاتك' : 'Submit Your Feedback'}
+                    أرسل ملاحظاتك
                   </h2>
                 </div>
 
@@ -199,7 +183,7 @@ export default function ComplaintsPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                        {isAr ? 'الاسم الكامل' : 'Full Name'}
+                        الاسم الكامل
                       </label>
                       <input
                         type="text"
@@ -207,13 +191,13 @@ export default function ComplaintsPage() {
                         value={form.name}
                         onChange={handleChange}
                         required
-                        placeholder={isAr ? 'أدخل اسمك' : 'Enter your name'}
+                        placeholder="أدخل اسمك"
                         className="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-dark-surface border border-light-border dark:border-dark-border text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200"
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                        {isAr ? 'البريد الإلكتروني' : 'Email Address'}
+                        البريد الإلكتروني
                       </label>
                       <input
                         type="email"
@@ -221,7 +205,7 @@ export default function ComplaintsPage() {
                         value={form.email}
                         onChange={handleChange}
                         required
-                        placeholder={isAr ? 'أدخل بريدك الإلكتروني' : 'Enter your email'}
+                        placeholder="أدخل بريدك الإلكتروني"
                         className="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-dark-surface border border-light-border dark:border-dark-border text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200"
                       />
                     </div>
@@ -230,7 +214,7 @@ export default function ComplaintsPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                        {isAr ? 'نوع الملاحظات' : 'Feedback Type'}
+                        نوع الملاحظات
                       </label>
                       <select
                         name="type"
@@ -240,14 +224,14 @@ export default function ComplaintsPage() {
                       >
                         {feedbackTypes.map((t) => (
                           <option key={t.value} value={t.value}>
-                            {isAr ? t.labelAr : t.labelEn}
+                            {t.label}
                           </option>
                         ))}
                       </select>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                        {isAr ? 'الأولوية' : 'Priority'}
+                        الأولوية
                       </label>
                       <select
                         name="priority"
@@ -257,7 +241,7 @@ export default function ComplaintsPage() {
                       >
                         {priorities.map((p) => (
                           <option key={p.value} value={p.value}>
-                            {isAr ? p.labelAr : p.labelEn}
+                            {p.label}
                           </option>
                         ))}
                       </select>
@@ -266,7 +250,7 @@ export default function ComplaintsPage() {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                      {isAr ? 'الموضوع' : 'Subject'}
+                      الموضوع
                     </label>
                     <input
                       type="text"
@@ -274,14 +258,14 @@ export default function ComplaintsPage() {
                       value={form.subject}
                       onChange={handleChange}
                       required
-                      placeholder={isAr ? 'موضوع الملاحظات' : 'Feedback subject'}
+                      placeholder="موضوع الملاحظات"
                       className="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-dark-surface border border-light-border dark:border-dark-border text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200"
                     />
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                      {isAr ? 'الوصف' : 'Description'}
+                      الوصف
                     </label>
                     <textarea
                       name="description"
@@ -289,7 +273,7 @@ export default function ComplaintsPage() {
                       onChange={handleChange}
                       required
                       rows={5}
-                      placeholder={isAr ? 'اكتب وصفاً تفصيلياً...' : 'Write a detailed description...'}
+                      placeholder="اكتب وصفاً تفصيلياً..."
                       className="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-dark-surface border border-light-border dark:border-dark-border text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200 resize-none"
                     />
                   </div>
@@ -297,13 +281,13 @@ export default function ComplaintsPage() {
                   {/* Screenshot Upload */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                      {isAr ? 'لقطة شاشة (اختياري)' : 'Screenshot (Optional)'}
+                      لقطة شاشة (اختياري)
                     </label>
                     <div className="flex items-center justify-center w-full px-4 py-6 rounded-xl border-2 border-dashed border-light-border dark:border-dark-border bg-gray-50 dark:bg-dark-surface hover:border-primary-300 dark:hover:border-primary-700 transition-colors duration-200 cursor-pointer">
                       <div className="text-center">
                         <Upload className="w-8 h-8 text-gray-300 dark:text-gray-600 mx-auto mb-2" />
                         <p className="text-xs text-gray-400 dark:text-gray-500">
-                          {isAr ? 'اسحب وأفلت صورة هنا أو انقر للاختيار' : 'Drag and drop an image here or click to select'}
+                          اسحب وأفلت صورة هنا أو انقر للاختيار
                         </p>
                       </div>
                     </div>
@@ -314,7 +298,7 @@ export default function ComplaintsPage() {
                     className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-700 text-white text-sm font-medium transition-colors duration-200 shadow-md shadow-primary-600/20"
                   >
                     <Send className="w-4 h-4" />
-                    {isAr ? 'إرسال الملاحظات' : 'Submit Feedback'}
+                    إرسال الملاحظات
                   </button>
                 </form>
               </>
@@ -333,7 +317,7 @@ export default function ComplaintsPage() {
           className="text-center mb-10"
         >
           <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-3">
-            {isAr ? 'ماذا يحدث بعد الإرسال؟' : 'What Happens Next?'}
+            ماذا يحدث بعد الإرسال؟
           </h2>
         </motion.div>
 
@@ -357,10 +341,10 @@ export default function ComplaintsPage() {
                     <Icon className="w-7 h-7 text-white" />
                   </div>
                   <div className="text-sm font-semibold text-gray-900 dark:text-white mb-1">
-                    {isAr ? step.titleAr : step.titleEn}
+                    {step.title}
                   </div>
                   <div className="text-xs text-gray-500 dark:text-gray-400">
-                    {isAr ? step.descAr : step.descEn}
+                    {step.desc}
                   </div>
                 </div>
                 {!isLast && (
@@ -399,10 +383,10 @@ export default function ComplaintsPage() {
                 </div>
                 <div className="pt-2 pb-6">
                   <div className="text-sm font-semibold text-gray-900 dark:text-white mb-0.5">
-                    {isAr ? step.titleAr : step.titleEn}
+                    {step.title}
                   </div>
                   <div className="text-xs text-gray-500 dark:text-gray-400">
-                    {isAr ? step.descAr : step.descEn}
+                    {step.desc}
                   </div>
                 </div>
               </motion.div>
@@ -421,7 +405,7 @@ export default function ComplaintsPage() {
           className="text-center mb-10"
         >
           <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-3">
-            {isAr ? 'التزامنا بملاحظاتك' : 'Our Commitment to Your Feedback'}
+            التزامنا بملاحظاتك
           </h2>
         </motion.div>
 
@@ -447,7 +431,7 @@ export default function ComplaintsPage() {
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                 </div>
                 <span className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-                  {isAr ? item.ar : item.en}
+                  {item}
                 </span>
               </motion.div>
             ))}
@@ -465,12 +449,10 @@ export default function ComplaintsPage() {
       >
         <MessageSquare className="w-8 h-8 text-primary-200 mx-auto mb-4" />
         <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
-          {isAr ? 'شكراً لمساهمتك' : 'Thank You for Your Feedback'}
+          شكراً لمساهمتك
         </h2>
         <p className="text-primary-100 max-w-md mx-auto mb-8 text-sm md:text-base">
-          {isAr
-            ? 'كل ملاحظة تساعدنا على بناء منصة أفضل. لا تتردد في المشاركة في أي وقت.'
-            : 'Every piece of feedback helps us build a better platform. Feel free to share anytime.'}
+          كل ملاحظة تساعدنا على بناء منصة أفضل. لا تتردد في المشاركة في أي وقت.
         </p>
       </motion.section>
     </div>

@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import i18n from '@/i18n';
 
 export type PomodoroMode = 'focus' | 'break' | 'longBreak';
 
@@ -35,7 +34,7 @@ interface PomodoroStore extends PomodoroSnapshot {
 }
 
 const STORAGE_KEY = 'morven-pomodoro';
-export const DEFAULT_POMODORO_SETTINGS: PomodoroSettings = {
+const DEFAULT_POMODORO_SETTINGS: PomodoroSettings = {
   focusDuration: 25,
   breakDuration: 5,
   longBreakDuration: 15,
@@ -58,17 +57,7 @@ const loadSnapshot = (): PomodoroSnapshot => {
   };
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (!saved) {
-      const legacySettings = localStorage.getItem('morven-pomodoro-settings');
-      if (!legacySettings) return fallback;
-      const legacy = JSON.parse(legacySettings) as Partial<PomodoroSettings> & { workDuration?: number };
-      const settings = {
-        ...DEFAULT_POMODORO_SETTINGS,
-        ...legacy,
-        focusDuration: legacy.focusDuration ?? legacy.workDuration ?? DEFAULT_POMODORO_SETTINGS.focusDuration,
-      };
-      return { ...fallback, settings, timeRemaining: settings.focusDuration * 60 };
-    }
+    if (!saved) return fallback;
     const parsed = JSON.parse(saved) as Partial<PomodoroSnapshot>;
     const settings = { ...DEFAULT_POMODORO_SETTINGS, ...parsed.settings };
     const mode = parsed.mode === 'break' || parsed.mode === 'longBreak' ? parsed.mode : 'focus';
@@ -130,7 +119,7 @@ const playNotificationSound = () => {
 const notifyCompletion = (next: 'break' | 'focus') => {
   playNotificationSound();
   if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-    new Notification(i18n.t('pomodoro.timeUp'), { body: i18n.t(next === 'break' ? 'pomodoro.breakTime' : 'pomodoro.focusTime'), icon: '🍅' });
+    new Notification('انتهى الوقت!', { body: next === 'break' ? 'وقت الاستراحة' : 'وقت التركيز', icon: '🍅' });
   }
 };
 

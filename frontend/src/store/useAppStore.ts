@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { Tool, ToolCategory, Notification, FileItem, Task, ExamCountdown, Flashcard, ClipboardEntry } from '@/types';
+import type { ToolCategory, Notification, FileItem, Task, ExamCountdown, Flashcard } from '@/types';
 import { v4 as uuid } from 'uuid';
 
 interface AppStore {
@@ -7,10 +7,6 @@ interface AppStore {
   sidebarOpen: boolean;
   toggleSidebar: () => void;
   setSidebarOpen: (open: boolean) => void;
-
-  // Search
-  searchQuery: string;
-  setSearchQuery: (q: string) => void;
 
   // Favorites
   favoriteTools: string[];
@@ -25,17 +21,9 @@ interface AppStore {
   addNotification: (msg: string, type: Notification['type'], duration?: number) => void;
   removeNotification: (id: string) => void;
 
-  // Clipboard
-  clipboardHistory: ClipboardEntry[];
-  addClipboardEntry: (content: string, type: ClipboardEntry['type']) => void;
-  removeClipboardEntry: (id: string) => void;
-  clearClipboard: () => void;
-
   // Files
   recentFiles: FileItem[];
   addFile: (file: FileItem) => void;
-  removeFile: (id: string) => void;
-  clearFiles: () => void;
 
   // Tasks
   tasks: Task[];
@@ -47,18 +35,12 @@ interface AppStore {
   // Exams
   exams: ExamCountdown[];
   addExam: (name: string, date: string, color: string) => void;
-  updateExam: (id: string, updates: Partial<ExamCountdown>) => void;
   deleteExam: (id: string) => void;
 
   // Flashcards
   flashcards: Flashcard[];
   addFlashcard: (front: string, back: string, deck: string) => void;
-  updateFlashcard: (id: string, updates: Partial<Flashcard>) => void;
   deleteFlashcard: (id: string) => void;
-
-  // Active tool
-  activeTool: string | null;
-  setActiveTool: (toolId: string | null) => void;
 }
 
 const loadState = <T>(key: string, fallback: T): T => {
@@ -80,9 +62,6 @@ export const useAppStore = create<AppStore>((set, get) => ({
   sidebarOpen: true,
   toggleSidebar: () => set((s) => ({ sidebarOpen: !s.sidebarOpen })),
   setSidebarOpen: (open) => set({ sidebarOpen: open }),
-
-  searchQuery: '',
-  setSearchQuery: (q) => set({ searchQuery: q }),
 
   favoriteTools: loadState('favorites', []),
   toggleFavorite: (toolId) => {
@@ -108,37 +87,11 @@ export const useAppStore = create<AppStore>((set, get) => ({
   },
   removeNotification: (id) => set((s) => ({ notifications: s.notifications.filter((n) => n.id !== id) })),
 
-  clipboardHistory: loadState('clipboard', []),
-  addClipboardEntry: (content, type) => {
-    const entry: ClipboardEntry = { id: uuid(), content, timestamp: Date.now(), type };
-    const next = [entry, ...get().clipboardHistory].slice(0, 50);
-    saveState('clipboard', next);
-    set({ clipboardHistory: next });
-  },
-  removeClipboardEntry: (id) => {
-    const next = get().clipboardHistory.filter((e) => e.id !== id);
-    saveState('clipboard', next);
-    set({ clipboardHistory: next });
-  },
-  clearClipboard: () => {
-    saveState('clipboard', []);
-    set({ clipboardHistory: [] });
-  },
-
   recentFiles: loadState('files', []),
   addFile: (file) => {
     const next = [file, ...get().recentFiles].slice(0, 30);
     saveState('files', next);
     set({ recentFiles: next });
-  },
-  removeFile: (id) => {
-    const next = get().recentFiles.filter((f) => f.id !== id);
-    saveState('files', next);
-    set({ recentFiles: next });
-  },
-  clearFiles: () => {
-    saveState('files', []);
-    set({ recentFiles: [] });
   },
 
   tasks: loadState('tasks', []),
@@ -180,11 +133,6 @@ export const useAppStore = create<AppStore>((set, get) => ({
     saveState('exams', next);
     set({ exams: next });
   },
-  updateExam: (id, updates) => {
-    const next = get().exams.map((e) => (e.id === id ? { ...e, ...updates } : e));
-    saveState('exams', next);
-    set({ exams: next });
-  },
   deleteExam: (id) => {
     const next = get().exams.filter((e) => e.id !== id);
     saveState('exams', next);
@@ -207,17 +155,9 @@ export const useAppStore = create<AppStore>((set, get) => ({
     saveState('flashcards', next);
     set({ flashcards: next });
   },
-  updateFlashcard: (id, updates) => {
-    const next = get().flashcards.map((c) => (c.id === id ? { ...c, ...updates } : c));
-    saveState('flashcards', next);
-    set({ flashcards: next });
-  },
   deleteFlashcard: (id) => {
     const next = get().flashcards.filter((c) => c.id !== id);
     saveState('flashcards', next);
     set({ flashcards: next });
   },
-
-  activeTool: null,
-  setActiveTool: (toolId) => set({ activeTool: toolId }),
 }));

@@ -1,7 +1,6 @@
 import { useRef, useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '@/store/useAppStore';
-import { useLanguageStore } from '@/store/useLanguageStore';
 import { SidebarContent } from './SidebarContent';
 
 
@@ -15,20 +14,19 @@ const sidebarVariants = {
     },
   },
 
-  closed: (direction: 'ltr' | 'rtl') => ({
-    x: direction === 'rtl' ? '100%' : '-100%',
+  closed: {
+    x: '100%',
     transition: {
       type: 'tween',
      duration: 0.25,
       ease: [0.4, 0, 0.2, 1],
     },
-  }),
+  },
 };
 
 export function Sidebar() {
   const sidebarOpen = useAppStore((s) => s.sidebarOpen);
   const setSidebarOpen = useAppStore((s) => s.setSidebarOpen);
-  const direction = useLanguageStore((s) => s.direction);
   const overlayRef = useRef<HTMLDivElement>(null);
   
   const [isHovered, setIsHovered] = useState(false);
@@ -86,7 +84,6 @@ export function Sidebar() {
             {/* Sidebar */}
             <motion.aside
               key="sidebar"
-              custom={direction}
               variants={sidebarVariants}
               initial="closed"
               animate="open"
@@ -97,7 +94,7 @@ export function Sidebar() {
                 'fixed top-0 z-50 h-full transition-all duration-300 bg-white dark:bg-dark-card border-light-border dark:border-dark-border shadow-xl overflow-hidden',
                 isMobile ? 'w-64' : (isHovered ? 'w-64' : 'w-20'),
                 'lg:static lg:z-auto lg:translate-x-0',
-                direction === 'rtl' ? 'right-0 border-l' : 'left-0 border-r',
+                'right-0 border-l',
               ].join(' ')}
             >
 

@@ -1,11 +1,9 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { WifiOff } from 'lucide-react';
 import { useOnlineStatus } from '@/hooks/useOnlineStatus';
-import { useLanguageStore } from '@/store/useLanguageStore';
 
 export function OfflineIndicator() {
   const isOnline = useOnlineStatus();
-  const { language } = useLanguageStore();
 
   return (
     <AnimatePresence>
@@ -20,9 +18,7 @@ export function OfflineIndicator() {
         >
           <WifiOff className="w-3.5 h-3.5 shrink-0" />
           <span>
-            {language === 'ar'
-              ? 'أنت غير متصل بالإنترنت — الأدوات المحلية لا تزال تعمل.'
-              : 'You are offline — local tools still work.'}
+            {'أنت غير متصل بالإنترنت — الأدوات المحلية لا تزال تعمل.'}
           </span>
         </motion.div>
       )}

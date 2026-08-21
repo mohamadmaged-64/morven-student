@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useAppStore } from '@/store/useAppStore';
 import { ThemeToggle } from '@/components/UI/ThemeToggle';
 import { usePomodoroStore } from '@/store/usePomodoroStore';
@@ -13,8 +12,6 @@ interface HeaderProps {
 }
 
 export function Header({ title }: HeaderProps) {
-  const { t } = useTranslation();
-  const { i18n } = useTranslation();
   const toggleSidebar = useAppStore((s) => s.toggleSidebar);
   const navigate = useNavigate();
   const pomodoroRunning = usePomodoroStore((s) => s.isRunning);
@@ -31,7 +28,7 @@ export function Header({ title }: HeaderProps) {
   }, []);
 
   const gregorianDate = new Intl.DateTimeFormat(
-    i18n.language === 'ar' ? 'ar-EG' : 'en-US',
+    'ar-EG',
     {
       weekday: 'long',
       year: 'numeric',
@@ -41,9 +38,7 @@ export function Header({ title }: HeaderProps) {
   ).format(now);
 
   const hijriDate = new Intl.DateTimeFormat(
-    i18n.language === 'ar'
-      ? 'ar-SA-u-ca-islamic'
-      : 'en-US-u-ca-islamic',
+    'ar-SA-u-ca-islamic',
     {
       year: 'numeric',
       month: 'long',
@@ -52,7 +47,7 @@ export function Header({ title }: HeaderProps) {
   ).format(now);
 
   const time = new Intl.DateTimeFormat(
-    i18n.language === 'ar' ? 'ar-EG' : 'en-US',
+    'ar-EG',
     {
       hour: '2-digit',
       minute: '2-digit',
@@ -73,7 +68,7 @@ export function Header({ title }: HeaderProps) {
         <button
           onClick={toggleSidebar}
           className="lg:hidden p-2 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-dark-hover transition-colors"
-          aria-label={t('sidebar.collapse')}
+          aria-label={'طي القائمة'}
         >
           <svg
             width="20"
@@ -124,8 +119,8 @@ export function Header({ title }: HeaderProps) {
             <button
               onClick={() => navigate('/tool/pomodoro-timer')}
               className="px-2.5 py-1.5 rounded-xl text-sm font-semibold font-mono tabular-nums text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-500/10 transition-colors"
-              aria-label={t('pomodoro.settings')}
-              title={t('tools.pomodoro')}
+              aria-label={'إعدادات بومودورو'}
+              title={'مؤقت بومودورو'}
             >
               {String(Math.floor(pomodoroTimeRemaining / 60)).padStart(2, '0')}:{String(pomodoroTimeRemaining % 60).padStart(2, '0')}
             </button>

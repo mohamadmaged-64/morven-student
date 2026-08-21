@@ -1,6 +1,5 @@
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useLanguageStore } from '@/store/useLanguageStore';
 import { Mic2, Search, ChevronDown } from 'lucide-react';
 import type { Reciter } from '@/types/quran';
 
@@ -15,7 +14,6 @@ export function ReciterSelector({
   currentReciter,
   onSelect,
 }: ReciterSelectorProps) {
-  const { language } = useLanguageStore();
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
 
@@ -26,8 +24,7 @@ export function ReciterSelector({
 
     return reciters.filter(
       (r) =>
-        r.name.toLowerCase().includes(q) ||
-        r.nameAr.includes(q),
+        r.name.toLowerCase().includes(q),
     );
   }, [reciters, search]);
 
@@ -35,7 +32,7 @@ export function ReciterSelector({
     <div className="space-y-2">
       <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
         <Mic2 className="w-4 h-4" />
-        {language === 'ar' ? 'القارئ' : 'Reciter'}
+        القارئ
       </label>
 
       <div className="relative">
@@ -50,12 +47,8 @@ export function ReciterSelector({
         >
           <span>
             {currentReciter
-              ? language === 'ar'
-                ? currentReciter.nameAr
-                : currentReciter.name
-              : language === 'ar'
-                ? 'اختر القارئ'
-                : 'Select a Reciter'}
+              ? currentReciter.name
+              : 'اختر القارئ'}
           </span>
 
           <ChevronDown
@@ -82,11 +75,7 @@ export function ReciterSelector({
                     type="text"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    placeholder={
-                      language === 'ar'
-                        ? 'بحث عن قارئ...'
-                        : 'Search reciter...'
-                    }
+                    placeholder="بحث عن قارئ..."
                     className="w-full pl-9 pr-3 py-2 text-sm rounded-lg bg-gray-50 dark:bg-dark-surface border border-light-border dark:border-dark-border text-gray-800 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                     autoFocus
                   />
@@ -96,9 +85,7 @@ export function ReciterSelector({
               <div className="max-h-64 overflow-y-auto overscroll-contain">
                 {filtered.length === 0 ? (
                   <div className="p-4 text-sm text-gray-400 dark:text-gray-500 text-center">
-                    {language === 'ar'
-                      ? 'لا توجد نتائج'
-                      : 'No results'}
+                    لا توجد نتائج
                   </div>
                 ) : (
                   <div className="p-1">
@@ -127,9 +114,7 @@ export function ReciterSelector({
 
                           <div className="flex-1 text-left">
                             <div className="font-medium">
-                              {language === 'ar'
-                                ? reciter.nameAr
-                                : reciter.name}
+                              {reciter.name}
                             </div>
                           </div>
                         </button>

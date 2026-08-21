@@ -1,12 +1,10 @@
 import { useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { useLanguageStore } from '@/store/useLanguageStore';
 import { useQuranStore } from '@/store/quranStore';
 import { ProgressBar } from './ProgressBar';
 import {
   Play,
   Pause,
-  Square,
   SkipBack,
   SkipForward,
   Volume2,
@@ -19,7 +17,6 @@ interface QuranPlayerProps {
 }
 
 export function QuranPlayer({ surahs }: QuranPlayerProps) {
-  const { language } = useLanguageStore();
   const {
     currentReciter,
     currentSurah,
@@ -29,7 +26,6 @@ export function QuranPlayer({ surahs }: QuranPlayerProps) {
     currentTime,
     play,
     pause,
-    stop,
     seek,
     setVolume,
     setSurah,
@@ -68,10 +64,10 @@ export function QuranPlayer({ surahs }: QuranPlayerProps) {
     >
       <div className="text-center space-y-1">
         <h3 className="text-xl font-bold text-gray-800 dark:text-white">
-          {language === 'ar' ? currentSurah.nameAr : currentSurah.name}
+          {currentSurah.name}
         </h3>
         <p className="text-sm text-gray-400 dark:text-gray-500">
-          {language === 'ar' ? currentReciter.nameAr : currentReciter.name}
+          {currentReciter.name}
         </p>
       </div>
 
@@ -86,7 +82,7 @@ export function QuranPlayer({ surahs }: QuranPlayerProps) {
           onClick={handlePrevious}
           disabled={surahs.findIndex((s) => s.id === currentSurah.id) <= 0}
           className="p-2 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-dark-surface hover:text-gray-700 dark:hover:text-gray-200 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-          aria-label={language === 'ar' ? 'السابق' : 'Previous'}
+          aria-label="السابق"
         >
           <SkipBack className="w-5 h-5" />
         </button>
@@ -98,7 +94,7 @@ export function QuranPlayer({ surahs }: QuranPlayerProps) {
           className="p-3.5 rounded-xl bg-primary-500 hover:bg-primary-600 text-white shadow-lg shadow-primary-500/25 transition-all"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          aria-label={isPlaying ? (language === 'ar' ? 'إيقاف مؤقت' : 'Pause') : (language === 'ar' ? 'تشغيل' : 'Play')}
+          aria-label={isPlaying ? 'إيقاف مؤقت' : 'تشغيل'}
         >
           {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6" />}
         </motion.button>
@@ -107,7 +103,7 @@ export function QuranPlayer({ surahs }: QuranPlayerProps) {
           onClick={handleNext}
           disabled={surahs.findIndex((s) => s.id === currentSurah.id) >= surahs.length - 1}
           className="p-2 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-dark-surface hover:text-gray-700 dark:hover:text-gray-200 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-          aria-label={language === 'ar' ? 'التالي' : 'Next'}
+          aria-label="التالي"
         >
           <SkipForward className="w-5 h-5" />
         </button>

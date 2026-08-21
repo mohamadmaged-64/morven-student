@@ -1,5 +1,4 @@
 import { motion } from 'framer-motion';
-import { useLanguageStore } from '@/store/useLanguageStore';
 import { useQuranStore } from '@/store/quranStore';
 import { Card } from '@/components/UI/Card';
 import { Spinner } from '@/components/UI/Loading';
@@ -13,7 +12,6 @@ import { useEffect, useRef } from 'react';
 import { Book, Headphones, AlertCircle, WifiOff } from 'lucide-react';
 
 export default function QuranPage() {
-  const { language } = useLanguageStore();
   const { currentReciter, currentSurah, setReciter, setSurah } = useQuranStore();
   const { reciters, surahs, loading, error, refetch } = useQuranData();
   const isOnline = useOnlineStatus();
@@ -40,15 +38,13 @@ export default function QuranPage() {
         <div className="flex flex-col items-center justify-center py-8 text-center">
           <WifiOff className="w-12 h-12 text-amber-500 mb-3" />
           <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-1">
-            {language === 'ar' ? 'أنت غير متصل بالإنترنت' : 'You are offline'}
+            أنت غير متصل بالإنترنت
           </h3>
           <p className="text-sm text-gray-400 dark:text-gray-500 max-w-md mb-4">
-            {language === 'ar'
-              ? 'يتطلب القرآن الكريم اتصالاً بالإنترنت لتحميل القراء والسور والاستماع إليها.'
-              : 'The Holy Quran tool requires an internet connection to load reciters, surahs, and audio.'}
+            يتطلب القرآن الكريم اتصالاً بالإنترنت لتحميل القراء والسور والاستماع إليها.
           </p>
           <Button onClick={refetch}>
-            {language === 'ar' ? 'إعادة المحاولة' : 'Try Again'}
+            إعادة المحاولة
           </Button>
         </div>
       </Card>
@@ -61,11 +57,11 @@ export default function QuranPage() {
         <div className="flex flex-col items-center justify-center py-8 text-center">
           <AlertCircle className="w-12 h-12 text-red-500 mb-3" />
           <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-1">
-            {language === 'ar' ? 'خطأ في التحميل' : 'Failed to Load'}
+            خطأ في التحميل
           </h3>
           <p className="text-sm text-gray-400 dark:text-gray-500 max-w-md mb-4">{error}</p>
           <Button onClick={refetch}>
-            {language === 'ar' ? 'إعادة المحاولة' : 'Try Again'}
+            إعادة المحاولة
           </Button>
         </div>
       </Card>
@@ -81,22 +77,20 @@ export default function QuranPage() {
       >
         <Card className="overflow-hidden">
           <div className="flex flex-col items-center justify-center text-center gap-4 py-2">
-  <div className="w-12 h-14 rounded-2xl bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-primary-600 dark:text-primary-400">
-    <Book className="w-6 h-6" />
-  </div>
+            <div className="w-12 h-14 rounded-2xl bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-primary-600 dark:text-primary-400">
+              <Book className="w-6 h-6" />
+            </div>
 
-  <div className="max-w-3xl">
-    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-      {language === 'ar' ? 'القرآن الكريم' : 'Holy Quran'}
-    </h1>
+            <div className="max-w-3xl">
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                القرآن الكريم
+              </h1>
 
-    <p className="mt-2 text-base text-gray-500 dark:text-gray-400">
-      {language === 'ar'
-        ? 'استمع إلى القرآن الكريم مع عدة قراء'
-        : 'Listen to the Holy Quran with multiple reciters.'}
-    </p>
-  </div>
-</div>
+              <p className="mt-2 text-base text-gray-500 dark:text-gray-400">
+                استمع إلى القرآن الكريم مع عدة قراء
+              </p>
+            </div>
+          </div>
         </Card>
       </motion.div>
 
@@ -141,12 +135,10 @@ export default function QuranPage() {
                 <Headphones className="w-8 h-8 text-primary-500 dark:text-primary-400" />
               </div>
               <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                {language === 'ar' ? 'اختر قارئاً وسورة' : 'Select a Reciter & Surah'}
+                اختر قارئاً وسورة
               </h3>
               <p className="text-sm text-gray-400 dark:text-gray-500 max-w-md">
-                {language === 'ar'
-                  ? 'اختر قارئاً وسورة من القائمة أعلاه لبدء الاستماع'
-                  : 'Choose a reciter and a surah from the options above to start listening'}
+                اختر قارئاً وسورة من القائمة أعلاه لبدء الاستماع
               </p>
             </div>
           </Card>

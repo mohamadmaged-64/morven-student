@@ -10,7 +10,6 @@ import { EmptyState } from '@/components/UI/EmptyState';
 import { Slider } from '@/components/UI/Slider';
 import { saveToLibrary } from '@/services/savedFilesService';
 import { useAppStore } from '@/store/useAppStore';
-import { useLanguageStore } from '@/store/useLanguageStore';
 import { useNavigate } from 'react-router-dom';
 
 type ToolId = 'background-remover' | 'rotate-image' | 'blur-image' | 'images-to-pdf';
@@ -40,7 +39,6 @@ function downloadCanvas(canvas: HTMLCanvasElement, filename: string) {
 
 function BackgroundRemover() {
   const { addNotification } = useAppStore();
-  const { direction } = useLanguageStore();
   const [originalUrl, setOriginalUrl] = useState('');
   const [processedUrl, setProcessedUrl] = useState('');
   const [processing, setProcessing] = useState(false);
@@ -104,7 +102,7 @@ function BackgroundRemover() {
   }, [processedUrl, addNotification]);
 
   return (
-    <div className="space-y-4" dir={direction}>
+    <div className="space-y-4" dir="rtl">
       <FileUpload accept={['image/*']} onFilesSelected={handleFile} label="Upload image to remove background" description="Detects and removes near-white backgrounds" maxFiles={1} readAs="DataURL" />
       {originalUrl && (
         <div className="grid grid-cols-2 gap-4">
@@ -136,7 +134,6 @@ function BackgroundRemover() {
 
 function RotateImageTool() {
   const { addNotification } = useAppStore();
-  const { direction } = useLanguageStore();
   const [originalUrl, setOriginalUrl] = useState('');
   const [rotation, setRotation] = useState(0);
   const [processedUrl, setProcessedUrl] = useState('');
@@ -199,7 +196,7 @@ function RotateImageTool() {
   }, [addNotification]);
 
   return (
-    <div className="space-y-4" dir={direction}>
+    <div className="space-y-4" dir="rtl">
       <FileUpload accept={['image/*']} onFilesSelected={handleFile} label="Upload image to rotate" maxFiles={1} readAs="DataURL" />
       {originalUrl && (
         <div className="grid grid-cols-2 gap-4">
@@ -235,7 +232,6 @@ function RotateImageTool() {
 
 function BlurImageTool() {
   const { addNotification } = useAppStore();
-  const { direction } = useLanguageStore();
   const [originalUrl, setOriginalUrl] = useState('');
   const [blurRadius, setBlurRadius] = useState(5);
   const [processedUrl, setProcessedUrl] = useState('');
@@ -294,7 +290,7 @@ function BlurImageTool() {
   }, [addNotification]);
 
   return (
-    <div className="space-y-4" dir={direction}>
+    <div className="space-y-4" dir="rtl">
       <FileUpload accept={['image/*']} onFilesSelected={handleFile} label="Upload image to blur" maxFiles={1} readAs="DataURL" />
       {originalUrl && (
         <div className="grid grid-cols-2 gap-4">
@@ -326,7 +322,6 @@ interface ImageItem {
 
 function ImagesToPdfTool() {
   const { addNotification } = useAppStore();
-  const { direction } = useLanguageStore();
   const [images, setImages] = useState<ImageItem[]>([]);
   const [generating, setGenerating] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -418,7 +413,7 @@ function ImagesToPdfTool() {
   }, [images, addNotification]);
 
   return (
-    <div className="space-y-4" dir={direction}>
+    <div className="space-y-4" dir="rtl">
       <FileUpload accept={['image/*']} onFilesSelected={handleFiles} label="Upload images for PDF" description="Add multiple images. They can be reordered below." multiple maxFiles={20} readAs="DataURL" />
 
       {images.length > 0 && (
@@ -468,30 +463,29 @@ function ImagesToPdfTool() {
 }
 
 function ImageToolPage({ toolId }: { toolId: string }) {
-  const { direction } = useLanguageStore();
   const navigate = useNavigate();
   const configs: Record<ToolId, { title: string; description: string; icon: JSX.Element; component: JSX.Element }> = {
     'background-remover': {
-      title: 'Background Remover',
-      description: 'Remove backgrounds from images using color detection',
+      title: 'إزالة الخلفية',
+      description: 'إزالة خلفية الصورة تلقائياً',
       icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>,
       component: <BackgroundRemover />,
     },
     'rotate-image': {
-      title: 'Rotate Image',
-      description: 'Rotate images by any angle with live preview',
+      title: 'تدوير الصورة',
+      description: 'تدوير الصورة بأي زاوية مع معاينة مباشرة',
       icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>,
       component: <RotateImageTool />,
     },
     'blur-image': {
-      title: 'Blur Image',
-      description: 'Apply blur effect to images with adjustable radius',
+      title: 'تعتيم الصورة',
+      description: 'تعتيم الصورة مع إمكانية ضبط الدرجة',
       icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6" opacity="0.5"/><circle cx="12" cy="12" r="2" opacity="0.3"/></svg>,
       component: <BlurImageTool />,
     },
     'images-to-pdf': {
-      title: 'Images to PDF',
-      description: 'Combine multiple images into a single PDF document',
+      title: 'صور إلى PDF',
+      description: 'دمج عدة صور في مستند PDF واحد',
       icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>,
       component: <ImagesToPdfTool />,
     },
@@ -503,14 +497,14 @@ function ImageToolPage({ toolId }: { toolId: string }) {
     return (
       <EmptyState
         icon={<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>}
-        title="Tool not found"
-        description="The requested image tool could not be found."
+        title="الأداة غير موجودة"
+        description="تعذر العثور على أداة الصور المطلوبة."
       />
     );
   }
 
 return (
-  <div className="max-w-4xl mx-auto space-y-6" dir={direction}>
+  <div className="max-w-4xl mx-auto space-y-6" dir="rtl">
     <motion.div
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -521,11 +515,7 @@ return (
         className="flex items-center gap-2 text-gray-500 hover:text-primary-500 dark:text-gray-400 dark:hover:text-primary-400 transition-colors mb-6 group"
       >
         <svg
-          className={`w-5 h-5 transition-transform ${
-            direction === 'rtl'
-              ? 'rotate-180 group-hover:translate-x-1'
-              : 'group-hover:-translate-x-1'
-          }`}
+          className="w-5 h-5 transition-transform rotate-180 group-hover:translate-x-1"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -539,9 +529,7 @@ return (
         </svg>
 
         <span className="text-sm font-medium">
-          {direction === 'rtl'
-            ? 'العودة لأدوات الصور'
-            : 'Back to Image Tools'}
+          العودة لأدوات الصور
         </span>
       </button>
 

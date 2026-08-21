@@ -5,11 +5,9 @@ import { Input, Button, Modal, EmptyState } from '@/components/UI';
 import { NoteCard } from '@/components/notes/NoteCard';
 import { NoteEditor } from '@/components/notes/NoteEditor';
 import { useNotesStore } from '@/store/useNotesStore';
-import { useLanguageStore } from '@/store/useLanguageStore';
 import { NotebookPen, Search, Plus, StickyNote } from 'lucide-react';
 
 export default function NotesPage() {
-  const { language } = useLanguageStore();
   const notes = useNotesStore((s) => s.notes);
   const createNote = useNotesStore((s) => s.createNote);
   const updateNote = useNotesStore((s) => s.updateNote);
@@ -41,7 +39,6 @@ export default function NotesPage() {
         <NoteEditor
           key={note.id}
           note={note}
-          language={language}
           onDone={() => setEditingId(null)}
           onTitleChange={(value) => updateNote(id, { title: value })}
           onContentChange={(value) => updateNote(id, { content: value })}
@@ -53,7 +50,6 @@ export default function NotesPage() {
       <NoteCard
         key={note.id}
         note={note}
-        language={language}
         onEdit={() => setEditingId(id)}
         onDelete={() => setDeleteConfirmId(id)}
         onTogglePin={() => togglePin(id)}
@@ -65,12 +61,8 @@ export default function NotesPage() {
     <div className="space-y-6">
       <ToolHero
         icon={<NotebookPen className="w-6 h-6" />}
-        title={language === 'ar' ? 'الملاحظات' : 'Notes'}
-        description={
-          language === 'ar'
-            ? 'أنشئ واحفظ ملاحظاتك بسرعة مع حفظ تلقائي.'
-            : 'Quickly create and organize your notes with automatic saving.'
-        }
+        title="الملاحظات"
+        description="أنشئ واحفظ ملاحظاتك بسرعة مع حفظ تلقائي."
       />
 
       {/* Toolbar */}
@@ -83,13 +75,13 @@ export default function NotesPage() {
         <Input
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder={language === 'ar' ? 'ابحث في ملاحظاتك...' : 'Search your notes...'}
+          placeholder="ابحث في ملاحظاتك..."
           icon={<Search className="w-4 h-4" />}
           wrapperClassName="flex-1"
-          aria-label={language === 'ar' ? 'البحث في الملاحظات' : 'Search notes'}
+          aria-label="البحث في الملاحظات"
         />
         <Button onClick={handleNewNote} icon={<Plus className="w-4 h-4" />} className="shrink-0">
-          {language === 'ar' ? 'ملاحظة جديدة' : 'New Note'}
+          ملاحظة جديدة
         </Button>
       </motion.div>
 
@@ -97,26 +89,22 @@ export default function NotesPage() {
       {notes.length === 0 ? (
         <EmptyState
           icon={<StickyNote className="w-9 h-9" />}
-          title={language === 'ar' ? 'لا توجد ملاحظات حتى الآن' : 'No notes yet.'}
-          description={
-            language === 'ar' ? 'ابدأ بإنشاء أول ملاحظة.' : 'Create your first note.'
-          }
-          action={{ label: language === 'ar' ? 'إنشاء ملاحظة' : 'New Note', onClick: handleNewNote }}
+          title="لا توجد ملاحظات حتى الآن"
+          description="ابدأ بإنشاء أول ملاحظة."
+          action={{ label: 'إنشاء ملاحظة', onClick: handleNewNote }}
         />
       ) : visibleNotes.length === 0 ? (
         <EmptyState
           icon={<Search className="w-9 h-9" />}
-          title={language === 'ar' ? 'لا توجد نتائج' : 'No results found'}
-          description={
-            language === 'ar' ? 'جرّب البحث بكلمات مختلفة' : 'Try different search terms'
-          }
+          title="لا توجد نتائج"
+          description="جرّب البحث بكلمات مختلفة"
         />
       ) : (
         <div className="space-y-6">
           {pinnedNotes.length > 0 && (
             <div className="space-y-3">
               <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                {language === 'ar' ? 'مثبتة' : 'Pinned'}
+                مثبتة
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <AnimatePresence mode="popLayout">
@@ -129,7 +117,7 @@ export default function NotesPage() {
           {unpinnedNotes.length > 0 && (
             <div className="space-y-3">
               <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                {language === 'ar' ? 'كل الملاحظات' : 'All Notes'}
+                كل الملاحظات
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <AnimatePresence mode="popLayout">
@@ -145,17 +133,15 @@ export default function NotesPage() {
       <Modal
         open={!!deleteConfirmId}
         onClose={() => setDeleteConfirmId(null)}
-        title={language === 'ar' ? 'حذف الملاحظة' : 'Delete Note'}
+        title="حذف الملاحظة"
         size="sm"
       >
         <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-          {language === 'ar'
-            ? 'هل أنت متأكد من حذف هذه الملاحظة؟ لا يمكن التراجع عن هذا الإجراء.'
-            : 'Are you sure you want to delete this note? This action cannot be undone.'}
+          هل أنت متأكد من حذف هذه الملاحظة؟ لا يمكن التراجع عن هذا الإجراء.
         </p>
         <div className="flex gap-3">
           <Button variant="ghost" onClick={() => setDeleteConfirmId(null)} className="flex-1">
-            {language === 'ar' ? 'إلغاء' : 'Cancel'}
+            إلغاء
           </Button>
           <Button
             variant="danger"
@@ -168,7 +154,7 @@ export default function NotesPage() {
             }}
             className="flex-1"
           >
-            {language === 'ar' ? 'حذف' : 'Delete'}
+            حذف
           </Button>
         </div>
       </Modal>

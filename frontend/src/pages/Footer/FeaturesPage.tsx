@@ -16,7 +16,6 @@ import {
   Cog,
   Image,
 } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
 
 
 const fadeUp = {
@@ -29,36 +28,31 @@ const fadeUp = {
 };
 
 const featureCards = [
-  { icon: GraduationCap, titleEn: 'General Tools', titleAr: 'أدوات عامة', descEn: 'Pomodoro timer, task manager, exam countdown, and productivity aids.', descAr: 'مدير المهام ومنشئ الملاحظات ومؤقت البومودورو والمزيد.' },
-  { icon: HeartPulse, titleEn: 'Medical Section', titleAr: 'القسم الطبي', descEn: 'Medical summarizers, flashcards, drug references, and lab values.', descAr: 'ملخصات طبية وبطاقات تعليمية ومراجع الأدوية وقيم المختبر.' },
-   { icon: Cog, titleEn: 'Engineering Section', titleAr: 'القسم الهندسي', descEn: 'Computer enguneering tools and more', descAr: 'أدوات هندسة الحاسوب والمزيد' },
-  { icon: FileText, titleEn: 'PDF Tools', titleAr: 'أدوات ال PDF', descEn: 'Convert, merge, split, compress, and edit PDF documents entirely in your browser.', descAr: 'تحويل ودمج وتقسيم وضغط وتحرير مستندات PDF بالكامل في متصفحك.' },
-  { icon: Presentation, titleEn: 'PowerPoint', titleAr: 'أدوات ال PowerPoint', descEn: 'Create, edit, convert, and enhance PowerPoint presentations with ease.', descAr: 'إنشاء وتحرير وتحويل وتحسين عروض PowerPoint التقديمية بسهولة.' },
-  { icon: Video, titleEn: 'Video Tools', titleAr: 'أدوات الفيديو', descEn: 'Compress, convert, and extract audio and more', descAr: 'ضغط وتحويل واستخراج الصوت والمزيد' },
-  { icon: Image, titleEn: 'Images Tools', titleAr: 'أدوات الصور', descEn: 'Rotate, blur, convert images and more', descAr: 'تدوير وتشميع وتحويل الصور، والمزيد'},
-  { icon: Music, titleEn: 'Audio Tools', titleAr: 'أدوات الصوت', descEn: 'Convert audio formats and transcribe speech to text effortlessly.', descAr: 'تحويل صيغ الصوت ونسخ الصوت إلى نص بسهولة.' },
-  { icon: QrCode, titleEn: 'QR Code', titleAr: 'رمز QR', descEn: 'Generate QR codes for URLs, text, and any data you need.', descAr: 'إنشاء رموز QR للروابط والنصوص وأي بيانات تحتاجها.' },
+  { icon: GraduationCap, title: 'أدوات عامة', desc: 'مدير المهام ومنشئ الملاحظات ومؤقت البومودورو والمزيد.' },
+  { icon: HeartPulse, title: 'القسم الطبي', desc: 'ملخصات طبية وبطاقات تعليمية ومراجع الأدوية وقيم المختبر.' },
+  { icon: Cog, title: 'القسم الهندسي', desc: 'أدوات هندسة الحاسوب والمزيد' },
+  { icon: FileText, title: 'أدوات ال PDF', desc: 'تحويل ودمج وتقسيم وضغط وتحرير مستندات PDF بالكامل في متصفحك.' },
+  { icon: Presentation, title: 'أدوات ال PowerPoint', desc: 'إنشاء وتحرير وتحويل وتحسين عروض PowerPoint التقديمية بسهولة.' },
+  { icon: Video, title: 'أدوات الفيديو', desc: 'ضغط وتحويل واستخراج الصوت والمزيد' },
+  { icon: Image, title: 'أدوات الصور', desc: 'تدوير وتشميع وتحويل الصور، والمزيد' },
+  { icon: Music, title: 'أدوات الصوت', desc: 'تحويل صيغ الصوت ونسخ الصوت إلى نص بسهولة.' },
+  { icon: QrCode, title: 'رمز QR', desc: 'إنشاء رموز QR للروابط والنصوص وأي بيانات تحتاجها.' },
 ];
 
 const whyChooseItems = [
-  { icon: Lock, titleEn: 'Privacy First', titleAr: 'الخصوصية أولاً', descEn: 'All processing happens locally in your browser. Your files never leave your device.', descAr: 'جميع المعالجات تتم محلياً في متصفحك. ملفاتك لا تغادر جهازك أبداً.' },
-  { icon: Zap, titleEn: 'Lightning Fast', titleAr: 'سرعة البرق', descEn: 'No uploads, no waiting. Get instant results with client-side processing.', descAr: 'لا رفع، لا انتظار. احصل على نتائج فورية مع المعالجة المحلية.' },
-  { icon: Globe, titleEn: 'Bilingual', titleAr: 'ثنائي اللغة', descEn: 'Full support for both English and Arabic with a seamless RTL experience.', descAr: 'دعم كامل للإنجليزية والعربية مع تجربة سلسة من اليمين لليسار.' },
-  { icon: Sparkles, titleEn: 'Always Improving', titleAr: 'في تطور مستمر', descEn: 'New tools and features are added regularly based on student feedback.', descAr: 'تُضاف أدوات وميزات جديدة بانتظام بناءً على ملاحظات الطلاب.' },
+  { icon: Lock, title: 'الخصوصية أولاً', desc: 'جميع المعالجات تتم محلياً في متصفحك. ملفاتك لا تغادر جهازك أبداً.' },
+  { icon: Zap, title: 'سرعة البرق', desc: 'لا رفع، لا انتظار. احصل على نتائج فورية مع المعالجة المحلية.' },
+  { icon: Globe, title: 'العربية فقط', desc: 'واجهة عربية بالكامل مع تجربة سلسة من اليمين لليسار.' },
+  { icon: Sparkles, title: 'في تطور مستمر', desc: 'تُضاف أدوات وميزات جديدة بانتظام بناءً على ملاحظات الطلاب.' },
 ];
 
 const stats = [
-  { value: '10+', labelEn: 'Tool Categories', labelAr: 'فئة أدوات' },
-  { value: '70+', labelEn: 'Tools', labelAr: 'أداة' },
-  { value: '2', labelEn: 'Languages', labelAr: 'لغة' },
-  { value: '100%', labelEn: ' Privacy', labelAr: 'خصوصية' },
+  { value: '10+', label: 'فئة أدوات' },
+  { value: '70+', label: 'أداة' },
+  { value: '100%', label: 'خصوصية' },
 ];
 
 export default function FeaturesPage() {
-  const { t } = useTranslation();
-  const lang = document.documentElement.lang === 'ar' ? 'ar' : 'en';
-  const isAr = lang === 'ar';
-
   return (
     <div className="max-w-6xl mx-auto pb-16">
       {/* ── Hero ── */}
@@ -80,7 +74,7 @@ export default function FeaturesPage() {
             className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 text-xs font-semibold mb-6"
           >
             <Sparkles className="w-3.5 h-3.5" />
-            {isAr ? 'ادوات طلابية متقدمة' : 'Advanced Student Tools'}
+            ادوات طلابية متقدمة
           </motion.div>
           <motion.h1
             initial={{ opacity: 0, y: 12 }}
@@ -88,10 +82,10 @@ export default function FeaturesPage() {
             transition={{ duration: 0.5, delay: 0.15 }}
             className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-4 tracking-tight leading-tight"
           >
-            {isAr ? 'ادرس بذكاء' : 'Study Smarter,'}
+            ادرس بذكاء
             <br />
             <span className="text-primary-600 dark:text-primary-400">
-              {isAr ? 'وليس بجهد' : 'Not Harder'}
+              وليس بجهد
             </span>
           </motion.h1>
           <motion.p
@@ -100,9 +94,7 @@ export default function FeaturesPage() {
             transition={{ duration: 0.5, delay: 0.25 }}
             className="text-gray-500 dark:text-gray-400 max-w-xl mx-auto mb-8 text-base md:text-lg leading-relaxed"
           >
-            {isAr
-              ? 'مورفن للطلاب هو حقيبة أدوات شاملة مصممة لمساعدتك على الدراسة بذكاء. استكشف أدواتنا القوية أدناه.'
-              : 'Morven for Students is an all-in-one toolkit designed to help you study smarter. Explore our powerful features below.'}
+            مورفن للطلاب هو حقيبة أدوات شاملة مصممة لمساعدتك على الدراسة بذكاء. استكشف أدواتنا القوية أدناه.
           </motion.p>
           <motion.div
             initial={{ opacity: 0, y: 12 }}
@@ -110,7 +102,7 @@ export default function FeaturesPage() {
             transition={{ duration: 0.5, delay: 0.35 }}
           >
             <Button as="link" to="/tools" variant="primary" size="lg" icon={<ArrowRight className="w-5 h-5" />} iconRight={undefined}>
-              {isAr ? 'استكشف الأدوات' : 'Explore Tools'}
+              استكشف الأدوات
             </Button>
           </motion.div>
         </div>
@@ -126,12 +118,10 @@ export default function FeaturesPage() {
           className="text-center mb-10"
         >
           <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-3">
-            {isAr ? 'كل ما تحتاجه في مكان واحد' : 'Everything You Need, In One Place'}
+            كل ما تحتاجه في مكان واحد
           </h2>
           <p className="text-gray-500 dark:text-gray-400 max-w-lg mx-auto">
-            {isAr
-              ? 'أدوات متنوعة تغطي احتياجاتك الدراسية من PDF إلى PowerPoint.'
-              : 'A diverse set of tools covering your study needs from PDF to PowerPoint.'}
+            أدوات متنوعة تغطي احتياجاتك الدراسية من PDF إلى PowerPoint.
           </p>
         </motion.div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -151,10 +141,10 @@ export default function FeaturesPage() {
                   <Icon className="w-5.5 h-5.5 text-primary-600 dark:text-primary-400" />
                 </div>
                 <h3 className="font-semibold text-gray-900 dark:text-white mb-2 text-sm">
-                  {isAr ? card.titleAr : card.titleEn}
+                  {card.title}
                 </h3>
                 <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
-                  {isAr ? card.descAr : card.descEn}
+                  {card.desc}
                 </p>
               </motion.div>
             );
@@ -172,12 +162,10 @@ export default function FeaturesPage() {
           className="text-center mb-10"
         >
           <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-3">
-            {isAr ? 'لماذا تختار مورفن؟' : 'Why Choose Morven?'}
+            لماذا تختار مورفن؟
           </h2>
           <p className="text-gray-500 dark:text-gray-400 max-w-lg mx-auto">
-            {isAr
-              ? 'مبنية للطلاب، بواسطة طلاب.'
-              : 'Built for students, by students.'}
+            مبنية للطلاب، بواسطة طلاب.
           </p>
         </motion.div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -198,10 +186,10 @@ export default function FeaturesPage() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-900 dark:text-white text-sm mb-1">
-                    {isAr ? item.titleAr : item.titleEn}
+                    {item.title}
                   </h3>
                   <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
-                    {isAr ? item.descAr : item.descEn}
+                    {item.desc}
                   </p>
                 </div>
               </motion.div>
@@ -222,7 +210,7 @@ export default function FeaturesPage() {
           {stats.map((stat, i) => (
             <div key={i}>
               <div className="text-3xl md:text-4xl font-bold text-white mb-1">{stat.value}</div>
-              <div className="text-sm text-primary-100">{isAr ? stat.labelAr : stat.labelEn}</div>
+              <div className="text-sm text-primary-100">{stat.label}</div>
             </div>
           ))}
         </div>
@@ -237,15 +225,13 @@ export default function FeaturesPage() {
         className="rounded-2xl bg-white dark:bg-dark-card border border-light-border dark:border-dark-border p-8 md:p-12 text-center"
       >
         <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-3">
-          {isAr ? 'جاهز للبدء؟' : 'Ready to Get Started?'}
+          جاهز للبدء؟
         </h2>
         <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto mb-8 text-sm md:text-base">
-          {isAr
-            ? 'ابدأ باستخدام أدواتنا الآن واحصل على أفضل تجربة دراسية.'
-            : 'Start using our tools now and get the best study experience.'}
+          ابدأ باستخدام أدواتنا الآن واحصل على أفضل تجربة دراسية.
         </p>
         <Button as="link" to="/tools" variant="primary" size="lg" icon={<ArrowRight className="w-5 h-5" />} iconRight={undefined}>
-          {isAr ? 'استكشف الأدوات' : 'Explore Tools'}
+          استكشف الأدوات
         </Button>
       </motion.section>
     </div>

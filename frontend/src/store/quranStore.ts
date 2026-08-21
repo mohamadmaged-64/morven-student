@@ -50,10 +50,8 @@ interface QuranStore {
   setSurah: (surah: Surah) => void;
   play: () => void;
   pause: () => void;
-  stop: () => void;
   seek: (time: number) => void;
   setVolume: (volume: number) => void;
-  getAudioUrl: () => string;
 
   _setCurrentTime: (time: number) => void;
   _setDuration: (duration: number) => void;
@@ -113,13 +111,6 @@ export const useQuranStore = create<QuranStore>((set, get) => ({
     audio.pause();
   },
 
-  stop: () => {
-    const audio = initAudio();
-    audio.pause();
-    audio.currentTime = 0;
-    set({ currentTime: 0, isPlaying: false });
-  },
-
   seek: (time) => {
     const audio = initAudio();
     audio.currentTime = time;
@@ -130,12 +121,6 @@ export const useQuranStore = create<QuranStore>((set, get) => ({
     const audio = initAudio();
     audio.volume = volume;
     set({ volume });
-  },
-
-  getAudioUrl: () => {
-    const state = get();
-    if (!state.currentReciter || !state.currentSurah) return '';
-    return `${state.currentReciter.server}${String(state.currentSurah.id).padStart(3, '0')}.mp3`;
   },
 
   _setCurrentTime: (time) => {

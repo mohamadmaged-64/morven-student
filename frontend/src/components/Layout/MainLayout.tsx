@@ -1,6 +1,5 @@
 import { useEffect, useRef } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
-import { useLanguageStore } from '@/store/useLanguageStore';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar/Sidebar';
 import { PomodoroTimerService } from '@/components/PomodoroTimerService';
@@ -8,21 +7,20 @@ import { ToolErrorBoundary } from '@/components/Tool/ToolErrorBoundary';
 import Footer from './Footer';
 
 export function MainLayout() {
-  const direction = useLanguageStore((s) => s.direction);
   const { pathname } = useLocation();
 
   const mainRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    document.documentElement.dir = direction;
-  }, [direction]);
+    document.documentElement.dir = 'rtl';
+  }, []);
 
   useEffect(() => {
     mainRef.current?.scrollTo(0, 0);
   }, [pathname]);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50 dark:bg-dark-bg" dir={direction}>
+    <div className="flex h-screen overflow-hidden bg-gray-50 dark:bg-dark-bg" dir="rtl">
       <PomodoroTimerService />
       <Sidebar />
 
@@ -39,7 +37,7 @@ export function MainLayout() {
     </ToolErrorBoundary>
   </div>
 
-  <Footer />
+  {pathname === '/' && <Footer />}
 </main>
       </div>
     </div>

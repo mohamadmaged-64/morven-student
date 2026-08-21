@@ -24,168 +24,91 @@ const ARABIC_STOP_WORDS = new Set([
   'كانوا','كانت','لكن','أما','حيث','كيف','لماذا','متى','أين','ما','هناك','هنا','ذلك',
 ]);
 
-const PHRASE_DICT: Record<string, Record<string, string>> = {
-  'en-ar': {
-    'hello': 'مرحبا',
-    'goodbye': 'وداعا',
-    'thank you': 'شكرا',
-    'please': 'من فضلك',
-    'yes': 'نعم',
-    'no': 'لا',
-    'good morning': 'صباح الخير',
-    'good evening': 'مساء الخير',
-    'how are you': 'كيف حالك',
-    'i am fine': 'أنا بخير',
-    'welcome': 'أهلا وسهلا',
-    'sorry': 'آسف',
-    'excuse me': 'عذرا',
-    'help': 'مساعدة',
-    'water': 'ماء',
-    'food': 'طعام',
-    'house': 'منزل',
-    'school': 'مدرسة',
-    'student': 'طالب',
-    'teacher': 'معلم',
-    'book': 'كتاب',
-    'pen': 'قلم',
-    'paper': 'ورقة',
-    'computer': 'حاسوب',
-    'internet': 'إنترنت',
-    'phone': 'هاتف',
-    'friend': 'صديق',
-    'family': 'عائلة',
-    'mother': 'أم',
-    'father': 'أب',
-    'brother': 'أخ',
-    'sister': 'أخت',
-    'city': 'مدينة',
-    'country': 'بلد',
-    'world': 'عالم',
-    'time': 'وقت',
-    'day': 'يوم',
-    'night': 'ليل',
-    'today': 'اليوم',
-    'tomorrow': 'غدا',
-    'yesterday': 'أمس',
-    'week': 'أسبوع',
-    'month': 'شهر',
-    'year': 'سنة',
-    'love': 'حب',
-    'happy': 'سعيد',
-    'sad': 'حزين',
-    'big': 'كبير',
-    'small': 'صغير',
-    'new': 'جديد',
-    'old': 'قديم',
-    'important': 'مهم',
-    'beautiful': 'جميل',
-    'study': 'دراسة',
-    'learn': 'تعلم',
-    'teach': 'يعلم',
-    'read': 'يقرأ',
-    'write': 'يكتب',
-    'think': 'يفكر',
-    'understand': 'يفهم',
-    'knowledge': 'معرفة',
-    'science': 'علم',
-    'history': 'تاريخ',
-    'math': 'رياضيات',
-    'english': 'إنجليزي',
-    'arabic': 'عربي',
-    'theology': 'علم الكلام',
-    'islamic studies': 'الدراسات الإسلامية',
-    'philosophy': 'فلسفة',
-    'literature': 'أدب',
-    'medicine': 'طب',
-    'engineering': 'هندسة',
-    'law': 'قانون',
-    'economy': 'اقتصاد',
-    'psychology': 'علم النفس',
-    'sociology': 'علم الاجتماع',
-    'biology': 'أحياء',
-    'chemistry': 'كيمياء',
-    'physics': 'فيزياء',
-    'the introduction discusses': 'يتحدث المقدمة عن',
-    'this paper examines': 'يختبر هذا البحث',
-    'the results show': 'تظهر النتائج',
-    'in conclusion': 'في الختام',
-    'further research': 'مزيد من البحث',
-  },
-  'ar-en': {
-    'مرحبا': 'hello',
-    'وداعا': 'goodbye',
-    'شكرا': 'thank you',
-    'من فضلك': 'please',
-    'نعم': 'yes',
-    'لا': 'no',
-    'صباح الخير': 'good morning',
-    'مساء الخير': 'good evening',
-    'كيف حالك': 'how are you',
-    'أنا بخير': 'i am fine',
-    'أهلا وسهلا': 'welcome',
-    'آسف': 'sorry',
-    'عذرا': 'excuse me',
-    'مساعدة': 'help',
-    'ماء': 'water',
-    'طعام': 'food',
-    'منزل': 'house',
-    'مدرسة': 'school',
-    'طالب': 'student',
-    'معلم': 'teacher',
-    'كتاب': 'book',
-    'قلم': 'pen',
-    'ورقة': 'paper',
-    'حاسوب': 'computer',
-    'إنترنت': 'internet',
-    'هاتف': 'phone',
-    'صديق': 'friend',
-    'عائلة': 'family',
-    'أم': 'mother',
-    'أب': 'father',
-    'أخ': 'brother',
-    'أخت': 'sister',
-    'مدينة': 'city',
-    'بلد': 'country',
-    'عالم': 'world',
-    'وقت': 'time',
-    'يوم': 'day',
-    'ليل': 'night',
-    'اليوم': 'today',
-    'غدا': 'tomorrow',
-    'أمس': 'yesterday',
-    'أسبوع': 'week',
-    'شهر': 'month',
-    'سنة': 'year',
-    'حب': 'love',
-    'سعيد': 'happy',
-    'حزين': 'sad',
-    'كبير': 'big',
-    'صغير': 'small',
-    'جديد': 'new',
-    'قديم': 'old',
-    'مهم': 'important',
-    'جميل': 'beautiful',
-    'دراسة': 'study',
-    'تعلم': 'learn',
-    'يعلم': 'teach',
-    'يقرأ': 'read',
-    'يكتب': 'write',
-    'يفكر': 'think',
-    'يفهم': 'understand',
-    'معرفة': 'knowledge',
-    'علم': 'science',
-    'تاريخ': 'history',
-    'رياضيات': 'math',
-    'إنجليزي': 'english',
-    'عربي': 'arabic',
-    'فلسفة': 'philosophy',
-    'أدب': 'literature',
-    'طب': 'medicine',
-    'هندسة': 'engineering',
-    'قانون': 'law',
-    'اقتصاد': 'economy',
-    'في الختام': 'in conclusion',
-  },
+const PHRASE_DICT: Record<string, string> = {
+  'hello': 'مرحبا',
+  'goodbye': 'وداعا',
+  'thank you': 'شكرا',
+  'please': 'من فضلك',
+  'yes': 'نعم',
+  'no': 'لا',
+  'good morning': 'صباح الخير',
+  'good evening': 'مساء الخير',
+  'how are you': 'كيف حالك',
+  'i am fine': 'أنا بخير',
+  'welcome': 'أهلا وسهلا',
+  'sorry': 'آسف',
+  'excuse me': 'عذرا',
+  'help': 'مساعدة',
+  'water': 'ماء',
+  'food': 'طعام',
+  'house': 'منزل',
+  'school': 'مدرسة',
+  'student': 'طالب',
+  'teacher': 'معلم',
+  'book': 'كتاب',
+  'pen': 'قلم',
+  'paper': 'ورقة',
+  'computer': 'حاسوب',
+  'internet': 'إنترنت',
+  'phone': 'هاتف',
+  'friend': 'صديق',
+  'family': 'عائلة',
+  'mother': 'أم',
+  'father': 'أب',
+  'brother': 'أخ',
+  'sister': 'أخت',
+  'city': 'مدينة',
+  'country': 'بلد',
+  'world': 'عالم',
+  'time': 'وقت',
+  'day': 'يوم',
+  'night': 'ليل',
+  'today': 'اليوم',
+  'tomorrow': 'غدا',
+  'yesterday': 'أمس',
+  'week': 'أسبوع',
+  'month': 'شهر',
+  'year': 'سنة',
+  'love': 'حب',
+  'happy': 'سعيد',
+  'sad': 'حزين',
+  'big': 'كبير',
+  'small': 'صغير',
+  'new': 'جديد',
+  'old': 'قديم',
+  'important': 'مهم',
+  'beautiful': 'جميل',
+  'study': 'دراسة',
+  'learn': 'تعلم',
+  'teach': 'يعلم',
+  'read': 'يقرأ',
+  'write': 'يكتب',
+  'think': 'يفكر',
+  'understand': 'يفهم',
+  'knowledge': 'معرفة',
+  'science': 'علم',
+  'history': 'تاريخ',
+  'math': 'رياضيات',
+  'english': 'إنجليزي',
+  'arabic': 'عربي',
+  'theology': 'علم الكلام',
+  'islamic studies': 'الدراسات الإسلامية',
+  'philosophy': 'فلسفة',
+  'literature': 'أدب',
+  'medicine': 'طب',
+  'engineering': 'هندسة',
+  'law': 'قانون',
+  'economy': 'اقتصاد',
+  'psychology': 'علم النفس',
+  'sociology': 'علم الاجتماع',
+  'biology': 'أحياء',
+  'chemistry': 'كيمياء',
+  'physics': 'فيزياء',
+  'the introduction discusses': 'يتحدث المقدمة عن',
+  'this paper examines': 'يختبر هذا البحث',
+  'the results show': 'تظهر النتائج',
+  'in conclusion': 'في الختام',
+  'further research': 'مزيد من البحث',
 };
 
 interface MCQ {
@@ -548,28 +471,21 @@ export function grammarCheck(text: string): { corrected: string; issues: string[
   return { corrected, issues };
 }
 
-export function translateText(text: string, targetLang: 'en' | 'ar'): string {
+export function translateText(text: string): string {
   const trimmed = text.trim();
   if (!trimmed) return '';
 
-  const dictKey = targetLang === 'ar' ? 'en-ar' : 'ar-en';
-  const dict = PHRASE_DICT[dictKey] || {};
-
   const lowerText = trimmed.toLowerCase();
-  for (const [from, to] of Object.entries(dict)) {
+  for (const [from, to] of Object.entries(PHRASE_DICT)) {
     if (lowerText === from.toLowerCase()) {
-      return targetLang === 'ar' ? to : capitalize(to);
+      return to;
     }
   }
 
-  for (const [from, to] of Object.entries(dict)) {
+  for (const [from, to] of Object.entries(PHRASE_DICT)) {
     const regex = new RegExp(`\\b${from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
     if (regex.test(trimmed)) {
-      const result = trimmed.replace(regex, (m) => {
-        if (targetLang === 'ar') return to;
-        return m[0] === m[0].toUpperCase() ? capitalize(to) : to;
-      });
-      return result;
+      return trimmed.replace(regex, () => to);
     }
   }
 
@@ -577,17 +493,13 @@ export function translateText(text: string, targetLang: 'en' | 'ar'): string {
   const translated = words.map(w => {
     const lower = w.toLowerCase().replace(/[^a-zA-Z\u0600-\u06FF]/g, '');
     const punct = w.replace(/[a-zA-Z\u0600-\u06FF]/g, '');
-    const found = dict[lower];
-    if (found) {
-      const result = targetLang === 'ar' ? found : found;
-      return result + punct;
-    }
-    return w;
+    const found = PHRASE_DICT[lower];
+    return found ? found + punct : w;
   });
 
   const result = translated.join(' ');
   if (result === trimmed) {
-    return `[${targetLang === 'ar' ? 'Arabic' : 'English'} translation]\n\n${trimmed}\n\nNote: Full translation requires an online translation service. The dictionary contains ${Object.keys(dict).length} common terms. Some words may not have direct translations.`;
+    return `[Arabic translation]\n\n${trimmed}\n\nNote: Full translation requires an online translation service. The dictionary contains ${Object.keys(PHRASE_DICT).length} common terms. Some words may not have direct translations.`;
   }
   return result;
 }

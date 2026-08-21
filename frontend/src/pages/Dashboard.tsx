@@ -1,8 +1,6 @@
 import { useMemo, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import { useAppStore } from '@/store/useAppStore';
-import { useLanguageStore } from '@/store/useLanguageStore';
 import { useNotesStore, sortNotes } from '@/store/useNotesStore';
 import { usePomodoroStore } from '@/store/usePomodoroStore';
 import { useFileStorage } from '@/hooks/useFileStorage';
@@ -50,7 +48,6 @@ function EmptyState({ icon: Icon, text, hint, accent }: { icon: LucideIcon; text
 
 /* ─── Quick Summary ─── */
 function QuickSummary() {
-  const { t } = useTranslation();
   const tasks = useAppStore((s) => s.tasks);
   const { files } = useFileStorage();
   const totalFocusSeconds = usePomodoroStore((s) => s.totalFocusSeconds);
@@ -63,13 +60,13 @@ function QuickSummary() {
   const filesCount = files.length;
   const pomodoroHours = useMemo(() => {
     const h = totalFocusSeconds / 3600;
-    return h >= 1 ? `${h.toFixed(1)}h` : `${Math.round(totalFocusSeconds / 60)}m`;
+    return h >= 1 ? `${h.toFixed(1)}س` : `${Math.round(totalFocusSeconds / 60)}د`;
   }, [totalFocusSeconds]);
 
   const stats = [
-    { icon: ListChecks, label: t('dashboard.workspace.tasksDueToday'), value: tasksDueToday, bg: 'bg-emerald-50', bgDark: 'dark:bg-emerald-900/30', text: 'text-emerald-600', ring: 'ring-emerald-100', ringDark: 'dark:ring-emerald-800/40', compact: false },
-    { icon: Clock, label: t('dashboard.workspace.pomodoroHours'), value: pomodoroHours, bg: 'bg-amber-50', bgDark: 'dark:bg-amber-900/30', text: 'text-amber-600', ring: 'ring-amber-100', ringDark: 'dark:ring-amber-800/40', compact: false },
-    { icon: FileStack, label: t('dashboard.workspace.filesStored'), value: filesCount, bg: 'bg-sky-50', bgDark: 'dark:bg-sky-900/30', text: 'text-sky-600', ring: 'ring-sky-100', ringDark: 'dark:ring-sky-800/40', compact: true },
+    { icon: ListChecks, label: 'مهام مستحقة اليوم', value: tasksDueToday, bg: 'bg-emerald-50', bgDark: 'dark:bg-emerald-900/30', text: 'text-emerald-600', ring: 'ring-emerald-100', ringDark: 'dark:ring-emerald-800/40', compact: false },
+    { icon: Clock, label: 'ساعات بومودورو اليوم', value: pomodoroHours, bg: 'bg-amber-50', bgDark: 'dark:bg-amber-900/30', text: 'text-amber-600', ring: 'ring-amber-100', ringDark: 'dark:ring-amber-800/40', compact: false },
+    { icon: FileStack, label: 'ملفات محفوظة', value: filesCount, bg: 'bg-sky-50', bgDark: 'dark:bg-sky-900/30', text: 'text-sky-600', ring: 'ring-sky-100', ringDark: 'dark:ring-sky-800/40', compact: true },
   ];
 
   return (
@@ -94,7 +91,6 @@ function QuickSummary() {
 
 /* ─── Tasks Panel ─── */
 function TasksPanel() {
-  const { t } = useTranslation();
   const tasks = useAppStore((s) => s.tasks);
   const toggleTask = useAppStore((s) => s.toggleTask);
 
@@ -127,7 +123,7 @@ function TasksPanel() {
   return (
     <div className="w-full flex flex-col">
       <PanelHeader
-        title={t('dashboard.workspace.tasks')}
+        title={'المهام'}
         icon={CheckSquare}
         accent="bg-emerald-50"
         action={
@@ -137,7 +133,7 @@ function TasksPanel() {
         }
       />
       {activeTasks.length === 0 ? (
-        <EmptyState icon={CheckSquare} text={t('dashboard.workspace.noTasks')} hint={t('dashboard.workspace.noTasksHint')} accent="bg-emerald-50" />
+        <EmptyState icon={CheckSquare} text={'لا توجد مهام بعد'} hint={'أضف مهمة للبدء'} accent="bg-emerald-50" />
       ) : (
         <div className="space-y-1">
           {activeTasks.map((task) => (
@@ -148,7 +144,7 @@ function TasksPanel() {
               <button
                 onClick={() => toggleTask(task.id)}
                 className="w-5 h-5 rounded-md border-2 border-gray-300 dark:border-gray-600 hover:border-primary-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500 transition-colors shrink-0 flex items-center justify-center"
-                aria-label={t('tasks.markComplete')}
+                aria-label={'وضع عامة مكتملة'}
               >
                 {task.completed && (
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-primary-500">
@@ -161,9 +157,9 @@ function TasksPanel() {
               {task.dueDate && (
                 <span className={`text-xs font-medium shrink-0 px-2 py-0.5 rounded-full ${task.dueDate < today ? 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400' : task.dueDate === today ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400' : 'bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400'}`}>
                   {task.dueDate === today
-                    ? t('dashboard.workspace.today')
+                    ? 'اليوم'
                     : task.dueDate < today
-                      ? t('dashboard.workspace.overdue')
+                      ? 'متأخر'
                       : new Date(task.dueDate).toLocaleDateString()}
                 </span>
               )}
@@ -175,7 +171,7 @@ function TasksPanel() {
         to="/tool/task-manager"
         className="block mt-4 text-center text-xs font-semibold text-primary-600 hover:text-primary-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500 py-2 rounded-xl hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors"
       >
-        {t('dashboard.workspace.viewAll')} →
+        {'عرض الكل'} →
       </Link>
     </div>
   );
@@ -183,7 +179,6 @@ function TasksPanel() {
 
 /* ─── Files Panel ─── */
 function FilesPanel() {
-  const { t } = useTranslation();
   const { files, upload, remove } = useFileStorage();
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -212,7 +207,7 @@ function FilesPanel() {
   return (
     <div className="w-full flex flex-col">
       <PanelHeader
-        title={t('dashboard.workspace.files')}
+        title={'الملفات'}
         icon={FolderOpen}
         accent="bg-sky-50"
         action={
@@ -222,13 +217,13 @@ function FilesPanel() {
               onClick={() => inputRef.current?.click()}
               className="text-xs font-semibold text-primary-600 hover:text-primary-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500 transition-colors"
             >
-              {t('dashboard.workspace.uploadFile')}
+              {'رفع ملف'}
             </button>
           </>
         }
       />
       {recentFiles.length === 0 ? (
-        <EmptyState icon={FolderOpen} text={t('dashboard.workspace.noFiles')} hint={t('dashboard.workspace.noFilesHint')} accent="bg-sky-100" />
+        <EmptyState icon={FolderOpen} text={'لا توجد ملفات محفوظة'} hint={'ارفع ملفاً للبدء'} accent="bg-sky-100" />
       ) : (
         <div className="space-y-1">
           {recentFiles.map((f) => (
@@ -250,8 +245,8 @@ function FilesPanel() {
                 <button
                   onClick={() => handleDownload(f)}
                   className="p-1.5 rounded-lg text-gray-400 hover:text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500 transition-colors"
-                  aria-label={t('ui.download')}
-                  title={t('ui.download')}
+                  aria-label={'تنزيل'}
+                  title={'تنزيل'}
                 >
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
@@ -262,8 +257,8 @@ function FilesPanel() {
                 <button
                   onClick={() => remove(f.id)}
                   className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500 transition-colors"
-                  aria-label={t('ui.delete')}
-                  title={t('ui.delete')}
+                  aria-label={'حذف'}
+                  title={'حذف'}
                 >
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <line x1="18" y1="6" x2="6" y2="18" />
@@ -281,7 +276,6 @@ function FilesPanel() {
 
 /* ─── Pomodoro Panel ─── */
 function PomodoroPanel() {
-  const { t } = useTranslation();
   const mode = usePomodoroStore((s) => s.mode);
   const timeRemaining = usePomodoroStore((s) => s.timeRemaining);
   const isRunning = usePomodoroStore((s) => s.isRunning);
@@ -301,7 +295,7 @@ function PomodoroPanel() {
       : settings.longBreakDuration * 60;
   const progress = totalDuration > 0 ? ((totalDuration - timeRemaining) / totalDuration) * 100 : 0;
 
-  const modeLabel = mode === 'focus' ? t('pomodoro.focus') : mode === 'break' ? t('pomodoro.break') : t('pomodoro.longBreak');
+  const modeLabel = mode === 'focus' ? 'تركيز' : mode === 'break' ? 'استراحة' : 'استراحة طويلة';
   const circumference = 2 * Math.PI * 44;
   const strokeDashoffset = circumference - (progress / 100) * circumference;
 
@@ -309,7 +303,7 @@ function PomodoroPanel() {
 
   return (
     <div className="w-full flex flex-col">
-      <PanelHeader title={t('dashboard.workspace.pomodoro')} icon={Clock} accent="bg-blue-50" />
+      <PanelHeader title={'بومودورو'} icon={Clock} accent="bg-blue-50" />
       <div className="flex items-center gap-6">
         <div className="relative w-28 h-28 shrink-0">
           <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
@@ -342,32 +336,32 @@ function PomodoroPanel() {
             {modeLabel}
           </p>
           <p className="text-xs text-gray-400 mb-4">
-            {t('pomodoro.sessionCount', { current: currentSession + 1, total: settings.sessionsUntilLongBreak })}
+            {`الجلسة ${currentSession + 1} من ${settings.sessionsUntilLongBreak}`}
           </p>
           <div className="flex items-center gap-2">
             {!isRunning ? (
               <button
                 onClick={timeRemaining > 0 && timeRemaining < totalDuration ? resume : start}
                 className="px-4 py-2 rounded-xl bg-primary-600 hover:bg-primary-700 text-white text-xs font-semibold shadow-sm shadow-primary-600/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500 transition-all"
-                aria-label={timeRemaining > 0 && timeRemaining < totalDuration ? t('ui.resume') : t('ui.start')}
+                aria-label={timeRemaining > 0 && timeRemaining < totalDuration ? 'استئناف' : 'بدء'}
               >
-                {timeRemaining > 0 && timeRemaining < totalDuration ? t('ui.resume') : t('ui.start')}
+                {timeRemaining > 0 && timeRemaining < totalDuration ? 'استئناف' : 'بدء'}
               </button>
             ) : (
               <button
                 onClick={pause}
                 className="px-4 py-2 rounded-xl bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/15 text-gray-700 dark:text-gray-300 text-xs font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500 transition-all"
-                aria-label={t('ui.pause')}
+                aria-label={'إيقاف مؤقت'}
               >
-                {t('ui.pause')}
+                {'إيقاف مؤقت'}
               </button>
             )}
             <button
               onClick={reset}
               className="px-4 py-2 rounded-xl bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/15 text-gray-700 dark:text-gray-300 text-xs font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500 transition-all"
-              aria-label={t('ui.reset')}
+              aria-label={'إعادة تعيين'}
             >
-              {t('ui.reset')}
+              {'إعادة تعيين'}
             </button>
           </div>
         </div>
@@ -378,8 +372,6 @@ function PomodoroPanel() {
 
 /* ─── Exams Panel ─── */
 function ExamsPanel() {
-  const { t } = useTranslation();
-  const { language } = useLanguageStore();
   const exams = useAppStore((s) => s.exams);
   const navigate = useNavigate();
 
@@ -411,7 +403,7 @@ function ExamsPanel() {
   return (
     <div className="w-full flex flex-col">
       <PanelHeader
-        title={t('dashboard.workspace.exams')}
+        title={'عداد الامتحانات'}
         icon={GraduationCap}
         accent="bg-purple-50"
         action={
@@ -419,12 +411,12 @@ function ExamsPanel() {
             onClick={() => navigate('/tool/exam-countdown')}
             className="text-xs font-semibold text-primary-600 hover:text-primary-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500 transition-colors"
           >
-            {t('dashboard.workspace.addExam')}
+            {'إضافة امتحان'}
           </button>
         }
       />
       {sortedExams.length === 0 ? (
-        <EmptyState icon={GraduationCap} text={t('dashboard.workspace.noExams')} hint={t('dashboard.workspace.noExamsHint')} accent="bg-purple-100" />
+        <EmptyState icon={GraduationCap} text={'لا توجد امتحانات مجدولة'} hint={'أضف امتحاناً لتتبع العداد'} accent="bg-purple-100" />
       ) : (
         <div className="space-y-2">
           {sortedExams.map((exam) => {
@@ -435,7 +427,7 @@ function ExamsPanel() {
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 truncate">{exam.name}</p>
                   <p className="text-xs text-gray-400 dark:text-gray-500">
-                    {new Date(exam.date).toLocaleDateString(language === 'ar' ? 'ar-SA' : 'en-US', { month: 'short', day: 'numeric' })}
+                    {new Date(exam.date).toLocaleDateString('ar-SA', { month: 'short', day: 'numeric' })}
                   </p>
                 </div>
                 <span className={`text-xs font-semibold shrink-0 px-2.5 py-1 rounded-full ${
@@ -448,12 +440,12 @@ function ExamsPanel() {
                         : 'bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-400'
                 }`}>
                   {days < 0
-                    ? t('dashboard.workspace.overdue')
+                    ? 'متأخر'
                     : days === 0
-                      ? t('dashboard.workspace.today')
+                      ? 'اليوم'
                       : days === 1
-                        ? t('dashboard.workspace.tomorrow')
-                        : t('dashboard.workspace.daysLeft', { count: days })}
+                        ? 'غدًا'
+                        : `${days} أيام متبقية`}
                 </span>
               </div>
             );
@@ -466,7 +458,6 @@ function ExamsPanel() {
 
 /* ─── Notes Panel ─── */
 function NotesPanel() {
-  const { t } = useTranslation();
   const notes = useNotesStore((s) => s.notes);
   const navigate = useNavigate();
 
@@ -475,7 +466,7 @@ function NotesPanel() {
   return (
     <div className="w-full flex flex-col">
       <PanelHeader
-        title={t('dashboard.workspace.notes')}
+        title={'الملاحظات'}
         icon={StickyNote}
         accent="bg-amber-50"
         action={
@@ -483,12 +474,12 @@ function NotesPanel() {
             onClick={() => navigate('/tool/notes')}
             className="text-xs font-semibold text-primary-600 hover:text-primary-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500 transition-colors"
           >
-            {t('dashboard.workspace.viewAll')}
+            {'عرض الكل'}
           </button>
         }
       />
       {recentNotes.length === 0 ? (
-        <EmptyState icon={StickyNote} text={t('dashboard.workspace.noNotes')} hint={t('dashboard.workspace.noNotesHint')} accent="bg-amber-100" />
+        <EmptyState icon={StickyNote} text={'لا توجد ملاحظات بعد'} hint={'أنشئ ملاحظة للبدء'} accent="bg-amber-100" />
       ) : (
         <div className="space-y-1">
           {recentNotes.map((note) => (
@@ -504,7 +495,7 @@ function NotesPanel() {
               )}
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">
-                  {note.title || t('dashboard.workspace.recent')}
+                  {note.title || 'الأخيرة'}
                 </p>
                 {note.content && (
                   <p className="text-xs text-gray-400 dark:text-gray-500 truncate">{note.content.slice(0, 60)}</p>
@@ -522,7 +513,6 @@ function NotesPanel() {
 
 /* ─── Dashboard ─── */
 export default function Dashboard() {
-  const { t } = useTranslation();
   const card = 'p-7 lg:p-9 min-h-[320px] lg:min-h-[380px] flex flex-col rounded-2xl border border-light-border bg-white shadow-card dark:bg-dark-card dark:border-dark-border dark:shadow-card-dark';
 
   return (
@@ -530,7 +520,7 @@ export default function Dashboard() {
       {/* Welcome Heading */}
       <div className="text-center mb-10">
         <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-gray-100 tracking-tight">
-          {t('dashboard.workspace.welcomeHeading')}
+          {'يا طالبَ العلمِ، أهلًا بمَقدَمِكَ، وطيبًا بمُقامِكَ'}
         </h1>
       </div>
 

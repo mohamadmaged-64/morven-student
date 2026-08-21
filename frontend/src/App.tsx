@@ -5,7 +5,6 @@ import { NotificationHost } from '@/components/Layout/NotificationHost';
 import { ToolErrorBoundary } from '@/components/Tool/ToolErrorBoundary';
 import { useAppStore } from '@/store/useAppStore';
 import { useThemeStore } from '@/store/useThemeStore';
-import { useLanguageStore } from '@/store/useLanguageStore';
 import { getToolById } from '@/data/tools';
 import type { ToolCategory } from '@/types';
 import Dashboard from '@/pages/Dashboard';
@@ -48,31 +47,26 @@ const toolPageMap: Record<ToolCategory, ComponentType<{ toolId: string }>> = {
 function ToolPage() {
   const { toolId } = useParams<{ toolId: string }>();
   const addRecentTool = useAppStore((s) => s.addRecentTool);
-  const setActiveTool = useAppStore((s) => s.setActiveTool);
 
   const tool = toolId ? getToolById(toolId) : undefined;
 
   useEffect(() => {
     if (toolId) {
       addRecentTool(toolId);
-      setActiveTool(toolId);
     }
-    return () => {
-      setActiveTool(null);
-    };
-  }, [toolId, addRecentTool, setActiveTool]);
+  }, [toolId, addRecentTool]);
 
   if (!tool) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
         <div className="text-6xl mb-4">🔍</div>
-        <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-2">Tool Not Found</h2>
-        <p className="text-gray-500 dark:text-gray-400 mb-6">The tool you are looking for does not exist.</p>
+        <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-2">الأداة غير موجودة</h2>
+        <p className="text-gray-500 dark:text-gray-400 mb-6">الأداة التي تبحث عنها غير موجودة.</p>
         <a
           href="/"
           className="px-6 py-3 bg-primary-500 hover:bg-primary-600 text-white rounded-xl font-medium transition-colors"
         >
-          Back to Dashboard
+          العودة للصفحة الرئيسية  
         </a>
       </div>
     );
@@ -84,8 +78,8 @@ function ToolPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
         <div className="text-6xl mb-4">⚠️</div>
-        <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-2">Category Not Supported</h2>
-        <p className="text-gray-500 dark:text-gray-400">This tool category is not yet implemented.</p>
+        <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-2">الفئة غير مدعومة</h2>
+        <p className="text-gray-500 dark:text-gray-400">هذه الفئة من الأدوات غير متاحة حالياً.</p>
       </div>
     );
   }
@@ -101,9 +95,8 @@ export default function App() {
   useEffect(() => {
     const theme = useThemeStore.getState().theme;
     document.documentElement.classList.add(theme);
-    const dir = useLanguageStore.getState().direction;
-    document.documentElement.dir = dir;
-    document.documentElement.lang = useLanguageStore.getState().language;
+    document.documentElement.dir = 'rtl';
+    document.documentElement.lang = 'ar';
   }, []);
 
   return (
