@@ -137,10 +137,10 @@ export const tools: Tool[] = [
   { id: 'compress-ppt', name: 'ضغط PowerPoint', description: 'تقليل حجم عرض PowerPoint', icon: Archive, category: 'powerpoint' },
   
   // VIDEO
-  { id: 'extract-audio-video', name: 'استخراج الصوت من فيديو', description: 'استخراج المسار الصوتي من ملفات الفيديو', icon: Music, comingSoon: true, category: 'video' },
-  { id: 'compress-video', name: 'ضغط الفيديو', description: 'تقليل حجم ملف الفيديو مع الحفاظ على الجودة', icon: Minimize2, comingSoon: true, category: 'video' },
-  { id: 'convert-video', name: 'تحويل الفيديو', description: 'تحويل الفيديوهات بين صيغ مختلفة', icon: ArrowLeftRight, comingSoon: true, category: 'video' },
-  { id: 'video-to-audio', name: 'فيديو إلى صوت', description: 'تحويل ملفات الفيديو إلى صيغ صوتية', icon: Mic, comingSoon: true, category: 'video' },
+  { id: 'extract-audio-video', name: 'استخراج الصوت من فيديو', description: 'استخراج المسار الصوتي من ملفات الفيديو بصيغة MP3 أو WAV أو M4A', icon: Music, category: 'video' },
+  { id: 'compress-video', name: 'ضغط الفيديو', description: 'تقليل حجم ملف الفيديو مع الحفاظ على الجودة عبر FFmpeg', icon: Minimize2, category: 'video' },
+  { id: 'convert-video', name: 'تحويل الفيديو', description: 'تحويل الفيديوهات بين MP4 وWebM وMOV وMKV', icon: ArrowLeftRight, category: 'video' },
+  { id: 'video-to-audio', name: 'فيديو إلى صوت', description: 'تحويل ملفات الفيديو إلى صيغ صوتية', icon: Mic, category: 'video' },
 
   // IMAGES
   { id: 'bg-remove', name: 'إزالة الخلفية', description: 'إزالة الخلفية من الصور تلقائياً', icon: Scissors, comingSoon: true, category: 'images' },

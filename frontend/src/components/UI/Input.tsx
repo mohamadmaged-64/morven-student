@@ -1,4 +1,4 @@
-import { type InputHTMLAttributes, type TextareaHTMLAttributes, type SelectHTMLAttributes, type ReactNode, forwardRef } from 'react';
+import { type InputHTMLAttributes, type TextareaHTMLAttributes, type SelectHTMLAttributes, type ReactNode, forwardRef, useId } from 'react';
 
 type InputBaseProps = {
   label?: string;
@@ -40,9 +40,9 @@ const inputBaseClasses = [
 const errorClasses =
   'border-red-500 focus:ring-red-500/40 focus:border-red-500';
 
-function InputLabel({ label, required }: { label: string; required?: boolean }) {
+function InputLabel({ label, required, htmlFor }: { label: string; required?: boolean; htmlFor?: string }) {
   return (
-    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+    <label htmlFor={htmlFor} className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
       {label}
       {required && <span className="text-red-500 ms-0.5">*</span>}
     </label>
@@ -67,10 +67,12 @@ function HelperText({ text }: { text: string }) {
 }
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ label, error, helperText, icon, iconRight, wrapperClassName = '', className = '', required, ...props }, ref) => {
+  ({ label, error, helperText, icon, iconRight, wrapperClassName = '', className = '', required, id, ...props }, ref) => {
+    const autoId = useId();
+    const inputId = id || autoId;
     return (
       <div className={`${baseWrapperClasses} ${wrapperClassName}`}>
-        {label && <InputLabel label={label} required={required} />}
+        {label && <InputLabel label={label} required={required} htmlFor={inputId} />}
         <div className="relative">
           {icon && (
             <span className="absolute inset-y-0 start-0 flex items-center ps-3.5 text-gray-400 dark:text-gray-500 pointer-events-none">
@@ -79,9 +81,10 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           )}
           <input
             ref={ref}
+            id={inputId}
             className={`${inputBaseClasses} ${icon ? 'ps-10' : ''} ${iconRight ? 'pe-10' : ''} ${error ? errorClasses : ''} ${className}`}
             aria-invalid={!!error}
-            aria-describedby={error ? `${props.id}-error` : helperText ? `${props.id}-helper` : undefined}
+            aria-describedby={error ? `${inputId}-error` : helperText ? `${inputId}-helper` : undefined}
             required={required}
             {...props}
           />
@@ -99,15 +102,18 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
 );
 
 const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
-  ({ label, error, helperText, wrapperClassName = '', className = '', required, ...props }, ref) => {
+  ({ label, error, helperText, wrapperClassName = '', className = '', required, id, ...props }, ref) => {
+    const autoId = useId();
+    const textAreaId = id || autoId;
     return (
       <div className={`${baseWrapperClasses} ${wrapperClassName}`}>
-        {label && <InputLabel label={label} required={required} />}
+        {label && <InputLabel label={label} required={required} htmlFor={textAreaId} />}
         <textarea
           ref={ref}
+          id={textAreaId}
           className={`${inputBaseClasses} resize-none min-h-[100px] ${error ? errorClasses : ''} ${className}`}
           aria-invalid={!!error}
-          aria-describedby={error ? `${props.id}-error` : helperText ? `${props.id}-helper` : undefined}
+          aria-describedby={error ? `${textAreaId}-error` : helperText ? `${textAreaId}-helper` : undefined}
           required={required}
           {...props}
         />
@@ -119,10 +125,12 @@ const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
 );
 
 const Select = forwardRef<HTMLSelectElement, SelectProps>(
-  ({ label, error, helperText, options, placeholder, icon, wrapperClassName = '', className = '', required, ...props }, ref) => {
+  ({ label, error, helperText, options, placeholder, icon, wrapperClassName = '', className = '', required, id, ...props }, ref) => {
+    const autoId = useId();
+    const selectId = id || autoId;
     return (
       <div className={`${baseWrapperClasses} ${wrapperClassName}`}>
-        {label && <InputLabel label={label} required={required} />}
+        {label && <InputLabel label={label} required={required} htmlFor={selectId} />}
         <div className="relative">
           {icon && (
             <span className="absolute inset-y-0 start-0 flex items-center ps-3.5 text-gray-400 dark:text-gray-500 pointer-events-none">
@@ -131,6 +139,7 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
           )}
           <select
             ref={ref}
+            id={selectId}
             className={`${inputBaseClasses} ${icon ? 'ps-10' : ''} pe-10 appearance-none ${error ? errorClasses : ''} ${className}`}
             aria-invalid={!!error}
             required={required}

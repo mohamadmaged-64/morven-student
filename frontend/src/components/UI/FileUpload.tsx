@@ -22,6 +22,11 @@ type FileUploadProps = {
   label?: string;
   description?: string;
   readAs?: 'ArrayBuffer' | 'DataURL';
+  /**
+   * When false the selected files are handed over without reading their
+   * bytes into memory (recommended for very large media uploads).
+   */
+  readFileData?: boolean;
 };
 
 let fileIdCounter = 0;
@@ -47,6 +52,7 @@ function FileUpload({
   label,
   description,
   readAs = 'ArrayBuffer',
+  readFileData = true,
 }: FileUploadProps) {
   console.log("Received label:", label);
   const [files, setFiles] = useState<UploadedFile[]>([]);
@@ -89,6 +95,12 @@ function FileUpload({
       }));
 
       setFiles((prev) => [...prev, ...uploaded]);
+
+      if (!readFileData) {
+        // Skip the FileReader pass entirely; report files immediately.
+        onFilesSelected?.(uploaded.map((uf) => ({ file: uf.file, data: '' })));
+        return;
+      }
 
       uploaded.forEach((uf) => {
         setFiles((prev) =>
@@ -136,7 +148,7 @@ function FileUpload({
         onFilesSelected?.(results);
       }).catch(() => {});
     },
-    [files.length, maxFiles, maxSize, accept, readAs, onFilesSelected],
+    [files.length, maxFiles, maxSize, accept, readAs, readFileData, onFilesSelected],
   );
 
   const handleDragOver = (e: DragEvent) => {
