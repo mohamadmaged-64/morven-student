@@ -2,6 +2,7 @@ import { useEffect, type ComponentType } from 'react';
 import { BrowserRouter, Routes, Route, useParams } from 'react-router-dom';
 import { MainLayout } from '@/components/Layout/MainLayout';
 import { NotificationHost } from '@/components/Layout/NotificationHost';
+import { PrayerPauseHost } from '@/features/prayer-pause';
 import { ToolErrorBoundary } from '@/components/Tool/ToolErrorBoundary';
 import { ArabicIndicNumerals } from '@/components/ArabicIndicNumerals';
 import { useAppStore } from '@/store/useAppStore';
@@ -104,6 +105,7 @@ export default function App() {
     <BrowserRouter>
       <ArabicIndicNumerals />
       <NotificationHost />
+      <PrayerPauseHost />
       <Routes>
         <Route element={<MainLayout />}>
           <Route path="/" element={<Dashboard />} />

@@ -140,10 +140,18 @@ function NotificationContainer({
   onDismiss,
   position = 'top-right',
   className = '',
-}: NotificationProps) {
+  suppressed = false,
+}: NotificationProps & { suppressed?: boolean }) {
   return (
     <div
-      className={`fixed z-[100] flex flex-col gap-2 ${positionClasses[position]} ${className}`}
+      data-notification-container=""
+      className={`fixed z-[100] flex flex-col gap-2 ${positionClasses[position]} ${className} ${
+        // Prayer Pause (Phase 5): while the pause overlay is up, notifications
+        // stay mounted (state and expiry timers untouched) but are invisible
+        // and non-interactive. Never raised above the overlay via z-index.
+        suppressed ? 'invisible pointer-events-none' : ''
+      }`}
+      aria-hidden={suppressed || undefined}
       aria-live="polite"
       aria-label="Notifications"
     >
