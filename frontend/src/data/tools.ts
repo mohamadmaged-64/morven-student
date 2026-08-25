@@ -51,6 +51,7 @@ export const tools: Tool[] = [
   { id: 'notes', name: 'الملاحظات', description: 'أنشئ واحفظ ملاحظاتك بسرعة مع حفظ تلقائي', icon: NotebookPen, category: 'general' },
   { id: 'pomodoro-timer', name: 'مؤقت بومودورو', description: 'تعزيز الإنتاجية بجلسات دراسة محددة الوقت', icon: Timer, category: 'general' },
   { id: 'exam-countdown', name: 'عد تنازلي للامتحان', description: 'تتبع الأيام المتبقية حتى امتحاناتك', icon: Calendar, category: 'general' },
+  { id: 'cv-builder', name: 'منشئ السيرة الذاتية', description: 'أنشئ سيرة ذاتية احترافية بتصميمات متعددة وتصديرها كملف PDF', icon: FileText, category: 'general' },
 
   // MEDICAL
   { id: 'disease-explain', name: 'شرح الأمراض', description: 'الحصول على شروحات بسيطة للأمراض والحالات', icon: Stethoscope, category: 'medical' },

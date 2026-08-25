@@ -19,6 +19,7 @@ import { usePomodoroStore, type PomodoroMode, type PomodoroSettings } from '@/st
 import type { Task, ExamCountdown } from '@/types';
 import QuranPage from './Quran';
 import NotesPage from './Notes';
+import CvBuilder from './cv/CvBuilder';
 import { ToolHero } from '@/components/Tool/ToolHero';
 
 
@@ -52,6 +53,10 @@ export default function GeneralToolPage({ toolId }: GeneralToolPageProps) {
 
     case 'notes':
       content = <NotesPage />;
+      break;
+
+    case 'cv-builder':
+      content = <CvBuilder />;
       break;
 
     default:
