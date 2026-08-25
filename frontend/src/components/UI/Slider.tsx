@@ -57,14 +57,16 @@ function Slider({
     handleChange(calculateValue(e.clientX));
   };
 
+  const isRtl = typeof document !== 'undefined' && document.documentElement.dir === 'rtl';
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (disabled) return;
     let newValue = value;
 
     if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
-      newValue = Math.min(max, value + step);
+      newValue = isRtl ? Math.max(min, value - step) : Math.min(max, value + step);
     } else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
-      newValue = Math.max(min, value - step);
+      newValue = isRtl ? Math.min(max, value + step) : Math.max(min, value - step);
     } else if (e.key === 'Home') {
       newValue = min;
     } else if (e.key === 'End') {
@@ -111,6 +113,7 @@ function Slider({
 
       <div
         ref={trackRef}
+        dir="ltr"
         className="relative w-full h-6 flex items-center cursor-pointer"
         onClick={handleTrackClick}
         onKeyDown={handleKeyDown}

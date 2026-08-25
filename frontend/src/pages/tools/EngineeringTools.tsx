@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getToolById } from '@/data/tools';
 import {
@@ -519,13 +520,17 @@ function PasswordGeneratorTool() {
   };
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-8">
       <Card className="space-y-5">
-        <Slider
+        <Input
+          type="number"
           min={6}
           max={64}
           value={length}
-          onChange={setLength}
+          onChange={(e) => {
+            const v = parseInt(e.target.value, 10);
+            if (!isNaN(v)) setLength(Math.min(64, Math.max(6, v)));
+          }}
           label={'الطول'}
         />
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -549,12 +554,41 @@ function PasswordGeneratorTool() {
             </label>
           ))}
         </div>
+      </Card>
+
+      <div className="flex justify-center py-1">
         <Button onClick={generate} disabled={!uppercase && !lowercase && !numbers && !symbols}>
           {'توليد كلمة المرور'}
         </Button>
-      </Card>
+      </div>
+
       {password && (
-        <ResultBox title={'كلمة المرور'} value={password} onClear={() => setPassword('')} />
+        <Card className="space-y-5">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200">{'كلمة المرور'}</h3>
+            <div className="flex items-center gap-4">
+              <Button variant="secondary" size="sm" onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(password);
+                  addNotification('تم النسخ إلى الحافظة', 'success');
+                } catch {
+                  addNotification('فشل النسخ', 'error');
+                }
+              }}>
+                {'نسخ'}
+              </Button>
+              <Button variant="ghost" size="sm" onClick={() => setPassword('')}>
+                {'مسح'}
+              </Button>
+            </div>
+          </div>
+          <pre
+            dir="ltr"
+            className="w-full min-h-[100px] max-h-80 overflow-auto rounded-xl bg-gray-50 dark:bg-dark-surface border border-light-border dark:border-dark-border p-4 text-sm font-mono text-gray-800 dark:text-gray-100 whitespace-pre-wrap break-words"
+          >
+            {password}
+          </pre>
+        </Card>
       )}
     </div>
   );
@@ -736,6 +770,340 @@ function GradientGenerator() {
         />
       </Card>
       <ResultBox title={'كود CSS'} value={`background: ${css};`} onClear={() => undefined} />
+    </div>
+  );
+}
+
+// =============================================================================
+// 11a. CSS BEAUTIFIER
+// =============================================================================
+
+function cssTokenize(src: string): string[] {
+  const tokens: string[] = [];
+  let i = 0;
+  while (i < src.length) {
+    if (src[i] === '"' || src[i] === "'") {
+      const q = src[i];
+      let s = q;
+      i++;
+      while (i < src.length && src[i] !== q) {
+        if (src[i] === '\\') { s += src[i] + (src[i + 1] || ''); i += 2; continue; }
+        s += src[i]; i++;
+      }
+      if (i < src.length) { s += src[i]; i++; }
+      tokens.push(s);
+    } else if (src[i] === '/' && src[i + 1] === '*') {
+      let s = '/*';
+      i += 2;
+      while (i < src.length && !(src[i] === '*' && src[i + 1] === '/')) { s += src[i]; i++; }
+      if (i < src.length) { s += '*/'; i += 2; }
+      tokens.push(s);
+    } else if (src[i] === '/' && src[i + 1] === '/') {
+      let s = '';
+      while (i < src.length && src[i] !== '\n') { s += src[i]; i++; }
+      tokens.push(s);
+    } else {
+      let s = '';
+      while (i < src.length && src[i] !== '"' && src[i] !== "'" && !(src[i] === '/' && (src[i + 1] === '*' || src[i + 1] === '/'))) {
+        s += src[i]; i++;
+      }
+      if (s) tokens.push(s);
+    }
+  }
+  return tokens;
+}
+
+function beautifyCss(src: string): string {
+  const tokens = cssTokenize(src);
+  const flat = tokens.join('');
+  let out = '';
+  let indent = 0;
+  const nl = () => '\n' + '  '.repeat(indent);
+
+  for (let i = 0; i < flat.length; i++) {
+    const ch = flat[i];
+    if (ch === '{') {
+      out = out.trimEnd() + ' {\n';
+      indent++;
+      out += '  '.repeat(indent);
+    } else if (ch === '}') {
+      out = out.trimEnd() + '\n';
+      indent = Math.max(0, indent - 1);
+      out += '  '.repeat(indent) + '}\n\n';
+    } else if (ch === ';') {
+      out = out.trimEnd() + ';\n' + '  '.repeat(indent);
+    } else if (ch === ':' && out.trimEnd().length > 0 && !out.trimEnd().endsWith('&') && !out.trimEnd().endsWith(',')) {
+      out = out.trimEnd() + ': ';
+      while (i + 1 < flat.length && flat[i + 1] === ' ') i++;
+    } else {
+      out += ch;
+    }
+  }
+  return out.replace(/\n{3,}/g, '\n\n').trim() + '\n';
+}
+
+function CssBeautifier() {
+  const { addNotification } = useAppStore();
+  const [input, setInput] = useState('body { margin: 0; padding: 0; font-family: sans-serif; }\n.container { max-width: 1200px; margin: 0 auto; }\n.card { background: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }');
+  const [output, setOutput] = useState('');
+
+  const handleFormat = () => {
+    try {
+      setOutput(beautifyCss(input));
+      addNotification('تم تنسيق CSS بنجاح', 'success');
+    } catch {
+      addNotification('خطأ في تنسيق CSS', 'error');
+    }
+  };
+
+  return (
+    <div className="space-y-5">
+      <Card className="space-y-4">
+        <TextArea label={'كود CSS'} value={input} onChange={(e) => setInput(e.target.value)} rows={10} className="font-mono" />
+        <Button onClick={handleFormat}>{'تنسيق CSS'}</Button>
+      </Card>
+      {output && <ResultBox title={'النتيجة'} value={output} onClear={() => setOutput('')} />}
+    </div>
+  );
+}
+
+// =============================================================================
+// 11b. CSS MINIFIER
+// =============================================================================
+
+function minifyCss(src: string): string {
+  const tokens = cssTokenize(src);
+  let result = '';
+  for (const t of tokens) {
+    if (t.startsWith('/*') || t.startsWith('//')) continue;
+    result += t;
+  }
+  return result
+    .replace(/\s*{\s*/g, '{')
+    .replace(/\s*}\s*/g, '}')
+    .replace(/\s*;\s*/g, ';')
+    .replace(/\s*:\s*/g, ':')
+    .replace(/\s*,\s*/g, ',')
+    .replace(/;}/g, '}')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function CssMinifier() {
+  const { addNotification } = useAppStore();
+  const [input, setInput] = useState('body {\n  margin: 0;\n  padding: 0;\n  font-family: sans-serif;\n}\n\n.container {\n  max-width: 1200px;\n  margin: 0 auto;\n}');
+  const [output, setOutput] = useState('');
+
+  const handleMinify = () => {
+    try {
+      const min = minifyCss(input);
+      setOutput(min);
+      addNotification('تم تصغير CSS بنجاح', 'success');
+    } catch {
+      addNotification('خطأ في تصغير CSS', 'error');
+    }
+  };
+
+  return (
+    <div className="space-y-5">
+      <Card className="space-y-4">
+        <TextArea label={'كود CSS'} value={input} onChange={(e) => setInput(e.target.value)} rows={10} className="font-mono" />
+        <Button onClick={handleMinify}>{'تصغير CSS'}</Button>
+      </Card>
+      {output && (
+        <Card className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200">{'النتيجة المصغرة'}</h3>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-gray-500 dark:text-gray-400">{input.length} → {output.length} حرف</span>
+              <Button variant="secondary" size="sm" onClick={() => { navigator.clipboard.writeText(output); addNotification('تم النسخ', 'success'); }}>{'نسخ'}</Button>
+              <Button variant="ghost" size="sm" onClick={() => setOutput('')}>{'مسح'}</Button>
+            </div>
+          </div>
+          <pre dir="ltr" className="w-full min-h-[80px] max-h-80 overflow-auto rounded-xl bg-gray-50 dark:bg-dark-surface border border-light-border dark:border-dark-border p-4 text-sm font-mono text-gray-800 dark:text-gray-100 whitespace-pre-wrap break-words">{output}</pre>
+        </Card>
+      )}
+    </div>
+  );
+}
+
+// =============================================================================
+// 11c. JS BEAUTIFIER
+// =============================================================================
+
+function jsTokenize(src: string): string[] {
+  const tokens: string[] = [];
+  let i = 0;
+  while (i < src.length) {
+    if (src[i] === '"' || src[i] === "'" || src[i] === '`') {
+      const q = src[i];
+      let s = q;
+      i++;
+      while (i < src.length && src[i] !== q) {
+        if (src[i] === '\\') { s += src[i] + (src[i + 1] || ''); i += 2; continue; }
+        if (q === '`' && src[i] === '$' && src[i + 1] === '{') {
+          s += '${';
+          i += 2;
+          let depth = 1;
+          while (i < src.length && depth > 0) {
+            if (src[i] === '{') depth++;
+            else if (src[i] === '}') depth--;
+            if (depth > 0) s += src[i];
+            i++;
+          }
+          s += '}';
+          continue;
+        }
+        s += src[i]; i++;
+      }
+      if (i < src.length) { s += src[i]; i++; }
+      tokens.push(s);
+    } else if (src[i] === '/' && src[i + 1] === '*') {
+      let s = '/*';
+      i += 2;
+      while (i < src.length && !(src[i] === '*' && src[i + 1] === '/')) { s += src[i]; i++; }
+      if (i < src.length) { s += '*/'; i += 2; }
+      tokens.push(s);
+    } else if (src[i] === '/' && src[i + 1] === '/') {
+      let s = '';
+      while (i < src.length && src[i] !== '\n') { s += src[i]; i++; }
+      tokens.push(s);
+    } else {
+      let s = '';
+      while (i < src.length && src[i] !== '"' && src[i] !== "'" && src[i] !== '`' && !(src[i] === '/' && (src[i + 1] === '*' || src[i + 1] === '/'))) {
+        s += src[i]; i++;
+      }
+      if (s) tokens.push(s);
+    }
+  }
+  return tokens;
+}
+
+function beautifyJs(src: string): string {
+  const tokens = jsTokenize(src);
+  const flat = tokens.join('');
+  let out = '';
+  let indent = 0;
+  const nl = () => '\n' + '  '.repeat(indent);
+
+  for (let i = 0; i < flat.length; i++) {
+    const ch = flat[i];
+    if (ch === '{') {
+      out = out.trimEnd() + ' {\n';
+      indent++;
+      out += '  '.repeat(indent);
+    } else if (ch === '}') {
+      out = out.trimEnd() + '\n';
+      indent = Math.max(0, indent - 1);
+      out += '  '.repeat(indent) + '}\n';
+      if (i + 1 < flat.length && flat[i + 1] === ';') { out += ';'; i++; }
+      out += '\n' + '  '.repeat(indent);
+    } else if (ch === ';') {
+      out = out.trimEnd() + ';\n' + '  '.repeat(indent);
+    } else {
+      out += ch;
+    }
+  }
+  return out.replace(/\n{3,}/g, '\n\n').replace(/\n+\s*$/,'').trim() + '\n';
+}
+
+function JsBeautifier() {
+  const { addNotification } = useAppStore();
+  const [input, setInput] = useState('function greet(name){if(name){console.log("Hello, "+name+"!");return{status:"ok",name:name};}else{return null;}}');
+  const [output, setOutput] = useState('');
+
+  const handleFormat = () => {
+    try {
+      setOutput(beautifyJs(input));
+      addNotification('تم تنسيق JavaScript بنجاح', 'success');
+    } catch {
+      addNotification('خطأ في تنسيق JavaScript', 'error');
+    }
+  };
+
+  return (
+    <div className="space-y-5">
+      <Card className="space-y-4">
+        <TextArea label={'كود JavaScript'} value={input} onChange={(e) => setInput(e.target.value)} rows={10} className="font-mono" />
+        <Button onClick={handleFormat}>{'تنسيق JavaScript'}</Button>
+      </Card>
+      {output && <ResultBox title={'النتيجة'} value={output} onClear={() => setOutput('')} />}
+    </div>
+  );
+}
+
+// =============================================================================
+// 11d. JS MINIFIER
+// =============================================================================
+
+function minifyJs(src: string): string {
+  const tokens = jsTokenize(src);
+  let result = '';
+  for (const t of tokens) {
+    if (t.startsWith('/*') || t.startsWith('//')) continue;
+    result += t;
+  }
+  return result
+    .replace(/\s*{\s*/g, '{')
+    .replace(/\s*}\s*/g, '}')
+    .replace(/\s*;\s*/g, ';')
+    .replace(/\s*\(\s*/g, '(')
+    .replace(/\s*\)\s*/g, ')')
+    .replace(/\s*,\s*/g, ',')
+    .replace(/\s*=\s*/g, '=')
+    .replace(/\s*!=\s*/g, '!=')
+    .replace(/\s*!==\s*/g, '!==')
+    .replace(/\s*==\s*/g, '==')
+    .replace(/\s*===\s*/g, '===')
+    .replace(/\s*>\s*/g, '>')
+    .replace(/\s*<\s*/g, '<')
+    .replace(/\s*<=\s*/g, '<=')
+    .replace(/\s*>=\s*/g, '>=')
+    .replace(/\s*\+\s*/g, '+')
+    .replace(/\s*-\s*/g, '-')
+    .replace(/\s*\*\s*/g, '*')
+    .replace(/\s*\/\s*/g, '/')
+    .replace(/\s*&&\s*/g, '&&')
+    .replace(/\s*\|\|\s*/g, '||')
+    .replace(/;\}/g, '}')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function JsMinifier() {
+  const { addNotification } = useAppStore();
+  const [input, setInput] = useState('function greet(name) {\n  if (name) {\n    console.log("Hello, " + name + "!");\n    return { status: "ok", name: name };\n  } else {\n    return null;\n  }\n}');
+  const [output, setOutput] = useState('');
+
+  const handleMinify = () => {
+    try {
+      const min = minifyJs(input);
+      setOutput(min);
+      addNotification('تم تصغير JavaScript بنجاح', 'success');
+    } catch {
+      addNotification('خطأ في تصغير JavaScript', 'error');
+    }
+  };
+
+  return (
+    <div className="space-y-5">
+      <Card className="space-y-4">
+        <TextArea label={'كود JavaScript'} value={input} onChange={(e) => setInput(e.target.value)} rows={10} className="font-mono" />
+        <Button onClick={handleMinify}>{'تصغير JavaScript'}</Button>
+      </Card>
+      {output && (
+        <Card className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200">{'النتيجة المصغرة'}</h3>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-gray-500 dark:text-gray-400">{input.length} → {output.length} حرف</span>
+              <Button variant="secondary" size="sm" onClick={() => { navigator.clipboard.writeText(output); addNotification('تم النسخ', 'success'); }}>{'نسخ'}</Button>
+              <Button variant="ghost" size="sm" onClick={() => setOutput('')}>{'مسح'}</Button>
+            </div>
+          </div>
+          <pre dir="ltr" className="w-full min-h-[80px] max-h-80 overflow-auto rounded-xl bg-gray-50 dark:bg-dark-surface border border-light-border dark:border-dark-border p-4 text-sm font-mono text-gray-800 dark:text-gray-100 whitespace-pre-wrap break-words">{output}</pre>
+        </Card>
+      )}
     </div>
   );
 }
@@ -1957,6 +2325,13 @@ interface EngineeringToolPageProps {
 
 export default function EngineeringToolPage({ toolId }: EngineeringToolPageProps) {
   const tool = getToolById(toolId);
+  const location = useLocation();
+  const sub = (location.state as { sub?: string; subName?: string } | null)?.sub;
+  const subName = (location.state as { sub?: string; subName?: string } | null)?.subName;
+
+  const backLabel = subName
+    ? `العودة لأدوات ${subName}`
+    : 'العودة لأدوات الهندسية';
 
   let content: React.ReactNode;
 
@@ -1993,6 +2368,18 @@ export default function EngineeringToolPage({ toolId }: EngineeringToolPageProps
       break;
     case 'gradient-generator':
       content = <GradientGenerator />;
+      break;
+    case 'css-beautifier':
+      content = <CssBeautifier />;
+      break;
+    case 'css-minifier':
+      content = <CssMinifier />;
+      break;
+    case 'js-beautifier':
+      content = <JsBeautifier />;
+      break;
+    case 'js-minifier':
+      content = <JsMinifier />;
       break;
     case 'csv-json':
       content = <CsvJson />;
@@ -2080,7 +2467,8 @@ export default function EngineeringToolPage({ toolId }: EngineeringToolPageProps
   return (
     <ToolLayout
       backTo="/category/engineering"
-      backLabel={'العودة للأدوات الهندسية'}
+      backLabel={backLabel}
+      backState={sub ? { sub } : undefined}
     >
       {tool && (
         <ToolHero

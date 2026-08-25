@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { tools, categoryOrder, searchTools } from '@/data/tools';
 import { Card } from '@/components/UI/Card';
 import { Badge } from '@/components/UI/Badge';
-import { useAppStore } from '@/store/useAppStore';
 import type { ToolCategory, Tool } from '@/types';
 import { categories } from '@/data/categories';
 import { CategoryMeta } from '@/data/categories';
@@ -42,7 +41,6 @@ const badgeVariantMap: Record<string, 'primary' | 'success' | 'warning' | 'info'
 export function AllToolsPage() {
   const navigate = useNavigate();
   const direction = 'rtl' as const;
-  const { favoriteTools, toggleFavorite } = useAppStore();
 
   const [query, setQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<ToolCategory | 'all'>('all');
@@ -221,7 +219,6 @@ export function AllToolsPage() {
                 >
                   {catTools.map((tool) => {
                     const ToolIcon = tool.icon;
-                    const isFavorite = favoriteTools.includes(tool.id);
                     const isComingSoon = tool.comingSoon === true;
                     return (
                       <motion.div key={tool.id} variants={itemVariants}>
@@ -250,31 +247,6 @@ export function AllToolsPage() {
                                     قريبًا
                                   </Badge>
                                 )}
-
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    toggleFavorite(tool.id);
-                                  }}
-                                  className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-surface transition-colors"
-                                >
-                                  <svg
-                                    className={`w-5 h-5 ${
-                                      isFavorite
-                                        ? 'text-amber-500 fill-amber-500'
-                                        : 'text-gray-300 dark:text-gray-600 hover:text-amber-400'
-                                    }`}
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                    strokeWidth={2}
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
-                                    />
-                                  </svg>
-                                </button>
 
                               </div>
                             </div>
@@ -306,7 +278,6 @@ export function AllToolsPage() {
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
         >
           {filteredTools.map((tool) => {
-            const isFavorite = favoriteTools.includes(tool.id);
             const ToolIcon = tool.icon;
             return (
               <motion.div key={tool.id} variants={itemVariants}>
@@ -325,32 +296,6 @@ export function AllToolsPage() {
                       <span className="group-hover:scale-110 transition-transform duration-200">
                         <ToolIcon className="w-9 h-9" />
                       </span>
-                      <button
-                        onClick={() => {
-                          if (!tool.comingSoon) {
-                            navigate(`/tool/${tool.id}`);
-                          }
-                        }}
-                        className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-surface transition-colors"
-                        aria-label={isFavorite ? 'إزالة من المفضلة' : 'إضافة إلى المفضلة'}
-                      >
-                        <svg
-                          className={`w-5 h-5 transition-colors ${
-                            isFavorite
-                              ? 'text-amber-500 fill-amber-500'
-                              : 'text-gray-300 dark:text-gray-600 hover:text-amber-400'
-                          }`}
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          strokeWidth={2}
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
-                          />
-                        </svg>
-                      </button>
                     </div>
 
                     <div className="mb-2">

@@ -3,6 +3,7 @@ import { Card } from '@/components/UI/Card';
 import { EmptyState } from '@/components/UI/EmptyState';
 import { useNavigate } from 'react-router-dom';
 import { ToolBody } from './video/shared';
+import { ToolHero } from '@/components/Tool/ToolHero';
 import {
   SpeechToTextTool,
   RecordTool,
@@ -89,23 +90,7 @@ export default function AudioTools({ toolId }: { toolId: string }) {
         </button>
       </motion.div>
 
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
-        <Card className="relative overflow-hidden">
-          <div aria-hidden="true" className="pointer-events-none absolute inset-0">
-            <div className="absolute -top-10 -start-10 w-40 h-40 rounded-full bg-primary-100/60 dark:bg-primary-900/20 blur-2xl" />
-            <div className="absolute -bottom-14 -end-8 w-44 h-44 rounded-full bg-emerald-100/50 dark:bg-emerald-900/15 blur-2xl" />
-          </div>
-          <div className="relative flex items-center gap-4">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-500 to-emerald-500 text-white shadow-lg shadow-primary-600/25 flex items-center justify-center shrink-0">
-              {config.icon}
-            </div>
-            <div className="min-w-0 flex-1">
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{config.title}</h1>
-              <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400 mt-0.5">{config.description}</p>
-            </div>
-          </div>
-        </Card>
-      </motion.div>
+      <ToolHero icon={config.icon} title={config.title} description={config.description} />
 
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.1 }}>
         <Card>

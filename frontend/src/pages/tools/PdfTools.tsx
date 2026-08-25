@@ -8,14 +8,15 @@ import { Card } from '@/components/UI/Card';
 import { Input, TextArea, Select } from '@/components/UI/Input';
 import { FileUpload } from '@/components/UI/FileUpload';
 import { EmptyState } from '@/components/UI/EmptyState';
+import { useAppStore } from '@/store/useAppStore';
+import { useThemeStore } from '@/store/useThemeStore';
+import { saveToLibrary } from '@/services/savedFilesService';
+import { useNavigate } from 'react-router-dom';
+import { ToolHero } from '@/components/Tool/ToolHero';
 import { Badge } from '@/components/UI/Badge';
 import { Spinner } from '@/components/UI/Loading';
 import { ProgressBar } from '@/components/UI/ProgressBar';
 import { Modal } from '@/components/UI/Modal';
-import { useAppStore } from '@/store/useAppStore';
-import { useThemeStore } from '@/store/useThemeStore';
-import { useNavigate } from 'react-router-dom';
-import { saveToLibrary } from '@/services/savedFilesService';
 import {
   fileToArrayBuffer,
   fileToDataURL,
@@ -202,53 +203,40 @@ interface UploadedFileData {
 }
 
 // ─── Utility Sub-Components ─────────────────────────────────────────
- 
-function ToolHeader({ tool, isDark }: { tool: ToolConfig; isDark: boolean }) {
+
+function ToolHeader({ tool }: { tool: ToolConfig }) {
   const navigate = useNavigate();
-  const Icon = tool.icon;
   return (
     <>
-<button
-  onClick={() => navigate('/category/pdf')}
-  className="flex items-center gap-2 text-gray-500 hover:text-primary-500 dark:text-gray-400 dark:hover:text-primary-400 transition-colors mb-6 group"
->
-  <svg
-    className="w-5 h-5 transition-transform rotate-180 group-hover:-translate-x-1"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M15 19l-7-7 7-7"
-    />
-  </svg>
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <button
+          onClick={() => navigate('/category/pdf')}
+          className="flex items-center gap-2 text-gray-500 hover:text-primary-500 dark:text-gray-400 dark:hover:text-primary-400 transition-colors mb-6 group"
+        >
+          <svg
+            className="w-5 h-5 transition-transform rotate-180 group-hover:translate-x-1"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15 19l-7-7 7-7"
+            />
+          </svg>
 
-  <span className="text-sm font-medium">
-    {'العودة إلى أدوات الـPDF'}
-  </span>
-</button>
-    <motion.div
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="mb-8"
-    >
-      <div className="flex items-center gap-4 mb-3">
-       <div className="w-16 h-16 rounded-2xl bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
-  <Icon className="w-8 h-8 text-primary-600 dark:text-primary-400" />
-</div>
-        <div className="text-right">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            {tool.name}
-          </h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            {tool.description}
-          </p>
-        </div>
-      </div>
-    </motion.div>
+          <span className="text-sm font-medium">
+            {'العودة إلى أدوات الـPDF'}
+          </span>
+        </button>
+      </motion.div>
+      <ToolHero icon={<tool.icon className="w-7 h-7" />} title={tool.name} description={tool.description} />
     </>
   );
 }
@@ -1872,8 +1860,8 @@ export default function PdfToolPage({ toolId: propToolId }: { toolId?: string })
   if (tool.id === 'merge-pdfs') {
     return (
       <div className={'min-h-screen bg-light-bg dark:bg-dark-bg rtl'}>
-        <div className="max-w-4xl mx-auto px-4 py-8">
-          <ToolHeader tool={tool} isDark={isDark} />
+        <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
+          <ToolHeader tool={tool} />
           <MergePdfWorkspace
             files={files}
             processing={processState === 'processing'}
@@ -1894,8 +1882,8 @@ export default function PdfToolPage({ toolId: propToolId }: { toolId?: string })
   if (tool.id === 'split-pdf') {
     return (
       <div className={'min-h-screen bg-light-bg dark:bg-dark-bg rtl'}>
-        <div className="max-w-4xl mx-auto px-4 py-8">
-          <ToolHeader tool={tool} isDark={isDark} />
+        <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
+          <ToolHeader tool={tool} />
           <SplitPdfWorkspace
             file={files[0] || null}
             pageCount={splitPageCount}
@@ -1934,8 +1922,8 @@ export default function PdfToolPage({ toolId: propToolId }: { toolId?: string })
   if (tool.id === 'delete-pages') {
     return (
       <div className={'min-h-screen bg-light-bg dark:bg-dark-bg rtl'}>
-        <div className="max-w-4xl mx-auto px-4 py-8">
-          <ToolHeader tool={tool} isDark={isDark} />
+        <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
+          <ToolHeader tool={tool} />
           <DeletePdfWorkspace
             file={files[0] || null}
             pageCount={deletePageCount}
@@ -1961,8 +1949,8 @@ export default function PdfToolPage({ toolId: propToolId }: { toolId?: string })
   if (tool.id === 'reorder-pages') {
     return (
       <div className={'min-h-screen bg-light-bg dark:bg-dark-bg rtl'}>
-        <div className="max-w-4xl mx-auto px-4 py-8">
-          <ToolHeader tool={tool} isDark={isDark} />
+        <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
+          <ToolHeader tool={tool} />
           <ReorderPdfWorkspace
             file={files[0] || null}
             pageCount={reorderPageCount}
@@ -1986,8 +1974,8 @@ export default function PdfToolPage({ toolId: propToolId }: { toolId?: string })
 
   return (
     <div className="min-h-screen bg-light-bg dark:bg-dark-bg rtl">
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <ToolHeader tool={tool} isDark={isDark} />
+      <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
+        <ToolHeader tool={tool} />
 
         <AnimatePresence mode="wait">
           {/* Upload Step */}

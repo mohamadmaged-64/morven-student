@@ -8,10 +8,6 @@ interface AppStore {
   toggleSidebar: () => void;
   setSidebarOpen: (open: boolean) => void;
 
-  // Favorites
-  favoriteTools: string[];
-  toggleFavorite: (toolId: string) => void;
-
   // Recent tools
   recentTools: string[];
   addRecentTool: (toolId: string) => void;
@@ -62,14 +58,6 @@ export const useAppStore = create<AppStore>((set, get) => ({
   sidebarOpen: true,
   toggleSidebar: () => set((s) => ({ sidebarOpen: !s.sidebarOpen })),
   setSidebarOpen: (open) => set({ sidebarOpen: open }),
-
-  favoriteTools: loadState('favorites', []),
-  toggleFavorite: (toolId) => {
-    const current = get().favoriteTools;
-    const next = current.includes(toolId) ? current.filter((id) => id !== toolId) : [...current, toolId];
-    saveState('favorites', next);
-    set({ favoriteTools: next });
-  },
 
   recentTools: loadState('recentTools', []),
   addRecentTool: (toolId) => {

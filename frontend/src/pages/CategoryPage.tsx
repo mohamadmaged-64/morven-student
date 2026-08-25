@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { getToolsByCategory } from '@/data/tools';
 import { Card } from '@/components/UI/Card';
@@ -7,7 +7,6 @@ import { Badge } from '@/components/UI/Badge';
 import type { Tool, ToolCategory } from '@/types';
 import type { LucideIcon } from 'lucide-react';
 import { Braces, Globe, ArrowLeftRight, Server, Database, BookOpenCheck, Wand2, ShieldCheck } from 'lucide-react';
-import { useAppStore } from '@/store/useAppStore';
 import { categories } from '@/data/categories'
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -45,6 +44,7 @@ interface EngineeringSubCategory {
   description: string;
   icon: LucideIcon;
   toolIds: string[];
+  comingSoon?: boolean;
 }
 
 const ENGINEERING_SUBCATEGORIES: EngineeringSubCategory[] = [
@@ -68,6 +68,7 @@ const ENGINEERING_SUBCATEGORIES: EngineeringSubCategory[] = [
     description: 'التحويل بين CSV وJSON وMarkdown والمزيد',
     icon: ArrowLeftRight,
     toolIds: ['json-yaml', 'json-xml', 'csv-json', 'markdown-html', 'html-markdown', 'url-encoder'],
+    comingSoon: true,
   },
   {
     id: 'api-networking',
@@ -75,6 +76,7 @@ const ENGINEERING_SUBCATEGORIES: EngineeringSubCategory[] = [
     description: 'أكواد حالة HTTP وطرق REST ومراجع واجهات API',
     icon: Server,
     toolIds: ['api-tester', 'http-status-codes', 'http-headers', 'mime-types', 'rest-methods'],
+    comingSoon: true,
   },
   {
     id: 'database',
@@ -82,6 +84,7 @@ const ENGINEERING_SUBCATEGORIES: EngineeringSubCategory[] = [
     description: 'تنسيق SQL وتحويل CSV وJSON إلى SQL',
     icon: Database,
     toolIds: ['sql-formatter', 'sql-beautifier', 'sql-playground', 'csv-to-sql', 'json-to-sql'],
+    comingSoon: true,
   },
   {
     id: 'developer-reference',
@@ -89,6 +92,7 @@ const ENGINEERING_SUBCATEGORIES: EngineeringSubCategory[] = [
     description: 'أوراق مرجعية لـ Git وLinux والتعبيرات النمطية وكيانات HTML',
     icon: BookOpenCheck,
     toolIds: ['git-cheatsheet', 'linux-commands', 'regex-cheatsheet', 'http-cheatsheet', 'html-entities', 'ascii-table'],
+    comingSoon: true,
   },
   {
     id: 'developer-utilities',
@@ -96,6 +100,7 @@ const ENGINEERING_SUBCATEGORIES: EngineeringSubCategory[] = [
     description: 'الطوابع الزمنية ورموز QR ولوريم إيبسوم وبيانات الاختبار',
     icon: Wand2,
     toolIds: ['unix-timestamp', 'qr-generator-eng', 'barcode-generator', 'lorem-ipsum', 'random-data', 'cron-builder'],
+    comingSoon: true,
   },
   {
     id: 'security',
@@ -103,15 +108,17 @@ const ENGINEERING_SUBCATEGORIES: EngineeringSubCategory[] = [
     description: 'قوة كلمات المرور والتحقق من التجزئة وHMAC',
     icon: ShieldCheck,
     toolIds: ['password-strength', 'hash-verifier', 'hmac-generator', 'jwt-inspector', 'token-decoder'],
+    comingSoon: true,
   },
 ];
 
 export function CategoryPage() {
   const { category: rawCategory } = useParams<{ category: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const direction = 'rtl' as const;
-  const { favoriteTools, toggleFavorite } = useAppStore();
-  const [selectedSubCategory, setSelectedSubCategory] = useState<string | null>(null);
+  const initialState = (location.state as { sub?: string } | null)?.sub ?? null;
+  const [selectedSubCategory, setSelectedSubCategory] = useState<string | null>(initialState);
 
   const category = rawCategory as ToolCategory;
 
@@ -184,6 +191,8 @@ export function CategoryPage() {
   const displayTools = activeSubCategory
     ? tools.filter((tool) => activeSubCategory.toolIds.includes(tool.id))
     : tools;
+
+  const isSubCategoryComingSoon = activeSubCategory?.comingSoon === true;
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-6" dir={direction}>
@@ -259,18 +268,30 @@ export function CategoryPage() {
             return (
               <motion.div key={sub.id} variants={itemVariants}>
                 <Card
-                  hoverable
-                  onClick={() => setSelectedSubCategory(sub.id)}
-                  className="h-full group cursor-pointer"
+                  hoverable={!sub.comingSoon}
+                  onClick={() => {
+                    if (!sub.comingSoon) {
+                      setSelectedSubCategory(sub.id);
+                    }
+                  }}
+                  className={`h-full group ${
+                    sub.comingSoon ? 'opacity-70 cursor-not-allowed' : 'cursor-pointer'
+                  }`}
                 >
                   <div className="flex flex-col h-full">
                     <div className="flex items-start justify-between mb-3">
                       <div className="w-12 h-12 rounded-2xl bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-200">
                         <SubIcon className="w-6 h-6 text-primary-600 dark:text-primary-400" />
                       </div>
-                      <Badge variant="neutral" size="sm">
-                        {availableCount} متاحة
-                      </Badge>
+                      {sub.comingSoon ? (
+                        <Badge variant="warning" size="sm">
+                          قريبًا
+                        </Badge>
+                      ) : (
+                        <Badge variant="neutral" size="sm">
+                          {availableCount} متاحة
+                        </Badge>
+                      )}
                     </div>
                     <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-1 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
                       {sub.name}
@@ -279,7 +300,7 @@ export function CategoryPage() {
                       {sub.description}
                     </p>
                     <div className="flex items-center gap-1 mt-3 text-xs font-medium text-primary-600 dark:text-primary-400">
-                      استعراض الأدوات
+                      {sub.comingSoon ? 'قريباً' : 'استعراض الأدوات'}
                       <svg
                         className={`w-4 h-4 transition-transform group-hover:translate-x-0.5 ${direction === 'rtl' ? 'rotate-180' : ''}`}
                         fill="none"
@@ -294,6 +315,31 @@ export function CategoryPage() {
               </motion.div>
             );
           })}
+        </motion.div>
+      ) : isSubCategoryComingSoon ? (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="text-center py-16"
+        >
+          <div className="w-20 h-20 mx-auto mb-6 rounded-3xl bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center">
+            {activeSubCategory && <activeSubCategory.icon className="w-10 h-10 text-primary-600 dark:text-primary-400" />}
+          </div>
+          <Badge variant="warning" className="mb-3">
+            قريبًا
+          </Badge>
+          <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-2">
+            {activeSubCategory?.name}
+          </h2>
+          <p className="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
+            هذا القسم قيد التطوير وسيتوفر قريباً. ترقبوا المزيد!
+          </p>
+          <button
+            onClick={() => setSelectedSubCategory(null)}
+            className="px-6 py-3 bg-primary-500 hover:bg-primary-600 text-white rounded-xl font-medium transition-colors"
+          >
+            العودة للفئات
+          </button>
         </motion.div>
       ) : displayTools.length === 0 ? (
         <motion.div
@@ -316,7 +362,6 @@ export function CategoryPage() {
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
         >
           {displayTools.map((tool) => {
-            const isFavorite = favoriteTools.includes(tool.id);
             const isComingSoon = tool.comingSoon === true;
             const isFeatured = category === 'general' && tool.id === 'holy-quran';
 
@@ -330,7 +375,11 @@ export function CategoryPage() {
                   hoverable
                   onClick={() => {
                     if (!isComingSoon) {
-                      navigate(`/tool/${tool.id}`);
+                      navigate(`/tool/${tool.id}`, {
+                        state: selectedSubCategory
+                          ? { sub: selectedSubCategory, subName: activeSubCategory?.name }
+                          : undefined,
+                      });
                     }
                   }}
                   className={`h-full group ${
@@ -352,33 +401,6 @@ export function CategoryPage() {
                             قريبًا
                           </Badge>
                         )}
-
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toggleFavorite(tool.id);
-                          }}
-                          className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-surface transition-colors"
-                        >
-
-                          <svg
-                            className={`w-5 h-5 transition-colors ${
-                              isFavorite
-                                ? 'text-amber-500 fill-amber-500'
-                                : 'text-gray-300 dark:text-gray-600 hover:text-amber-400'
-                            }`}
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            strokeWidth={2}
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
-                            />
-                          </svg>
-
-                        </button>
                       </div>
                     </div>
                     <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-1 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">

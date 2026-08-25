@@ -3,6 +3,7 @@ import { Card } from '@/components/UI/Card';
 import { EmptyState } from '@/components/UI/EmptyState';
 import { useNavigate } from 'react-router-dom';
 import type { LucideIcon } from 'lucide-react';
+import { ToolHero } from '@/components/Tool/ToolHero';
 import {
   Eraser,
   Maximize2,
@@ -137,25 +138,9 @@ function ImageToolPage({ toolId }: { toolId: string }) {
             العودة لأدوات الصور
           </span>
         </button>
-
-        <Card>
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
-              <HeaderIcon className="w-6 h-6" />
-            </div>
-
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                {config.title}
-              </h1>
-
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                {config.description}
-              </p>
-            </div>
-          </div>
-        </Card>
       </motion.div>
+
+      <ToolHero icon={<HeaderIcon className="w-7 h-7" />} title={config.title} description={config.description} />
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}

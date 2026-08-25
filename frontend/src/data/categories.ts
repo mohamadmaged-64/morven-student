@@ -35,7 +35,6 @@ export const categories: Record<ToolCategory, CategoryMeta> = {
   engineering: {
     name: 'القسم الهندسي',
     icon: Cog,
-    comingSoon: true,
     description: 'حاسبات هندسية ورسومات وأدوات تصميم',
   },
 

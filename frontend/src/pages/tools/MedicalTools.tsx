@@ -1,6 +1,7 @@
 ﻿import { useState, useCallback, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { getToolById } from '@/data/tools';
 import {
   Button,
   Card,
@@ -18,6 +19,7 @@ import {
 import { useAppStore } from '@/store/useAppStore';
 import { useStatsStore } from '@/store/useStatsStore';
 import { Notebook } from 'lucide-react';
+import { ToolHero } from '@/components/Tool/ToolHero';
 import {
   summarizeText,
   extractKeyIdeas,
@@ -1512,6 +1514,7 @@ interface MedicalToolPageProps {
 
 export function MedicalToolPage({ toolId }: MedicalToolPageProps) {
   const navigate = useNavigate();
+  const tool = getToolById(toolId);
 
   let content: JSX.Element;
 
@@ -1559,31 +1562,49 @@ export function MedicalToolPage({ toolId }: MedicalToolPageProps) {
   }
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
-      <button
-        onClick={() => navigate('/category/medical')}
-        className="flex items-center gap-2 text-gray-500 hover:text-primary-500 dark:text-gray-400 dark:hover:text-primary-400 transition-colors group"
+    <div className="max-w-4xl mx-auto space-y-6" dir="rtl">
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
       >
-        <svg
-          className="w-5 h-5 transition-transform rotate-180 group-hover:translate-x-1"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
+        <button
+          onClick={() => navigate('/category/medical')}
+          className="flex items-center gap-2 text-gray-500 hover:text-primary-500 dark:text-gray-400 dark:hover:text-primary-400 transition-colors mb-6 group"
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M15 19l-7-7 7-7"
-          />
-        </svg>
+          <svg
+            className="w-5 h-5 transition-transform rotate-180 group-hover:translate-x-1"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15 19l-7-7 7-7"
+            />
+          </svg>
 
-        <span className="text-sm font-medium">
-          {'العودة للأدوات الطبية'}
-        </span>
-      </button>
+          <span className="text-sm font-medium">
+            {'العودة للأدوات الطبية'}
+          </span>
+        </button>
+      </motion.div>
 
-      {content}
+      {tool && (
+        <ToolHero
+          icon={<tool.icon className="w-7 h-7" />}
+          title={tool.name}
+          description={tool.description}
+        />
+      )}
+
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.1 }}>
+        <Card>
+          {content}
+        </Card>
+      </motion.div>
     </div>
   );
 }

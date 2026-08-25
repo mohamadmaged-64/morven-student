@@ -17,7 +17,6 @@ const categoryNames: Record<string, string> = {
   general: 'عام',
   medical: 'القسم الطبي',
   engineering: 'القسم الهندسي',
-  favorites: 'المفضلة',
   recent: 'الأدوات الأخيرة',
   allTools: 'جميع الأدوات',
   studentSection: 'القسم الطلابي',

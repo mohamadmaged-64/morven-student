@@ -12,6 +12,7 @@ import { useNavigate } from 'react-router-dom';
 import { saveToLibrary } from '@/services/savedFilesService';
 import { QRImageScanner } from './QRImageScanner';
 import { QRCodeCameraScanner } from './QRCodeCameraScanner';
+import { ToolHero } from '@/components/Tool/ToolHero';
 type ToolId = 'qr-generator' | 'qr-scanner-image' | 'qr-scanner-camera';
 
 type InputType = 'text' | 'url' | 'email' | 'phone' | 'wifi';
@@ -350,34 +351,43 @@ function QRCodeToolPage({ toolId }: { toolId: string }) {
   }
 
     return (
-      <div className="max-w-5xl mx-auto space-y-6" dir="rtl">
-        <button
-          onClick={() => navigate('/category/qrcode')}
-          className="flex items-center gap-2 text-gray-500 hover:text-primary-500 dark:text-gray-400 dark:hover:text-primary-400 transition-colors mb-6 group"
+      <div className="max-w-4xl mx-auto space-y-6" dir="rtl">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
         >
-          <svg
-            className="w-5 h-5 transition-transform rotate-180 group-hover:-translate-x-1"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
+          <button
+            onClick={() => navigate('/category/qrcode')}
+            className="flex items-center gap-2 text-gray-500 hover:text-primary-500 dark:text-gray-400 dark:hover:text-primary-400 transition-colors mb-6 group"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 19l-7-7 7-7"
-            />
-          </svg>
+            <svg
+              className="w-5 h-5 transition-transform rotate-180 group-hover:translate-x-1"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
 
-          <span className="text-sm font-medium">
-            العودة إلى أدوات رموز QR
-          </span>
-        </button>
+            <span className="text-sm font-medium">
+              العودة إلى أدوات رموز QR
+            </span>
+          </button>
+        </motion.div>
+
+        <ToolHero icon={config.icon} title={config.title} description={config.description} />
+
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.1 }}>
-        <Card>{config.component}</Card>
-      </motion.div>
-    </div>
-  );
+          <Card>{config.component}</Card>
+        </motion.div>
+      </div>
+    );
 }
 
 export default QRCodeToolPage;

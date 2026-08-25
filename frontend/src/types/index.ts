@@ -8,7 +8,6 @@ export interface Tool {
   description: string;
   icon: LucideIcon;
   category: ToolCategory;
-  isFavorite?: boolean;
   lastUsed?: number;
   comingSoon?: boolean;
 }
