@@ -695,7 +695,7 @@ function TaskManager() {
                             'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'
                           }`}>
                             {isOverdue(task.dueDate) && !task.completed ? '⚠ ' : ''}
-                            {new Date(task.dueDate).toLocaleDateString('ar-SA', { month: 'short', day: 'numeric' })}
+                            {new Date(task.dueDate).toLocaleDateString('ar-SA-u-nu-latn', { month: 'short', day: 'numeric' })}
                           </span>
                         )}
                       </div>
@@ -940,7 +940,7 @@ function ExamCountdownPage() {
                             {exam.name}
                           </h3>
                           <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
-                            {new Date(exam.date).toLocaleDateString('ar-SA', {
+                            {new Date(exam.date).toLocaleDateString('ar-SA-u-nu-latn', {
                               weekday: 'long',
                               year: 'numeric',
                               month: 'long',

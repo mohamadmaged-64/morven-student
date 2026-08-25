@@ -28,7 +28,8 @@ import {
   Braces, Regex, KeyRound, Fingerprint, Palette, Code2, FileCode2, Wand2, Table,
   FileCode, Link, Server, Gauge, Route, Database, Box, Boxes, Table2, Grid3x3,
   GitBranch, Terminal, Cloud, AtSign, Columns, Clock, Barcode, Quote, ListChecks,
-  CalendarClock, ShieldCheck, BadgeCheck, LockKeyhole, Shield, Book, BookOpenCheck, Type
+  CalendarClock, ShieldCheck, BadgeCheck, LockKeyhole, Shield, Book, BookOpenCheck, Type,
+  Eraser, Maximize2, Crop, SlidersHorizontal, EyeOff, Stamp, Info, AudioLines, WandSparkles, ScanLine, Camera
 } from "lucide-react";
 
 export const icon = {
@@ -39,7 +40,8 @@ export const icon = {
   Music, Lightbulb, Pen, CheckCircle, Globe, List, Newspaper, Key,
   HelpCircle, Sparkles, Smartphone, Timer,
   ListTodo, Calendar, ClipboardPlus, FileArchive, ArrowUpDown, Droplets, Signature, ScanSearch, ScanText, GitCompare, Stethoscope, Scale, Pill, FlaskConical, FileHeart,
-  Cog, Combine, Archive, Hash, NotebookPen, Book, BookOpenCheck, Type
+  Cog, Combine, Archive, Hash, NotebookPen, Book, BookOpenCheck, Type,
+  Eraser, Maximize2, Crop, SlidersHorizontal, EyeOff, Stamp, Info, AudioLines, WandSparkles, ScanLine, Camera
 }
 
 export const tools: Tool[] = [
@@ -137,22 +139,37 @@ export const tools: Tool[] = [
   { id: 'compress-ppt', name: 'ضغط PowerPoint', description: 'تقليل حجم عرض PowerPoint', icon: Archive, category: 'powerpoint' },
   
   // VIDEO
-  { id: 'extract-audio-video', name: 'استخراج الصوت من فيديو', description: 'استخراج المسار الصوتي من ملفات الفيديو بصيغة MP3 أو WAV أو M4A', icon: Music, category: 'video' },
-  { id: 'compress-video', name: 'ضغط الفيديو', description: 'تقليل حجم ملف الفيديو مع الحفاظ على الجودة عبر FFmpeg', icon: Minimize2, category: 'video' },
-  { id: 'convert-video', name: 'تحويل الفيديو', description: 'تحويل الفيديوهات بين MP4 وWebM وMOV وMKV', icon: ArrowLeftRight, category: 'video' },
-  { id: 'video-to-audio', name: 'فيديو إلى صوت', description: 'تحويل ملفات الفيديو إلى صيغ صوتية', icon: Mic, category: 'video' },
-
+  { id: 'cut-video', name: 'قص الفيديو', description: 'اقتطاع المقطع المطلوب من الفيديو.', icon: Scissors, category: 'video' },
+  { id: 'edit-video', name: 'تحرير الفيديو', description: 'تغيير حجم الفيديو وتدويره أو قلبه في أداة واحدة.', icon: PenTool, category: 'video' },
+  { id: 'edit-video-audio', name: 'تحرير صوت الفيديو', description: 'إزالة صوت الفيديو أو استبداله بملف صوتي آخر مع ضبط مستوى الصوت.', icon: Mic, category: 'video' },
+  { id: 'merge-videos', name: 'دمج الفيديوهات', description: 'دمج عدة مقاطع فيديو في فيديو واحد بالترتيب الذي تختاره.', icon: Combine, category: 'video' },
+  { id: 'compress-video', name: 'ضغط الفيديو', description: 'تقليل حجم ملف الفيديو.', icon: Minimize2, category: 'video' },
+  { id: 'change-video-speed', name: 'تغيير سرعة الفيديو', description: 'تسريع الفيديو أو إبطاؤه مع الحفاظ على تزامن الصوت.', icon: Gauge, category: 'video' },
+  { id: 'extract-audio-video', name: 'استخراج الصوت من فيديو', description: 'استخراج المسار الصوتي من ملفات الفيديو بصيغة MP3.', icon: Music, category: 'video' },
+  { id: 'video-to-gif', name: 'تحويل الفيديو إلى GIF', description: 'إنشاء GIF متحركة من مقطع فيديو بإعدادات مرنة.', icon: ImageIcon, category: 'video' },
+   
   // IMAGES
-  { id: 'bg-remove', name: 'إزالة الخلفية', description: 'إزالة الخلفية من الصور تلقائياً', icon: Scissors, comingSoon: true, category: 'images' },
-  { id: 'rotate-image', name: 'تدوير الصورة', description: 'تدوير الصور بأي زاوية', icon: RotateCw, comingSoon: true, category: 'images' },
-  { id: 'blur-image', name: 'تعتيم الصورة', description: 'تعتيم أجزاء أو الصورة كاملة', icon: Droplet, comingSoon: true, category: 'images' },
-  { id: 'images-to-pdf', name: 'صور إلى PDF', description: 'تحويل صور متعددة إلى مستند PDF', icon: FileImage, comingSoon: true, category: 'images' },
+  { id: 'bg-remove', name: 'إزالة الخلفية', description: 'إزالة خلفية الصورة تلقائياً', icon: Eraser, category: 'images' },
+  { id: 'resize-image', name: 'تغيير حجم الصورة', description: 'تغيير أبعاد الصورة مع الحفاظ على تناسبها', icon: Maximize2, category: 'images' },
+  { id: 'crop-image', name: 'قص الصورة', description: 'قص الجزء الذي تريده من الصورة بسهولة', icon: Crop, category: 'images' },
+  { id: 'rotate-image', name: 'تدوير وقلب الصورة', description: 'تدوير الصورة أو قلبها أفقياً وعمودياً', icon: RotateCw, category: 'images' },
+  { id: 'adjust-image', name: 'تعديل الصورة', description: 'تحسين الإضاءة والألوان ومظهر الصورة', icon: SlidersHorizontal, category: 'images' },
+  { id: 'blur-image', name: 'طمس وإخفاء أجزاء من الصورة', description: 'طمس أو إخفاء أجزاء محددة من الصورة لحماية الخصوصية', icon: EyeOff, category: 'images' },
+  { id: 'watermark-image', name: 'إضافة علامة مائية', description: 'أضف نصاً أو شعاراً إلى الصورة لحمايتها', icon: Stamp, category: 'images' },
+  { id: 'image-info', name: 'معلومات الصورة والخصوصية', description: 'عرض معلومات الصورة وإدارة بياناتها الخاصة', icon: Info, category: 'images' },
 
   // AUDIO
-  { id: 'speech-to-text', name: 'صوت إلى نص', description: 'تحويل التسجيلات الصوتية إلى نص', icon: Mic, category: 'audio' },
+  { id: 'speech-to-text', name: 'تحويل الكلام إلى نص', description: 'حوّل التسجيلات الصوتية إلى نص مكتوب باستخدام Whisper.', icon: Mic, category: 'audio' },
+  { id: 'record-audio', name: 'تسجيل صوتي', description: 'سجّل صوتك مباشرة من الميكروفون وحسّنه أو حمّله.', icon: AudioLines, category: 'audio' },
+  { id: 'cut-audio', name: 'قص الصوت', description: 'اقتطاع مقطع محدد من ملف صوتي.', icon: Scissors, category: 'audio' },
+  { id: 'enhance-audio', name: 'تحسين الصوت', description: 'تحسين الصوت بضبط المستوى والتلاشي والتنعيم والوضوح.', icon: SlidersHorizontal, category: 'audio' },
+  { id: 'clean-audio', name: 'تنظيف الصوت', description: 'إزالة الضوضاء والتشويش من التسجيلات الصوتية.', icon: WandSparkles, category: 'audio' },
+  { id: 'merge-audio', name: 'دمج الملفات الصوتية', description: 'دمج عدة ملفات صوتية في ملف واحد بالترتيب المحدد.', icon: Combine, category: 'audio' },
 
   // QR CODE
   { id: 'qr-generator', name: 'مولد QR', description: 'إنشاء رموز QR من نص أو روابط أو بيانات', icon: QrCode, category: 'qrcode' },
+  { id: 'qr-scanner-image', name: 'مسح QR — صورة', description: 'مسح وفك ترميز رمز QR من صورة مرفوعة', icon: ScanLine, category: 'qrcode' },
+  { id: 'qr-scanner-camera', name: 'مسح QR — كاميرا', description: 'مسح رمز QR مباشرة بالكاميرا (متوافق مع الهاتف والأجهزة اللوحية)', icon: Camera, category: 'qrcode' },
 
 
 ]

@@ -28,7 +28,7 @@ export function Header({ title }: HeaderProps) {
   }, []);
 
   const gregorianDate = new Intl.DateTimeFormat(
-    'ar-EG',
+    'ar-EG-u-nu-latn',
     {
       weekday: 'long',
       year: 'numeric',
@@ -38,7 +38,7 @@ export function Header({ title }: HeaderProps) {
   ).format(now);
 
   const hijriDate = new Intl.DateTimeFormat(
-    'ar-SA-u-ca-islamic',
+    'ar-SA-u-ca-islamic-nu-latn',
     {
       year: 'numeric',
       month: 'long',
@@ -47,7 +47,7 @@ export function Header({ title }: HeaderProps) {
   ).format(now);
 
   const time = new Intl.DateTimeFormat(
-    'ar-EG',
+    'ar-EG-u-nu-latn',
     {
       hour: '2-digit',
       minute: '2-digit',

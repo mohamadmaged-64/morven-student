@@ -4,7 +4,6 @@ import { MainLayout } from '@/components/Layout/MainLayout';
 import { NotificationHost } from '@/components/Layout/NotificationHost';
 import { PrayerPauseHost } from '@/features/prayer-pause';
 import { ToolErrorBoundary } from '@/components/Tool/ToolErrorBoundary';
-import { ArabicIndicNumerals } from '@/components/ArabicIndicNumerals';
 import { useAppStore } from '@/store/useAppStore';
 import { useThemeStore } from '@/store/useThemeStore';
 import { getToolById } from '@/data/tools';
@@ -21,16 +20,6 @@ import VideoToolPage from '@/pages/tools/VideoTools';
 import ImageToolPage from '@/pages/tools/ImageTools';
 import AudioToolPage from '@/pages/tools/AudioTools';
 import QRCodeToolPage from '@/pages/tools/QRCodeTools';
-import FeaturesPage from '@/pages/Footer/FeaturesPage';
-import ToolsListPage from '@/pages/Footer/ToolsPage';
-import FAQPage from '@/pages/Footer/FAQPage';
-import SecurityPage from '@/pages/Footer/SecurityPage';
-import PrivacyPolicyPage from '@/pages/Footer/PrivacyPolicyPage';
-import TermsPage from '@/pages/Footer/TermsPage';
-import AboutPage from '@/pages/Footer/AboutPage';
-import ContactPage from '@/pages/Footer/ContactPage';
-import ComplaintsPage from '@/pages/Footer/ComplaintsPage';
-import CategoryDetailPage from '@/pages/Footer/CategoryDetailPage';
 import FileManagerPage from '@/pages/FileManagerPage';
 
 
@@ -103,7 +92,6 @@ export default function App() {
 
   return (
     <BrowserRouter>
-      <ArabicIndicNumerals />
       <NotificationHost />
       <PrayerPauseHost />
       <Routes>
@@ -112,16 +100,7 @@ export default function App() {
           <Route path="/category/:category" element={<CategoryPage />} />
           <Route path="/tools" element={<AllToolsPage />} />
           <Route path="/tool/:toolId" element={<ToolPage />} />
-          <Route path="/features" element={<FeaturesPage />} />
-          <Route path="/our-tools" element={<ToolsListPage />} />
-          <Route path="/our-tools/:category" element={<CategoryDetailPage />} />
-          <Route path="/faq" element={<FAQPage />} />
-          <Route path="/security" element={<SecurityPage />} />
-          <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
-          <Route path="/terms" element={<TermsPage />} />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/contact" element={<ContactPage />} />
-          <Route path="/complaints" element={<ComplaintsPage />} />
+        
           <Route path="/files" element={<FileManagerPage />} />
 
         </Route>

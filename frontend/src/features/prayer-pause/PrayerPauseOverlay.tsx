@@ -33,13 +33,13 @@ import { PRAYER_ARABIC_NAMES } from './prayerNames';
 import { usePrayerPauseStore } from './prayerPauseStore';
 import { usePrayerPause } from './usePrayerPause';
 
-const HEADING = 'حان وقت الصلاة';
+const HEADING = 'حان وقت الصلاة ';
 const VERSE = 'إِنَّ الصَّلَاةَ كَانَتْ عَلَى الْمُؤْمِنِينَ كِتَابًا مَوْقُوتًا';
 const SUPPORTING_TEXT = 'اذهب إلى صلاتك، فالصلاة أولى.';
 const RETURNING_TEXT = 'عودة آمنة إلى مورفن';
 const COUNTDOWN_LABEL = 'الوقت المتبقي';
 
-const countdownFormatter = new Intl.DateTimeFormat('ar-EG', {
+const countdownFormatter = new Intl.DateTimeFormat('ar-EG-u-nu-latn', {
   minute: '2-digit',
   second: '2-digit',
   hour12: false,
@@ -47,14 +47,14 @@ const countdownFormatter = new Intl.DateTimeFormat('ar-EG', {
 });
 
 /**
- * mm:ss in Arabic-Indic digits; window can never exceed 15 minutes.
+ * mm:ss in Western digits; window can never exceed 15 minutes.
  * Defense in depth: the store rejects malformed windows at its boundary, so
  * non-finite input is unreachable in normal operation — but this component
  * mounts at the app root and must never crash the whole application because
  * of an invalid countdown value.
  */
 function formatRemaining(ms: number): string {
-  if (!Number.isFinite(ms)) return '٠٠:٠٠';
+  if (!Number.isFinite(ms)) return '00:00';
   return countdownFormatter.format(new Date(Math.max(0, ms)));
 }
 
@@ -194,6 +194,8 @@ export function PrayerPauseOverlay() {
 
             <h1 data-prayer-pause-heading="" className="text-2xl sm:text-3xl font-bold">{HEADING}</h1>
 
+            <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">حسب التوقيت المحلي لدولة فلسطين</p>
+
             {activePrayerId && (
               <p
                 data-prayer-pause-prayer=""
@@ -209,7 +211,7 @@ export function PrayerPauseOverlay() {
                 ﴿ {VERSE} ﴾
               </blockquote>
               <figcaption className="mt-2 text-xs text-gray-400 dark:text-gray-500">
-                سورة النساء — الآية ١٠٣
+                سورة النساء - الآية 103
               </figcaption>
             </figure>
 

@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { useFileStorage } from '@/hooks/useFileStorage';
 import { formatFileSize } from '@/utils/file';
+import { APP_DISPLAY_LOCALE } from '@/utils/displayLocale';
 
 export default function FileManagerPage() {
   const { files, loading, error, upload, remove, clear } = useFileStorage();
@@ -90,7 +91,7 @@ export default function FileManagerPage() {
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">{f.name}</p>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                  {formatFileSize(f.size)} · {new Date(f.createdAt).toLocaleString()}
+                  {formatFileSize(f.size)} · {new Date(f.createdAt).toLocaleString(APP_DISPLAY_LOCALE)}
                 </p>
               </div>
               <div className="flex items-center gap-1 shrink-0">

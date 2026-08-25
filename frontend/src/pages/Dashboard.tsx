@@ -6,6 +6,7 @@ import { usePomodoroStore } from '@/store/usePomodoroStore';
 import { useFileStorage } from '@/hooks/useFileStorage';
 import AchievementsPanel from '@/components/Dashboard/AchievementsPanel';
 import { formatFileSize } from '@/utils/file';
+import { APP_DISPLAY_LOCALE } from '@/utils/displayLocale';
 import type { Task } from '@/types';
 import {
   CheckSquare,
@@ -160,7 +161,7 @@ function TasksPanel() {
                     ? 'اليوم'
                     : task.dueDate < today
                       ? 'متأخر'
-                      : new Date(task.dueDate).toLocaleDateString()}
+                      : new Date(task.dueDate).toLocaleDateString(APP_DISPLAY_LOCALE)}
                 </span>
               )}
             </div>
@@ -427,7 +428,7 @@ function ExamsPanel() {
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 truncate">{exam.name}</p>
                   <p className="text-xs text-gray-400 dark:text-gray-500">
-                    {new Date(exam.date).toLocaleDateString('ar-SA', { month: 'short', day: 'numeric' })}
+                    {new Date(exam.date).toLocaleDateString('ar-SA-u-nu-latn', { month: 'short', day: 'numeric' })}
                   </p>
                 </div>
                 <span className={`text-xs font-semibold shrink-0 px-2.5 py-1 rounded-full ${

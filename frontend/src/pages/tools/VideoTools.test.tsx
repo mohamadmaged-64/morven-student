@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+﻿import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ExtractAudioFromVideo, CompressVideo, ConvertVideoFormats } from './VideoTools';
@@ -57,7 +57,7 @@ describe('ExtractAudioFromVideo', () => {
     render(<ExtractAudioFromVideo />);
     await selectFile(makeVideoFile());
 
-    await user.click(screen.getByRole('button', { name: 'استخراج الصوت من الفيديو' }));
+    await user.click(screen.getByRole('button', { name: 'استخراج الصوت' }));
 
     await waitFor(() => {
       expect(mockedExtract).toHaveBeenCalledTimes(1);
@@ -66,7 +66,7 @@ describe('ExtractAudioFromVideo', () => {
     expect(fileArg.name).toBe('clip.mp4');
     expect(optionsArg).toEqual({ format: 'mp3', quality: 'high' });
 
-    expect(await screen.findByText('تمت المعالجة بنجاح')).toBeInTheDocument();
+    expect(await screen.findByText('تمت العملية بنجاح')).toBeInTheDocument();
     expect(screen.getByText('clip-audio.mp3')).toBeInTheDocument();
     expect(mockedSaveToLibrary).toHaveBeenCalledWith(
       expect.any(Blob),
@@ -75,7 +75,7 @@ describe('ExtractAudioFromVideo', () => {
     );
     // The action button is replaced by the result actions.
     expect(
-      screen.queryByRole('button', { name: 'استخراج الصوت من الفيديو' })
+      screen.queryByRole('button', { name: 'استخراج الصوت' })
     ).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'تنزيل الملف' })).toBeInTheDocument();
   });
@@ -88,7 +88,7 @@ describe('ExtractAudioFromVideo', () => {
 
     render(<ExtractAudioFromVideo />);
     await selectFile(makeVideoFile());
-    await user.click(screen.getByRole('button', { name: 'استخراج الصوت من الفيديو' }));
+    await user.click(screen.getByRole('button', { name: 'استخراج الصوت' }));
 
     expect(
       await screen.findByText('نوع الملف غير مدعوم. يرجى اختيار ملف فيديو صالح.')
@@ -96,7 +96,7 @@ describe('ExtractAudioFromVideo', () => {
     // Error state returns to the idle form so the user can retry.
     await waitFor(() =>
       expect(
-        screen.getByRole('button', { name: 'استخراج الصوت من الفيديو' })
+        screen.getByRole('button', { name: 'استخراج الصوت' })
       ).toBeInTheDocument()
     );
   });
@@ -129,7 +129,7 @@ describe('CompressVideo', () => {
 
     await user.click(screen.getByRole('button', { name: 'ضغط الفيديو' }));
 
-    expect(await screen.findByText('تمت المعالجة بنجاح')).toBeInTheDocument();
+    expect(await screen.findByText('تمت العملية بنجاح')).toBeInTheDocument();
     // formatBytes keeps bytes under 1KB unsplit; "1000 B" appears both in
     // the file summary and in the savings grid.
     expect(screen.getAllByText('1000 B').length).toBeGreaterThanOrEqual(2);
@@ -182,7 +182,7 @@ describe('ConvertVideoFormats', () => {
     const [, target] = mockedConvert.mock.calls[0];
     expect(target).toBe('webm');
 
-    expect(await screen.findByText('تمت المعالجة بنجاح')).toBeInTheDocument();
+    expect(await screen.findByText('تمت العملية بنجاح')).toBeInTheDocument();
   });
 
   it('auto-selects the first available target for unusual extensions', async () => {

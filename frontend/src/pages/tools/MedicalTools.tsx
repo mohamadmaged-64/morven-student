@@ -63,6 +63,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { groupBy } from '@/utils/groupBy';
+import { APP_DISPLAY_LOCALE } from '@/utils/displayLocale';
 
 // =============================================================================
 // Types
@@ -3376,7 +3377,7 @@ const NOTE_TEMPLATES = [
   {
     id: 'progress',
     name: 'Progress Note',
-    template: `DATE: ${new Date().toLocaleDateString()}\n\nSUBJECTIVE:\nPatient reports: \nSymptoms: \n\nOBJECTIVE:\nVitals: \nExam findings: \nNew results: \n\nASSESSMENT:\nCondition: \nResponse to treatment: \n\nPLAN:\n1. \n2. \n3. \nDisposition: `,
+    template: `DATE: ${new Date().toLocaleDateString(APP_DISPLAY_LOCALE)}\n\nSUBJECTIVE:\nPatient reports: \nSymptoms: \n\nOBJECTIVE:\nVitals: \nExam findings: \nNew results: \n\nASSESSMENT:\nCondition: \nResponse to treatment: \n\nPLAN:\n1. \n2. \n3. \nDisposition: `,
   },
   {
     id: 'discharge',
@@ -3570,7 +3571,7 @@ function MedicalNotesTool() {
                       <Badge variant="info">{note.category}</Badge>
                     </div>
                     <p className="text-sm text-gray-400 dark:text-gray-500 mb-2">
-                      {new Date(note.updatedAt).toLocaleDateString()} {new Date(note.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      {new Date(note.updatedAt).toLocaleDateString(APP_DISPLAY_LOCALE)} {new Date(note.updatedAt).toLocaleTimeString([APP_DISPLAY_LOCALE], { hour: '2-digit', minute: '2-digit' })}
                     </p>
                     <p className="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-wrap line-clamp-3 font-mono">{note.content}</p>
                   </div>

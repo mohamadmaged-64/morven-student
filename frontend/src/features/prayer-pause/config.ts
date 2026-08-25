@@ -38,8 +38,11 @@ export const PRAYER_CALCULATION: {
   asrShadowFactor: 1,
 };
 
-/** Display locale for prayer-time formatting (Arabic-first application). */
-export const DISPLAY_LOCALE = 'ar-EG';
+/**
+ * Display locale for prayer-time formatting (Arabic-first application).
+ * `nu-latn` forces Western digits (0123456789) while keeping Arabic wording.
+ */
+export const DISPLAY_LOCALE = 'ar-EG-u-nu-latn';
 
 /**
  * Stacking tier for the Prayer Pause overlay (rendered by Phase 5).

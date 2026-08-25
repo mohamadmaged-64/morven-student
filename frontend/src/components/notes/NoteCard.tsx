@@ -11,7 +11,7 @@ type NoteCardProps = {
 };
 
 function formatNoteDate(timestamp: number): string {
-  return new Date(timestamp).toLocaleDateString('ar-SA', {
+  return new Date(timestamp).toLocaleDateString('ar-SA-u-nu-latn', {
     month: 'short',
     day: 'numeric',
   });

@@ -57,7 +57,7 @@ export const categories: Record<ToolCategory, CategoryMeta> = {
    images: {
     name: 'أدوات الصور',
     icon: ImageIcon,
-    description: 'إزالة الخلفيات وتدوير وتغيير الحجم وتحويل الصور',
+    description: 'إزالة الخلفيات وتغيير الحجم والقص والتدوير والعلامات المائية والمزيد',
   },
   audio: {
     name: 'أدوات الصوت',

@@ -22,6 +22,8 @@ type FileUploadProps = {
   label?: string;
   description?: string;
   readAs?: 'ArrayBuffer' | 'DataURL';
+  /** Hide the component-internal file list (parent renders its own). */
+  hideFileList?: boolean;
   /**
    * When false the selected files are handed over without reading their
    * bytes into memory (recommended for very large media uploads).
@@ -52,15 +54,21 @@ function FileUpload({
   label,
   description,
   readAs = 'ArrayBuffer',
+  hideFileList = false,
   readFileData = true,
 }: FileUploadProps) {
-  console.log("Received label:", label);
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-   const Label =
+  const Label =
     label ?? 'اسحب الملفات هنا أو اضغط للتصفح';
+
+  const formatSizeAr = (bytes: number): string => {
+    if (bytes < 1024) return `${bytes} بايت`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} كيلوبايت`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} ميغابايت`;
+  };
 
   const processFiles = useCallback(
     (fileList: FileList) => {
@@ -68,17 +76,17 @@ function FileUpload({
       const newFiles = Array.from(fileList);
 
       if (files.length + newFiles.length > maxFiles) {
-        setError(`Maximum ${maxFiles} files allowed`);
+        setError(`الحد الأقصى ${maxFiles} ملفات.`);
         return;
       }
 
       const validFiles = newFiles.filter((f) => {
         if (maxSize && f.size > maxSize) {
-          setError(`File "${f.name}" exceeds ${formatSize(maxSize)} limit`);
+          setError(`حجم الملف "${f.name}" يتجاوز الحد المسموح (${formatSizeAr(maxSize)}).`);
           return false;
         }
         if (accept.length > 0 && !accept.some((type) => f.type === type || f.name.endsWith(type.replace('*', '')))) {
-          setError(`File type "${f.type || 'unknown'}" is not allowed`);
+          setError(`نوع الملف "${f.type || f.name}" غير مدعوم.`);
           return false;
         }
         return true;
@@ -207,7 +215,7 @@ function FileUpload({
             inputRef.current?.click();
           }
         }}
-        aria-label="File upload area"
+        aria-label="منطقة رفع الملفات"
       >
         <input
           ref={inputRef}
@@ -223,7 +231,7 @@ function FileUpload({
         <div className="flex flex-col items-center gap-3">
           <div
             className={[
-              'w-5 h-5 rounded-2xl flex items-center justify-center transition-colors',
+              'w-12 h-12 rounded-2xl flex items-center justify-center transition-colors',
               isDragging
                 ? 'bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-400'
                 : 'bg-gray-100 dark:bg-dark-surface text-gray-400 dark:text-gray-500',
@@ -256,7 +264,7 @@ function FileUpload({
       )}
 
       <AnimatePresence>
-        {files.length > 0 && (
+        {files.length > 0 && !hideFileList && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
@@ -322,7 +330,7 @@ function FileUpload({
                       removeFile(uf.id);
                     }}
                     className="p-1 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                    aria-label={`Remove ${uf.file.name}`}
+                    aria-label={`إزالة ${uf.file.name}`}
                   >
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <line x1="18" y1="6" x2="6" y2="18" />

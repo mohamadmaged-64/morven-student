@@ -145,6 +145,10 @@ export const usePrayerPauseStore = create<PrayerPauseState>((set, get) => ({
   },
 }));
 
+if (import.meta.env.DEV) {
+  (window as any).__prayerPauseStore = usePrayerPauseStore;
+}
+
 /** Synchronous snapshot helpers for non-React consumers (e.g. title guard). */
 export function getPrayerPauseStatus(): PrayerPauseStatus {
   return usePrayerPauseStore.getState().status;

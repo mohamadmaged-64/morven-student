@@ -10,7 +10,9 @@ import { Slider } from '@/components/UI/Slider';
 import { useAppStore } from '@/store/useAppStore';
 import { useNavigate } from 'react-router-dom';
 import { saveToLibrary } from '@/services/savedFilesService';
-type ToolId = 'qr-generator';
+import { QRImageScanner } from './QRImageScanner';
+import { QRCodeCameraScanner } from './QRCodeCameraScanner';
+type ToolId = 'qr-generator' | 'qr-scanner-image' | 'qr-scanner-camera';
 
 type InputType = 'text' | 'url' | 'email' | 'phone' | 'wifi';
 type ErrorLevel = 'L' | 'M' | 'Q' | 'H';
@@ -320,6 +322,18 @@ function QRCodeToolPage({ toolId }: { toolId: string }) {
       description: 'أنشئ رموز QR مخصصة للنصوص والروابط والبريد وواي فاي والمزيد',
       icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>,
       component: <QRCodeGenerator />,
+    },
+    'qr-scanner-image': {
+      title: 'مسح رمز QR من صورة',
+      description: 'ارفع صورة تحتوي على رمز QR وسنتعرف عليه فوراً',
+      icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>,
+      component: <QRImageScanner />,
+    },
+    'qr-scanner-camera': {
+      title: 'مسح رمز QR بالكاميرا',
+      description: 'استخدم كاميرا جهازك لمسح رمز QR في الوقت الفعلي',
+      icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>,
+      component: <QRCodeCameraScanner />,
     },
   };
 

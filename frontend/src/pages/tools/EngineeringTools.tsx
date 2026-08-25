@@ -1443,7 +1443,7 @@ function UnixTimestamp() {
   const handleTimestampToDate = () => {
     const ts = parseInt(timestamp, 10);
     if (isNaN(ts)) return;
-    setConvertedDate(new Date(ts * 1000).toLocaleString('ar-SA'));
+    setConvertedDate(new Date(ts * 1000).toLocaleString('ar-SA-u-nu-latn'));
   };
 
   const handleDateToTimestamp = () => {
