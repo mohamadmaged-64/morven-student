@@ -1,18 +1,16 @@
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import { useAppStore } from '@/store/useAppStore';
 import { usePomodoroStore } from '@/store/usePomodoroStore';
 import { useNotesStore } from '@/store/useNotesStore';
 import { useStatsStore } from '@/store/useStatsStore';
 import { useFileStorage } from '@/hooks/useFileStorage';
+import { syncAchievements } from '@/services/profileApi';
+import { Trophy } from 'lucide-react';
 import {
-  Trophy,
-  CheckSquare,
-  Brain,
-  Timer,
-  StickyNote,
-  FolderOpen,
-  Sparkles,
-} from 'lucide-react';
+  computeAchievementTotal,
+  type AchievementMetricCounts,
+} from './achievementMetrics';
+import AchievementMetricsGrid from './AchievementMetricsGrid';
 
 export default function AchievementsPanel() {
   const tasks = useAppStore((s) => s.tasks);
@@ -33,73 +31,28 @@ export default function AchievementsPanel() {
     [notes],
   );
 
-  const flashcardsCount = useMemo(() => flashcards.length, [flashcards]);
+  const counts: AchievementMetricCounts = {
+    completedTasks,
+    cardsReviewed,
+    completedSessions,
+    meaningfulNotes,
+    files: files.length,
+    flashcards: flashcards.length,
+    quizzesCompleted,
+  };
 
-  const totalAchievements = completedTasks + completedSessions + meaningfulNotes + files.length + flashcardsCount + cardsReviewed + quizzesCompleted;
+  const totalAchievements = computeAchievementTotal(counts);
 
-  const metrics: {
-    icon: typeof Trophy;
-    value: number;
-    label: string;
-    accent: string;
-    accentDark: string;
-    iconColor: string;
-  }[] = [
-    {
-      icon: CheckSquare,
-      value: completedTasks,
-      label: 'مهمة مكتملة',
-      accent: 'bg-emerald-50',
-      accentDark: 'dark:bg-emerald-900/30',
-      iconColor: 'text-emerald-600',
-    },
-    {
-      icon: Brain,
-      value: cardsReviewed,
-      label: 'بطاقة تمت مراجعتها',
-      accent: 'bg-violet-50',
-      accentDark: 'dark:bg-violet-900/30',
-      iconColor: 'text-violet-600',
-    },
-    {
-      icon: Timer,
-      value: completedSessions,
-      label: 'جلسة بومودورو',
-      accent: 'bg-blue-50',
-      accentDark: 'dark:bg-blue-900/30',
-      iconColor: 'text-blue-600',
-    },
-    {
-      icon: StickyNote,
-      value: meaningfulNotes,
-      label: 'ملاحظة',
-      accent: 'bg-amber-50',
-      accentDark: 'dark:bg-amber-900/30',
-      iconColor: 'text-amber-600',
-    },
-    {
-      icon: FolderOpen,
-      value: files.length,
-      label: 'ملف محفوظ',
-      accent: 'bg-sky-50',
-      accentDark: 'dark:bg-sky-900/30',
-      iconColor: 'text-sky-600',
-    },
-    {
-      icon: Sparkles,
-      value: quizzesCompleted,
-      label: 'اختبار مكتمل',
-      accent: 'bg-rose-50',
-      accentDark: 'dark:bg-rose-900/30',
-      iconColor: 'text-rose-600',
-    },
-  ];
+  // Seed the server-side achievement counters from the dashboard data so the
+  // user's public profile reflects the same achievements. Fire-and-forget.
+  useEffect(() => {
+    syncAchievements(counts).catch(() => {
+      // ignore — syncing is best-effort
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [totalAchievements]);
 
   const hasAny = totalAchievements > 0;
-
-  const motivationalMessage = totalAchievements >= 100
-    ? 'ممتاز! وصلت إلى 100 إنجاز!'
-    : 'استمر، فإنجازاتك تزيد يومًا بعد يوم.';
 
   return (
     <div className="w-full flex flex-col">
@@ -126,33 +79,7 @@ export default function AchievementsPanel() {
           </p>
         </div>
       ) : (
-        <>
-          {/* Metrics Grid */}
-          <div className="grid grid-cols-3 gap-3 mb-6">
-            {metrics.map((m) => (
-              <div
-                key={m.label}
-                className={`flex flex-col items-center justify-center rounded-2xl ${m.accent} ${m.accentDark} px-3 py-4 transition-all`}
-              >
-                <m.icon className={`w-5 h-5 ${m.iconColor} mb-2`} strokeWidth={1.8} />
-                <span className="text-xl font-extrabold text-gray-900 dark:text-gray-100 tabular-nums leading-none">
-                  {m.value}
-                </span>
-                <span className="text-[10px] font-medium text-gray-500 dark:text-gray-400 mt-1 text-center leading-tight">
-                  {m.label}
-                </span>
-              </div>
-            ))}
-          </div>
-
-          {/* Motivational Message */}
-          <div className="flex items-center gap-2.5 rounded-xl bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 px-4 py-3">
-            <Sparkles className="w-4 h-4 text-amber-500 shrink-0" />
-            <p className="text-xs font-medium text-amber-700 dark:text-amber-300">
-              {motivationalMessage}
-            </p>
-          </div>
-        </>
+        <AchievementMetricsGrid counts={counts} total={totalAchievements} />
       )}
     </div>
   );

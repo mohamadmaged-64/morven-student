@@ -4,7 +4,10 @@ import { MainLayout } from '@/components/Layout/MainLayout';
 import { NotificationHost } from '@/components/Layout/NotificationHost';
 import { PrayerPauseHost } from '@/features/prayer-pause';
 import { ToolErrorBoundary } from '@/components/Tool/ToolErrorBoundary';
+import { ProtectedRoute } from '@/components/ProtectedRoute';
+import { PreviewBanner } from '@/dev/PreviewBanner';
 import { useAppStore } from '@/store/useAppStore';
+import { useAuthStore } from '@/store/useAuthStore';
 import { useThemeStore } from '@/store/useThemeStore';
 import { getToolById } from '@/data/tools';
 import type { ToolCategory } from '@/types';
@@ -21,6 +24,15 @@ import ImageToolPage from '@/pages/tools/ImageTools';
 import AudioToolPage from '@/pages/tools/AudioTools';
 import QRCodeToolPage from '@/pages/tools/QRCodeTools';
 import FileManagerPage from '@/pages/FileManagerPage';
+import LoginPage from '@/pages/auth/LoginPage';
+import RegisterPage from '@/pages/auth/RegisterPage';
+import ConnectLandingPage from '@/pages/connect/ConnectLandingPage';
+import AccountPage from '@/pages/connect/AccountPage';
+import PublicProfilePage from '@/pages/connect/PublicProfilePage';
+import GroupsPage from '@/pages/connect/GroupsPage';
+import GroupDetailPage from '@/pages/connect/GroupDetailPage';
+import ResourcesPage from '@/pages/connect/ResourcesPage';
+import ResourceDetailPage from '@/pages/connect/ResourceDetailPage';
 
 
 const toolPageMap: Record<ToolCategory, ComponentType<{ toolId: string }>> = {
@@ -90,19 +102,34 @@ export default function App() {
     document.documentElement.lang = 'ar';
   }, []);
 
+  useEffect(() => {
+    useAuthStore.getState().initialize();
+  }, []);
+
   return (
     <BrowserRouter>
       <NotificationHost />
       <PrayerPauseHost />
+      <PreviewBanner />
       <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+
         <Route element={<MainLayout />}>
           <Route path="/" element={<Dashboard />} />
           <Route path="/category/:category" element={<CategoryPage />} />
           <Route path="/tools" element={<AllToolsPage />} />
           <Route path="/tool/:toolId" element={<ToolPage />} />
-        
           <Route path="/files" element={<FileManagerPage />} />
 
+          {/* Morven Connect */}
+          <Route path="/connect" element={<ConnectLandingPage />} />
+          <Route path="/connect/account" element={<ProtectedRoute><AccountPage /></ProtectedRoute>} />
+          <Route path="/connect/profile/:username" element={<PublicProfilePage />} />
+          <Route path="/connect/groups" element={<ProtectedRoute><GroupsPage /></ProtectedRoute>} />
+          <Route path="/connect/groups/:groupId" element={<ProtectedRoute><GroupDetailPage /></ProtectedRoute>} />
+          <Route path="/connect/resources" element={<ResourcesPage />} />
+          <Route path="/connect/resources/:resourceId" element={<ResourceDetailPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

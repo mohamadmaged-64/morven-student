@@ -1,0 +1,89 @@
+import { useState, type FormEvent } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuthStore } from '@/store/useAuthStore';
+import { Button } from '@/components/UI/Button';
+import { Input } from '@/components/UI/Input';
+import { Card } from '@/components/UI/Card';
+
+export default function LoginPage() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const { login, loading, error, clearError } = useAuthStore();
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    clearError();
+    try {
+      await login(email, password);
+      navigate('/');
+    } catch {
+      // error is set in the store
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-dark-bg px-4">
+      <Card className="w-full max-w-md" padding="lg">
+        <div className="text-center mb-8">
+          <img src="/morven.png" alt="مورفن" className="w-12 h-12 mx-auto mb-4" />
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+            تسجيل الدخول
+          </h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+            الدخول إلى حسابك في مورفن كونكت
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {error && (
+            <div className="p-3 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-red-600 dark:text-red-400 text-sm">
+              {error}
+            </div>
+          )}
+
+          <Input
+            label="البريد الإلكتروني"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            autoComplete="email"
+            placeholder="example@email.com"
+          />
+
+          <Input
+            label="كلمة المرور"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            autoComplete="current-password"
+            placeholder="••••••••"
+          />
+
+          <Button
+            type="submit"
+            loading={loading}
+            className="w-full"
+            size="lg"
+          >
+            دخول
+          </Button>
+        </form>
+
+        <div className="mt-6 text-center">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            ليس لديك حساب؟{' '}
+            <Link
+              to="/register"
+              className="text-primary-600 dark:text-primary-400 hover:underline font-medium"
+            >
+              إنشاء حساب
+            </Link>
+          </p>
+        </div>
+      </Card>
+    </div>
+  );
+}

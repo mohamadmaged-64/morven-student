@@ -1,5 +1,5 @@
 const DB_NAME = 'morven-storage';
-const DB_VERSION = 3;
+const DB_VERSION = 4;
 const FILE_STORE = 'files';
 
 let dbPromise: Promise<IDBDatabase> | null = null;

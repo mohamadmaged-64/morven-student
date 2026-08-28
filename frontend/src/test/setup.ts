@@ -20,6 +20,28 @@ if (typeof URL.revokeObjectURL !== 'function') {
 
 window.HTMLElement.prototype.scrollIntoView = () => undefined;
 
+// jsdom does not reliably expose `localStorage` in this environment, but the
+// Pomodoro store and connectPomodoro rely on it. Provide a deterministic
+// in-memory implementation so tests (and preview mode) work offline.
+if (!window.localStorage || typeof window.localStorage.clear !== 'function') {
+  const store = new Map<string, string>();
+  const localStorageStub = {
+    getItem: (key: string) => (store.has(key) ? store.get(key)! : null),
+    setItem: (key: string, value: string) => void store.set(key, String(value)),
+    removeItem: (key: string) => void store.delete(key),
+    clear: () => store.clear(),
+    key: (index: number) => Array.from(store.keys())[index] ?? null,
+    get length() {
+      return store.size;
+    },
+  } as Storage;
+  Object.defineProperty(window, 'localStorage', {
+    value: localStorageStub,
+    configurable: true,
+    writable: true,
+  });
+}
+
 // jsdom does not implement the Clipboard API; provide a minimal stub so
 // components that call navigator.clipboard.writeText work in tests.
 if (!navigator.clipboard) {

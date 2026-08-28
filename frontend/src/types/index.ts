@@ -1,6 +1,6 @@
 import { LucideIcon } from "lucide-react";
 
-export type Theme = 'light' | 'dark';
+export type Theme = 'light' | 'dark' | 'system';
 
 export interface Tool {
   id: string;
