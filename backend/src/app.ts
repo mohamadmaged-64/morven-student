@@ -14,7 +14,6 @@ import mediaRoutes from "./routes/media";
 import authRoutes from "./routes/auth";
 import profileRoutes from "./routes/profile";
 import groupRoutes from "./routes/group";
-import roomRoutes from "./routes/room";
 import pomodoroRoutes from "./routes/pomodoro";
 import resourceRoutes from "./routes/resource";
 
@@ -115,7 +114,6 @@ app.use("/api/auth/refresh", refreshLimiter);
 app.use(authRoutes);
 app.use(profileRoutes);
 app.use(groupRoutes);
-app.use(roomRoutes);
 app.use(pomodoroRoutes);
 app.use(resourceRoutes);
 

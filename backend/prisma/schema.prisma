@@ -97,7 +97,6 @@ model Group {
   updatedAt   DateTime      @updatedAt @map("updated_at")
   creator     User          @relation("GroupOwner", fields: [creatorId], references: [id], onDelete: Cascade)
   members     GroupMember[]
-  rooms       Room[]
   pomodoroSessions PomodoroSession[]
 
   @@map("groups")
@@ -115,18 +114,6 @@ model GroupMember {
   @@unique([groupId, userId])
   @@index([userId])
   @@map("group_members")
-}
-
-model Room {
-  id          String   @id @default(uuid())
-  name        String
-  description String?
-  groupId     String   @map("group_id")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
-  group       Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
-
-  @@map("rooms")
 }
 
 model PomodoroSession {

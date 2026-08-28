@@ -135,7 +135,7 @@ export async function listUserGroups(userId: string) {
     where: { userId },
     include: {
       group: {
-        include: { _count: { select: { members: true, rooms: true } } },
+        include: { _count: { select: { members: true } } },
       },
     },
     orderBy: { createdAt: "desc" },
@@ -145,7 +145,6 @@ export async function listUserGroups(userId: string) {
     ...sanitizeGroup(m.group),
     role: m.role,
     memberCount: m.group._count.members,
-    roomCount: m.group._count.rooms,
   }));
 }
 
@@ -157,7 +156,6 @@ export async function getGroupDetails(groupId: string, userId: string) {
         include: { user: { select: { id: true, username: true, displayName: true, profile: { select: { avatarUrl: true } } } } },
         orderBy: { createdAt: "asc" },
       },
-      _count: { select: { rooms: true } },
     },
   });
 
@@ -181,7 +179,6 @@ export async function getGroupDetails(groupId: string, userId: string) {
       role: m.role,
       joinedAt: m.createdAt,
     })),
-    roomCount: group._count.rooms,
   };
 }
 
