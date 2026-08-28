@@ -1,0 +1,307 @@
+import { Server as SocketIOServer, Socket, Namespace } from "socket.io";
+import jwt from "jsonwebtoken";
+import { EventEmitter } from "events";
+import type { Server as HTTPServer } from "http";
+import prisma from "../lib/prisma";
+
+const JWT_SECRET = process.env.JWT_SECRET;
+
+interface OnlineEntry {
+  userId: string;
+  username: string;
+  displayName: string;
+  avatarUrl: string | null;
+  socketCount: number;
+  lastHeartbeat: number;
+}
+
+// user-level online presence (NOT room-local). A user is online while they have
+// >= 1 authenticated socket. Their online/focusing state is reflected in every
+// group they are a member of, independent of which group they currently view.
+const onlineUsers = new Map<string, OnlineEntry>();
+
+// user-level transient focusing state (in-memory only, never persisted).
+const focusingStore = new Map<string, { focusing: boolean; updatedAt: number }>();
+
+// socketId -> SET<groupId> so we know which group rooms a given socket joined.
+const socketGroups = new Map<string, Set<string>>();
+
+const HEARTBEAT_INTERVAL = 15_000;
+const STALE_TIMEOUT = 30_000;
+
+function toPresencePayload(entry: OnlineEntry, focusing: boolean) {
+  return {
+    userId: entry.userId,
+    username: entry.username,
+    displayName: entry.displayName,
+    avatarUrl: entry.avatarUrl,
+    focusing,
+    lastHeartbeat: entry.lastHeartbeat,
+    socketCount: entry.socketCount,
+  };
+}
+
+function isFocusing(userId: string): boolean {
+  return focusingStore.get(userId)?.focusing === true;
+}
+
+async function groupMemberProfiles(groupId: string): Promise<{ userId: string; username: string; displayName: string; avatarUrl: string | null }[]> {
+  const members = await prisma.groupMember.findMany({
+    where: { groupId },
+    select: {
+      user: {
+        select: { id: true, username: true, displayName: true, profile: { select: { avatarUrl: true } } },
+      },
+    },
+  });
+  return members.map((m) => ({
+    userId: m.user.id,
+    username: m.user.username,
+    displayName: m.user.displayName,
+    avatarUrl: m.user.profile?.avatarUrl ?? null,
+  }));
+}
+
+async function userGroupIds(userId: string): Promise<string[]> {
+  const memberships = await prisma.groupMember.findMany({
+    where: { userId },
+    select: { groupId: true },
+  });
+  return memberships.map((m) => m.groupId);
+}
+
+// Recompute the online + focusing members for a group from headers of each
+// online user whom that group knows about, and push to the room.
+async function pushGroupPresence(groupId: string, connectNs: Namespace) {
+  const members = await groupMemberProfiles(groupId);
+  const profileById = new Map(members.map((m) => [m.userId, m]));
+  const present: ReturnType<typeof toPresencePayload>[] = [];
+
+  for (const [userId, entry] of onlineUsers) {
+    const profile = profileById.get(userId);
+    if (!profile) continue; // not a member of this group
+    present.push(
+      toPresencePayload(
+        { ...entry, username: profile.username, displayName: profile.displayName, avatarUrl: profile.avatarUrl },
+        isFocusing(userId),
+      ),
+    );
+  }
+
+  connectNs.to(`group:${groupId}`).emit("group-presence-update", { groupId, users: present });
+}
+
+function removeSocketFromOnline(socket: Socket, connectNs: Namespace) {
+  const userId = socket.data.userId as string;
+  const entry = onlineUsers.get(userId);
+  if (!entry) return;
+
+  entry.socketCount -= 1;
+  const wentOffline = entry.socketCount <= 0;
+  if (wentOffline) {
+    onlineUsers.delete(userId);
+  }
+
+  // Recompute presence for every group room this socket had joined so viewers
+  // see the user leave (or, if still online via another tab, stay with updated count).
+  // If the user is fully offline, also emit an explicit user-left event.
+  const groups = socketGroups.get(socket.id);
+  if (groups) {
+    for (const groupId of groups) {
+      if (wentOffline) {
+        connectNs.to(`group:${groupId}`).emit("group-user-left", {
+          groupId,
+          user: { userId, username: entry.username, displayName: entry.displayName },
+        });
+      }
+      void pushGroupPresence(groupId, connectNs);
+    }
+    socketGroups.delete(socket.id);
+  }
+}
+
+export function setupSocketIO(httpServer: HTTPServer) {
+  const io = new SocketIOServer(httpServer, {
+    path: "/socket.io",
+    cors: {
+      origin: [
+        "http://localhost:5173",
+        "http://localhost:5174",
+        "http://127.0.0.1:5173",
+        "http://127.0.0.1:5174",
+      ],
+      credentials: true,
+    },
+  });
+
+  const connectNs = io.of("/connect");
+
+  // Authentication middleware
+  connectNs.use((socket: Socket, next) => {
+    const token =
+      socket.handshake.auth?.token ||
+      socket.handshake.query?.token;
+
+    if (!token || typeof token !== "string") {
+      next(new Error("Authentication required"));
+      return;
+    }
+
+    try {
+      const payload = jwt.verify(token, JWT_SECRET!) as {
+        sub: string;
+        username: string;
+        displayName: string;
+      };
+      socket.data.userId = payload.sub;
+      socket.data.username = payload.username;
+      socket.data.displayName = payload.displayName;
+      next();
+    } catch {
+      next(new Error("Invalid token"));
+    }
+  });
+
+  connectNs.on("connection", (socket: Socket) => {
+    const userId = socket.data.userId as string;
+    const username = socket.data.username as string;
+    const displayName = socket.data.displayName as string;
+
+    // Upsert into user-level online registry.
+    const existing = onlineUsers.get(userId);
+    if (existing) {
+      existing.socketCount += 1;
+      existing.lastHeartbeat = Date.now();
+    } else {
+      // Fetch avatar from Profile.
+      void prisma.profile
+        .findUnique({ where: { userId }, select: { avatarUrl: true } })
+        .then((profile) => {
+          const cur = onlineUsers.get(userId);
+          if (cur) cur.avatarUrl = profile?.avatarUrl ?? null;
+        })
+        .catch(() => {});
+      onlineUsers.set(userId, {
+        userId,
+        username,
+        displayName,
+        avatarUrl: null,
+        socketCount: 1,
+        lastHeartbeat: Date.now(),
+      });
+    }
+
+    // Join a group — updates this group's presence list to reflect ALL online
+    // members (membership-based, cross-group).
+    socket.on("join-group", async ({ groupId }: { groupId: string }) => {
+      if (!groupId || typeof groupId !== "string") return;
+
+      socket.join(`group:${groupId}`);
+
+      if (!socketGroups.has(socket.id)) socketGroups.set(socket.id, new Set());
+      socketGroups.get(socket.id)!.add(groupId);
+
+      // Notify others in the group that this user is now online/present.
+      socket.to(`group:${groupId}`).emit("group-user-joined", {
+        groupId,
+        user: { userId, username, displayName },
+      });
+
+      // Membership-based presence snapshot including focusing state.
+      await pushGroupPresence(groupId, connectNs);
+    });
+
+    // Leave a group — stop receiving that group's broadcasts.
+    socket.on("leave-group", ({ groupId }: { groupId: string }) => {
+      if (!groupId || typeof groupId !== "string") return;
+      socket.leave(`group:${groupId}`);
+      socketGroups.get(socket.id)?.delete(groupId);
+      void pushGroupPresence(groupId, connectNs);
+    });
+
+    // Heartbeat keeps the user marked online.
+    socket.on("heartbeat", ({ groupId }: { groupId: string }) => {
+      const entry = onlineUsers.get(userId);
+      if (entry) {
+        entry.lastHeartbeat = Date.now();
+      }
+    });
+
+    // FOCUSING state is a user-level, transient signal. Broadcast it to every
+    // group the user belongs to so Focusing reflects across ALL groups.
+    socket.on("focusing-state", ({ focusing }: { focusing: boolean }) => {
+      const focused = focusing === true;
+      focusingStore.set(userId, { focusing: focused, updatedAt: Date.now() });
+
+      void userGroupIds(userId).then((groups) => {
+        for (const gid of groups) {
+          connectNs.to(`group:${gid}`).emit("user-focusing-update", {
+            groupId: gid,
+            userId,
+            focusing: focused,
+          });
+        }
+      });
+    });
+
+    socket.on("disconnect", () => {
+      removeSocketFromOnline(socket, connectNs);
+    });
+  });
+
+  // Stale presence cleanup based on heartbeat.
+  const cleanupInterval = setInterval(() => {
+    const now = Date.now();
+    let changed = false;
+    for (const [userId, entry] of onlineUsers) {
+      if (now - entry.lastHeartbeat > STALE_TIMEOUT) {
+        onlineUsers.delete(userId);
+        changed = true;
+      }
+    }
+    if (changed) {
+      // Recompute presence for all groups (cheap enough at this cadence).
+      const seen = new Set<string>();
+      for (const groups of socketGroups.values()) {
+        for (const gid of groups) {
+          if (!seen.has(gid)) {
+            seen.add(gid);
+            void pushGroupPresence(gid, connectNs);
+          }
+        }
+      }
+    }
+  }, HEARTBEAT_INTERVAL);
+
+  io.on("close", () => {
+    clearInterval(cleanupInterval);
+    leaderboardEvents.removeAllListeners();
+  });
+
+  // Broadcast leaderboard updates to group rooms.
+  leaderboardEvents.on("update", ({ groupId, leaderboard }) => {
+    connectNs.to(`group:${groupId}`).emit("group-leaderboard-update", { groupId, leaderboard });
+  });
+
+  return io;
+}
+
+// For testing: expose internal state helpers.
+export function getOnlineUsers() {
+  return onlineUsers;
+}
+export function getFocusingStore() {
+  return focusingStore;
+}
+
+// ---------------------------------------------------------------------------
+// Leaderboard broadcast via event emitter
+// ---------------------------------------------------------------------------
+
+export const leaderboardEvents = new EventEmitter();
+leaderboardEvents.setMaxListeners(50);
+
+// Call this after a pomodoro session is submitted to broadcast to group members
+export function broadcastLeaderboard(groupId: string, leaderboard: unknown[]) {
+  leaderboardEvents.emit("update", { groupId, leaderboard });
+}

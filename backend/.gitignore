@@ -5,3 +5,8 @@ src/temp/*
 src/output/*
 !src/temp/.gitkeep
 !src/output/.gitkeep
+tests/.fixtures/
+.models/
+uploads/
+test-debug.log
+dbg-subject.png

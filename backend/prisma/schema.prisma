@@ -1,0 +1,200 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String         @id @default(uuid())
+  email         String         @unique
+  username      String         @unique
+  passwordHash  String         @map("password_hash")
+  displayName   String         @map("display_name")
+  role          Role           @default(USER)
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+  lastLoginAt   DateTime?      @map("last_login_at")
+  profile       Profile?
+  refreshTokens RefreshToken[]
+  ownedGroups   Group[]        @relation("GroupOwner")
+  groupMembers  GroupMember[]
+  pomodoroSessions PomodoroSession[]
+  achievements  UserAchievement?
+  resources     Resource[]     @relation("ResourceOwner")
+
+  @@map("users")
+}
+
+model Profile {
+  id        String   @id @default(uuid())
+  userId    String   @unique @map("user_id")
+  bio       String?
+  avatarUrl String?  @map("avatar_url")
+  isPublic  Boolean  @default(true) @map("is_public")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("profiles")
+}
+
+model UserAchievement {
+  id                String   @id @default(uuid())
+  userId            String   @unique @map("user_id")
+  completedTasks    Int      @default(0) @map("completed_tasks")
+  cardsReviewed     Int      @default(0) @map("cards_reviewed")
+  completedSessions Int      @default(0) @map("completed_sessions")
+  meaningfulNotes   Int      @default(0) @map("meaningful_notes")
+  files             Int      @default(0)
+  flashcards        Int      @default(0)
+  quizzesCompleted  Int      @default(0) @map("quizzes_completed")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_achievements")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  tokenHash String   @unique @map("token_hash")
+  userId    String   @map("user_id")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum GroupRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum ResourceType {
+  FILE
+  NOTE
+  LINK
+}
+
+model Group {
+  id          String        @id @default(uuid())
+  name        String
+  description String?
+  imageUrl    String?       @map("image_url")
+  joinCode    String        @unique @map("join_code")
+  creatorId   String        @map("creator_id")
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+  creator     User          @relation("GroupOwner", fields: [creatorId], references: [id], onDelete: Cascade)
+  members     GroupMember[]
+  rooms       Room[]
+  pomodoroSessions PomodoroSession[]
+
+  @@map("groups")
+}
+
+model GroupMember {
+  id        String    @id @default(uuid())
+  groupId   String    @map("group_id")
+  userId    String    @map("user_id")
+  role      GroupRole @default(MEMBER)
+  createdAt DateTime  @default(now()) @map("created_at")
+  group     Group     @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, userId])
+  @@index([userId])
+  @@map("group_members")
+}
+
+model Room {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  groupId     String   @map("group_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  group       Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@map("rooms")
+}
+
+model PomodoroSession {
+  id              String   @id @default(uuid())
+  userId          String   @map("user_id")
+  groupId         String   @map("group_id")
+  durationSeconds Int      @map("duration_seconds")
+  completedAt     DateTime @default(now()) @map("completed_at")
+  sessionId       String   @unique @map("session_id")
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  group           Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@index([groupId])
+  @@index([userId, groupId])
+  @@map("pomodoro_sessions")
+}
+
+model Resource {
+  id          String          @id @default(uuid())
+  title       String
+  description String?
+  type        ResourceType
+  ownerId     String          @map("owner_id")
+  createdAt   DateTime        @default(now()) @map("created_at")
+  updatedAt   DateTime        @updatedAt @map("updated_at")
+  owner       User            @relation("ResourceOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  files       ResourceFile[]
+  notes       ResourceNote[]
+  links       ResourceLink[]
+
+  @@index([ownerId])
+  @@map("resources")
+}
+
+model ResourceFile {
+  id          String   @id @default(uuid())
+  resourceId  String   @map("resource_id")
+  name        String
+  mimeType    String   @map("mime_type")
+  size        Int
+  storagePath String   @map("storage_path")
+  createdAt   DateTime @default(now()) @map("created_at")
+  resource    Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+
+  @@index([resourceId])
+  @@map("resource_files")
+}
+
+model ResourceNote {
+  id         String   @id @default(uuid())
+  resourceId String   @map("resource_id")
+  title      String
+  content    String
+  createdAt  DateTime @default(now()) @map("created_at")
+  resource   Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+
+  @@index([resourceId])
+  @@map("resource_notes")
+}
+
+model ResourceLink {
+  id         String   @id @default(uuid())
+  resourceId String   @map("resource_id")
+  title      String
+  url        String
+  createdAt  DateTime @default(now()) @map("created_at")
+  resource   Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+
+  @@index([resourceId])
+  @@map("resource_links")
+}

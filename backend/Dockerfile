@@ -1,12 +1,14 @@
 FROM node:22-bookworm
 
 RUN apt-get update && \
-    apt-get install -y libreoffice ghostscript qpdf && \
+    apt-get install -y libreoffice ghostscript qpdf ffmpeg && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
 # Verify Ghostscript is available inside the container
 RUN gs --version
+# Verify FFmpeg is available inside the container
+RUN ffmpeg -version
 
 WORKDIR /app
 
@@ -15,6 +17,11 @@ COPY package*.json ./
 RUN npm install
 
 COPY . .
+
+# Preload the Whisper ONNX model for the speech-to-text tool so production
+# containers do not need runtime access to the Hugging Face registry.
+# Offline builds skip this gracefully; the model is then fetched on first use.
+RUN node scripts/preload-stt-model.mjs || echo "STT model preload skipped"
 
 RUN npm run build
 
