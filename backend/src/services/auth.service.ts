@@ -128,11 +128,37 @@ export async function revokeAllUserRefreshTokens(
 
 const isProduction = process.env.NODE_ENV === "production";
 
+/**
+ * SameSite policy for auth cookies.
+ *
+ * - "lax" (secure default): works when the frontend and backend share a site
+ *   (same origin or a same-site proxy). Cookies are never sent on cross-site
+ *   subresource/fetch requests.
+ * - "none" (requires Secure, i.e. HTTPS): required when the frontend and
+ *   backend are served from DIFFERENT sites. Railway's default domains are
+ *   `<svc>.<hash>.up.railway.app`, and because `up.railway.app` is a public
+ *   suffix each service is its own site, so SameSite=Lax cookies would NOT be
+ *   sent on cross-site fetch requests. Default to "none" in production.
+ *
+ * CSRF protection does NOT rely solely on SameSite: the app uses a double
+ * submit CSRF token (a cookie + matching "X-CSRF-Token" header), which is the
+ * recommended control when SameSite=None is required.
+ */
+const sameSite: "lax" | "strict" | "none" =
+  process.env.COOKIE_SAMESITE === "none" ||
+  process.env.COOKIE_SAMESITE === "strict"
+    ? process.env.COOKIE_SAMESITE
+    : process.env.COOKIE_SAMESITE === "lax"
+      ? "lax"
+      : isProduction
+        ? "none"
+        : "lax";
+
 export const REFRESH_COOKIE_NAME = "morven_refresh_token";
 export const REFRESH_COOKIE_OPTIONS = {
   httpOnly: true,
   secure: isProduction,
-  sameSite: "lax" as const,
+  sameSite,
   maxAge: REFRESH_TOKEN_DAYS * 24 * 60 * 60 * 1000,
   path: "/",
 };
@@ -141,7 +167,7 @@ export const CSRF_COOKIE_NAME = "morven_csrf_token";
 export const CSRF_COOKIE_OPTIONS = {
   httpOnly: false,
   secure: isProduction,
-  sameSite: "lax" as const,
+  sameSite,
   maxAge: REFRESH_TOKEN_DAYS * 24 * 60 * 60 * 1000,
   path: "/",
 };

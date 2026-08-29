@@ -3,3 +3,12 @@
 > ts-node-dev --respawn --transpile-only src/server.ts
 
 [INFO] 12:22:24 ts-node-dev ver. 2.0.0 (using ts-node ver. 10.9.2, typescript ver. 5.9.3)
+[INFO] 14:46:10 Restarting: D:\morven student\backend\src\app.ts has been modified
+Morven Backend running on http://0.0.0.0:3001
+[INFO] 14:46:19 Restarting: D:\morven student\backend\src\app.ts has been modified
+[INFO] 14:46:25 Restarting: D:\morven student\backend\src\services\presence.service.ts has been modified
+Morven Backend running on http://0.0.0.0:3001
+[INFO] 14:46:31 Restarting: D:\morven student\backend\src\services\presence.service.ts has been modified
+[INFO] 14:48:23 Restarting: D:\morven student\backend\src\services\auth.service.ts has been modified
+Morven Backend running on http://0.0.0.0:3001
+[stt] model ready (Xenova/whisper-base)

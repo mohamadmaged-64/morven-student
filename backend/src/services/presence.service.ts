@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import { EventEmitter } from "events";
 import type { Server as HTTPServer } from "http";
 import prisma from "../lib/prisma";
+import { createSocketIoCorsOptions } from "../cors";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -123,15 +124,7 @@ function removeSocketFromOnline(socket: Socket, connectNs: Namespace) {
 export function setupSocketIO(httpServer: HTTPServer) {
   const io = new SocketIOServer(httpServer, {
     path: "/socket.io",
-    cors: {
-      origin: [
-        "http://localhost:5173",
-        "http://localhost:5174",
-        "http://127.0.0.1:5173",
-        "http://127.0.0.1:5174",
-      ],
-      credentials: true,
-    },
+    cors: createSocketIoCorsOptions(),
   });
 
   const connectNs = io.of("/connect");

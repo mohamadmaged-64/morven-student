@@ -1,2 +1,10 @@
 node_modules/
 dist/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Frontend build/dev artifacts
+dev-dist/

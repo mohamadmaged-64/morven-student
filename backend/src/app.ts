@@ -1,6 +1,7 @@
 import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import helmet from "helmet";
+import { createHttpCorsOptions } from "./cors";
 import rateLimit from "express-rate-limit";
 import cookieParser from "cookie-parser";
 import path from "path";
@@ -35,48 +36,7 @@ app.use(helmet({ crossOriginResourcePolicy: false }));
 // ---------------------------------------------------------------------------
 // CORS
 // ---------------------------------------------------------------------------
-const allowedOrigins = [
-  "http://localhost:5173",
-  "http://localhost:5174",
-  "http://localhost:3000",
-  "http://127.0.0.1:5173",
-  "http://127.0.0.1:5174",
-  "http://127.0.0.1:3000",
-];
-
-const envOrigins = process.env.CORS_ORIGINS?.split(",").map((o) => o.trim());
-if (envOrigins) allowedOrigins.push(...envOrigins);
-
-const isAllowedOrigin = (origin: string | undefined): boolean => {
-  if (!origin) return true;
-  if (allowedOrigins.some((o) => origin.startsWith(o))) return true;
-  try {
-    const host = new URL(origin).hostname;
-    return host.endsWith(".vercel.app") || host.endsWith(".railway.app");
-  } catch {
-    return false;
-  }
-};
-
-app.use(
-  cors({
-    origin(origin, callback) {
-      callback(null, isAllowedOrigin(origin));
-    },
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: [
-      "Content-Type",
-      "Authorization",
-      "Accept",
-      "X-Requested-With",
-      "X-CSRF-Token",
-    ],
-    exposedHeaders: ["Content-Disposition"],
-    credentials: true,
-    maxAge: 86400,
-    optionsSuccessStatus: 204,
-  })
-);
+app.use(cors(createHttpCorsOptions()));
 
 // ---------------------------------------------------------------------------
 // Body parsing + cookie parsing

@@ -18,6 +18,13 @@ RUN npm install
 
 COPY . .
 
+# Generate the Prisma client from the copied schema. The @prisma/client
+# postinstall (during `npm install` above) cannot do this because the schema
+# is copied after install, so it only leaves a stub. This step must run after
+# COPY and before the TypeScript build so types resolve and the runtime works.
+# `prisma generate` does not require DATABASE_URL to be set (verified).
+RUN npx prisma generate
+
 # Preload the Whisper ONNX model for the speech-to-text tool so production
 # containers do not need runtime access to the Hugging Face registry.
 # Offline builds skip this gracefully; the model is then fetched on first use.
