@@ -74,6 +74,25 @@ enum Role {
   ADMIN
 }
 
+enum AppNotificationType {
+  info
+  announcement
+  update
+}
+
+model AppNotification {
+  id        String              @id @default(uuid())
+  title     String
+  body      String
+  type      AppNotificationType @default(info)
+  createdBy String?             @map("created_by")
+  createdAt DateTime            @default(now()) @map("created_at")
+  updatedAt DateTime            @updatedAt @map("updated_at")
+
+  @@index([createdAt])
+  @@map("app_notifications")
+}
+
 enum GroupRole {
   OWNER
   ADMIN

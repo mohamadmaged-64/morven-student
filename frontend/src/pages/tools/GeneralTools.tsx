@@ -98,7 +98,7 @@ export default function GeneralToolPage({ toolId }: GeneralToolPageProps) {
         </button>
       </motion.div>
 
-      {tool && (
+      {tool && tool.id !== 'notes' && (
         <ToolHero
           icon={<tool.icon className="w-7 h-7" />}
           title={tool.name}

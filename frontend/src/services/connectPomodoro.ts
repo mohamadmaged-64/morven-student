@@ -34,7 +34,10 @@ export function getActiveGroupId(): string | null {
 async function refreshMyGroupIds() {
   try {
     const { groups } = await listGroups();
-    myGroupIds = groups.map((g) => g.id);
+    // A system ADMIN's group list contains every group in the system. Pomodoro
+    // credit is membership-based, so only target groups the user actually
+    // belongs to.
+    myGroupIds = groups.filter((g) => g.isMember !== false).map((g) => g.id);
   } catch {
     myGroupIds = [];
   }

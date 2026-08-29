@@ -1,6 +1,6 @@
 import { z } from "zod";
 import prisma from "../lib/prisma";
-import { GroupError } from "./group.service";
+import { GroupError, isGlobalAdmin } from "./group.service";
 
 // ---------------------------------------------------------------------------
 // Validation
@@ -16,7 +16,7 @@ export const submitPomodoroSchema = z.object({
 // Service functions
 // ---------------------------------------------------------------------------
 
-export async function verifyMembership(userId: string, groupId: string): Promise<void> {
+export async function verifyMembership(userId: string, groupId: string, userRole?: string): Promise<void> {
   const group = await prisma.group.findUnique({ where: { id: groupId } });
   if (!group) {
     throw new GroupError("المجموعة غير موجودة", 404);
@@ -25,7 +25,7 @@ export async function verifyMembership(userId: string, groupId: string): Promise
   const membership = await prisma.groupMember.findUnique({
     where: { groupId_userId: { groupId, userId } },
   });
-  if (!membership) {
+  if (!membership && !isGlobalAdmin(userRole)) {
     throw new GroupError("غير مصرح", 403);
   }
 }

@@ -53,7 +53,7 @@ router.post("/api/groups", authenticate, uploadAvatar.single("image"), async (re
       return;
     }
 
-    const group = await createGroup(req.user.sub, parsed.data);
+    const group = await createGroup(req.user.sub, req.user.role, parsed.data);
     res.status(201).json({ group });
   } catch (err) {
     handleGroupError(err, res);
@@ -71,7 +71,7 @@ router.post("/api/groups/join", authenticate, async (req: Request, res: Response
       return;
     }
 
-    const group = await joinGroup(req.user.sub, parsed.data.joinCode);
+    const group = await joinGroup(req.user.sub, req.user.role, parsed.data.joinCode);
     res.json({ group });
   } catch (err) {
     handleGroupError(err, res);
@@ -83,7 +83,7 @@ router.get("/api/groups", authenticate, async (req: Request, res: Response) => {
   try {
     if (!req.user) { res.status(401).json({ error: "غير مصرح" }); return; }
 
-    const groups = await listUserGroups(req.user.sub);
+    const groups = await listUserGroups(req.user.sub, req.user.role);
     res.json({ groups });
   } catch (err) {
     handleGroupError(err, res);
@@ -95,7 +95,7 @@ router.get("/api/groups/:groupId", authenticate, async (req: Request<{ groupId: 
   try {
     if (!req.user) { res.status(401).json({ error: "غير مصرح" }); return; }
 
-    const details = await getGroupDetails(req.params.groupId, req.user.sub);
+    const details = await getGroupDetails(req.params.groupId, req.user.sub, req.user.role);
     res.json({ group: details });
   } catch (err) {
     handleGroupError(err, res);
@@ -122,7 +122,7 @@ router.delete("/api/groups/:groupId", authenticate, async (req: Request<{ groupI
     const { default: prisma } = await import("../lib/prisma");
     const group = await prisma.group.findUnique({ where: { id: req.params.groupId }, select: { imageUrl: true } });
 
-    await deleteGroup(req.params.groupId, req.user.sub);
+    await deleteGroup(req.params.groupId, req.user.sub, req.user.role);
 
     // Delete group image file
     if (group?.imageUrl) deleteFileIfExists(group.imageUrl);
@@ -138,7 +138,7 @@ router.delete("/api/groups/:groupId/members/:memberId", authenticate, async (req
   try {
     if (!req.user) { res.status(401).json({ error: "غير مصرح" }); return; }
 
-    await removeMember(req.params.groupId, req.params.memberId, req.user.sub);
+    await removeMember(req.params.groupId, req.params.memberId, req.user.sub, req.user.role);
     res.json({ message: "تمت إزالة العضو بنجاح" });
   } catch (err) {
     handleGroupError(err, res);
@@ -156,7 +156,7 @@ router.patch("/api/groups/:groupId/members/:memberId/role", authenticate, async 
       return;
     }
 
-    await updateMemberRole(req.params.groupId, req.params.memberId, parsed.data.role, req.user.sub);
+    await updateMemberRole(req.params.groupId, req.params.memberId, parsed.data.role, req.user.sub, req.user.role);
     res.json({ message: "تم تحديث الدور بنجاح" });
   } catch (err) {
     handleGroupError(err, res);
@@ -186,7 +186,7 @@ router.patch("/api/groups/:groupId", authenticate, uploadAvatar.single("image"),
       return;
     }
 
-    const group = await updateGroup(req.params.groupId, req.user.sub, parsed.data);
+    const group = await updateGroup(req.params.groupId, req.user.sub, req.user.role, parsed.data);
 
     // Delete old group image file if it was replaced or removed
     if (oldGroup?.imageUrl && body.imageUrl !== undefined && oldGroup.imageUrl !== body.imageUrl) {

@@ -16,6 +16,7 @@ import profileRoutes from "./routes/profile";
 import groupRoutes from "./routes/group";
 import pomodoroRoutes from "./routes/pomodoro";
 import resourceRoutes from "./routes/resource";
+import notificationRoutes from "./routes/notification";
 
 const app = express();
 
@@ -116,6 +117,7 @@ app.use(profileRoutes);
 app.use(groupRoutes);
 app.use(pomodoroRoutes);
 app.use(resourceRoutes);
+app.use(notificationRoutes);
 
 // Existing file-processing routes (no auth required)
 app.use("/", convertRoutes);

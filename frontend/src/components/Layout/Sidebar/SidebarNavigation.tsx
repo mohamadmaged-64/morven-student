@@ -62,7 +62,7 @@ export function SidebarNavigation({
       {/* الملتقي — First major section, ABOVE student tools */}
       <div className={`${showText ? '' : 'mb-1'}`}>
         <div className="px-3 mb-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400 h-4">
-          {showText ? 'الملتقى' : ''}
+          {showText ? 'الملتقى التعليمي' : ''}
         </div>
 
         <div className={showText ? 'space-y-0.5' : 'space-y-0'}>

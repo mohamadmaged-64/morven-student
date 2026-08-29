@@ -32,6 +32,7 @@ export interface Group {
   updatedAt: string;
   role?: string;
   memberCount?: number;
+  isMember?: boolean;
 }
 
 export interface GroupMember {

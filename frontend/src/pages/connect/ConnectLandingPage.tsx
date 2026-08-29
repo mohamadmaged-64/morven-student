@@ -70,7 +70,7 @@ export default function ConnectLandingPage() {
                 {...fadeUp}
                 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-gray-900 dark:text-white leading-none tracking-tight mb-4"
               >
-                الملتقى الدراسي
+                الملتقى التعليمي
               </motion.h1>
 
               {/* Welcome */}

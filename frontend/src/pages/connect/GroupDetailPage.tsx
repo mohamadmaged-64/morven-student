@@ -262,8 +262,14 @@ export default function GroupDetailPage() {
 
   const isOwner = group.role === 'OWNER';
   const isAdmin = group.role === 'ADMIN';
-  // OWNER and ADMIN can edit the group; only OWNER can delete it.
+  // A system ADMIN (User.role === "ADMIN") manages every group without joining.
+  const isGlobalAdmin = user?.role === 'ADMIN';
+  // OWNER and ADMIN can edit the group; only the OWNER or a system ADMIN may
+  // delete it.
   const canEdit = isOwner || isAdmin;
+  const canDelete = isGlobalAdmin || (isOwner && group.members.length === 1);
+  // Leave is only meaningful when the user is actually a member.
+  const canLeave = group.isMember !== false;
   const myId = user?.id;
   const groupImageUrl = group.imageUrl ? (group.imageUrl.startsWith('http') ? group.imageUrl : `${API_BASE}${group.imageUrl}`) : null;
   // Internal "online" set (used ONLY to determine whether Focusing is valid;
@@ -332,7 +338,7 @@ export default function GroupDetailPage() {
             <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400 mb-4">
               <span className="flex items-center gap-1.5">
                 <Users className="w-4 h-4" />
-                {group.members.length} أعضاء
+                {group.members.length} طلاب
               </span>
             </div>
 
@@ -356,39 +362,42 @@ export default function GroupDetailPage() {
         </Card>
       </motion.div>
 
-      {/* Start Focus button */}
-      <motion.div {...fadeUp}>
-        <Card padding="lg" className="mb-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isFocusActive ? 'bg-emerald-100 dark:bg-emerald-900/30' : 'bg-primary-100 dark:bg-primary-900/30'}`}>
-                <Timer className={`w-5 h-5 ${isFocusActive ? 'text-emerald-600 dark:text-emerald-400' : 'text-primary-600 dark:text-primary-400'}`} />
+      {/* Start Focus button — only for actual members (focus time is
+          membership-based) */}
+      {canLeave && (
+        <motion.div {...fadeUp}>
+          <Card padding="lg" className="mb-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isFocusActive ? 'bg-emerald-100 dark:bg-emerald-900/30' : 'bg-primary-100 dark:bg-primary-900/30'}`}>
+                  <Timer className={`w-5 h-5 ${isFocusActive ? 'text-emerald-600 dark:text-emerald-400' : 'text-primary-600 dark:text-primary-400'}`} />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                    {isFocusActive ? 'جلسة تركيز نشطة' : 'ابدأ جلسة تركيز'}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    {isFocusActive ? 'ستُحسب لهذه المجموعة' : 'ستُحسب لنقاط المجموعة'}
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                  {isFocusActive ? 'جلسة تركيز نشطة' : 'ابدأ جلسة تركيز'}
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  {isFocusActive ? 'ستُحسب لهذه المجموعة' : 'ستُحسب لنقاط المجموعة'}
-                </p>
-              </div>
+              <Button
+                size="sm"
+                variant={isFocusActive ? 'secondary' : 'primary'}
+                onClick={handleStartFocus}
+                icon={<Play className="w-4 h-4" />}
+              >
+                {isFocusActive ? 'الذهاب' : 'ابدأ'}
+              </Button>
             </div>
-            <Button
-              size="sm"
-              variant={isFocusActive ? 'secondary' : 'primary'}
-              onClick={handleStartFocus}
-              icon={<Play className="w-4 h-4" />}
-            >
-              {isFocusActive ? 'الذهاب' : 'ابدأ'}
-            </Button>
-          </div>
-        </Card>
-      </motion.div>
+          </Card>
+        </motion.div>
+      )}
 
       {/* Members card — ranked by focus time */}
       <motion.div {...fadeUp}>
         <Card padding="lg" className="mb-6">
-          <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">الأعضاء</h2>
+          <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">الطلاب</h2>
           <div className="space-y-2">
             {sortedMembers.map((m) => {
               // An ADMIN can remove any other member — including the OWNER and
@@ -418,11 +427,13 @@ export default function GroupDetailPage() {
             تعديل المجموعة
           </Button>
         )}
-        <Button variant="danger" loading={actionLoading} onClick={() => setConfirmAction('leave')}>
-          مغادرة المجموعة
-        </Button>
-        {/* OWNER can only delete the group while it has no other members */}
-        {isOwner && group.members.length === 1 && (
+        {canLeave && (
+          <Button variant="danger" loading={actionLoading} onClick={() => setConfirmAction('leave')}>
+            مغادرة المجموعة
+          </Button>
+        )}
+        {/* OWNER (alone) or a system ADMIN can delete the group. */}
+        {canDelete && (
           <Button variant="danger" loading={actionLoading} onClick={() => setConfirmAction('delete')}>
             حذف المجموعة
           </Button>
@@ -491,7 +502,7 @@ export default function GroupDetailPage() {
       {/* Delete confirmation */}
       <Modal open={confirmAction === 'delete'} onClose={() => setConfirmAction(null)} title="حذف المجموعة" size="sm">
         <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
-          هل أنت متأكد من حذف هذه المجموعة؟ سيتم حذف جميع الأعضاء نهائياً.
+          هل أنت متأكد من حذف هذه المجموعة؟ سيتم حذف جميع الطلاب نهائياً.
         </p>
         <div className="flex gap-3">
           <Button variant="ghost" onClick={() => setConfirmAction(null)} className="flex-1">إلغاء</Button>

@@ -159,29 +159,29 @@ export function Header({ title }: HeaderProps) {
             </button>
           )}
 
+          {/* Notifications */}
+          <div ref={notifRef} className="relative">
+            <button
+              onClick={() => {
+                setShowNotifications(!showNotifications);
+                setMenuOpen(false);
+              }}
+              className="p-2.5 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-dark-hover transition-colors relative"
+              title="الإشعارات"
+            >
+              <Bell size={18} />
+              {unreadCount > 0 && (
+                <span className="absolute top-1.5 end-1.5 w-2 h-2 rounded-full bg-primary-500" />
+              )}
+            </button>
+            <NotificationsPanel
+              open={showNotifications}
+              onClose={() => setShowNotifications(false)}
+            />
+          </div>
+
           {user ? (
             <>
-              {/* Notifications */}
-              <div ref={notifRef} className="relative">
-                <button
-                  onClick={() => {
-                    setShowNotifications(!showNotifications);
-                    setMenuOpen(false);
-                  }}
-                  className="p-2.5 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-dark-hover transition-colors relative"
-                  title="الإشعارات"
-                >
-                  <Bell size={18} />
-                  {unreadCount > 0 && (
-                    <span className="absolute top-1.5 end-1.5 w-2 h-2 rounded-full bg-primary-500" />
-                  )}
-                </button>
-                <NotificationsPanel
-                  open={showNotifications}
-                  onClose={() => setShowNotifications(false)}
-                />
-              </div>
-
               {/* User menu */}
               <div ref={menuRef} className="relative">
                 <button
@@ -276,9 +276,11 @@ export function Header({ title }: HeaderProps) {
           ) : (
             <Link
               to="/login"
-              className="px-3 py-1.5 rounded-xl text-sm font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-500/10 transition-colors"
+              className="p-2.5 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-dark-hover transition-colors"
+              title="دخول"
+              aria-label="دخول"
             >
-              دخول
+              <UserCircle size={20} />
             </Link>
           )}
         </div>

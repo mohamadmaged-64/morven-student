@@ -29,7 +29,7 @@ const stagger = {
 const infoPoints = [
   {
     title: 'ما هي الموارد؟',
-    description: 'الموارد هي مواد تعليمية مشتركة يقدمها أعضاء الملتقى مثل الملخصات والأسئلة والروابط المفيدة.',
+    description: 'الموارد هي مواد تعليمية مشتركة يقدمها طلاب الملتقى مثل الملخصات والأسئلة والروابط المفيدة.',
   },
   {
     title: 'كيف أضيف مادة؟',
@@ -164,7 +164,7 @@ export default function ResourcesPage() {
           <EmptyState
             icon={<BookOpen className="w-8 h-8" />}
             title="لا توجد موارد بعد"
-            description="سيتم هنا عرض الموارد التعليمية المشتركة من أعضاء الملتقى"
+            description="سيتم هنا عرض الموارد التعليمية المشتركة من طلاب الملتقى"
           />
         )
       ) : (
@@ -230,7 +230,7 @@ export default function ResourcesPage() {
         open={showCreate}
         onClose={() => setShowCreate(false)}
         title="إنشاء مورد جديد"
-        description="أضف مادة تعليمية جديدة ليتشاركها أعضاء الملتقى"
+        description="أضف مادة تعليمية جديدة ليتشاركها طلاب الملتقى"
       >
         <form onSubmit={handleCreate} className="space-y-4">
           <Input

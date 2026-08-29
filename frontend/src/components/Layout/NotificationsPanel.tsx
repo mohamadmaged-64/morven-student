@@ -1,6 +1,9 @@
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNotificationStore, type Notification } from '@/store/useNotificationStore';
-import { Bell, Megaphone, RefreshCw, Info, X, CheckCheck } from 'lucide-react';
+import { useAuthStore } from '@/store/useAuthStore';
+import { useAppStore } from '@/store/useAppStore';
+import { Bell, Megaphone, RefreshCw, Info, X, Plus, Trash2 } from 'lucide-react';
 
 function typeIcon(type: Notification['type']) {
   switch (type) {
@@ -23,14 +26,73 @@ function timeAgo(dateStr: string) {
   return `منذ ${days} يوم`;
 }
 
+const typeLabels: Record<Notification['type'], string> = {
+  announcement: 'إعلان',
+  update: 'تحديث',
+  info: 'معلومة',
+};
+
 interface NotificationsPanelProps {
   open: boolean;
   onClose: () => void;
 }
 
 export function NotificationsPanel({ open, onClose }: NotificationsPanelProps) {
-  const { notifications, unreadCount, markAsRead, markAllAsRead, dismissNotification } =
+  const { notifications, unreadCount, markAsRead, markAllAsRead, dismissNotification, fetchNotifications, createNotification, deleteNotification } =
     useNotificationStore();
+  const user = useAuthStore((s) => s.user);
+  const addToast = useAppStore((s) => s.addNotification);
+
+  const isAdmin = user?.role === 'ADMIN';
+  const [showCreate, setShowCreate] = useState(false);
+  const [deleteMode, setDeleteMode] = useState(false);
+  const [title, setTitle] = useState('');
+  const [body, setBody] = useState('');
+  const [type, setType] = useState<Notification['type']>('announcement');
+  const [submitting, setSubmitting] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (open) {
+      fetchNotifications();
+    }
+  }, [open, fetchNotifications]);
+
+  const handleCreate = async () => {
+    if (!title.trim() || !body.trim()) {
+      addToast('يرجى تعبئة العنوان والنص', 'warning');
+      return;
+    }
+    setSubmitting(true);
+    try {
+      await createNotification({
+        title: title.trim(),
+        body: body.trim(),
+        type,
+      });
+      setTitle('');
+      setBody('');
+      setType('announcement');
+      setShowCreate(false);
+      addToast('تمت إضافة الإشعار بنجاح', 'success');
+    } catch (err) {
+      addToast(err instanceof Error ? err.message : 'حدث خطأ في إضافة الإشعار', 'error');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    setDeletingId(id);
+    try {
+      await deleteNotification(id);
+      addToast('تم حذف الإشعار بنجاح', 'success');
+    } catch (err) {
+      addToast(err instanceof Error ? err.message : 'حدث خطأ في حذف الإشعار', 'error');
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   return (
     <AnimatePresence>
@@ -101,19 +163,122 @@ export function NotificationsPanel({ open, onClose }: NotificationsPanelProps) {
                         {timeAgo(n.createdAt)}
                       </p>
                     </div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        dismissNotification(n.id);
-                      }}
-                      className="shrink-0 p-1 rounded-lg text-gray-300 dark:text-gray-600 hover:text-gray-500 dark:hover:text-gray-400 hover:bg-gray-100 dark:hover:bg-dark-hover transition-colors"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
+                    {isAdmin && deleteMode ? (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(n.id);
+                        }}
+                        disabled={deletingId === n.id}
+                        className="shrink-0 p-1 rounded-lg text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors disabled:opacity-50"
+                        title="حذف الإشعار"
+                        aria-label="حذف الإشعار"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    ) : (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          dismissNotification(n.id);
+                        }}
+                        className="shrink-0 p-1 rounded-lg text-gray-300 dark:text-gray-600 hover:text-gray-500 dark:hover:text-gray-400 hover:bg-gray-100 dark:hover:bg-dark-hover transition-colors"
+                        title="إزالة"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    )}
                   </div>
                 ))
               )}
             </div>
+
+            {isAdmin && (
+              <div className="border-t border-light-border dark:border-dark-border">
+                <div className="flex gap-2 px-4 py-2.5">
+                  <button
+                    onClick={() => {
+                      setShowCreate((v) => !v);
+                      setDeleteMode(false);
+                    }}
+                    className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-colors ${
+                      showCreate
+                        ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400'
+                        : 'bg-gray-100 dark:bg-dark-hover text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-dark-hover/80'
+                    }`}
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    إضافة إشعار
+                  </button>
+                  <button
+                    onClick={() => {
+                      setDeleteMode((v) => !v);
+                      setShowCreate(false);
+                    }}
+                    className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-colors ${
+                      deleteMode
+                        ? 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400'
+                        : 'bg-gray-100 dark:bg-dark-hover text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-dark-hover/80'
+                    }`}
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    حذف إشعار
+                  </button>
+                </div>
+
+                {showCreate && (
+                  <div className="px-4 py-3 border-t border-light-border/50 dark:border-dark-border/50 space-y-2.5">
+                    <input
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                      placeholder="عنوان الإشعار"
+                      className="w-full px-3 py-2 rounded-xl text-sm bg-gray-50 dark:bg-dark-bg border border-light-border dark:border-dark-border text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    />
+                    <textarea
+                      value={body}
+                      onChange={(e) => setBody(e.target.value)}
+                      placeholder="نص الإشعار"
+                      rows={2}
+                      className="w-full px-3 py-2 rounded-xl text-sm bg-gray-50 dark:bg-dark-bg border border-light-border dark:border-dark-border text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
+                    />
+                    <div className="flex items-center justify-between gap-2">
+                      <select
+                        value={type}
+                        onChange={(e) => setType(e.target.value as Notification['type'])}
+                        className="px-2.5 py-2 rounded-xl text-xs bg-gray-50 dark:bg-dark-bg border border-light-border dark:border-dark-border text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      >
+                        {(Object.keys(typeLabels) as Notification['type'][]).map((t) => (
+                          <option key={t} value={t}>
+                            {typeLabels[t]}
+                          </option>
+                        ))}
+                      </select>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => setShowCreate(false)}
+                          className="px-3 py-2 rounded-xl text-xs font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-dark-hover transition-colors"
+                        >
+                          إلغاء
+                        </button>
+                        <button
+                          onClick={handleCreate}
+                          disabled={submitting}
+                          className="px-4 py-2 rounded-xl text-xs font-semibold bg-primary-500 hover:bg-primary-600 text-white transition-colors disabled:opacity-60"
+                        >
+                          {submitting ? 'إضافة...' : 'إضافة'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {deleteMode && (
+                  <p className="px-4 pb-2.5 text-[11px] text-red-500 dark:text-red-400">
+                    اضغط على أيقونة الحذف بجانب الإشعار لإزالته لجميع المستخدمين
+                  </p>
+                )}
+              </div>
+            )}
           </motion.div>
         </>
       )}

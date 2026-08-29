@@ -51,8 +51,8 @@ router.get("/api/groups/:groupId/leaderboard", authenticate, async (req: Request
   try {
     if (!req.user) { res.status(401).json({ error: "غير مصرح" }); return; }
 
-    // Only group members may view the leaderboard
-    await verifyMembership(req.user.sub, req.params.groupId);
+    // Only group members (or a system ADMIN) may view the leaderboard
+    await verifyMembership(req.user.sub, req.params.groupId, req.user.role);
 
     const leaderboard = await getGroupLeaderboard(req.params.groupId);
     res.json({ leaderboard });
