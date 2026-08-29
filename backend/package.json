@@ -7,6 +7,7 @@
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
+    "migrate": "prisma migrate deploy",
     "preload:stt": "node scripts/preload-stt-model.mjs",
     "test": "npm run build && node --test --test-timeout=600000 \"tests/**/*.test.mjs\""
   },
