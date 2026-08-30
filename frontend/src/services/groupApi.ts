@@ -1,4 +1,5 @@
 import { authRequest, getAccessToken } from './authApi';
+import { API_BASE } from './apiBase';
 import { isPreviewMode } from '@/dev/previewMode';
 import {
   mockCreateGroup,
@@ -13,8 +14,6 @@ import {
   mockSubmitPomodoroSession,
   mockGetGroupLeaderboard,
 } from '@/dev/mockApi';
-
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 function authHeaders(): Record<string, string> {
   const token = getAccessToken();

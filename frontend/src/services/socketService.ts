@@ -1,8 +1,7 @@
 import { io, Socket } from 'socket.io-client';
 import { getAccessToken } from './authApi';
 import { isPreviewMode } from '@/dev/previewMode';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+import { API_BASE } from './apiBase';
 
 export interface PresenceUser {
   userId: string;
@@ -75,7 +74,7 @@ export function connectSocket(): Socket {
   const token = getAccessToken();
   if (!token) throw new Error('No access token');
 
-  socket = io(`${API_URL}/connect`, {
+  socket = io(`${API_BASE}/connect`, {
     auth: { token },
     transports: ['websocket', 'polling'],
   });

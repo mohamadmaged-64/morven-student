@@ -6,6 +6,7 @@ import { Button } from '@/components/UI/Button';
 import { Input, TextArea, Select } from '@/components/UI/Input';
 import { getOwnProfile, updateOwnProfile, uploadAvatar, removeAvatar, type OwnProfile } from '@/services/profileApi';
 import { useAuthStore } from '@/store/useAuthStore';
+import { API_BASE } from '@/services/apiBase';
 import { ChevronLeft, User, Shield, LogOut, Camera, Trash2, Check, X } from 'lucide-react';
 
 const fadeUp = {
@@ -185,7 +186,7 @@ export default function AccountPage() {
                   />
                 ) : profile?.avatarUrl ? (
                   <img
-                    src={profile.avatarUrl.startsWith('http') ? profile.avatarUrl : `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}${profile.avatarUrl}`}
+                    src={profile.avatarUrl.startsWith('http') ? profile.avatarUrl : `${API_BASE}${profile.avatarUrl}`}
                     alt={profile.displayName}
                     className="w-24 h-24 rounded-full object-cover border-3 border-light-border dark:border-dark-border"
                   />

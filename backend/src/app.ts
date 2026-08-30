@@ -23,6 +23,14 @@ import adminRoutes from "./routes/admin";
 const app = express();
 
 // ---------------------------------------------------------------------------
+// Proxy trust
+// ---------------------------------------------------------------------------
+// Request chain in production:  browser -> Vercel edge -> Railway ingress -> app.
+// Express must trust both hops so req.ip (used by the rate limiters) is the
+// real client IP instead of a shared proxy/Vercel edge IP.
+app.set("trust proxy", 2);
+
+// ---------------------------------------------------------------------------
 // Static file serving for uploads
 // ---------------------------------------------------------------------------
 const UPLOADS_DIR = path.resolve(__dirname, "..", "uploads");

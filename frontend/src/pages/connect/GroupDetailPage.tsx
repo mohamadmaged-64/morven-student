@@ -33,6 +33,7 @@ import {
 } from '@/services/connectPomodoro';
 import { usePomodoroStore } from '@/store/usePomodoroStore';
 import { useAuthStore } from '@/store/useAuthStore';
+import { API_BASE } from '@/services/apiBase';
 import {
   Users,
   Crown,
@@ -45,8 +46,6 @@ import {
   Play,
   Timer,
 } from 'lucide-react';
-
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 const fadeUp = {
   initial: { opacity: 0, y: 16 },

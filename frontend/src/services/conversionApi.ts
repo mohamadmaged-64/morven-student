@@ -1,9 +1,9 @@
 import { toNetworkError } from './apiError';
+import { API_BASE } from './apiBase';
 
 console.log("[conversionApi] import.meta.env.VITE_API_URL =", import.meta.env.VITE_API_URL);
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:3001";
+const API_BASE_URL = API_BASE;
 
 console.log("[conversionApi] API_BASE_URL =", API_BASE_URL);
 

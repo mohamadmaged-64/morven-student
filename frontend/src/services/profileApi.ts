@@ -1,4 +1,5 @@
 import { authRequest, getAccessToken } from './authApi';
+import { API_BASE } from './apiBase';
 import { isPreviewMode } from '@/dev/previewMode';
 import {
   mockGetOwnProfile,
@@ -7,8 +8,6 @@ import {
   mockGetPublicAchievements,
   mockSyncAchievements,
 } from '@/dev/mockApi';
-
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 function authHeaders(): Record<string, string> {
   const token = getAccessToken();
@@ -89,7 +88,7 @@ export async function getPublicProfile(
 ): Promise<{ profile: Profile }> {
   if (isPreviewMode()) return mockGetPublicProfile(username);
   const res = await fetch(
-    `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/profile/${encodeURIComponent(username)}`,
+    `${API_BASE}/api/profile/${encodeURIComponent(username)}`,
     {
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
@@ -110,7 +109,7 @@ export async function getPublicAchievements(
 ): Promise<{ achievements: AchievementCounters }> {
   if (isPreviewMode()) return mockGetPublicAchievements(username);
   const res = await fetch(
-    `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/profile/${encodeURIComponent(username)}/achievements`,
+    `${API_BASE}/api/profile/${encodeURIComponent(username)}/achievements`,
     {
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },

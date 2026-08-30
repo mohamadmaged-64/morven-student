@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Users, Crown, UserPlus, ChevronLeft } from 'lucide-react';
 import type { Group } from '@/services/groupApi';
+import { API_BASE } from '@/services/apiBase';
 
 type StudyGroupCardProps = {
   group: Group;
@@ -27,7 +28,7 @@ export function StudyGroupCard({
           <div className="flex items-center gap-3 mb-2.5">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-400 to-primary-600 text-white shadow-md flex items-center justify-center shrink-0 overflow-hidden">
               {g.imageUrl ? (
-                <img src={g.imageUrl.startsWith('http') ? g.imageUrl : `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}${g.imageUrl}`} alt={g.name} className="w-full h-full object-cover" />
+                <img src={g.imageUrl.startsWith('http') ? g.imageUrl : `${API_BASE}${g.imageUrl}`} alt={g.name} className="w-full h-full object-cover" />
               ) : (
                 <Users className="w-4 h-4" />
               )}

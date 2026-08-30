@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+import { API_BASE } from './apiBase';
 
 export interface AuthUser {
   id: string;
@@ -16,7 +16,7 @@ interface AuthResponse {
 }
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<{ data: T; res: Response }> {
-  const res = await fetch(`${API_URL}${path}`, {
+  const res = await fetch(`${API_BASE}${path}`, {
     credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
@@ -83,7 +83,7 @@ export async function authRequest<T>(
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const res = await fetch(`${API_URL}${path}`, {
+  const res = await fetch(`${API_BASE}${path}`, {
     ...options,
     credentials: 'include',
     headers,

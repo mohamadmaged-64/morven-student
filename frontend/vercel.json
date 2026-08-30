@@ -1,8 +1,7 @@
 {
   "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
-    }
+    { "source": "/api/:path*", "destination": "https://backend-production-cd587.up.railway.app/api/:path*" },
+    { "source": "/uploads/:path*", "destination": "https://backend-production-cd587.up.railway.app/uploads/:path*" },
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
