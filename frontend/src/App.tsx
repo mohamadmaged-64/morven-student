@@ -5,6 +5,7 @@ import { NotificationHost } from '@/components/Layout/NotificationHost';
 import { PrayerPauseHost } from '@/features/prayer-pause';
 import { ToolErrorBoundary } from '@/components/Tool/ToolErrorBoundary';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
+import { AdminRoute } from '@/components/AdminRoute';
 import { PreviewBanner } from '@/dev/PreviewBanner';
 import { useAppStore } from '@/store/useAppStore';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -33,6 +34,7 @@ import GroupsPage from '@/pages/connect/GroupsPage';
 import GroupDetailPage from '@/pages/connect/GroupDetailPage';
 import ResourcesPage from '@/pages/connect/ResourcesPage';
 import ResourceDetailPage from '@/pages/connect/ResourceDetailPage';
+import AdminUsersPage from '@/pages/admin/AdminUsersPage';
 
 
 const toolPageMap: Record<ToolCategory, ComponentType<{ toolId: string }>> = {
@@ -130,6 +132,9 @@ export default function App() {
           <Route path="/connect/groups/:groupId" element={<ProtectedRoute><GroupDetailPage /></ProtectedRoute>} />
           <Route path="/connect/resources" element={<ResourcesPage />} />
           <Route path="/connect/resources/:resourceId" element={<ResourceDetailPage />} />
+
+          {/* Admin (ADMIN role only) */}
+          <Route path="/admin/users" element={<AdminRoute><AdminUsersPage /></AdminRoute>} />
         </Route>
       </Routes>
     </BrowserRouter>
