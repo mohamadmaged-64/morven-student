@@ -19,10 +19,19 @@ export const createNotificationSchema = z.object({
 
 export type CreateNotificationInput = z.infer<typeof createNotificationSchema>;
 
-export async function listNotifications() {
-  return prisma.appNotification.findMany({
-    orderBy: { createdAt: "desc" },
-  });
+export async function listNotifications(userId: string) {
+  const [notifications, reads] = await Promise.all([
+    prisma.appNotification.findMany({
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.userNotificationRead.findMany({
+      where: { userId },
+      select: { notificationId: true },
+    }),
+  ]);
+
+  const readIds = new Set(reads.map((r) => r.notificationId));
+  return notifications.map((n) => ({ ...n, read: readIds.has(n.id) }));
 }
 
 export async function createNotification(
@@ -34,7 +43,53 @@ export async function createNotification(
   });
 }
 
+export async function markNotificationAsRead(
+  userId: string,
+  notificationId: string
+): Promise<boolean> {
+  const existing = await prisma.appNotification.findUnique({
+    where: { id: notificationId },
+    select: { id: true },
+  });
+  if (!existing) return false;
+
+  await prisma.userNotificationRead.upsert({
+    where: { userId_notificationId: { userId, notificationId } },
+    update: { readAt: new Date() },
+    create: { userId, notificationId },
+  });
+  return true;
+}
+
+export async function markAllNotificationsAsRead(userId: string): Promise<void> {
+  const notifications = await prisma.appNotification.findMany({
+    select: { id: true },
+  });
+  if (notifications.length === 0) return;
+
+  await prisma.userNotificationRead.createMany({
+    data: notifications.map((n) => ({ userId, notificationId: n.id })),
+    skipDuplicates: true,
+  });
+}
+
+export async function unmarkNotificationRead(
+  userId: string,
+  notificationId: string
+): Promise<void> {
+  await prisma.userNotificationRead.deleteMany({
+    where: { userId, notificationId },
+  });
+}
+
 export async function deleteNotification(id: string) {
-  const result = await prisma.appNotification.deleteMany({ where: { id } });
-  return result.count > 0;
+  try {
+    const result = await prisma.$transaction([
+      prisma.userNotificationRead.deleteMany({ where: { notificationId: id } }),
+      prisma.appNotification.deleteMany({ where: { id } }),
+    ]);
+    return result[1].count > 0;
+  } catch {
+    return false;
+  }
 }

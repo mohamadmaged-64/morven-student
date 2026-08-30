@@ -7,6 +7,7 @@ export interface ServerNotification {
   body: string;
   type: 'info' | 'announcement' | 'update';
   createdAt: string;
+  read: boolean;
 }
 
 export async function fetchNotifications(): Promise<{
@@ -38,6 +39,31 @@ export async function deleteNotification(
 ): Promise<{ message: string }> {
   if (isPreviewMode()) throw new Error('غير متاح في وضع المعاينة');
   return authRequest<{ message: string }>(`/api/notifications/${id}`, {
+    method: 'DELETE',
+  });
+}
+
+export async function markAsRead(
+  id: string,
+): Promise<{ message: string }> {
+  if (isPreviewMode()) return { message: '' };
+  return authRequest<{ message: string }>(`/api/notifications/${id}/read`, {
+    method: 'POST',
+  });
+}
+
+export async function markAllAsRead(): Promise<{ message: string }> {
+  if (isPreviewMode()) return { message: '' };
+  return authRequest<{ message: string }>('/api/notifications/read-all', {
+    method: 'POST',
+  });
+}
+
+export async function unmarkAsRead(
+  id: string,
+): Promise<{ message: string }> {
+  if (isPreviewMode()) return { message: '' };
+  return authRequest<{ message: string }>(`/api/notifications/${id}/read`, {
     method: 'DELETE',
   });
 }

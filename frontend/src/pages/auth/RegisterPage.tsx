@@ -44,7 +44,7 @@ export default function RegisterPage() {
             إنشاء حساب
           </h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-            انضم إلى مجتمع مورفن كونكت
+            انضم إلى الملتقى التعليمي
           </p>
         </div>
 

@@ -51,6 +51,16 @@ function parseCookies(res: Response): Record<string, string> {
 
 let csrfToken: string | null = null;
 
+function getCsrfTokenFromCookie(): string | null {
+  if (typeof document === 'undefined') return null;
+  const match = document.cookie.match(/(?:^|;\s*)morven_csrf_token=([^;]*)/);
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
+function resolveCsrfToken(): string | null {
+  return csrfToken || getCsrfTokenFromCookie();
+}
+
 export function setAccessToken(token: string | null): void {
   // Stored in memory only — never persisted.
   (globalThis as Record<string, unknown>).__morven_access_token = token;
@@ -125,8 +135,9 @@ export async function login(
 export async function logout(): Promise<void> {
   try {
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-    if (csrfToken) {
-      headers['X-CSRF-Token'] = csrfToken;
+    const token = resolveCsrfToken();
+    if (token) {
+      headers['X-CSRF-Token'] = token;
     }
     const { res } = await request('/api/auth/logout', { method: 'POST', headers });
     const cookies = parseCookies(res);
@@ -140,8 +151,9 @@ export async function logout(): Promise<void> {
 
 export async function refresh(): Promise<AuthResponse> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-  if (csrfToken) {
-    headers['X-CSRF-Token'] = csrfToken;
+  const token = resolveCsrfToken();
+  if (token) {
+    headers['X-CSRF-Token'] = token;
   }
   const { data, res } = await request<AuthResponse>('/api/auth/refresh', {
     method: 'POST',

@@ -24,6 +24,7 @@ model User {
   pomodoroSessions PomodoroSession[]
   achievements  UserAchievement?
   resources     Resource[]     @relation("ResourceOwner")
+  readNotifications UserNotificationRead[]
 
   @@map("users")
 }
@@ -88,9 +89,23 @@ model AppNotification {
   createdBy String?             @map("created_by")
   createdAt DateTime            @default(now()) @map("created_at")
   updatedAt DateTime            @updatedAt @map("updated_at")
+  userReads UserNotificationRead[]
 
   @@index([createdAt])
   @@map("app_notifications")
+}
+
+model UserNotificationRead {
+  id             String          @id @default(uuid())
+  userId         String          @map("user_id")
+  notificationId String          @map("notification_id")
+  readAt         DateTime        @default(now()) @map("read_at")
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  notification   AppNotification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, notificationId])
+  @@index([notificationId])
+  @@map("user_notification_reads")
 }
 
 enum GroupRole {

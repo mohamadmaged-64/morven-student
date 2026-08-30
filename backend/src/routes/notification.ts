@@ -4,6 +4,9 @@ import {
   listNotifications,
   createNotification,
   deleteNotification,
+  markNotificationAsRead,
+  markAllNotificationsAsRead,
+  unmarkNotificationRead,
 } from "../services/notification.service";
 import { authenticate } from "../middleware/auth";
 import { requireRole } from "../middleware/requireRole";
@@ -14,12 +17,87 @@ const router = Router();
 router.get(
   "/api/notifications",
   authenticate,
-  async (_req: Request, res: Response) => {
+  async (req: Request, res: Response) => {
     try {
-      const notifications = await listNotifications();
+      if (!req.user) {
+        res.status(401).json({ error: "غير مصرح" });
+        return;
+      }
+      const notifications = await listNotifications(req.user.sub);
       res.json({ notifications });
     } catch (err) {
       console.error("List notifications error:", err);
+      res.status(500).json({ error: "حدث خطأ في الخادم" });
+    }
+  }
+);
+
+// POST /api/notifications/:id/read — mark a notification as read for the current user
+router.post(
+  "/api/notifications/:id/read",
+  authenticate,
+  async (req: Request<{ id: string }>, res: Response) => {
+    try {
+      if (!req.user) {
+        res.status(401).json({ error: "غير مصرح" });
+        return;
+      }
+      const { id } = req.params;
+      if (!id || id.trim().length === 0) {
+        res.status(400).json({ error: "معرف الإشعار مطلوب" });
+        return;
+      }
+      const marked = await markNotificationAsRead(req.user.sub, id);
+      if (!marked) {
+        res.status(404).json({ error: "الإشعار غير موجود" });
+        return;
+      }
+      res.json({ message: "تم تحديد الإشعار كمقروء" });
+    } catch (err) {
+      console.error("Mark notification read error:", err);
+      res.status(500).json({ error: "حدث خطأ في الخادم" });
+    }
+  }
+);
+
+// POST /api/notifications/read-all — mark all notifications as read for the current user
+router.post(
+  "/api/notifications/read-all",
+  authenticate,
+  async (req: Request, res: Response) => {
+    try {
+      if (!req.user) {
+        res.status(401).json({ error: "غير مصرح" });
+        return;
+      }
+      await markAllNotificationsAsRead(req.user.sub);
+      res.json({ message: "تم تحديد جميع الإشعارات كمقروءة" });
+    } catch (err) {
+      console.error("Mark all notifications read error:", err);
+      res.status(500).json({ error: "حدث خطأ في الخادم" });
+    }
+  }
+);
+
+// DELETE /api/notifications/:id/read — mark a notification as unread for the current user
+router.delete(
+  "/api/notifications/:id/read",
+  authenticate,
+  async (req: Request<{ id: string }>, res: Response) => {
+    try {
+      if (!req.user) {
+        res.status(401).json({ error: "غير مصرح" });
+        return;
+      }
+      const { id } = req.params;
+      if (!id || id.trim().length === 0) {
+        res.status(400).json({ error: "معرف الإشعار مطلوب" });
+        return;
+      }
+      await unmarkNotificationRead(req.user.sub, id);
+      res.json({ message: "تم تحديد الإشعار كغير مقروء" });
+    } catch (err) {
+      console.error("Unmark notification read error:", err);
       res.status(500).json({ error: "حدث خطأ في الخادم" });
     }
   }

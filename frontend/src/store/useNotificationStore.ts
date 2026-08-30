@@ -5,6 +5,8 @@ import {
   fetchNotifications as fetchNotificationsApi,
   createNotification as createNotificationApi,
   deleteNotification as deleteNotificationApi,
+  markAsRead as markAsReadApi,
+  markAllAsRead as markAllAsReadApi,
 } from '@/services/notificationApi';
 
 export interface Notification {
@@ -56,6 +58,13 @@ const MOCK_NOTIFICATIONS: Notification[] = [
   },
 ];
 
+function recompute(state: NotificationState, notifications: Notification[]): Partial<NotificationState> {
+  return {
+    notifications,
+    unreadCount: notifications.filter((n) => !n.read).length,
+  };
+}
+
 export const useNotificationStore = create<NotificationState>((set, get) => ({
   notifications: MOCK_NOTIFICATIONS,
   unreadCount: MOCK_NOTIFICATIONS.filter((n) => !n.read).length,
@@ -68,60 +77,66 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
       createdAt: new Date().toISOString(),
       read: false,
     };
-    set((state) => ({
-      notifications: [notification, ...state.notifications],
-      unreadCount: state.unreadCount + 1,
-    }));
+    set((state) =>
+      recompute(state, [notification, ...state.notifications]),
+    );
   },
 
   markAsRead: (id) => {
-    set((state) => ({
-      notifications: state.notifications.map((n) =>
-        n.id === id ? { ...n, read: true } : n,
+    const notif = get().notifications.find((n) => n.id === id);
+    if (!notif || notif.read) return;
+    set((state) =>
+      recompute(
+        state,
+        state.notifications.map((n) => (n.id === id ? { ...n, read: true } : n)),
       ),
-      unreadCount: Math.max(0, state.unreadCount - 1),
-    }));
-  },
-
-  markAllAsRead: () => {
-    set((state) => ({
-      notifications: state.notifications.map((n) => ({ ...n, read: true })),
-      unreadCount: 0,
-    }));
-  },
-
-  dismissNotification: (id) => {
-    set((state) => {
-      const n = state.notifications.find((x) => x.id === id);
-      return {
-        notifications: state.notifications.filter((x) => x.id !== id),
-        unreadCount: n && !n.read ? state.unreadCount - 1 : state.unreadCount,
-      };
+    );
+    markAsReadApi(id).catch(() => {
+      set((state) =>
+        recompute(
+          state,
+          state.notifications.map((n) =>
+            n.id === id ? { ...n, read: false } : n,
+          ),
+        ),
+      );
     });
   },
 
+  markAllAsRead: () => {
+    set((state) =>
+      recompute(
+        state,
+        state.notifications.map((n) => ({ ...n, read: true })),
+      ),
+    );
+    markAllAsReadApi().catch(() => {
+      fetchNotificationsApi()
+        .then(({ notifications }) => {
+          set((state) => recompute(state, notifications));
+        })
+        .catch(() => {
+          /* keep optimistic state */
+        });
+    });
+  },
+
+  dismissNotification: (id) => {
+    const n = get().notifications.find((x) => x.id === id);
+    if (!n) return;
+    if (!n.read) markAsReadApi(id).catch(() => {});
+    set((state) => ({
+      notifications: state.notifications.filter((x) => x.id !== id),
+    }));
+  },
+
   fetchNotifications: async () => {
-    if (isPreviewMode() || !getAccessToken()) return;
+    if (isPreviewMode()) return;
+    if (!getAccessToken()) return;
     set({ loading: true });
     try {
       const { notifications: server } = await fetchNotificationsApi();
-      const local = get().notifications;
-      const readMap = new Map(local.map((n) => [n.id, n.read]));
-      const merged: Notification[] = server.map((n) => ({
-        ...n,
-        read: readMap.get(n.id) ?? false,
-      }));
-      const localOnly = local.filter(
-        (n) => !server.some((s) => s.id === n.id),
-      );
-      const all = [...merged, ...localOnly].sort(
-        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-      );
-      set({
-        notifications: all,
-        unreadCount: all.filter((n) => !n.read).length,
-        loading: false,
-      });
+      set((state) => ({ ...recompute(state, server), loading: false }));
     } catch {
       set({ loading: false });
     }
@@ -129,20 +144,15 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
 
   createNotification: async (n) => {
     const { notification } = await createNotificationApi(n);
-    set((state) => ({
-      notifications: [{ ...notification, read: false }, ...state.notifications],
-      unreadCount: state.unreadCount + 1,
-    }));
+    set((state) =>
+      recompute(state, [{ ...notification, read: false }, ...state.notifications]),
+    );
   },
 
   deleteNotification: async (id) => {
     await deleteNotificationApi(id);
-    set((state) => {
-      const n = state.notifications.find((x) => x.id === id);
-      return {
-        notifications: state.notifications.filter((x) => x.id !== id),
-        unreadCount: n && !n.read ? Math.max(0, state.unreadCount - 1) : state.unreadCount,
-      };
-    });
+    set((state) =>
+      recompute(state, state.notifications.filter((x) => x.id !== id)),
+    );
   },
 }));

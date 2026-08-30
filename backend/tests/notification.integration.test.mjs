@@ -10,6 +10,7 @@ const prisma = new PrismaClient();
 
 const createdUserIds = [];
 const createdNotificationIds = [];
+const createdReadIds = [];
 
 function uniqueSuffix(tag) {
   const ts = Date.now().toString(36);
@@ -230,5 +231,201 @@ describe("Global Notifications (ADMIN vs USER)", () => {
       { method: "DELETE" }
     );
     assert.equal(res.status, 404);
+  });
+});
+
+describe("Notification per-user read state", () => {
+  let server;
+  let normalUser, adminUser;
+  let normalToken, adminToken;
+
+  before(async () => {
+    server = await startBackend();
+    adminUser = await register(server.baseUrl, uniqueSuffix("radm"));
+    normalUser = await register(server.baseUrl, uniqueSuffix("rusr"));
+    await prisma.user.update({
+      where: { id: adminUser.user.id },
+      data: { role: "ADMIN" },
+    });
+    const adminLogin = await login(server.baseUrl, adminUser.user.email);
+    adminToken = adminLogin.accessToken;
+    normalToken = normalUser.accessToken;
+  });
+
+  beforeEach(async () => {
+    for (const id of createdNotificationIds.splice(0)) {
+      try {
+        await prisma.appNotification.delete({ where: { id } });
+      } catch {
+        /* already gone */
+      }
+    }
+  });
+
+  after(async () => {
+    for (const id of createdNotificationIds) {
+      try {
+        await prisma.appNotification.delete({ where: { id } });
+      } catch {
+        /* already gone */
+      }
+    }
+    for (const id of createdUserIds) {
+      try {
+        await prisma.user.delete({ where: { id } });
+      } catch {
+        /* already gone */
+      }
+    }
+    await server.stop();
+  });
+
+  async function createNotice(tag) {
+    const { data } = await api(
+      server.baseUrl,
+      adminToken,
+      "/api/notifications",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: `قراءة ${tag}`,
+          body: `اختبار حالة القراءة ${tag}`,
+          type: "info",
+        }),
+      }
+    );
+    createdNotificationIds.push(data.notification.id);
+    return data.notification;
+  }
+
+  it("notifications start unread for both users", async () => {
+    const n = await createNotice("start");
+    const { data: adminList } = await api(server.baseUrl, adminToken, "/api/notifications");
+    const { data: userList } = await api(server.baseUrl, normalToken, "/api/notifications");
+    const adminN = adminList.notifications.find((x) => x.id === n.id);
+    const userN = userList.notifications.find((x) => x.id === n.id);
+    assert.equal(adminN.read, false);
+    assert.equal(userN.read, false);
+  });
+
+  it("read state is scoped per user (not global)", async () => {
+    const n = await createNotice("scoped");
+    const mark = await api(server.baseUrl, normalToken, `/api/notifications/${n.id}/read`, {
+      method: "POST",
+    });
+    assert.equal(mark.res.status, 200);
+
+    const { data: userList } = await api(server.baseUrl, normalToken, "/api/notifications");
+    const { data: adminList } = await api(server.baseUrl, adminToken, "/api/notifications");
+    assert.equal(
+      userList.notifications.find((x) => x.id === n.id).read,
+      true,
+      "the user who marked it read must see read=true"
+    );
+    assert.equal(
+      adminList.notifications.find((x) => x.id === n.id).read,
+      false,
+      "other users must still see read=false"
+    );
+  });
+
+  it("read state persists across listing calls (server-side)", async () => {
+    const n = await createNotice("persist");
+    await api(server.baseUrl, normalToken, `/api/notifications/${n.id}/read`, {
+      method: "POST",
+    });
+    // Second independent fetch must still show read=true.
+    const { data: list1 } = await api(server.baseUrl, normalToken, "/api/notifications");
+    const { data: list2 } = await api(server.baseUrl, normalToken, "/api/notifications");
+    assert.equal(list1.notifications.find((x) => x.id === n.id).read, true);
+    assert.equal(list2.notifications.find((x) => x.id === n.id).read, true);
+  });
+
+  it("mark-all-as-read sets read=true for every notification of that user only", async () => {
+    const n1 = await createNotice("all-1");
+    const n2 = await createNotice("all-2");
+    const res = await api(server.baseUrl, normalToken, "/api/notifications/read-all", {
+      method: "POST",
+    });
+    assert.equal(res.res.status, 200);
+
+    const { data: userList } = await api(server.baseUrl, normalToken, "/api/notifications");
+    assert.ok(userList.notifications.every((x) => x.read));
+
+    const { data: adminList } = await api(server.baseUrl, adminToken, "/api/notifications");
+    assert.equal(adminList.notifications.find((x) => x.id === n1.id).read, false);
+    assert.equal(adminList.notifications.find((x) => x.id === n2.id).read, false);
+  });
+
+  it("a user cannot mark another user's read state (no shared state mutation)", async () => {
+    const n = await createNotice("isolate");
+    await api(server.baseUrl, adminToken, `/api/notifications/${n.id}/read`, {
+      method: "POST",
+    });
+    const { data: userList } = await api(server.baseUrl, normalToken, "/api/notifications");
+    assert.equal(
+      userList.notifications.find((x) => x.id === n.id).read,
+      false,
+      "admin marking read must not affect the other user's state"
+    );
+  });
+
+  it("marking a missing notification as read returns 404", async () => {
+    const { res } = await api(server.baseUrl, normalToken, "/api/notifications/nope/read", {
+      method: "POST",
+    });
+    assert.equal(res.status, 404);
+  });
+
+  it("unread endpoint flips a single notification back to unread", async () => {
+    const n = await createNotice("unread");
+    await api(server.baseUrl, normalToken, `/api/notifications/${n.id}/read`, {
+      method: "POST",
+    });
+    const del = await api(server.baseUrl, normalToken, `/api/notifications/${n.id}/read`, {
+      method: "DELETE",
+    });
+    assert.equal(del.res.status, 200);
+    const { data: userList } = await api(server.baseUrl, normalToken, "/api/notifications");
+    assert.equal(userList.notifications.find((x) => x.id === n.id).read, false);
+  });
+
+  it("global deletion also removes per-user read records (no orphans)", async () => {
+    const n = await createNotice("cleanup");
+    await api(server.baseUrl, normalToken, `/api/notifications/${n.id}/read`, {
+      method: "POST",
+    });
+    await api(server.baseUrl, adminToken, `/api/notifications/${n.id}/read`, {
+      method: "POST",
+    });
+
+    const del = await api(server.baseUrl, adminToken, `/api/notifications/${n.id}`, {
+      method: "DELETE",
+    });
+    assert.equal(del.res.status, 200);
+
+    const orphans = await prisma.userNotificationRead.count({
+      where: { notificationId: n.id },
+    });
+    assert.equal(orphans, 0, "no orphaned user_notification_reads may remain");
+
+    const remaining = await prisma.appNotification.findUnique({ where: { id: n.id } });
+    assert.equal(remaining, null);
+  });
+
+  it("deleting a notification makes it disappear for a user who had read it", async () => {
+    const n = await createNotice("gone");
+    await api(server.baseUrl, normalToken, `/api/notifications/${n.id}/read`, {
+      method: "POST",
+    });
+    await api(server.baseUrl, adminToken, `/api/notifications/${n.id}`, {
+      method: "DELETE",
+    });
+    const { data: userList } = await api(server.baseUrl, normalToken, "/api/notifications");
+    assert.ok(
+      !userList.notifications.some((x) => x.id === n.id),
+      "deleted notification must be gone for the reader"
+    );
   });
 });

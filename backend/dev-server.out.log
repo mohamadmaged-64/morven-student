@@ -12,3 +12,13 @@ Morven Backend running on http://0.0.0.0:3001
 [INFO] 14:48:23 Restarting: D:\morven student\backend\src\services\auth.service.ts has been modified
 Morven Backend running on http://0.0.0.0:3001
 [stt] model ready (Xenova/whisper-base)
+[INFO] 13:55:44 Restarting: D:\morven student\backend\src\server.ts has been modified
+Morven Backend running on http://0.0.0.0:3001
+[INFO] 17:53:26 Restarting: D:\morven student\backend\src\app.ts has been modified
+Morven Backend running on http://0.0.0.0:3001
+[INFO] 17:53:32 Restarting: D:\morven student\backend\src\app.ts has been modified
+Morven Backend running on http://0.0.0.0:3001
+[INFO] 18:29:53 Restarting: D:\morven student\backend\src\services\notification.service.ts has been modified
+Morven Backend running on http://0.0.0.0:3001
+[INFO] 18:30:10 Restarting: D:\morven student\backend\src\routes\notification.ts has been modified
+Morven Backend running on http://0.0.0.0:3001

@@ -31,7 +31,7 @@ export default function LoginPage() {
             تسجيل الدخول
           </h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-            الدخول إلى حسابك في مورفن كونكت
+            الدخول إلى حسابك في الملتقى
           </p>
         </div>
 
