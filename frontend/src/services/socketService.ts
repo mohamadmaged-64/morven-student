@@ -77,6 +77,7 @@ export function connectSocket(): Socket {
   socket = io(`${API_BASE}/connect`, {
     auth: { token },
     transports: ['websocket', 'polling'],
+    tryAllTransports: true,
   });
 
   socket.on('connect', () => {
