@@ -126,10 +126,13 @@ export function connectSocket(): Socket {
  *  which broadcasts it to every group the user belongs to (cross-group). */
 export function emitFocusingState(focusing: boolean) {
   if (isPreviewMode()) return;
-  if (!socket?.connected) {
+  if (!socket) {
     try { connectSocket(); } catch { return; }
-    if (!socket?.connected) return;
   }
+  // socket.io buffers events emitted while the socket is still connecting and
+  // flushes them on 'connect', so emit regardless of connect state. This avoids
+  // dropping the first focusing signal (e.g. when a focus session starts while
+  // the socket is mid-connection).
   socket?.emit('focusing-state', { focusing });
 }
 

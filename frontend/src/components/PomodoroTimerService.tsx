@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
 import { usePomodoroStore } from '@/store/usePomodoroStore';
 import { usePrayerPauseStore } from '@/features/prayer-pause';
+import { useAuthStore } from '@/store/useAuthStore';
+import { startCompletionPolling, stopCompletionPolling } from '@/services/connectPomodoro';
 
 const formatTime = (seconds: number) => `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
 
@@ -13,6 +15,17 @@ export function PomodoroTimerService() {
   // Prayer Pause (Phase 3): while a pause is active/returning the feature owns
   // the document title, so this service must not overwrite it.
   const prayerPauseStatus = usePrayerPauseStore((s) => s.status);
+  const user = useAuthStore((s) => s.user);
+
+  // Keep the Connect sync alive for the whole app session: it observes the
+  // Pomodoro store and broadcasts the live focusing state to the user's groups
+  // (plus submits completed sessions). This must run beyond the group page so
+  // members see the Focusing indicator while the Pomodoro actually runs.
+  useEffect(() => {
+    if (!user) return;
+    startCompletionPolling();
+    return () => stopCompletionPolling();
+  }, [user]);
 
   useEffect(() => {
     tick();

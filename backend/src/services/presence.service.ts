@@ -233,6 +233,11 @@ export function setupSocketIO(httpServer: HTTPServer) {
             userId,
             focusing: focused,
           });
+          // Refresh the room's presence snapshot too, so viewers who don't
+          // already have this user in their presence list see them online AND
+          // focusing (the Focusing indicator only renders for members present
+          // in the online presence snapshot).
+          void pushGroupPresence(gid, connectNs);
         }
       });
     });

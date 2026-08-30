@@ -17,7 +17,6 @@ import {
 } from '@/services/groupApi';
 import {
   connectSocket,
-  disconnectSocket,
   joinGroup,
   leaveGroup as leaveGroupPresence,
   onPresence,
@@ -26,11 +25,7 @@ import {
   type PresenceUser,
 } from '@/services/socketService';
 import { GroupMemberRow } from '@/components/connect/GroupMemberRow';
-import {
-  setActiveGroupId,
-  startCompletionPolling,
-  stopCompletionPolling,
-} from '@/services/connectPomodoro';
+import { setActiveGroupId } from '@/services/connectPomodoro';
 import { usePomodoroStore } from '@/store/usePomodoroStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import { API_BASE } from '@/services/apiBase';
@@ -136,21 +131,21 @@ export default function GroupDetailPage() {
       }
     });
     joinGroup(groupId);
+    // Leave the room on unmount, but keep the socket connected so this user
+    // stays online/present for the rest of the app session (required for the
+    // Focusing indicator to remain valid in their groups).
     return () => {
       leaveGroupPresence(groupId);
-      disconnectSocket();
     };
   }, [groupId]);
 
-  // Set active group for Pomodoro integration and start polling
+  // Track the active group for Pomodoro integration. The Connect sync itself is
+  // started app-wide by PomodoroTimerService so focusing keeps propagating even
+  // while the timer runs on another page.
   useEffect(() => {
     if (!groupId) return;
     setActiveGroupId(groupId);
-    startCompletionPolling();
-    return () => {
-      setActiveGroupId(null);
-      stopCompletionPolling();
-    };
+    return () => setActiveGroupId(null);
   }, [groupId]);
 
   const openEdit = () => {
