@@ -33,6 +33,9 @@ RUN node scripts/preload-stt-model.mjs || echo "STT model preload skipped"
 RUN npm run build
 
 ENV NODE_ENV=production
+# Ensure the server binds the port Railway's Health Domain targets (3001)
+# even when the platform does not inject a $PORT value itself.
+ENV PORT=3001
 
 EXPOSE 3001
 
