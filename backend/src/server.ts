@@ -1,6 +1,5 @@
 import "dotenv/config";
 import app from "./app";
-import { warmupStt } from "./services/media/stt.service";
 import { setupSocketIO } from "./services/presence.service";
 
 const PORT = Number(process.env.PORT) || 3001;
@@ -17,7 +16,6 @@ process.on("uncaughtException", (err) => {
 
 const server = app.listen(PORT, HOST, () => {
   console.log(`Morven Backend running on http://${HOST}:${PORT}`);
-  warmupStt();
 });
 
 // Socket.IO live presence
