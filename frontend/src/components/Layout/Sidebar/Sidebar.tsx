@@ -33,12 +33,12 @@ export function Sidebar() {
   const [isMobile, setIsMobile] = useState(false);
 
  useEffect(() => {
-  setIsMobile(window.innerWidth < 1024);
+  setIsMobile(window.innerWidth < 1280);
 }, []);
 
  useEffect(() => {
   const handleResize = () => {
-    const mobile = window.innerWidth < 1024;
+    const mobile = window.innerWidth < 1280;
 
     setIsMobile(mobile);
 
@@ -77,7 +77,7 @@ export function Sidebar() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 lg:hidden"
+              className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 xl:hidden"
               onClick={() => setSidebarOpen(false)}
             />
 
@@ -93,7 +93,7 @@ export function Sidebar() {
               className={[
                 'fixed top-0 z-50 h-full transition-all duration-300 bg-white dark:bg-dark-card border-light-border dark:border-dark-border shadow-xl overflow-hidden',
                 isMobile ? 'w-64' : (isHovered ? 'w-64' : 'w-20'),
-                'lg:static lg:z-auto lg:translate-x-0',
+                'xl:static xl:z-auto xl:translate-x-0',
                 'right-0 border-l',
               ].join(' ')}
             >

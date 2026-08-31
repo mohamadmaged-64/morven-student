@@ -12,10 +12,10 @@ try {
   console.error("Failed to create temp directory:", err);
 }
 
-// Video files are much larger than documents; override with
-// MAX_VIDEO_SIZE_MB when the deployment allows bigger uploads.
+// Video upload size cap; override with MAX_VIDEO_SIZE_MB when the
+// deployment needs a different limit.
 export const MAX_VIDEO_SIZE_BYTES =
-  (Number(process.env.MAX_VIDEO_SIZE_MB) || 500) * 1024 * 1024;
+  (Number(process.env.MAX_VIDEO_SIZE_MB) || 100) * 1024 * 1024;
 
 const storage = multer.diskStorage({
   destination: (_req, _file, cb) => {

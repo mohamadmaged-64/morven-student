@@ -7,7 +7,7 @@ const API_BASE_URL = API_BASE;
 
 // Must stay in sync with the backend limits (MAX_VIDEO_SIZE_MB env var).
 export const MAX_VIDEO_SIZE_MB = Number(
-  import.meta.env.VITE_MAX_VIDEO_SIZE_MB || 500
+  import.meta.env.VITE_MAX_VIDEO_SIZE_MB || 100
 );
 
 export const ACCEPTED_VIDEO_EXTENSIONS = [

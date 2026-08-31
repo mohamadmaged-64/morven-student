@@ -346,4 +346,8 @@ describe('accepted video constants', () => {
     expect(ACCEPTED_VIDEO_EXTENSIONS).toContain('.mkv');
     expect(MAX_VIDEO_SIZE_MB).toBeGreaterThan(0);
   });
+
+  it('caps video uploads at 100 MB by default', () => {
+    expect(MAX_VIDEO_SIZE_MB).toBe(100);
+  });
 });

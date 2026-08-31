@@ -103,7 +103,7 @@ export function Header({ title }: HeaderProps) {
         {/* Mobile Menu */}
         <button
           onClick={toggleSidebar}
-          className="lg:hidden p-2 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-dark-hover transition-colors"
+          className="xl:hidden p-2 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-dark-hover transition-colors"
           aria-label={'طي القائمة'}
         >
           <svg
@@ -152,7 +152,7 @@ export function Header({ title }: HeaderProps) {
           {(pomodoroRunning || pomodoroPaused) && (
             <button
               onClick={() => navigate('/tool/pomodoro-timer')}
-              className="px-2.5 py-1.5 rounded-xl text-sm font-semibold font-mono tabular-nums text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-500/10 transition-colors"
+              className="hidden lg:block px-2.5 py-1.5 rounded-xl text-sm font-semibold font-mono tabular-nums text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-500/10 transition-colors"
               title={'مؤقت بومودورو'}
             >
               {String(Math.floor(pomodoroTimeRemaining / 60)).padStart(2, '0')}:
