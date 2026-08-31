@@ -145,14 +145,11 @@ export const tools: Tool[] = [
   { id: 'video-to-gif', name: 'تحويل الفيديو إلى GIF', description: 'إنشاء GIF متحركة من مقطع فيديو بإعدادات مرنة.', icon: ImageIcon, category: 'video' },
    
   // IMAGES
-  { id: 'bg-remove', name: 'إزالة الخلفية', description: 'إزالة خلفية الصورة تلقائياً', icon: Eraser, category: 'images' },
-  { id: 'resize-image', name: 'تغيير حجم الصورة', description: 'تغيير أبعاد الصورة مع الحفاظ على تناسبها', icon: Maximize2, category: 'images' },
+{ id: 'resize-image', name: 'تغيير حجم الصورة', description: 'تغيير أبعاد الصورة مع الحفاظ على تناسبها', icon: Maximize2, category: 'images' },
   { id: 'crop-image', name: 'قص الصورة', description: 'قص الجزء الذي تريده من الصورة بسهولة', icon: Crop, category: 'images' },
   { id: 'rotate-image', name: 'تدوير وقلب الصورة', description: 'تدوير الصورة أو قلبها أفقياً وعمودياً', icon: RotateCw, category: 'images' },
   { id: 'adjust-image', name: 'تعديل الصورة', description: 'تحسين الإضاءة والألوان ومظهر الصورة', icon: SlidersHorizontal, category: 'images' },
   { id: 'blur-image', name: 'طمس وإخفاء أجزاء من الصورة', description: 'طمس أو إخفاء أجزاء محددة من الصورة لحماية الخصوصية', icon: EyeOff, category: 'images' },
-  { id: 'watermark-image', name: 'إضافة علامة مائية', description: 'أضف نصاً أو شعاراً إلى الصورة لحمايتها', icon: Stamp, category: 'images' },
-  { id: 'image-info', name: 'معلومات الصورة والخصوصية', description: 'عرض معلومات الصورة وإدارة بياناتها الخاصة', icon: Info, category: 'images' },
 
   // AUDIO
   { id: 'speech-to-text', name: 'تحويل الكلام إلى نص', description: 'حوّل التسجيلات الصوتية إلى نص مكتوب باستخدام Whisper.', icon: Mic, category: 'audio' },
