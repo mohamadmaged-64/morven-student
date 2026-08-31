@@ -245,11 +245,11 @@ describe("Phase 2 - Profiles", () => {
       assert.equal(data.profile.username, `prof_${suffix.replace(/[^a-zA-Z0-9]/g, "_")}`);
     });
 
-    it("hides profile when isPublic = false", async () => {
+    it("exposes only minimal identity when isPublic = false", async () => {
       const suffix = `priv-${Date.now()}`;
       const username = `prof_${suffix.replace(/[^a-zA-Z0-9]/g, "_")}`;
       const reg = await registerUser(server.baseUrl, suffix);
-      // Set profile to private
+      // Set profile to private with a bio that must NOT leak
       await fetch(`${server.baseUrl}/api/profile/me`, {
         method: "PUT",
         headers: {
@@ -260,7 +260,16 @@ describe("Phase 2 - Profiles", () => {
       });
 
       const res = await fetch(`${server.baseUrl}/api/profile/${username}`);
-      assert.equal(res.status, 404);
+      const data = await res.json();
+      assert.equal(res.status, 200);
+      assert.equal(data.profile.isPublic, false);
+      assert.equal(data.profile.username, username);
+      assert.ok(data.profile.displayName);
+      // Private data must NOT be exposed
+      assert.equal(data.profile.bio, undefined, "bio must not be exposed for private profile");
+      assert.equal(data.profile.email, undefined, "email must not be exposed for private profile");
+      assert.equal(data.profile.createdAt, undefined, "createdAt must not be exposed for private profile");
+      assert.equal(data.profile.updatedAt, undefined, "updatedAt must not be exposed for private profile");
     });
 
     it("returns 404 for non-existent user", async () => {

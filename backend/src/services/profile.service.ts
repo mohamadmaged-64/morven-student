@@ -169,7 +169,14 @@ export async function getPublicProfile(username: string) {
   }
 
   if (!profile.isPublic) {
-    return { isPublic: false as const, username: profile.user.username };
+    // Private profile: expose only minimal, non-sensitive identity (username,
+    // display name, avatar). Bio, achievements, and stats are NOT included.
+    return {
+      isPublic: false as const,
+      username: profile.user.username,
+      displayName: profile.user.displayName,
+      avatarUrl: profile.avatarUrl,
+    };
   }
 
   return sanitizePublicProfile(profile);

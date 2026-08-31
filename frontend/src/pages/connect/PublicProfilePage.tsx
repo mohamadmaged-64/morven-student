@@ -118,7 +118,8 @@ export default function PublicProfilePage() {
               @{profile.username}
             </p>
 
-            {profile.bio && (
+            {/* Bio is private info — only shown for public profiles */}
+            {profile.isPublic && profile.bio && (
               <p className="mt-4 text-gray-600 dark:text-gray-300 text-sm leading-relaxed max-w-md">
                 {profile.bio}
               </p>
@@ -131,6 +132,20 @@ export default function PublicProfilePage() {
           </div>
         </Card>
       </motion.div>
+
+      {/* Private profile: privacy notice — no achievements, stats, or other data */}
+      {!profile.isPublic && (
+        <motion.div {...fadeUp} className="mt-6">
+          <Card padding="lg" className="relative overflow-hidden">
+            <div className="flex items-center justify-center gap-3 text-center">
+              <Shield className="w-5 h-5 text-gray-400 dark:text-gray-500 shrink-0" />
+              <p className="text-sm font-semibold text-gray-600 dark:text-gray-400">
+                {'هذا الحساب خاص'}
+              </p>
+            </div>
+          </Card>
+        </motion.div>
+      )}
 
       {/* Achievements (public only — always shown, even with zero achievements) */}
       {profile.isPublic && achievementsLoaded && (

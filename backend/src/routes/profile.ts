@@ -125,11 +125,8 @@ router.get("/api/profile/:username", async (req: Request<{ username: string }>, 
       return;
     }
 
-    if (!profile.isPublic) {
-      res.status(404).json({ error: "الملف الشخصي خاص" });
-      return;
-    }
-
+    // Private profiles are returned with minimal identity only (no bio, no
+    // achievements, no stats). The client renders a basic card + privacy notice.
     res.json({ profile });
   } catch (err) {
     console.error("Get public profile error:", err);

@@ -125,6 +125,26 @@ describe('PublicProfilePage achievements', () => {
     expect(screen.getByText('لا توجد إنجازات بعد')).toBeInTheDocument();
   });
 
+  it('shows a minimal profile card + privacy notice for a private profile, with no achievements or private data', async () => {
+    mockedGetPublicProfile.mockResolvedValue({
+      profile: { ...publicProfile, isPublic: false },
+    });
+
+    renderPage();
+
+    await waitFor(() => {
+      expect(screen.getByText('أحمد محمد')).toBeInTheDocument();
+    });
+    // Basic identity is shown.
+    expect(screen.getByText('@ahmed_m')).toBeInTheDocument();
+    // Privacy notice is shown.
+    expect(screen.getByText('هذا الحساب خاص')).toBeInTheDocument();
+    // Private data is NOT exposed: no bio, no achievements.
+    expect(screen.queryByText('طالب')).not.toBeInTheDocument();
+    expect(screen.queryByText('إنجازات')).not.toBeInTheDocument();
+    expect(mockedGetPublicAchievements).not.toHaveBeenCalled();
+  });
+
   it('does not render the achievements section for a private profile', async () => {
     mockedGetPublicProfile.mockResolvedValue({
       profile: { ...publicProfile, isPublic: false },
