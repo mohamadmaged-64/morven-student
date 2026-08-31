@@ -1,21 +1,9 @@
 import { Router, NextFunction, Request, Response } from "express";
 import multer from "multer";
-import {
-  uploadVideo,
-  uploadVideoAndOptionalAudio,
-  makeMultiVideoUpload,
-  MAX_VIDEO_SIZE_BYTES,
-} from "../middleware/uploadVideo";
-import {
-  uploadImage,
-  uploadImageAndLogo,
-  MAX_IMAGE_SIZE_BYTES,
-} from "../middleware/uploadImage";
-import {
-  uploadAudio,
-  makeMultiAudioUpload,
-  MAX_AUDIO_SIZE_BYTES,
-} from "../middleware/uploadAudio";
+import { uploadVideo, uploadVideoAndOptionalAudio, makeMultiVideoUpload, MAX_VIDEO_SIZE_BYTES } from "../middleware/uploadVideo";
+import { uploadImage, uploadImageAndLogo, MAX_IMAGE_SIZE_BYTES } from "../middleware/uploadImage";
+import { uploadAudio, makeMultiAudioUpload, MAX_AUDIO_SIZE_BYTES } from "../middleware/uploadAudio";
+import { authenticate } from "../middleware/auth";
 import { MediaProcessingError } from "../services/media/media.types";
 import { MAX_MERGE_FILES } from "../services/media/media.utils";
 import { MAX_AUDIO_MERGE_FILES } from "../services/media/audio.types";
@@ -27,6 +15,10 @@ const router = Router();
 
 const uploadVideos = makeMultiVideoUpload(MAX_MERGE_FILES);
 const uploadAudios = makeMultiAudioUpload(MAX_AUDIO_MERGE_FILES);
+
+// Require an authenticated user: all media processing is a protected resource.
+// Scoped to the router's own path so unrelated/unknown routes are not affected.
+router.use("/api/media", authenticate);
 
 /**
  * Multer error mapping specific to media uploads:

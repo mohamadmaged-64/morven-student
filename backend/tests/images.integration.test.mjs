@@ -5,6 +5,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
 import { startBackend } from "./helpers/server.mjs";
+import { makeClient, registerUser } from "./helpers/client.mjs";
 
 /**
  * Real end-to-end coverage for the image tools API. Everything runs against
@@ -86,13 +87,13 @@ async function ensureImageFixtures() {
   return { subjectPath, photoPath, regionsPath, logoPath, spoofedPath, corruptedPath };
 }
 
-async function uploadAndAwait(baseUrl, endpoint, filePath, fields = {}, fileName, timeoutMs = 60000) {
+async function uploadAndAwait(client, endpoint, filePath, fields = {}, fileName, timeoutMs = 60000) {
   const form = new FormData();
   const bytes = await readFile(filePath);
   form.append("file", new Blob([bytes]), fileName || path.basename(filePath));
   for (const [k, v] of Object.entries(fields)) form.append(k, v);
 
-  const started = await fetch(`${baseUrl}${endpoint}`, { method: "POST", body: form });
+  const started = await client.fetch(`${client.baseUrl}${endpoint}`, { method: "POST", body: form });
   if (!started.ok) {
     // Consume the body so the undici socket can be released (otherwise the
     // test runner's event loop never drains and the process hangs).
@@ -105,7 +106,7 @@ async function uploadAndAwait(baseUrl, endpoint, filePath, fields = {}, fileName
   const deadline = Date.now() + timeoutMs;
   let status = null;
   while (Date.now() < deadline) {
-    const res = await fetch(`${baseUrl}/api/media/jobs/${jobId}/status`);
+    const res = await client.fetch(`${client.baseUrl}/api/media/jobs/${jobId}/status`);
     status = await res.json();
     if (status.status === "done" || status.status === "error") break;
     await new Promise((r) => setTimeout(r, 300));
@@ -120,34 +121,36 @@ async function drain(res) {
   } catch {}
 }
 
-async function downloadResult(baseUrl, jobId) {
-  const dl = await fetch(`${baseUrl}/api/media/jobs/${jobId}/download`);
+async function downloadResult(client, jobId) {
+  const dl = await client.fetch(`${client.baseUrl}/api/media/jobs/${jobId}/download`);
   assert.equal(dl.status, 200, `download failed with ${dl.status}`);
   return Buffer.from(await dl.arrayBuffer());
 }
 
-function multipartPost(baseUrl, endpoint, filePath, fields, fieldName = "file") {
-  return buildAndPost(baseUrl, endpoint, [{ field: fieldName, path: filePath }], fields);
+function multipartPost(client, endpoint, filePath, fields, fieldName = "file") {
+  return buildAndPost(client, endpoint, [{ field: fieldName, path: filePath }], fields);
 }
 
-async function buildAndPost(baseUrl, endpoint, files, fields) {
+async function buildAndPost(client, endpoint, files, fields) {
   const form = new FormData();
   for (const f of files) {
     const bytes = await readFile(f.path);
     form.append(f.field, new Blob([bytes]), path.basename(f.path));
   }
   for (const [k, v] of Object.entries(fields)) form.append(k, v);
-  return fetch(`${baseUrl}${endpoint}`, { method: "POST", body: form });
+  return client.fetch(`${client.baseUrl}${endpoint}`, { method: "POST", body: form });
 }
 
 describe("image tools API (real sharp integration)", () => {
   let server;
   let fixtures;
+  let client;
 
   before(async () => {
     try {
       fixtures = await ensureImageFixtures();
       server = await startBackend({});
+      client = makeClient(server.baseUrl, (await registerUser(server.baseUrl)).accessToken);
       const { appendFileSync } = await import("node:fs");
       appendFileSync("test-debug.log", `before ok: ${server.baseUrl}\n`);
     } catch (err) {
@@ -158,8 +161,8 @@ describe("image tools API (real sharp integration)", () => {
   });
 
   it("removes a uniform background and returns transparent PNG", async () => {
-    const { started, jobId, status } = await uploadAndAwait(
-      server.baseUrl,
+    const { started, jobId, status } =   await uploadAndAwait(
+      client,
       "/api/media/image/remove-bg",
       fixtures.subjectPath
     );
@@ -170,7 +173,7 @@ describe("image tools API (real sharp integration)", () => {
     assert.equal(started.status, 202, JSON.stringify(started));
     assert.equal(status?.status, "done", JSON.stringify(status));
 
-    const out = await downloadResult(server.baseUrl, jobId);
+    const out = await downloadResult(client, jobId);
     const meta = await sharp(out).metadata();
     assert.equal(meta.format, "png");
     assert.equal(meta.hasAlpha, true, "output must carry an alpha channel");
@@ -190,14 +193,14 @@ describe("image tools API (real sharp integration)", () => {
   });
 
   it("resizes by width and preserves aspect ratio", async () => {
-    const { jobId, status } = await uploadAndAwait(
-      server.baseUrl,
+    const { jobId, status } =   await uploadAndAwait(
+      client,
       "/api/media/image/resize",
       fixtures.photoPath,
       { width: "160" }
     );
     assert.equal(status?.status, "done", JSON.stringify(status));
-    const out = await downloadResult(server.baseUrl, jobId);
+    const out = await downloadResult(client, jobId);
     const meta = await sharp(out).metadata();
     assert.equal(meta.format, "jpeg");
     assert.equal(meta.width, 160);
@@ -205,28 +208,28 @@ describe("image tools API (real sharp integration)", () => {
   });
 
   it("crops an exact region", async () => {
-    const { jobId, status } = await uploadAndAwait(
-      server.baseUrl,
+    const { jobId, status } =   await uploadAndAwait(
+      client,
       "/api/media/image/crop",
       fixtures.photoPath,
       { left: "10", top: "20", width: "100", height: "80" }
     );
     assert.equal(status?.status, "done", JSON.stringify(status));
-    const out = await downloadResult(server.baseUrl, jobId);
+    const out = await downloadResult(client, jobId);
     const meta = await sharp(out).metadata();
     assert.equal(meta.width, 100);
     assert.equal(meta.height, 80);
   });
 
   it("rotates 90 degrees swapping dimensions", async () => {
-    const { jobId, status } = await uploadAndAwait(
-      server.baseUrl,
+    const { jobId, status } =   await uploadAndAwait(
+      client,
       "/api/media/image/rotate",
       fixtures.photoPath,
       { rotate: "90" }
     );
     assert.equal(status?.status, "done", JSON.stringify(status));
-    const out = await downloadResult(server.baseUrl, jobId);
+    const out = await downloadResult(client, jobId);
     const meta = await sharp(out).metadata();
     assert.equal(meta.width, 240);
     assert.equal(meta.height, 320);
@@ -234,14 +237,14 @@ describe("image tools API (real sharp integration)", () => {
 
   it("flips horizontally with mirrored pixels", async () => {
     const original = await sharp(fixtures.photoPath).raw().toBuffer({ resolveWithObject: true });
-    const { jobId, status } = await uploadAndAwait(
-      server.baseUrl,
+    const { jobId, status } =   await uploadAndAwait(
+      client,
       "/api/media/image/rotate",
       fixtures.photoPath,
       { rotate: "0", flip: "h" }
     );
     assert.equal(status?.status, "done", JSON.stringify(status));
-    const out = await downloadResult(server.baseUrl, jobId);
+    const out = await downloadResult(client, jobId);
     const flipped = await sharp(out).removeAlpha().raw().toBuffer({ resolveWithObject: true });
 
     const { width, height } = original.info;
@@ -258,14 +261,14 @@ describe("image tools API (real sharp integration)", () => {
 
   it("adjusts brightness measurably", async () => {
     const originalStats = await sharp(fixtures.photoPath).stats();
-    const { jobId, status } = await uploadAndAwait(
-      server.baseUrl,
+    const { jobId, status } =   await uploadAndAwait(
+      client,
       "/api/media/image/adjust",
       fixtures.photoPath,
       { brightness: "150" }
     );
     assert.equal(status?.status, "done", JSON.stringify(status));
-    const out = await downloadResult(server.baseUrl, jobId);
+    const out = await downloadResult(client, jobId);
     const brighter = await sharp(out).stats();
     assert.ok(
       brighter.channels[0].mean > originalStats.channels[0].mean + 5,
@@ -279,14 +282,14 @@ describe("image tools API (real sharp integration)", () => {
       .extract(region)
       .stats();
 
-    const { jobId, status } = await uploadAndAwait(
-      server.baseUrl,
+    const { jobId, status } =   await uploadAndAwait(
+      client,
       "/api/media/image/blur-regions",
       fixtures.regionsPath,
       { regions: JSON.stringify([region]), effect: "blur", intensity: "10" }
     );
     assert.equal(status?.status, "done", JSON.stringify(status));
-    const out = await downloadResult(server.baseUrl, jobId);
+    const out = await downloadResult(client, jobId);
     assert.equal((await sharp(out).metadata()).format, "png", "PNG in -> PNG out (lossless)");
     const full = await sharp(out).raw().toBuffer({ resolveWithObject: true });
 
@@ -316,14 +319,14 @@ describe("image tools API (real sharp integration)", () => {
 
   it("pixelates selected regions only", async () => {
     const region = { left: 40, top: 40, width: 80, height: 60 };
-    const { jobId, status } = await uploadAndAwait(
-      server.baseUrl,
+    const { jobId, status } =   await uploadAndAwait(
+      client,
       "/api/media/image/blur-regions",
       fixtures.regionsPath,
       { regions: JSON.stringify([region]), effect: "pixelate", intensity: "12" }
     );
     assert.equal(status?.status, "done", JSON.stringify(status));
-    const out = await downloadResult(server.baseUrl, jobId);
+    const out = await downloadResult(client, jobId);
     const full = await sharp(out).raw().toBuffer({ resolveWithObject: true });
 
     // Inside the blocky region many horizontal neighbours are identical.
@@ -342,8 +345,8 @@ describe("image tools API (real sharp integration)", () => {
   });
 
   it("applies a text watermark in the requested corner", async () => {
-    const { jobId, status } = await uploadAndAwait(
-      server.baseUrl,
+    const { jobId, status } =   await uploadAndAwait(
+      client,
       "/api/media/image/watermark",
       fixtures.photoPath,
       {
@@ -360,7 +363,7 @@ describe("image tools API (real sharp integration)", () => {
     assert.equal(status?.status, "done", JSON.stringify(status));
 
     // Arabic filenames survive the round trip in the download name.
-    const head = await fetch(`${server.baseUrl}/api/media/jobs/${jobId}/download`);
+    const head = await client.fetch(`${client.baseUrl}/api/media/jobs/${jobId}/download`);
     const disposition = head.headers.get("content-disposition") || "";
     assert.match(disposition, /\.jpg/i);
     const utf8Name = disposition.match(/filename\*=UTF-8''([^;]+)/i);
@@ -395,7 +398,7 @@ describe("image tools API (real sharp integration)", () => {
     form.append("position", "bottom-right");
     form.append("rotation", "0");
 
-    const started = await fetch(`${server.baseUrl}/api/media/image/watermark`, {
+    const started = await client.fetch(`${client.baseUrl}/api/media/image/watermark`, {
       method: "POST",
       body: form,
     });
@@ -405,14 +408,14 @@ describe("image tools API (real sharp integration)", () => {
 
     let status = null;
     for (let i = 0; i < 200; i++) {
-      const res = await fetch(`${server.baseUrl}/api/media/jobs/${jobId}/status`);
+      const res = await client.fetch(`${client.baseUrl}/api/media/jobs/${jobId}/status`);
       status = await res.json();
       if (status.status !== "processing") break;
       await new Promise((r) => setTimeout(r, 300));
     }
     assert.equal(status?.status, "done", JSON.stringify(status));
 
-    const out = await downloadResult(server.baseUrl, jobId);
+    const out = await downloadResult(client, jobId);
     const full = await sharp(out).raw().toBuffer({ resolveWithObject: true });
     let bluePixels = 0;
     const W = full.info.width;
@@ -427,13 +430,13 @@ describe("image tools API (real sharp integration)", () => {
   });
 
   it("strips EXIF metadata while keeping format and dimensions", async () => {
-    const { jobId, status } = await uploadAndAwait(
-      server.baseUrl,
+    const { jobId, status } =   await uploadAndAwait(
+      client,
       "/api/media/image/strip-metadata",
       fixtures.photoPath
     );
     assert.equal(status?.status, "done", JSON.stringify(status));
-    const out = await downloadResult(server.baseUrl, jobId);
+    const out = await downloadResult(client, jobId);
     const meta = await sharp(out).metadata();
     assert.equal(meta.format, "jpeg", "format must be preserved");
     assert.equal(meta.width, 320);
@@ -443,7 +446,7 @@ describe("image tools API (real sharp integration)", () => {
 
   it("rejects spoofed uploads whose content is not an image", async () => {
     const res = await multipartPost(
-      server.baseUrl,
+      client,
       "/api/media/image/resize",
       fixtures.spoofedPath,
       { width: "100" }
@@ -455,7 +458,7 @@ describe("image tools API (real sharp integration)", () => {
 
   it("reports corrupt images as job errors without leaking details", async () => {
     const { started, status } = await uploadAndAwait(
-      server.baseUrl,
+      client,
       "/api/media/image/strip-metadata",
       fixtures.corruptedPath
     );
@@ -477,7 +480,7 @@ describe("image tools API (real sharp integration)", () => {
       ["/api/media/image/watermark", { type: "text", text: "" }, 400],
     ];
     for (const [endpoint, fields, expectedStatus] of cases) {
-      const res = await multipartPost(server.baseUrl, endpoint, fixtures.photoPath, fields);
+      const res = await multipartPost(client, endpoint, fixtures.photoPath, fields);
       assert.equal(res.status, expectedStatus, `${endpoint} ${JSON.stringify(fields)}`);
       const body = await res.json();
       assert.ok(body.code, `error body must include code for ${endpoint}`);
@@ -485,7 +488,7 @@ describe("image tools API (real sharp integration)", () => {
   });
 
   it("requires a logo upload in image watermark mode", async () => {
-    const res = await multipartPost(server.baseUrl, "/api/media/image/watermark", fixtures.photoPath, {
+    const res = await multipartPost(client, "/api/media/image/watermark", fixtures.photoPath, {
       type: "image",
       sizePercent: "20",
     });
@@ -496,22 +499,22 @@ describe("image tools API (real sharp integration)", () => {
 
   it("enforces job lifecycle rules on shared endpoints", async () => {
     // Unknown job id.
-    const missing = await fetch(`${server.baseUrl}/api/media/jobs/does-not-exist/status`);
+    const missing = await client.fetch(`${client.baseUrl}/api/media/jobs/does-not-exist/status`);
     assert.equal(missing.status, 404);
     const body = await missing.json();
     assert.equal(body.code, "JOB_NOT_FOUND");
 
     // Single-consumer download semantics.
     const { jobId } = await uploadAndAwait(
-      server.baseUrl,
+      client,
       "/api/media/image/resize",
       fixtures.photoPath,
       { width: "64" }
     );
-    const first = await fetch(`${server.baseUrl}/api/media/jobs/${jobId}/download`);
+    const first = await client.fetch(`${client.baseUrl}/api/media/jobs/${jobId}/download`);
     assert.equal(first.status, 200);
     await drain(first);
-    const second = await fetch(`${server.baseUrl}/api/media/jobs/${jobId}/download`);
+    const second = await client.fetch(`${client.baseUrl}/api/media/jobs/${jobId}/download`);
     assert.equal(second.status, 404);
     await drain(second);
   });

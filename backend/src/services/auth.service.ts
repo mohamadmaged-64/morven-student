@@ -82,21 +82,48 @@ function generateRawRefreshToken(): string {
   return crypto.randomBytes(40).toString("hex");
 }
 
-export async function createRefreshToken(userId: string): Promise<string> {
+export async function createRefreshToken(
+  userId: string,
+  familyId?: string
+): Promise<string> {
   const rawToken = generateRawRefreshToken();
   const tokenHash = hashToken(rawToken);
   const expiresAt = new Date(Date.now() + REFRESH_TOKEN_DAYS * 24 * 60 * 60 * 1000);
 
   await prisma.refreshToken.create({
-    data: { tokenHash, userId, expiresAt },
+    data: {
+      tokenHash,
+      userId,
+      familyId: familyId || crypto.randomUUID(),
+      expiresAt,
+    },
   });
 
   return rawToken;
 }
 
+export interface RefreshValidationResult {
+  userId: string;
+  familyId: string;
+  reused: boolean;
+}
+
+/**
+ * Validate a raw refresh token.
+ *
+ * - Unknown token          -> null
+ * - Expired token          -> deleted, null
+ * - Already-rotated token  -> REUSE detected: the whole token family is revoked
+ *                             and `{ reused: true }` is returned (the original
+ *                             may have been stolen).
+ * - Valid, unused token    -> `{ reused: false }`; when `markUsed` is set the
+ *                             row is flagged so any later replay of the same
+ *                             token triggers family revocation.
+ */
 export async function validateRefreshToken(
-  rawToken: string
-): Promise<{ userId: string } | null> {
+  rawToken: string,
+  options: { markUsed?: boolean } = {}
+): Promise<RefreshValidationResult | null> {
   const tokenHash = hashToken(rawToken);
   const record = await prisma.refreshToken.findUnique({
     where: { tokenHash },
@@ -108,7 +135,24 @@ export async function validateRefreshToken(
     return null;
   }
 
-  return { userId: record.userId };
+  if (record.usedAt) {
+    await revokeRefreshFamily(record.familyId);
+    return { userId: record.userId, familyId: record.familyId, reused: true };
+  }
+
+  if (options.markUsed) {
+    await prisma.refreshToken.update({
+      where: { id: record.id },
+      data: { usedAt: new Date() },
+    });
+  }
+
+  return { userId: record.userId, familyId: record.familyId, reused: false };
+}
+
+/** Revoke every refresh token that belongs to the same token family. */
+export async function revokeRefreshFamily(familyId: string): Promise<void> {
+  await prisma.refreshToken.deleteMany({ where: { familyId } });
 }
 
 export async function revokeRefreshToken(rawToken: string): Promise<void> {
@@ -261,13 +305,16 @@ export async function loginUser(input: LoginInput) {
 }
 
 export async function refreshAccessToken(rawRefreshToken: string) {
-  const result = await validateRefreshToken(rawRefreshToken);
+  const result = await validateRefreshToken(rawRefreshToken, { markUsed: true });
   if (!result) {
     throw new AuthError("رمز التحديث غير صالح أو منتهي الصلاحية", 401);
   }
 
-  // Rotate: revoke old, issue new
-  await revokeRefreshToken(rawRefreshToken);
+  if (result.reused) {
+    // A rotated token was replayed. The whole family has already been revoked
+    // as a precaution (the original may have been stolen); force re-login.
+    throw new AuthError("رمز التحديث مستخدم مسبقاً. يرجى تسجيل الدخول مجدداً", 401);
+  }
 
   const user = await prisma.user.findUnique({ where: { id: result.userId }, include: { profile: { select: { avatarUrl: true } } } });
   if (!user) {
@@ -275,7 +322,9 @@ export async function refreshAccessToken(rawRefreshToken: string) {
   }
 
   const accessToken = generateAccessToken(user.id, user.role, user.username, user.displayName);
-  const refreshToken = await createRefreshToken(user.id);
+  // Rotate: issue a new refresh token in the SAME family (the old one was
+  // just marked as used so any replay revokes the family).
+  const refreshToken = await createRefreshToken(user.id, result.familyId);
 
   return {
     user: sanitizeUser(user, user.profile),

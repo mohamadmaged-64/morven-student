@@ -14,6 +14,7 @@ export async function startBackend(env = {}) {
       PORT: String(port),
       AUTH_RATE_LIMIT_MAX: "500",
       REFRESH_RATE_LIMIT_MAX: "500",
+      PROCESSING_RATE_LIMIT_MAX: "10000",
       ...env,
     },
     stdio: ["ignore", "pipe", "pipe"],

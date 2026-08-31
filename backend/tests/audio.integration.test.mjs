@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { startBackend } from "./helpers/server.mjs";
+import { makeClient, registerUser } from "./helpers/client.mjs";
 
 const execFileAsync = promisify(execFile);
 
@@ -131,13 +132,13 @@ async function bytes(filePath) {
   return readFile(filePath);
 }
 
-function multipartPost(baseUrl, endpoint, files, fields) {
+function multipartPost(client, endpoint, files, fields) {
   const form = new FormData();
   for (const f of files) {
     form.append(f.field, new Blob([f.bytes]), f.name);
   }
   for (const [k, v] of Object.entries(fields ?? {})) form.append(k, String(v));
-  return fetch(`${baseUrl}${endpoint}`, { method: "POST", body: form });
+  return client.fetch(`${client.baseUrl}${endpoint}`, { method: "POST", body: form });
 }
 
 /** Drain an unused response body to release its socket. */
@@ -152,11 +153,11 @@ async function drain(res) {
  * load the event loop can stall long enough for Windows to reset freshly
  * queued localhost connections; status polling must survive that.
  */
-async function fetchStatus(url) {
+async function fetchStatus(client, url) {
   let lastErr;
   for (let attempt = 0; attempt < 6; attempt++) {
     try {
-      return await fetch(url);
+      return await client.fetch(url);
     } catch (err) {
       lastErr = err;
       await new Promise((r) => setTimeout(r, 400));
@@ -165,8 +166,8 @@ async function fetchStatus(url) {
   throw lastErr;
 }
 
-async function uploadAndAwait(baseUrl, endpoint, files, fields = {}, timeoutMs = 90000) {
-  const started = await multipartPost(baseUrl, endpoint, files, fields);
+async function uploadAndAwait(client, endpoint, files, fields = {}, timeoutMs = 90000) {
+  const started = await multipartPost(client, endpoint, files, fields);
   if (started.status !== 202) {
     const problem = await started.json().catch(() => null);
     assert.fail(`start failed: ${started.status} ${JSON.stringify(problem)}`);
@@ -176,7 +177,7 @@ async function uploadAndAwait(baseUrl, endpoint, files, fields = {}, timeoutMs =
   const deadline = Date.now() + timeoutMs;
   let status = null;
   while (Date.now() < deadline) {
-    const res = await fetchStatus(`${baseUrl}/api/media/jobs/${jobId}/status`);
+    const res = await fetchStatus(client, `${client.baseUrl}/api/media/jobs/${jobId}/status`);
     status = await res.json();
     if (status.status === "done" || status.status === "error") break;
     await new Promise((r) => setTimeout(r, 300));
@@ -186,6 +187,7 @@ async function uploadAndAwait(baseUrl, endpoint, files, fields = {}, timeoutMs =
 
 describe("audio tools API (real FFmpeg + Whisper integration)", { skip: skipReason }, () => {
   let server;
+  let client;
   let fx;
   /** Every JSON body seen during the suite, for the leak scan at the end. */
   const seenBodies = [];
@@ -196,7 +198,7 @@ describe("audio tools API (real FFmpeg + Whisper integration)", { skip: skipReas
   }
 
   async function downloadTo(jobId, outPath) {
-    const dl = await fetch(`${server.baseUrl}/api/media/jobs/${jobId}/download`);
+    const dl = await client.fetch(`${client.baseUrl}/api/media/jobs/${jobId}/download`);
     assert.equal(dl.status, 200, `download failed with ${dl.status}`);
     const buf = Buffer.from(await dl.arrayBuffer());
     if (outPath) await writeFile(outPath, buf);
@@ -206,6 +208,7 @@ describe("audio tools API (real FFmpeg + Whisper integration)", { skip: skipReas
   before(async () => {
     fx = await ensureAudioFixtures();
     server = await startBackend({});
+    client = makeClient(server.baseUrl, (await registerUser(server.baseUrl)).accessToken);
   });
 
   after(async () => {
@@ -215,7 +218,7 @@ describe("audio tools API (real FFmpeg + Whisper integration)", { skip: skipReas
 
   it("cuts an MP3 segment with correct duration and format", async () => {
     const { jobId, status } = await uploadAndAwait(
-      server.baseUrl,
+      client,
       "/api/media/audio/cut",
       [{ field: "file", name: "tone440_6s.mp3", bytes: await bytes(fx.mp3) }],
       { start: "1", end: "4" }
@@ -233,7 +236,7 @@ describe("audio tools API (real FFmpeg + Whisper integration)", { skip: skipReas
 
   it("rejects cut windows with end <= start or beyond file duration", async () => {
     const badOrder = await multipartPost(
-      server.baseUrl,
+      client,
       "/api/media/audio/cut",
       [{ field: "file", name: "tone440_6s.mp3", bytes: await bytes(fx.mp3) }],
       { start: "4", end: "1" }
@@ -242,7 +245,7 @@ describe("audio tools API (real FFmpeg + Whisper integration)", { skip: skipReas
     assert.equal((await badOrder.json()).code, "INVALID_CONVERSION");
 
     const beyond = await multipartPost(
-      server.baseUrl,
+      client,
       "/api/media/audio/cut",
       [{ field: "file", name: "tone440_6s.mp3", bytes: await bytes(fx.mp3) }],
       { start: "100", end: "105" }
@@ -255,7 +258,7 @@ describe("audio tools API (real FFmpeg + Whisper integration)", { skip: skipReas
   it("boosts volume by ~6dB through enhance while preserving WAV output", async () => {
     const inputMean = await measureMeanVolumeDb(fx.wav);
     const { jobId, status } = await uploadAndAwait(
-      server.baseUrl,
+      client,
       "/api/media/audio/enhance",
       [{ field: "file", name: "tone880_8s.wav", bytes: await bytes(fx.wav) }],
       { volume: "200" }
@@ -279,7 +282,7 @@ describe("audio tools API (real FFmpeg + Whisper integration)", { skip: skipReas
 
   it("rejects no-op enhance requests and invalid fade values", async () => {
     const noop = await multipartPost(
-      server.baseUrl,
+      client,
       "/api/media/audio/enhance",
       [{ field: "file", name: "tone880_8s.wav", bytes: await bytes(fx.wav) }],
       {}
@@ -288,7 +291,7 @@ describe("audio tools API (real FFmpeg + Whisper integration)", { skip: skipReas
     assert.equal((await noop.json()).code, "INVALID_CONVERSION");
 
     const badFade = await multipartPost(
-      server.baseUrl,
+      client,
       "/api/media/audio/enhance",
       [{ field: "file", name: "tone880_8s.wav", bytes: await bytes(fx.wav) }],
       { fadeIn: "99" }
@@ -299,7 +302,7 @@ describe("audio tools API (real FFmpeg + Whisper integration)", { skip: skipReas
 
   it("applies normalization + clarity + fade-out as one pass", async () => {
     const { status } = await uploadAndAwait(
-      server.baseUrl,
+      client,
       "/api/media/audio/enhance",
       [{ field: "file", name: "noisy_5s.wav", bytes: await bytes(fx.noisy) }],
       { normalize: "true", clarity: "true", fadeOut: "2" }
@@ -309,7 +312,7 @@ describe("audio tools API (real FFmpeg + Whisper integration)", { skip: skipReas
 
   it("cleans noise while keeping duration stable", async () => {
     const { jobId, status } = await uploadAndAwait(
-      server.baseUrl,
+      client,
       "/api/media/audio/clean",
       [{ field: "file", name: "noisy_5s.wav", bytes: await bytes(fx.noisy) }],
       { strength: "strong" }
@@ -324,7 +327,7 @@ describe("audio tools API (real FFmpeg + Whisper integration)", { skip: skipReas
 
   it("merges mp3+wav+m4a in order into one MP3 of summed length", async () => {
     const { jobId, status } = await uploadAndAwait(
-      server.baseUrl,
+      client,
       "/api/media/audio/merge",
       [
         { field: "files", name: "a.mp3", bytes: await bytes(fx.mp3) },
@@ -347,7 +350,7 @@ describe("audio tools API (real FFmpeg + Whisper integration)", { skip: skipReas
 
   it("rejects merge with fewer than two files or more than ten", async () => {
     const single = await multipartPost(
-      server.baseUrl,
+      client,
       "/api/media/audio/merge",
       [{ field: "files", name: "a.mp3", bytes: await bytes(fx.mp3) }]
     );
@@ -359,7 +362,7 @@ describe("audio tools API (real FFmpeg + Whisper integration)", { skip: skipReas
     for (let i = 0; i < 11; i++) {
       eleven.push({ field: "files", name: `p${i}.mp3`, bytes: await bytes(fx.mp3) });
     }
-    const tooMany = await multipartPost(server.baseUrl, "/api/media/audio/merge", eleven);
+    const tooMany = await multipartPost(client, "/api/media/audio/merge", eleven);
     assert.equal(tooMany.status, 400);
     const body = note(await tooMany.json());
     assert.match(body.error, /up to 10/);
@@ -367,7 +370,7 @@ describe("audio tools API (real FFmpeg + Whisper integration)", { skip: skipReas
 
   it("transcribes real speech into text containing the expected words", async () => {
     const { jobId, status } = await uploadAndAwait(
-      server.baseUrl,
+      client,
       "/api/media/audio/transcribe",
       [{ field: "file", name: "speech-sample.wav", bytes: await bytes(SPEECH_FIXTURE) }],
       { language: "auto" },
@@ -375,7 +378,7 @@ describe("audio tools API (real FFmpeg + Whisper integration)", { skip: skipReas
     );
     assert.equal(status?.status, "done", JSON.stringify(note(status)));
 
-    const dl = await fetch(`${server.baseUrl}/api/media/jobs/${jobId}/download`);
+    const dl = await client.fetch(`${client.baseUrl}/api/media/jobs/${jobId}/download`);
     assert.equal(dl.status, 200);
     assert.match(dl.headers.get("content-disposition") || "", /-transcript\.txt/);
     const text = (await dl.text()).trim().toLowerCase();
@@ -387,7 +390,7 @@ describe("audio tools API (real FFmpeg + Whisper integration)", { skip: skipReas
 
   it("returns an empty transcript for pure silence instead of hallucinating", async () => {
     const { status } = await uploadAndAwait(
-      server.baseUrl,
+      client,
       "/api/media/audio/transcribe",
       [{ field: "file", name: "silence_3s.wav", bytes: await bytes(fx.silence) }],
       {},
@@ -399,7 +402,7 @@ describe("audio tools API (real FFmpeg + Whisper integration)", { skip: skipReas
 
   it("rejects unsupported transcription languages", async () => {
     const res = await multipartPost(
-      server.baseUrl,
+      client,
       "/api/media/audio/transcribe",
       [{ field: "file", name: "tone440_6s.mp3", bytes: await bytes(fx.mp3) }],
       { language: "xx" }
@@ -410,7 +413,7 @@ describe("audio tools API (real FFmpeg + Whisper integration)", { skip: skipReas
 
   it("rejects spoofed uploads whose contents do not match the extension", async () => {
     const res = await multipartPost(
-      server.baseUrl,
+      client,
       "/api/media/audio/cut",
       [{ field: "file", name: "not-audio.mp3", bytes: await bytes(fx.spoofed) }],
       { start: "0", end: "1" }
@@ -421,7 +424,7 @@ describe("audio tools API (real FFmpeg + Whisper integration)", { skip: skipReas
 
   it("surfaces a safe error when decoding valid-header junk fails", async () => {
     const { status } = await uploadAndAwait(
-      server.baseUrl,
+      client,
       "/api/media/audio/clean",
       [{ field: "file", name: "corrupt.wav", bytes: await bytes(fx.corrupt) }],
       {}
@@ -438,7 +441,7 @@ describe("audio tools API (real FFmpeg + Whisper integration)", { skip: skipReas
       ["GET", `/api/media/jobs/${bogus}/download`],
       ["DELETE", `/api/media/jobs/${bogus}`],
     ]) {
-      const res = await fetch(`${server.baseUrl}${url}`, { method });
+      const res = await client.fetch(`${client.baseUrl}${url}`, { method });
       assert.equal(res.status, 404, `${method} ${url}`);
       assert.equal((await res.json()).code, "JOB_NOT_FOUND");
     }
@@ -446,24 +449,24 @@ describe("audio tools API (real FFmpeg + Whisper integration)", { skip: skipReas
 
   it("allows only one download per completed job (single consumer)", async () => {
     const { jobId, status } = await uploadAndAwait(
-      server.baseUrl,
+      client,
       "/api/media/audio/clean",
       [{ field: "file", name: "noisy_5s.wav", bytes: await bytes(fx.noisy) }],
       { strength: "light" }
     );
     assert.equal(status?.status, "done");
 
-    const first = await fetch(`${server.baseUrl}/api/media/jobs/${jobId}/download`);
+    const first = await client.fetch(`${client.baseUrl}/api/media/jobs/${jobId}/download`);
     assert.equal(first.status, 200);
     await drain(first);
-    const second = await fetch(`${server.baseUrl}/api/media/jobs/${jobId}/download`);
+    const second = await client.fetch(`${client.baseUrl}/api/media/jobs/${jobId}/download`);
     assert.equal(second.status, 404);
     await drain(second);
   });
 
   it("supports cancelling a running job and removes its record", async () => {
     const started = await multipartPost(
-      server.baseUrl,
+      client,
       "/api/media/audio/merge",
       [
         { field: "files", name: "a.wav", bytes: await bytes(fx.big) },
@@ -473,24 +476,24 @@ describe("audio tools API (real FFmpeg + Whisper integration)", { skip: skipReas
     assert.equal(started.status, 202);
     const { jobId } = await started.json();
 
-    const del = await fetch(`${server.baseUrl}/api/media/jobs/${jobId}`, { method: "DELETE" });
+    const del = await client.fetch(`${client.baseUrl}/api/media/jobs/${jobId}`, { method: "DELETE" });
     assert.equal(del.status, 200);
     assert.equal((await del.json()).status, "cancelled");
 
-    const gone = await fetch(`${server.baseUrl}/api/media/jobs/${jobId}/status`);
+    const gone = await client.fetch(`${client.baseUrl}/api/media/jobs/${jobId}/status`);
     assert.equal(gone.status, 404);
   });
 
   it("handles Arabic filenames across processing and download", async () => {
     const { jobId, status } = await uploadAndAwait(
-      server.baseUrl,
+      client,
       "/api/media/audio/cut",
       [{ field: "file", name: "تسجيل تجربة.mp3", bytes: await bytes(fx.arabic) }],
       { start: "0.5", end: "2.5" }
     );
     assert.equal(status?.status, "done", JSON.stringify(note(status)));
 
-    const dl = await fetch(`${server.baseUrl}/api/media/jobs/${jobId}/download`);
+    const dl = await client.fetch(`${client.baseUrl}/api/media/jobs/${jobId}/download`);
     assert.equal(dl.status, 200);
     const disposition = decodeURIComponent(dl.headers.get("content-disposition") || "");
     assert.match(disposition, /-cut\.mp3/);
