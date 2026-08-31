@@ -93,14 +93,6 @@ const refreshLimiter = rateLimit({
   message: { error: "تم تجاوز الحد المسموح. يرجى المحاولة لاحقاً" },
 });
 
-const processingLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: parseInt(process.env.PROCESSING_RATE_LIMIT_MAX || "40", 10),
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { error: "تم تجاوز الحد المسموح للمعالجة. يرجى المحاولة لاحقاً" },
-});
-
 // ---------------------------------------------------------------------------
 // Routes
 // ---------------------------------------------------------------------------
@@ -118,20 +110,12 @@ app.use(resourceRoutes);
 app.use(notificationRoutes);
 app.use(adminRoutes);
 
-// Authenticated file-processing routes (auth required via router.use)
-// Rate-limit job-creation endpoints; skip lightweight status/download/cancel.
-app.use(processingLimiter, convertRoutes);
-app.use(processingLimiter, compressRoutes);
-app.use(processingLimiter, pdfSecurityRoutes);
-app.use(processingLimiter, pptRoutes);
-app.use((req, res, next) => {
-  // Don't rate-limit lightweight job status/download/cancel (GET/DELETE with
-  // random UUID jobId); only limit expensive job-creation POST endpoints.
-  if (req.method !== "POST" && req.path.startsWith("/api/media/jobs/")) {
-    return next();
-  }
-  processingLimiter(req, res, next);
-}, mediaRoutes);
+// Existing file-processing routes (no auth required)
+app.use("/", convertRoutes);
+app.use("/", compressRoutes);
+app.use("/", pdfSecurityRoutes);
+app.use("/", pptRoutes);
+app.use("/", mediaRoutes);
 
 // JSON 404 fallback for unknown routes.
 app.use((req: Request, res: Response) => {

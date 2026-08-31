@@ -27,14 +27,9 @@ class FakeXHR {
   responseType = '';
   response: unknown = null;
   status = 0;
-  withCredentials = false;
   sentBody: FormData | null = null;
-  setRequestHeaders: Record<string, string> = {};
 
   open = vi.fn();
-  setRequestHeader(name: string, value: string) {
-    this.setRequestHeaders[name] = value;
-  }
   send(body: FormData) {
     FakeXHR.instances.push(this);
     this.sentBody = body;

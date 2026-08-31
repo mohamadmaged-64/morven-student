@@ -1,6 +1,5 @@
 import { toNetworkError } from './apiError';
 import { API_BASE } from './apiBase';
-import { authedFetch } from './authApi';
 
 console.log("[conversionApi] import.meta.env.VITE_API_URL =", import.meta.env.VITE_API_URL);
 
@@ -25,7 +24,7 @@ export async function convertToPdf(file: File): Promise<Blob> {
   let response: Response;
 
   try {
-    response = await authedFetch(url, {
+    response = await fetch(url, {
       method: "POST",
       body: formData,
     });
@@ -80,7 +79,7 @@ export async function compressPdf(
   let response: Response;
 
   try {
-    response = await authedFetch(url, {
+    response = await fetch(url, {
       method: "POST",
       body: formData,
     });
@@ -136,7 +135,7 @@ async function postPdfSecurity(
   let response: Response;
 
   try {
-    response = await authedFetch(url, {
+    response = await fetch(url, {
       method: "POST",
       body: formData,
     });
@@ -211,7 +210,7 @@ export async function numberSlides(
   let response: Response;
 
   try {
-    response = await authedFetch(url, {
+    response = await fetch(url, {
       method: "POST",
       body: formData,
     });
@@ -262,7 +261,7 @@ export async function generatePptFromText(
   let response: Response;
 
   try {
-    response = await authedFetch(url, {
+    response = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ title, text }),
@@ -314,7 +313,7 @@ export async function generatePptFromPdf(file: File): Promise<Blob> {
   let response: Response;
 
   try {
-    response = await authedFetch(url, {
+    response = await fetch(url, {
       method: "POST",
       body: formData,
     });
@@ -365,7 +364,7 @@ export async function mergePowerPoint(files: File[]): Promise<Blob> {
   let response: Response;
 
   try {
-    response = await authedFetch(url, {
+    response = await fetch(url, {
       method: "POST",
       body: formData,
     });
@@ -417,7 +416,7 @@ export async function splitPowerPoint(file: File, ranges = ""): Promise<Blob> {
   let response: Response;
 
   try {
-    response = await authedFetch(url, {
+    response = await fetch(url, {
       method: "POST",
       body: formData,
     });

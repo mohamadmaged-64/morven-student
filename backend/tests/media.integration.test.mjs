@@ -4,7 +4,6 @@ import { readFile, readdir, rm } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { startBackend } from "./helpers/server.mjs";
-import { makeClient, registerUser } from "./helpers/client.mjs";
 import { ensureFixtures, fixturesDir, isFfmpegUsable } from "./helpers/fixtures.mjs";
 
 const FFMPEG_PATH =
@@ -44,20 +43,20 @@ async function mediaWorkDirs() {
   }
 }
 
-async function uploadAndAwait(client, endpoint, filePath, fields = {}, { timeoutMs = 120000 } = {}) {
+async function uploadAndAwait(baseUrl, endpoint, filePath, fields = {}, { timeoutMs = 120000 } = {}) {
   const form = new FormData();
   const bytes = await readFile(filePath);
   form.append("file", new Blob([bytes]), path.basename(filePath));
   for (const [k, v] of Object.entries(fields)) form.append(k, v);
 
-  const started = await client.fetch(`${client.baseUrl}${endpoint}`, { method: "POST", body: form });
+  const started = await fetch(`${baseUrl}${endpoint}`, { method: "POST", body: form });
   if (!started.ok) return { started };
 
   const { jobId } = await started.json();
   const deadline = Date.now() + timeoutMs;
   let status = null;
   while (Date.now() < deadline) {
-    const res = await client.fetch(`${client.baseUrl}/api/media/jobs/${jobId}/status`);
+    const res = await fetch(`${baseUrl}/api/media/jobs/${jobId}/status`);
     status = await res.json();
     if (status.status === "done" || status.status === "error") break;
     await new Promise((r) => setTimeout(r, 400));
@@ -65,18 +64,17 @@ async function uploadAndAwait(client, endpoint, filePath, fields = {}, { timeout
   return { jobId, status };
 }
 
-async function multipartPost(client, endpoint, filePath, fields) {
+async function multipartPost(baseUrl, endpoint, filePath, fields) {
   const form = new FormData();
   const bytes = await readFile(filePath);
   form.append("file", new Blob([bytes]), path.basename(filePath));
   for (const [k, v] of Object.entries(fields)) form.append(k, v);
-  return client.fetch(`${client.baseUrl}${endpoint}`, { method: "POST", body: form });
+  return fetch(`${baseUrl}${endpoint}`, { method: "POST", body: form });
 }
 
 describe("media API (real FFmpeg integration)", { skip: skipReason }, () => {
   let server;
   let fixtures;
-  let client;
 
   before(async () => {
     fixtures = await ensureFixtures(FFMPEG_PATH);
@@ -89,7 +87,6 @@ describe("media API (real FFmpeg integration)", { skip: skipReason }, () => {
       }
     }
     server = await startBackend({ FFMPEG_PATH });
-    client = makeClient(server.baseUrl, (await registerUser(server.baseUrl)).accessToken);
   });
 
   after(async () => {
@@ -97,8 +94,8 @@ describe("media API (real FFmpeg integration)", { skip: skipReason }, () => {
   });
 
   it("POST /api/media/extract-audio produces a valid MP3", async () => {
-    const { jobId, status } =   await uploadAndAwait(
-      client,
+    const { jobId, status } = await uploadAndAwait(
+      server.baseUrl,
       "/api/media/extract-audio",
       fixtures.small,
       { format: "mp3" }
@@ -106,7 +103,7 @@ describe("media API (real FFmpeg integration)", { skip: skipReason }, () => {
     assert.equal(status?.status, "done", JSON.stringify(status));
     assert.ok(status.progress > 0 && status.progress <= 1);
 
-    const dl = await client.fetch(`${client.baseUrl}/api/media/jobs/${jobId}/download`);
+    const dl = await fetch(`${server.baseUrl}/api/media/jobs/${jobId}/download`);
     assert.equal(dl.status, 200);
     assert.match(dl.headers.get("content-disposition") || "", /audio\.mp3/i);
     const blob = await dl.blob();
@@ -120,7 +117,7 @@ describe("media API (real FFmpeg integration)", { skip: skipReason }, () => {
   it("POST /api/media/extract-audio supports wav and m4a formats", async () => {
     for (const format of ["wav", "m4a"]) {
       const { jobId, status } = await uploadAndAwait(
-        client,
+        server.baseUrl,
         "/api/media/extract-audio",
         fixtures.small,
         { format }
@@ -128,7 +125,7 @@ describe("media API (real FFmpeg integration)", { skip: skipReason }, () => {
       assert.equal(status?.status, "done", `${format}: ${JSON.stringify(status)}`);
       assert.ok(status.outputSize > 1000);
       // Download so the job's temp files are reclaimed immediately.
-      const dl = await client.fetch(`${client.baseUrl}/api/media/jobs/${jobId}/download`);
+      const dl = await fetch(`${server.baseUrl}/api/media/jobs/${jobId}/download`);
       assert.equal(dl.status, 200);
     }
   });
@@ -139,7 +136,7 @@ describe("media API (real FFmpeg integration)", { skip: skipReason }, () => {
     async () => {
       const originalBytes = (await readFile(fixtures.large)).length;
       const { jobId, status } = await uploadAndAwait(
-        client,
+        server.baseUrl,
         "/api/media/compress-video",
         fixtures.large,
         { preset: "strong" },
@@ -155,7 +152,7 @@ describe("media API (real FFmpeg integration)", { skip: skipReason }, () => {
         path.basename(fixtures.large, ".mp4") + "-compressed.mp4"
       );
 
-      const dl = await client.fetch(`${client.baseUrl}/api/media/jobs/${jobId}/download`);
+      const dl = await fetch(`${server.baseUrl}/api/media/jobs/${jobId}/download`);
       assert.equal(dl.status, 200);
       const blob = await dl.blob();
       const boxType = Buffer.from(await blob.slice(4, 8).arrayBuffer()).toString("latin1");
@@ -167,13 +164,13 @@ describe("media API (real FFmpeg integration)", { skip: skipReason }, () => {
     "POST /api/media/convert-video mp4->webm yields an EBML/WebM file",
     async () => {
       const { jobId, status } = await uploadAndAwait(
-        client,
+        server.baseUrl,
         "/api/media/convert-video",
         fixtures.small,
         { target: "webm" }
       );
       assert.equal(status?.status, "done", JSON.stringify(status));
-      const dl = await client.fetch(`${client.baseUrl}/api/media/jobs/${jobId}/download`);
+      const dl = await fetch(`${server.baseUrl}/api/media/jobs/${jobId}/download`);
       assert.equal(dl.status, 200);
       assert.match(dl.headers.get("content-disposition") || "", /converted\.webm/i);
       const magic = Buffer.from(await (await dl.blob()).slice(0, 4).arrayBuffer());
@@ -182,7 +179,7 @@ describe("media API (real FFmpeg integration)", { skip: skipReason }, () => {
   );
 
   it("convert-video rejects same-format conversions with INVALID_CONVERSION", async () => {
-    const res = await multipartPost(client, "/api/media/convert-video", fixtures.small, {
+    const res = await multipartPost(server.baseUrl, "/api/media/convert-video", fixtures.small, {
       target: "mp4",
     });
     assert.equal(res.status, 400);
@@ -194,35 +191,35 @@ describe("media API (real FFmpeg integration)", { skip: skipReason }, () => {
     const txt = path.join(fixturesDir(), "not-video.txt");
     const { writeFile } = await import("node:fs/promises");
     await writeFile(txt, "plain text, definitely not a video");
-    const res = await multipartPost(client, "/api/media/compress-video", txt, {});
+    const res = await multipartPost(server.baseUrl, "/api/media/compress-video", txt, {});
     assert.equal(res.status, 415);
     const body = await res.json();
     assert.equal(body.code, "UNSUPPORTED_FILE_TYPE");
   });
 
   it("invalid option values get 400 without starting jobs", async () => {
-    const badFormat = await multipartPost(client, "/api/media/extract-audio", fixtures.small, {
+    const badFormat = await multipartPost(server.baseUrl, "/api/media/extract-audio", fixtures.small, {
       format: "flac",
     });
     assert.equal(badFormat.status, 400);
 
-    const missingFormat = await multipartPost(client, "/api/media/extract-audio", fixtures.small, {});
+    const missingFormat = await multipartPost(server.baseUrl, "/api/media/extract-audio", fixtures.small, {});
     assert.equal(missingFormat.status, 400);
 
-    const badPreset = await multipartPost(client, "/api/media/compress-video", fixtures.small, {
+    const badPreset = await multipartPost(server.baseUrl, "/api/media/compress-video", fixtures.small, {
       preset: "ultra",
     });
     assert.equal(badPreset.status, 400);
 
-    const badTarget = await multipartPost(client, "/api/media/convert-video", fixtures.small, {
+    const badTarget = await multipartPost(server.baseUrl, "/api/media/convert-video", fixtures.small, {
       target: "avi",
     });
     assert.equal(badTarget.status, 400);
   });
 
   it("corrupted video fails cleanly with PROCESSING_FAILED and no stderr leakage", async () => {
-    const { status } =   await uploadAndAwait(
-      client,
+    const { status } = await uploadAndAwait(
+      server.baseUrl,
       "/api/media/compress-video",
       fixtures.corrupted,
       { preset: "light" }
@@ -238,7 +235,7 @@ describe("media API (real FFmpeg integration)", { skip: skipReason }, () => {
   });
 
   it("unknown job ids return 404", async () => {
-    const res = await client.fetch(`${client.baseUrl}/api/media/jobs/nope/status`);
+    const res = await fetch(`${server.baseUrl}/api/media/jobs/nope/status`);
     assert.equal(res.status, 404);
   });
 
@@ -250,18 +247,18 @@ describe("media API (real FFmpeg integration)", { skip: skipReason }, () => {
       const bytes = await readFile(fixtures.large);
       form.append("file", new Blob([bytes]), "video-large-quality.mp4");
       form.append("preset", "medium");
-      const started = await client.fetch(`${client.baseUrl}/api/media/compress-video`, {
+      const started = await fetch(`${server.baseUrl}/api/media/compress-video`, {
         method: "POST",
         body: form,
       });
       assert.equal(started.status, 202);
       const { jobId } = await started.json();
 
-      const del = await client.fetch(`${client.baseUrl}/api/media/jobs/${jobId}`, { method: "DELETE" });
+      const del = await fetch(`${server.baseUrl}/api/media/jobs/${jobId}`, { method: "DELETE" });
       assert.equal(del.status, 200);
 
       await new Promise((r) => setTimeout(r, 1500));
-      const res = await client.fetch(`${client.baseUrl}/api/media/jobs/${jobId}/status`);
+      const res = await fetch(`${server.baseUrl}/api/media/jobs/${jobId}/status`);
       assert.equal(res.status, 404, "cancelled job must disappear immediately");
     }
   );
@@ -271,15 +268,15 @@ describe("media API (real FFmpeg integration)", { skip: skipReason }, () => {
     { timeout: 180000 },
     async () => {
       // success path
-      const okJob = await uploadAndAwait(client, "/api/media/extract-audio", fixtures.small, {
+      const okJob = await uploadAndAwait(server.baseUrl, "/api/media/extract-audio", fixtures.small, {
         format: "m4a",
       });
       assert.equal(okJob.status?.status, "done");
-      await client.fetch(`${client.baseUrl}/api/media/jobs/${okJob.jobId}/download`);
+      await fetch(`${server.baseUrl}/api/media/jobs/${okJob.jobId}/download`);
 
       // failure path
       const failJob = await uploadAndAwait(
-        client,
+        server.baseUrl,
         "/api/media/compress-video",
         fixtures.corrupted,
         {}
@@ -301,9 +298,8 @@ describe("media API limits", { skip: skipReason }, () => {
     async () => {
       const fixtures = await ensureFixtures(FFMPEG_PATH);
       const server = await startBackend({ FFMPEG_PATH, MAX_VIDEO_SIZE_MB: "1" });
-      const client = makeClient(server.baseUrl, (await registerUser(server.baseUrl)).accessToken);
       try {
-        const res = await multipartPost(client, "/api/media/compress-video", fixtures.large, {
+        const res = await multipartPost(server.baseUrl, "/api/media/compress-video", fixtures.large, {
           preset: "light",
         });
         assert.equal(res.status, 413);
@@ -321,10 +317,9 @@ describe("media API limits", { skip: skipReason }, () => {
     async () => {
       const fixtures = await ensureFixtures(FFMPEG_PATH);
       const server = await startBackend({ FFMPEG_PATH, FFMPEG_TIMEOUT_MS: "800" });
-      const client = makeClient(server.baseUrl, (await registerUser(server.baseUrl)).accessToken);
       try {
         const { status } = await uploadAndAwait(
-          client,
+          server.baseUrl,
           "/api/media/compress-video",
           fixtures.large,
           { preset: "strong" },
@@ -344,11 +339,10 @@ describe("media API limits", { skip: skipReason }, () => {
     async () => {
       const fixtures = await ensureFixtures(FFMPEG_PATH);
       const server = await startBackend({ FFMPEG_PATH, MEDIA_JOB_TTL_MINUTES: "0.05" });
-      const client = makeClient(server.baseUrl, (await registerUser(server.baseUrl)).accessToken);
       const beforeDirs = new Set(await mediaWorkDirs());
       try {
         const { jobId, status } = await uploadAndAwait(
-          client,
+          server.baseUrl,
           "/api/media/extract-audio",
           fixtures.small,
           { format: "mp3" }
@@ -356,12 +350,12 @@ describe("media API limits", { skip: skipReason }, () => {
         assert.equal(status?.status, "done");
 
         // TTL is 3s; the job must still be fetchable right away...
-        const immediate = await client.fetch(`${client.baseUrl}/api/media/jobs/${jobId}/status`);
+        const immediate = await fetch(`${server.baseUrl}/api/media/jobs/${jobId}/status`);
         assert.equal(immediate.status, 200);
 
         // ...and gone (with its files) shortly after the TTL.
         await new Promise((r) => setTimeout(r, 5000));
-        const after = await client.fetch(`${client.baseUrl}/api/media/jobs/${jobId}/status`);
+        const after = await fetch(`${server.baseUrl}/api/media/jobs/${jobId}/status`);
         assert.equal(after.status, 404);
         const afterDirs = await mediaWorkDirs();
         assert.equal(

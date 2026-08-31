@@ -1,6 +1,5 @@
 import { toNetworkError } from './apiError';
 import { API_BASE } from './apiBase';
-import { authedFetch, getAccessToken } from './authApi';
 
 console.log("[mediaApi] import.meta.env.VITE_API_URL =", import.meta.env.VITE_API_URL);
 
@@ -410,11 +409,6 @@ function startMediaJob(
     const xhr = new XMLHttpRequest();
     xhr.open('POST', `${API_BASE_URL}${endpoint}`);
     xhr.responseType = 'json';
-    xhr.withCredentials = true;
-    const token = getAccessToken();
-    if (token) {
-      xhr.setRequestHeader('Authorization', `Bearer ${token}`);
-    }
 
     xhr.upload.onprogress = (event) => {
       if (event.lengthComputable && onProgress) {
@@ -468,7 +462,7 @@ async function pollMediaJob(
 
     let response: Response;
     try {
-      response = await authedFetch(`${API_BASE_URL}/api/media/jobs/${encodeURIComponent(jobId)}/status`);
+      response = await fetch(`${API_BASE_URL}/api/media/jobs/${encodeURIComponent(jobId)}/status`);
     } catch (error) {
       throw toNetworkError(offlineMessage, error);
     }
@@ -511,7 +505,7 @@ async function fetchMediaResult(
 ): Promise<MediaResult> {
   let response: Response;
   try {
-    response = await authedFetch(`${API_BASE_URL}/api/media/jobs/${encodeURIComponent(jobId)}/download`);
+    response = await fetch(`${API_BASE_URL}/api/media/jobs/${encodeURIComponent(jobId)}/download`);
   } catch (error) {
     throw toNetworkError(offlineMessage, error);
   }
@@ -1114,7 +1108,7 @@ export async function transcribeAudioFile(
 
 export async function cancelMediaJob(jobId: string): Promise<boolean> {
   try {
-    const response = await authedFetch(
+    const response = await fetch(
       `${API_BASE_URL}/api/media/jobs/${encodeURIComponent(jobId)}`,
       { method: 'DELETE' }
     );

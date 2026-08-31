@@ -30,9 +30,7 @@ const ALLOWED_HEADERS = [
  * Single source of truth for which request origins are permitted.
  * - Local dev origins (exact match, always).
  * - Any origin from CORS_ORIGINS (comma-separated, exact match) when provided.
- * - Outside of production only: any *.vercel.app or *.railway.app hostname
- *   (preview/staging deploy domains). Production NEVER wildcard-matches these
- *   suffixes — it requires explicit trusted origins via CORS_ORIGINS.
+ * - Any *.vercel.app or *.railway.app hostname (production deploy domains).
  *
  * Origins are compared EXACTLY (never prefix/substring) so a spoofed origin
  * like `http://localhost:5173.evil.com` can never pass the allowlist.
@@ -49,17 +47,12 @@ function isOriginAllowed(origin: string | undefined): boolean {
     return true;
   }
 
-  const isProduction = process.env.NODE_ENV === "production";
-  if (!isProduction) {
-    try {
-      const host = new URL(origin).hostname;
-      return host.endsWith(".vercel.app") || host.endsWith(".railway.app");
-    } catch {
-      return false;
-    }
+  try {
+    const host = new URL(origin).hostname;
+    return host.endsWith(".vercel.app") || host.endsWith(".railway.app");
+  } catch {
+    return false;
   }
-
-  return false;
 }
 
 /** Express `cors` options shared by HTTP middleware. */
