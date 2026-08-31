@@ -842,8 +842,6 @@ const TOOL_CONFIGS: Record<OldToolId, { title: string; description: string; icon
 
 function PowerPointToolPage({ toolId }: { toolId: string }) {
   const navigate = useNavigate();
-  const [themeColor, setThemeColor] = useState('0D47A1');
-  const [font, setFont] = useState('Arial');
 
   const newToolConfigs: Record<NewToolId, { title: string; description: string; icon: JSX.Element }> = {
     'generate-ppt-text': {
@@ -888,7 +886,6 @@ function PowerPointToolPage({ toolId }: { toolId: string }) {
   const config = isNewTool
     ? newToolConfigs[toolId as NewToolId]
     : TOOL_CONFIGS[toolId as OldToolId];
-  const needsTheme = THEME_TOOL_IDS.includes(toolId as OldToolId);
 
   if (!config) {
     return (
@@ -900,55 +897,43 @@ function PowerPointToolPage({ toolId }: { toolId: string }) {
     );
   }
 
-  const toolComponents: Record<ToolId, JSX.Element> = {
-    'ppt-from-text': <GenerateFromText themeColor={themeColor} font={font} />,
-    'ppt-from-pdf': <GenerateFromPdf themeColor={themeColor} font={font} />,
-    'generate-ppt-text': <GeneratePptFromTextTool />,
-    'generate-ppt-pdf': <GeneratePptFromPdfTool />,
-    'merge-ppt': <MergePptTool />,
-    'split-ppt': <SplitPptTool />,
-    'compress-ppt': <CompressPptTool />,
-    'protect-ppt': <ProtectPptTool />,
-
-    'number-slides': <NumberSlidesTool />,
-  };
-
-    return (
-      <div className="max-w-4xl mx-auto space-y-6" dir="rtl">
-        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
-          <button
-            onClick={() => navigate('/category/powerpoint')}
-            className="flex items-center gap-2 text-gray-500 hover:text-primary-500 dark:text-gray-400 dark:hover:text-primary-400 transition-colors mb-6 group"
+  return (
+    <div className="max-w-4xl mx-auto space-y-6" dir="rtl">
+      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+        <button
+          onClick={() => navigate('/category/powerpoint')}
+          className="flex items-center gap-2 text-gray-500 hover:text-primary-500 dark:text-gray-400 dark:hover:text-primary-400 transition-colors mb-6 group"
+        >
+          <svg
+            className="w-5 h-5 transition-transform rotate-180 group-hover:translate-x-1"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
           >
-            <svg
-              className="w-5 h-5 transition-transform rotate-180 group-hover:translate-x-1"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 19l-7-7 7-7"
-              />
-            </svg>
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15 19l-7-7 7-7"
+            />
+          </svg>
 
-            <span className="text-sm font-medium">
-              العودة إلى أدوات PowerPoint
-            </span>
-          </button>
-        </motion.div>
-        {needsTheme && (
-          <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
-          <Card>
-            <ThemeOptions themeColor={themeColor} setThemeColor={setThemeColor} font={font} setFont={setFont} />
-          </Card>
-          </motion.div>
-        )}
-        <ToolHero icon={config.icon} title={config.title} description={config.description} />
+          <span className="text-sm font-medium">
+            العودة إلى أدوات PowerPoint
+          </span>
+        </button>
+      </motion.div>
+      <ToolHero icon={config.icon} title={config.title} description={config.description} />
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.1 }}>
-        <Card>{toolComponents[toolId as ToolId]}</Card>
+        <Card className="text-center py-16">
+          <div className="text-5xl mb-4">📊</div>
+          <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-2">
+            {'قريباً'}
+          </h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            {'هذه الأداة قيد التطوير.'}
+          </p>
+        </Card>
       </motion.div>
     </div>
   );
