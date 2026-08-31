@@ -47,7 +47,7 @@ export function SidebarCategory({
     typeof meta.icon === 'string'
       ? (iconMap[meta.icon as keyof typeof iconMap] || FileIcon)
       : meta.icon;
-  const isComingSoon = category !== 'engineering' && meta.comingSoon;
+  const isComingSoon = !['engineering', 'powerpoint'].includes(category) && meta.comingSoon;
   const isLocked = isComingSoon === true;
 
   const content = (

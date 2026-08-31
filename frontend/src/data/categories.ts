@@ -47,6 +47,7 @@ export const categories: Record<ToolCategory, CategoryMeta> = {
     name: 'أدوات الPowerPoint',
     icon: Presentation,
     description: 'إنشاء وتحرير وتحويل وتحسين عروض PowerPoint التقديمية',
+    comingSoon: true,
   },
   video: {
     name: 'أدوات الفيديو',
