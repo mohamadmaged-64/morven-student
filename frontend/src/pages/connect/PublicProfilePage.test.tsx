@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import PublicProfilePage from '@/pages/connect/PublicProfilePage';
@@ -13,6 +13,10 @@ import { getPublicProfile, getPublicAchievements } from '@/services/profileApi';
 
 const mockedGetPublicProfile = vi.mocked(getPublicProfile);
 const mockedGetPublicAchievements = vi.mocked(getPublicAchievements);
+
+beforeEach(() => {
+  vi.clearAllMocks();
+});
 
 const publicProfile: Profile = {
   id: 'p1',
@@ -78,7 +82,7 @@ describe('PublicProfilePage achievements', () => {
     expect(screen.queryByText('ممتاز! وصلت إلى 100 إنجاز!')).not.toBeInTheDocument();
   });
 
-  it('does not render the achievements section when total is zero', async () => {
+  it('renders the achievements card with an empty state when total is zero', async () => {
     mockedGetPublicProfile.mockResolvedValue({ profile: publicProfile });
     mockedGetPublicAchievements.mockResolvedValue({
       achievements: {
@@ -99,6 +103,39 @@ describe('PublicProfilePage achievements', () => {
     await waitFor(() => {
       expect(screen.getByText('أحمد محمد')).toBeInTheDocument();
     });
+    // The card must appear even with zero achievements, showing an empty state.
+    expect(screen.getByText('إنجازات')).toBeInTheDocument();
+    expect(screen.getByText('لا توجد إنجازات بعد')).toBeInTheDocument();
+    // Counter tiles should not be rendered when there is nothing to show.
     expect(screen.queryByText('مهمة مكتملة')).not.toBeInTheDocument();
+    expect(screen.queryByText('3')).not.toBeInTheDocument();
+  });
+
+  it('renders the achievements card with an empty state when the achievements fetch fails', async () => {
+    mockedGetPublicProfile.mockResolvedValue({ profile: publicProfile });
+    mockedGetPublicAchievements.mockRejectedValue(new Error('network'));
+
+    renderPage();
+
+    await waitFor(() => {
+      expect(screen.getByText('أحمد محمد')).toBeInTheDocument();
+    });
+    // Profile still renders, and the card degrades gracefully to an empty state.
+    expect(screen.getByText('إنجازات')).toBeInTheDocument();
+    expect(screen.getByText('لا توجد إنجازات بعد')).toBeInTheDocument();
+  });
+
+  it('does not render the achievements section for a private profile', async () => {
+    mockedGetPublicProfile.mockResolvedValue({
+      profile: { ...publicProfile, isPublic: false },
+    });
+
+    renderPage();
+
+    await waitFor(() => {
+      expect(screen.getByText('أحمد محمد')).toBeInTheDocument();
+    });
+    expect(screen.queryByText('إنجازات')).not.toBeInTheDocument();
+    expect(mockedGetPublicAchievements).not.toHaveBeenCalled();
   });
 });

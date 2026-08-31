@@ -24,6 +24,7 @@ export default function PublicProfilePage() {
   const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [achievements, setAchievements] = useState<AchievementCounters | null>(null);
+  const [achievementsLoaded, setAchievementsLoaded] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -34,6 +35,7 @@ export default function PublicProfilePage() {
       setLoading(true);
       setError(null);
       setAchievements(null);
+      setAchievementsLoaded(false);
       try {
         const { profile: p } = await getPublicProfile(username);
         if (cancelled) return;
@@ -41,9 +43,16 @@ export default function PublicProfilePage() {
         if (p.isPublic) {
           try {
             const { achievements: a } = await getPublicAchievements(username);
-            if (!cancelled) setAchievements(a);
+            if (!cancelled) {
+              setAchievements(a);
+              // Loaded successfully — even with zero achievements the card shows.
+              setAchievementsLoaded(true);
+            }
           } catch {
-            // achievements are optional — keep profile without them
+            // Achievements are optional: keep the public profile working, but
+            // mark that the card's data is unavailable so we can show a graceful
+            // empty state instead of silently hiding the card.
+            if (!cancelled) setAchievementsLoaded(true);
           }
         }
       } catch (err) {
@@ -123,8 +132,8 @@ export default function PublicProfilePage() {
         </Card>
       </motion.div>
 
-      {/* Achievements (public only) */}
-      {achievements && achievements.totalAchievements > 0 && (
+      {/* Achievements (public only — always shown, even with zero achievements) */}
+      {profile.isPublic && achievementsLoaded && (
         <motion.div {...fadeUp} className="mt-6">
           <Card padding="lg" className="relative overflow-hidden">
             <div className="mb-6 flex items-center justify-center relative">
@@ -137,16 +146,17 @@ export default function PublicProfilePage() {
             </div>
             <AchievementMetricsGrid
               counts={{
-                completedTasks: achievements.completedTasks,
-                cardsReviewed: achievements.cardsReviewed,
-                completedSessions: achievements.completedSessions,
-                meaningfulNotes: achievements.meaningfulNotes,
-                files: achievements.files,
-                flashcards: achievements.flashcards,
-                quizzesCompleted: achievements.quizzesCompleted,
+                completedTasks: achievements?.completedTasks ?? 0,
+                cardsReviewed: achievements?.cardsReviewed ?? 0,
+                completedSessions: achievements?.completedSessions ?? 0,
+                meaningfulNotes: achievements?.meaningfulNotes ?? 0,
+                files: achievements?.files ?? 0,
+                flashcards: achievements?.flashcards ?? 0,
+                quizzesCompleted: achievements?.quizzesCompleted ?? 0,
               }}
-              total={achievements.totalAchievements}
+              total={achievements?.totalAchievements ?? 0}
               showMilestoneMessage={false}
+              emptyLabel={'لا توجد إنجازات بعد'}
             />
           </Card>
         </motion.div>

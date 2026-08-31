@@ -10,6 +10,8 @@ interface Props {
   counts: AchievementMetricCounts;
   total?: number;
   showMilestoneMessage?: boolean;
+  /** Renders an empty-state block when there are no achievements yet. */
+  emptyLabel?: string;
 }
 
 /**
@@ -21,11 +23,21 @@ export default function AchievementMetricsGrid({
   counts,
   total,
   showMilestoneMessage = true,
+  emptyLabel,
 }: Props) {
   const resolvedTotal = total ?? computeAchievementTotal(counts);
   const hasAny = resolvedTotal > 0;
 
-  if (!hasAny) return null;
+  if (!hasAny) {
+    if (emptyLabel) {
+      return (
+        <div className="flex items-center justify-center rounded-2xl bg-gray-50 dark:bg-dark-surface px-4 py-6">
+          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{emptyLabel}</p>
+        </div>
+      );
+    }
+    return null;
+  }
 
   return (
     <div className="w-full flex flex-col">
