@@ -81,6 +81,11 @@ export function connectSocket(): Socket {
   });
 
   socket.on('connect', () => {
+    // Presence is app-wide ("online while the socket is connected"), not tied
+    // to a specific group room: keep heartbeating for the whole session so the
+    // user stays in the online presence snapshot of every group they belong to
+    // (the Focusing indicator only renders for online presence members).
+    startHeartbeat();
     if (currentGroupId) {
       socket?.emit('join-group', { groupId: currentGroupId });
     }
@@ -157,7 +162,6 @@ export function joinGroup(groupId: string) {
 
   currentGroupId = groupId;
   socket?.emit('join-group', { groupId });
-  startHeartbeat(groupId);
 }
 
 export function leaveGroup(groupId: string) {
@@ -175,7 +179,6 @@ export function leaveGroup(groupId: string) {
   socket?.emit('leave-group', { groupId });
   if (currentGroupId === groupId) {
     currentGroupId = null;
-    stopHeartbeat();
   }
 }
 
@@ -215,10 +218,10 @@ export function onFocusing(callback: FocusingCallback) {
   onFocusingUpdate = callback;
 }
 
-function startHeartbeat(groupId: string) {
+function startHeartbeat() {
   stopHeartbeat();
   heartbeatInterval = setInterval(() => {
-    socket?.emit('heartbeat', { groupId });
+    socket?.emit('heartbeat', { groupId: currentGroupId ?? undefined });
   }, 15_000);
 }
 
