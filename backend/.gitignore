@@ -10,3 +10,8 @@ tests/.fixtures/
 uploads/
 test-debug.log
 dbg-subject.png
+
+# Committed debug/test artifacts (removed — keep ignored going forward)
+.tmp-verify.cjs
+dev-server.err.log
+dev-server.out.log

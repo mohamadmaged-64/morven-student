@@ -130,8 +130,8 @@ export default function App() {
           <Route path="/connect/profile/:username" element={<PublicProfilePage />} />
           <Route path="/connect/groups" element={<ProtectedRoute><GroupsPage /></ProtectedRoute>} />
           <Route path="/connect/groups/:groupId" element={<ProtectedRoute><GroupDetailPage /></ProtectedRoute>} />
-          <Route path="/connect/resources" element={<ResourcesPage />} />
-          <Route path="/connect/resources/:resourceId" element={<ResourceDetailPage />} />
+          <Route path="/connect/resources" element={<ProtectedRoute><ResourcesPage /></ProtectedRoute>} />
+          <Route path="/connect/resources/:resourceId" element={<ProtectedRoute><ResourceDetailPage /></ProtectedRoute>} />
 
           {/* Admin (ADMIN role only) */}
           <Route path="/admin/users" element={<AdminRoute><AdminUsersPage /></AdminRoute>} />

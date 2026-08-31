@@ -70,25 +70,102 @@ export function getAccessToken(): string | null {
   return ((globalThis as Record<string, unknown>).__morven_access_token as string) || null;
 }
 
+// ---------------------------------------------------------------------------
+// Centralized 401 handling (H1)
+//
+// Access tokens are short-lived (15m) and stored only in memory. Every
+// authenticated request must go through `authedFetch`, which transparently
+// refreshes the access token (single-flight) and retries the original request
+// once when it gets a 401 from an expired/invalid token. This keeps long
+// sessions alive without a full page reload.
+// ---------------------------------------------------------------------------
+
+let tokenRotationHandler: (() => void) | null = null;
+
+/** Register a callback fired whenever the access token is rotated (via refresh). */
+export function setTokenRotationHandler(handler: (() => void) | null): void {
+  tokenRotationHandler = handler;
+}
+
+function notifyTokenRotated(): void {
+  tokenRotationHandler?.();
+}
+
+// Single-flight: only one refresh is ever in flight at a time. Concurrent 401s
+// share the same refresh instead of spamming /api/auth/refresh.
+let refreshPromise: Promise<boolean> | null = null;
+
+/** Refreshes the access token once (single-flight). Resolves true if a fresh token is now available. */
+function refreshAccessTokenSingleFlight(): Promise<boolean> {
+  if (!refreshPromise) {
+    refreshPromise = refresh()
+      .then(() => {
+        notifyTokenRotated();
+        return true;
+      })
+      .catch(() => {
+        setAccessToken(null);
+        return false;
+      })
+      .finally(() => {
+        refreshPromise = null;
+      });
+  }
+  return refreshPromise;
+}
+
+/**
+ * Public wrapper for external consumers (e.g. the Socket.IO service) that need
+ * a fresh access token on demand. Single-flight across all callers.
+ */
+export function refreshTokenIfNeeded(): Promise<boolean> {
+  return refreshAccessTokenSingleFlight();
+}
+
+function buildAuthHeaders(existing: HeadersInit | undefined): Headers {
+  const headers = new Headers(existing || {});
+  const token = getAccessToken();
+  if (token && !headers.has('Authorization')) {
+    headers.set('Authorization', `Bearer ${token}`);
+  }
+  return headers;
+}
+
+/**
+ * Authenticated fetch with automatic 401 handling. On a 401 from an expired
+ * access token it performs a single-flight token refresh and retries once.
+ * Safe for multipart (FormData) bodies, which are reusable on retry.
+ */
+export async function authedFetch(
+  input: RequestInfo | URL,
+  init: RequestInit = {},
+): Promise<Response> {
+  const perform = (): Promise<Response> =>
+    fetch(input, {
+      ...init,
+      credentials: 'include',
+      headers: buildAuthHeaders(init.headers),
+    });
+
+  let res = await perform();
+  if (res.status === 401) {
+    const refreshed = await refreshAccessTokenSingleFlight();
+    if (refreshed) {
+      res = await perform();
+    }
+  }
+  return res;
+}
+
 export async function authRequest<T>(
   path: string,
   options: RequestInit = {},
 ): Promise<T> {
-  const token = getAccessToken();
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-    ...(options.headers as Record<string, string>),
-  };
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
+  const headers = new Headers(options.headers || {});
+  if (!headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json');
   }
-
-  const res = await fetch(`${API_BASE}${path}`, {
-    ...options,
-    credentials: 'include',
-    headers,
-  });
-
+  const res = await authedFetch(`${API_BASE}${path}`, { ...options, headers });
   const data = await res.json();
 
   if (!res.ok) {

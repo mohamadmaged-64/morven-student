@@ -1,5 +1,5 @@
 import { io, Socket } from 'socket.io-client';
-import { getAccessToken } from './authApi';
+import { getAccessToken, refreshTokenIfNeeded, setTokenRotationHandler } from './authApi';
 import { isPreviewMode } from '@/dev/previewMode';
 import { API_BASE } from './apiBase';
 
@@ -80,6 +80,14 @@ export function connectSocket(): Socket {
     tryAllTransports: true,
   });
 
+  // M2: keep the socket handshake token in sync with the (rotating) access
+  // token so automatic reconnections after a refresh never send a stale token.
+  setTokenRotationHandler(() => {
+    if (socket) {
+      socket.auth = { ...socket.auth, token: getAccessToken() };
+    }
+  });
+
   socket.on('connect', () => {
     // Presence is app-wide ("online while the socket is connected"), not tied
     // to a specific group room: keep heartbeating for the whole session so the
@@ -123,6 +131,19 @@ export function connectSocket(): Socket {
 
   socket.on('disconnect', () => {
     stopHeartbeat();
+  });
+
+  // M2: if the handshake was rejected because the access token expired while
+  // the socket was disconnected, refresh it (single-flight) and update the
+  // socket's auth so the next automatic reconnect uses a valid token.
+  socket.on('connect_error', (err) => {
+    if (socket && /invalid token|authentication required/i.test(err.message)) {
+      void refreshTokenIfNeeded().then((ok) => {
+        if (ok && socket) {
+          socket.auth = { ...socket.auth, token: getAccessToken() };
+        }
+      });
+    }
   });
 
   return socket;

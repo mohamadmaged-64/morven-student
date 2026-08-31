@@ -28,17 +28,22 @@ const ALLOWED_HEADERS = [
 
 /**
  * Single source of truth for which request origins are permitted.
- * - Local dev origins (always).
- * - Any origin from CORS_ORIGINS (comma-separated) when provided.
+ * - Local dev origins (exact match, always).
+ * - Any origin from CORS_ORIGINS (comma-separated, exact match) when provided.
  * - Any *.vercel.app or *.railway.app hostname (production deploy domains).
+ *
+ * Origins are compared EXACTLY (never prefix/substring) so a spoofed origin
+ * like `http://localhost:5173.evil.com` can never pass the allowlist.
  */
 function isOriginAllowed(origin: string | undefined): boolean {
   if (!origin) return true;
 
-  const envOrigins =
-    process.env.CORS_ORIGINS?.split(",").map((o) => o.trim()).filter(Boolean) ?? [];
+  const normalize = (o: string): string => o.replace(/\/+$/, "");
 
-  if ([...LOCAL_ORIGINS, ...envOrigins].some((o) => origin.startsWith(o))) {
+  const envOrigins =
+    process.env.CORS_ORIGINS?.split(",").map((o) => normalize(o.trim())).filter(Boolean) ?? [];
+
+  if ([...LOCAL_ORIGINS.map(normalize), ...envOrigins].includes(normalize(origin))) {
     return true;
   }
 

@@ -66,8 +66,10 @@ function recompute(state: NotificationState, notifications: Notification[]): Par
 }
 
 export const useNotificationStore = create<NotificationState>((set, get) => ({
-  notifications: MOCK_NOTIFICATIONS,
-  unreadCount: MOCK_NOTIFICATIONS.filter((n) => !n.read).length,
+  // M5: no hardcoded mock data in production — start empty. The demo mocks are
+  // only seeded for the dev-only preview mode.
+  notifications: isPreviewMode() ? MOCK_NOTIFICATIONS : [],
+  unreadCount: isPreviewMode() ? MOCK_NOTIFICATIONS.filter((n) => !n.read).length : 0,
   loading: false,
 
   addNotification: (n) => {

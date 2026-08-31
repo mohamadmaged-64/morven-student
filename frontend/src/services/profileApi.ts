@@ -1,4 +1,4 @@
-import { authRequest, getAccessToken } from './authApi';
+import { authRequest, authedFetch } from './authApi';
 import { API_BASE } from './apiBase';
 import { isPreviewMode } from '@/dev/previewMode';
 import {
@@ -8,11 +8,6 @@ import {
   mockGetPublicAchievements,
   mockSyncAchievements,
 } from '@/dev/mockApi';
-
-function authHeaders(): Record<string, string> {
-  const token = getAccessToken();
-  return token ? { Authorization: `Bearer ${token}` } : {};
-}
 
 export interface Profile {
   id: string;
@@ -72,13 +67,13 @@ export async function updateOwnProfile(data: {
 export async function uploadAvatar(file: File): Promise<{ avatarUrl: string }> {
   const fd = new FormData();
   fd.append('avatar', file);
-  const res = await fetch(`${API_BASE}/api/profile/avatar`, { method: 'POST', headers: authHeaders(), body: fd, credentials: 'include' });
+  const res = await authedFetch(`${API_BASE}/api/profile/avatar`, { method: 'POST', body: fd });
   if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || 'حدث خطأ'); }
   return res.json();
 }
 
 export async function removeAvatar(): Promise<{ message: string }> {
-  const res = await fetch(`${API_BASE}/api/profile/avatar`, { method: 'DELETE', headers: authHeaders(), credentials: 'include' });
+  const res = await authedFetch(`${API_BASE}/api/profile/avatar`, { method: 'DELETE' });
   if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || 'حدث خطأ'); }
   return res.json();
 }

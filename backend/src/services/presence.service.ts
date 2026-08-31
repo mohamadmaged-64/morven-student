@@ -185,9 +185,23 @@ export function setupSocketIO(httpServer: HTTPServer) {
     }
 
     // Join a group — updates this group's presence list to reflect ALL online
-    // members (membership-based, cross-group).
+    // members (membership-based, cross-group). Only actual members may join a
+    // group's presence room (M1): joining leaks that group's who-is-online /
+    // focusing / leaderboard broadcasts to anyone.
     socket.on("join-group", async ({ groupId }: { groupId: string }) => {
       if (!groupId || typeof groupId !== "string") return;
+
+      const membership = await prisma.groupMember.findUnique({
+        where: { groupId_userId: { groupId, userId } },
+        select: { id: true },
+      });
+      if (!membership) {
+        socket.emit("join-group-error", {
+          groupId,
+          error: "ليس لديك صلاحية للانضمام لهذه المجموعة",
+        });
+        return;
+      }
 
       socket.join(`group:${groupId}`);
 

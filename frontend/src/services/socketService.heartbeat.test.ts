@@ -38,6 +38,8 @@ vi.mock('./apiBase', () => ({
 }));
 vi.mock('./authApi', () => ({
   getAccessToken: () => state.token,
+  setTokenRotationHandler: () => {},
+  refreshTokenIfNeeded: () => Promise.resolve(true),
 }));
 vi.mock('@/dev/previewMode', () => ({
   isPreviewMode: () => false,

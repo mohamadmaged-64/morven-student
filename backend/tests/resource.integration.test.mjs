@@ -229,4 +229,48 @@ describe("Phase 2 - Resource authorization", () => {
     const res = await fetch(`${server.baseUrl}/api/resources`);
     assert.equal(res.status, 401);
   });
+
+  it("rejects dangerous/executable upload types (H2) and blocks direct serving", async () => {
+    const owner = await register(server.baseUrl, "h2owner");
+    const authOf = (token) => ({ Authorization: `Bearer ${token}` });
+
+    const createRes = await fetch(`${server.baseUrl}/api/resources`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...authOf(owner.accessToken) },
+      body: JSON.stringify({ title: "H2 file guard", description: "x", type: "note" }),
+    });
+    assert.equal(createRes.status, 201);
+    const resourceId = (await createRes.json()).resource.id;
+
+    // Denied types: even with a spoofed safe MIME, the extension blocks them.
+    const blockedCases = [
+      ["evil.html", "text/html"],
+      ["evil.svg", "image/svg+xml"],
+      ["evil.js", "text/javascript"],
+      ["payload.pdf.html", "application/pdf"],
+    ];
+
+    for (const [fileName, mime] of blockedCases) {
+      const fd = new FormData();
+      fd.append("files", new Blob(["<script>alert(1)</script>"], { type: mime }), fileName);
+      const res = await withTimeout(15000, fetch(
+        `${server.baseUrl}/api/resources/${resourceId}/files`,
+        { method: "POST", headers: authOf(owner.accessToken), body: fd },
+      ));
+      assert.equal(res.status, 422, `${fileName} should be rejected`);
+    }
+
+    // Allowed type still uploads (sanity that the allowlist didn't break legit files).
+    const ok = new FormData();
+    ok.append("files", new Blob(["safe file"], { type: "text/plain" }), "safe.txt");
+    const okRes = await fetch(
+      `${server.baseUrl}/api/resources/${resourceId}/files`,
+      { method: "POST", headers: authOf(owner.accessToken), body: ok },
+    );
+    assert.equal(okRes.status, 201, "allowed text/plain upload should succeed");
+
+    // The dedicated resource dir is never served via the public static mount.
+    const direct = await fetch(`${server.baseUrl}/uploads/resources/somefile.txt`);
+    assert.equal(direct.status, 404, "/uploads/resources must not be publicly served");
+  });
 });

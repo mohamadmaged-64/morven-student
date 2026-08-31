@@ -26,7 +26,7 @@ import { uploadResource } from "../middleware/uploadResource";
 
 const router = Router();
 
-const UPLOADS_DIR = path.resolve(__dirname, "..", "..", "uploads");
+const UPLOADS_DIR = path.resolve(__dirname, "..", "..", "uploads", "resources");
 
 function handleResourceError(err: unknown, res: Response): void {
   if (err instanceof ResourceError) {

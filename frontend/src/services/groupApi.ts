@@ -1,4 +1,4 @@
-import { authRequest, getAccessToken } from './authApi';
+import { authRequest, authedFetch } from './authApi';
 import { API_BASE } from './apiBase';
 import { isPreviewMode } from '@/dev/previewMode';
 import {
@@ -14,11 +14,6 @@ import {
   mockSubmitPomodoroSession,
   mockGetGroupLeaderboard,
 } from '@/dev/mockApi';
-
-function authHeaders(): Record<string, string> {
-  const token = getAccessToken();
-  return token ? { Authorization: `Bearer ${token}` } : {};
-}
 
 export interface Group {
   id: string;
@@ -62,7 +57,7 @@ export async function createGroup(data: { name: string; description?: string; im
     fd.append('name', data.name);
     if (data.description) fd.append('description', data.description);
     fd.append('image', data.image);
-    const res = await fetch(`${API_BASE}/api/groups`, { method: 'POST', headers: authHeaders(), body: fd, credentials: 'include' });
+    const res = await authedFetch(`${API_BASE}/api/groups`, { method: 'POST', body: fd });
     if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || 'حدث خطأ'); }
     return res.json();
   }
@@ -82,7 +77,7 @@ export async function updateGroup(groupId: string, data: { name?: string; descri
     if (data.description !== undefined) fd.append('description', data.description);
     if (data.image) fd.append('image', data.image);
     if (data.removeImage) fd.append('removeImage', 'true');
-    const res = await fetch(`${API_BASE}/api/groups/${groupId}`, { method: 'PATCH', headers: authHeaders(), body: fd, credentials: 'include' });
+    const res = await authedFetch(`${API_BASE}/api/groups/${groupId}`, { method: 'PATCH', body: fd });
     if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || 'حدث خطأ'); }
     return res.json();
   }

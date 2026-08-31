@@ -28,13 +28,34 @@ const app = express();
 // Request chain in production:  browser -> Vercel edge -> Railway ingress -> app.
 // Express must trust both hops so req.ip (used by the rate limiters) is the
 // real client IP instead of a shared proxy/Vercel edge IP.
-app.set("trust proxy", 2);
+//
+// Configurable via environment:
+//   - TRUST_PROXY_HOPS=<n>    number of trusted reverse-proxy hops (default 2)
+//   - TRUST_PROXY=false       disable trust entirely (e.g. direct local dev)
+const trustProxySetting: boolean | number = (() => {
+  if (process.env.TRUST_PROXY === "false") return false;
+  const raw = process.env.TRUST_PROXY_HOPS;
+  if (raw !== undefined) {
+    const n = Number(raw);
+    if (Number.isInteger(n) && n >= 0) return n;
+  }
+  return 2;
+})();
+app.set("trust proxy", trustProxySetting);
 
 // ---------------------------------------------------------------------------
 // Static file serving for uploads
 // ---------------------------------------------------------------------------
 const UPLOADS_DIR = path.resolve(__dirname, "..", "uploads");
 try { fs.mkdirSync(UPLOADS_DIR, { recursive: true }); } catch { /* ignore */ }
+
+// Resource files live under `uploads/resources` and must NEVER be reachable
+// through the public static mount (they are served only via the authenticated
+// download endpoint). Block the sub-path before the static middleware so it
+// cannot be fetched unauthenticated.
+app.use("/uploads/resources", (_req, res) => {
+  res.status(404).json({ error: "Not found" });
+});
 app.use("/uploads", express.static(UPLOADS_DIR, { maxAge: "30d", immutable: true }));
 
 // ---------------------------------------------------------------------------

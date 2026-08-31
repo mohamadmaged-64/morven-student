@@ -1,11 +1,6 @@
-import { authRequest, getAccessToken } from './authApi';
+import { authRequest, authedFetch } from './authApi';
 import { API_BASE } from './apiBase';
 import type { ResourceType } from '@/data/resources';
-
-function authHeaders(): Record<string, string> {
-  const token = getAccessToken();
-  return token ? { Authorization: `Bearer ${token}` } : {};
-}
 
 // ---------------------------------------------------------------------------
 // Types (mirror of the backend Resource API response shapes)
@@ -132,12 +127,10 @@ export async function uploadResourceFiles(
     fd.append('files', file);
   }
 
-  const res = await fetch(`${API_BASE}/api/resources/${encodeURIComponent(resourceId)}/files`, {
-    method: 'POST',
-    headers: authHeaders(),
-    body: fd,
-    credentials: 'include',
-  });
+  const res = await authedFetch(
+    `${API_BASE}/api/resources/${encodeURIComponent(resourceId)}/files`,
+    { method: 'POST', body: fd },
+  );
   const { files: uploaded } = await unwrapResponse<{ files: ApiResourceFile[] }>(res);
   return uploaded;
 }
@@ -150,9 +143,9 @@ export async function deleteResourceFileApi(resourceId: string, fileId: string):
 }
 
 export async function downloadResourceFile(resourceId: string, fileId: string, filename: string): Promise<void> {
-  const res = await fetch(
+  const res = await authedFetch(
     `${API_BASE}/api/resources/${encodeURIComponent(resourceId)}/files/${encodeURIComponent(fileId)}/download`,
-    { headers: authHeaders(), credentials: 'include' },
+    { method: 'GET' },
   );
   if (!res.ok) {
     let message = `حدث خطأ (${res.status})`;

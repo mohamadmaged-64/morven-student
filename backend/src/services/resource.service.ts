@@ -32,7 +32,7 @@ export const addLinkSchema = z.object({
   url: z.string().min(1, "عنوان الرابط مطلوب").max(2000, "الرابط طويل جداً").trim(),
 });
 
-const UPLOADS_DIR = path.resolve(__dirname, "..", "..", "uploads");
+const UPLOADS_DIR = path.resolve(__dirname, "..", "..", "uploads", "resources");
 
 function absolutePath(filename: string): string {
   return path.join(UPLOADS_DIR, path.basename(filename));

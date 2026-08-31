@@ -273,6 +273,38 @@ describe("Phase 5 - Socket.IO Presence", () => {
         setTimeout(() => { client1.close(); client2.close(); if (!isolated) reject(new Error("isolation timeout")); }, 7000);
       });
     });
+
+    it("rejects join-group for a user who is not a member of that group (M1)", async () => {
+      const ts = Date.now();
+      // User A owns a group; user B is NOT a member.
+      const regA = await registerUser(baseUrl, `m1a-${ts}`);
+      const regB = await registerUser(baseUrl, `m1b-${ts}`);
+      const { group } = await createGroup(baseUrl, regA.accessToken, "M1 Check");
+
+      const clientB = createClient(regB.accessToken);
+
+      await new Promise((resolve, reject) => {
+        clientB.on("connect", () => {
+          clientB.emit("join-group", { groupId: group.id });
+        });
+
+        clientB.on("join-group-error", (data) => {
+          assert.equal(data.groupId, group.id);
+          assert.ok(data.error && data.error.length > 0);
+          clientB.close();
+          resolve();
+        });
+
+        clientB.on("group-presence-update", () => {
+          // Should never receive presence for a group the user isn't in.
+          clientB.close();
+          reject(new Error("unauthorized user received group presence"));
+        });
+
+        clientB.on("connect_error", reject);
+        setTimeout(() => { clientB.close(); reject(new Error("join-group-error timeout")); }, 5000);
+      });
+    });
   });
 });
 
