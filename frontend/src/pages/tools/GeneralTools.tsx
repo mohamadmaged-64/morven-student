@@ -16,8 +16,9 @@ import {
 } from '@/components/UI';
 import { getToolById } from '@/data/tools';
 import { useAppStore } from '@/store/useAppStore';
-import { usePomodoroStore, type PomodoroMode, type PomodoroSettings, type PomodoroTheme } from '@/store/usePomodoroStore';
+import { usePomodoroStore, type PomodoroMode, type PomodoroSettings, type PomodoroTheme, type TimerMode } from '@/store/usePomodoroStore';
 import { SegmentTimeDisplay } from '@/components/Pomodoro/SevenSegment';
+import { formatClock, hasClockHours } from '@/components/Pomodoro/formatTime';
 import { useFullscreen } from '@/components/Pomodoro/useFullscreen';
 import natureBackground from '@/assets/nature-focus.webp';
 import type { Task, ExamCountdown } from '@/types';
@@ -160,6 +161,7 @@ function PomodoroTimer() {
   const mode = usePomodoroStore((s) => s.mode);
   const timeRemaining = usePomodoroStore((s) => s.timeRemaining);
   const isRunning = usePomodoroStore((s) => s.isRunning);
+  const isPaused = usePomodoroStore((s) => s.isPaused);
   const currentSession = usePomodoroStore((s) => s.currentSession);
   const completedSessions = usePomodoroStore((s) => s.completedSessions);
   const totalFocusSeconds = usePomodoroStore((s) => s.totalFocusSeconds);
@@ -176,6 +178,7 @@ function PomodoroTimer() {
   const currentMode = mode;
   // Theme is presentation-only: it never touches the timer state machine.
   const displayTheme: PomodoroTheme = settings.theme ?? 'classic';
+  const isCountUp = settings.timerMode === 'countup';
   const totalDuration = currentMode === 'focus' ? settings.focusDuration * 60 : currentMode === 'break' ? settings.breakDuration * 60 : settings.longBreakDuration * 60;
 
   const handleSaveSettings = (newSettings: PomodoroSettings) => {
@@ -214,7 +217,7 @@ function PomodoroTimer() {
       if (e.code === 'Space') {
         e.preventDefault();
         if (isRunning) pause();
-        else if (timeRemaining > 0 && timeRemaining < totalDuration) resume();
+        else if (isPaused && timeRemaining > 0) resume();
         else start();
       } else if (e.code === 'KeyF') {
         if (immersive) closeImmersive();
@@ -233,8 +236,8 @@ function PomodoroTimer() {
   }, [
     showSettings,
     isRunning,
+    isPaused,
     timeRemaining,
-    totalDuration,
     immersive,
     start,
     pause,
@@ -258,9 +261,9 @@ function PomodoroTimer() {
     }
   }, [fullscreen.isFullscreen]);
 
-  const minutes = Math.floor(timeRemaining / 60);
-  const seconds = timeRemaining % 60;
-  const progress = totalDuration > 0 ? ((totalDuration - timeRemaining) / totalDuration) * 100 : 0;
+  const showHours = hasClockHours(timeRemaining);
+  // Count Up has no target duration, so its progress area stays empty (0%).
+  const progress = isCountUp ? 0 : totalDuration > 0 ? ((totalDuration - timeRemaining) / totalDuration) * 100 : 0;
   const modeColor = modeColors[currentMode];
   const circumference = 2 * Math.PI * 120;
   const strokeDashoffset = circumference - (progress / 100) * circumference;
@@ -330,8 +333,8 @@ function PomodoroTimer() {
                 </motion.span>
               </AnimatePresence>
 
-              <span className="text-5xl md:text-6xl font-bold text-gray-800 dark:text-white font-mono tabular-nums">
-                {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
+              <span className={`font-bold text-gray-800 dark:text-white font-mono tabular-nums ${showHours ? 'text-2xl md:text-3xl' : 'text-5xl md:text-6xl'}`}>
+                {formatClock(timeRemaining)}
               </span>
 
               <span className="text-xs text-gray-400 dark:text-gray-500 mt-2">
@@ -444,8 +447,8 @@ function PomodoroTimer() {
                       {modeLabel}
                     </motion.span>
                   </AnimatePresence>
-                  <span className="text-5xl md:text-6xl font-bold text-white font-mono tabular-nums drop-shadow-lg">
-                    {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
+                  <span className={`font-bold text-white font-mono tabular-nums drop-shadow-lg ${showHours ? 'text-2xl md:text-3xl' : 'text-5xl md:text-6xl'}`}>
+                    {formatClock(timeRemaining)}
                   </span>
                   <span className="text-xs text-white/70 mt-2 tabular-nums">
                     {`الجلسة ${Math.min(currentSession + 1, settings.sessionsUntilLongBreak)} من ${settings.sessionsUntilLongBreak}`}
@@ -479,7 +482,7 @@ function PomodoroTimer() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
       >
-        {!isRunning && timeRemaining === totalDuration && (
+        {!isRunning && !isPaused && (
           <Button size="lg" onClick={start}>
             {'ابدأ'}
           </Button>
@@ -489,7 +492,7 @@ function PomodoroTimer() {
             {'إيقاف مؤقت'}
           </Button>
         )}
-        {!isRunning && timeRemaining < totalDuration && timeRemaining > 0 && (
+        {!isRunning && isPaused && timeRemaining > 0 && (
           <Button size="lg" onClick={resume}>
             {'استئناف'}
           </Button>
@@ -582,7 +585,7 @@ function PomodoroTimer() {
 
                 {/* Small timer controls under the numbers */}
                 <div className="mt-6 flex flex-wrap items-center justify-center gap-2 absolute left-0 right-0 bottom-40">
-                  {!isRunning && timeRemaining === totalDuration && (
+                  {!isRunning && !isPaused && (
                     <button
                       type="button"
                       onClick={start}
@@ -600,7 +603,7 @@ function PomodoroTimer() {
                       {'إيقاف مؤقت'}
                     </button>
                   )}
-                  {!isRunning && timeRemaining < totalDuration && timeRemaining > 0 && (
+                  {!isRunning && isPaused && timeRemaining > 0 && (
                     <button
                       type="button"
                       onClick={resume}
@@ -651,8 +654,8 @@ function PomodoroTimer() {
                       />
                     </svg>
                     <div className="absolute inset-4 rounded-full bg-black/35 backdrop-blur-sm flex items-center justify-center">
-                      <span className="text-6xl md:text-7xl font-bold text-white font-mono tabular-nums drop-shadow-lg">
-                        {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
+                      <span className={`font-bold text-white font-mono tabular-nums drop-shadow-lg ${showHours ? 'text-3xl md:text-4xl' : 'text-6xl md:text-7xl'}`}>
+                        {formatClock(timeRemaining)}
                       </span>
                     </div>
                   </div>
@@ -660,7 +663,7 @@ function PomodoroTimer() {
 
                 {/* Same small timer controls as the digital mode */}
                 <div className="absolute left-0 right-0 bottom-40 flex flex-wrap items-center justify-center gap-2">
-                  {!isRunning && timeRemaining === totalDuration && (
+                  {!isRunning && !isPaused && (
                     <button
                       type="button"
                       onClick={start}
@@ -678,7 +681,7 @@ function PomodoroTimer() {
                       {'إيقاف مؤقت'}
                     </button>
                   )}
-                  {!isRunning && timeRemaining < totalDuration && timeRemaining > 0 && (
+                  {!isRunning && isPaused && timeRemaining > 0 && (
                     <button
                       type="button"
                       onClick={resume}
@@ -830,6 +833,16 @@ function PomodoroSettingsModal({
             })}
           </div>
         </div>
+
+        <Select
+          label={'وضع المؤقت'}
+          value={local.timerMode}
+          options={[
+            { value: 'countdown', label: 'عد تنازلي' },
+            { value: 'countup', label: 'عد تصاعدي' },
+          ]}
+          onChange={e => setLocal(p => ({ ...p, timerMode: e.target.value as TimerMode }))}
+        />
 
         <Input
           label={'مدة التركيز (دقائق)'}

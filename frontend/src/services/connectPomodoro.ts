@@ -119,7 +119,9 @@ let lastFocusing = false;
 
 export async function submitSessionToAllGroups(state: ReturnType<typeof usePomodoroStore.getState>) {
   const settings = state.settings;
-  const durationSeconds = settings.focusDuration * 60;
+  // Count Up has no fixed duration: credit what was actually counted up (the
+  // most recently completed focus session). Countdown keeps its full duration.
+  const durationSeconds = state.lastFocusSeconds > 0 ? state.lastFocusSeconds : settings.focusDuration * 60;
   const sessionId = generateSessionId(settings);
 
   // In preview mode, mock submission only needs one representative group.

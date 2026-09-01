@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAppStore } from '@/store/useAppStore';
 import { useNotesStore, sortNotes } from '@/store/useNotesStore';
 import { usePomodoroStore } from '@/store/usePomodoroStore';
+import { formatClock, hasClockHours } from '@/components/Pomodoro/formatTime';
 import { useFileStorage } from '@/hooks/useFileStorage';
 import AchievementsPanel from '@/components/Dashboard/AchievementsPanel';
 import { formatFileSize } from '@/utils/file';
@@ -280,6 +281,7 @@ function PomodoroPanel() {
   const mode = usePomodoroStore((s) => s.mode);
   const timeRemaining = usePomodoroStore((s) => s.timeRemaining);
   const isRunning = usePomodoroStore((s) => s.isRunning);
+  const isPaused = usePomodoroStore((s) => s.isPaused);
   const currentSession = usePomodoroStore((s) => s.currentSession);
   const settings = usePomodoroStore((s) => s.settings);
   const start = usePomodoroStore((s) => s.start);
@@ -287,14 +289,15 @@ function PomodoroPanel() {
   const resume = usePomodoroStore((s) => s.resume);
   const reset = usePomodoroStore((s) => s.reset);
 
-  const minutes = Math.floor(timeRemaining / 60);
-  const seconds = timeRemaining % 60;
+  const isCountUp = settings.timerMode === 'countup';
+  const showHours = hasClockHours(timeRemaining);
   const totalDuration = mode === 'focus'
     ? settings.focusDuration * 60
     : mode === 'break'
       ? settings.breakDuration * 60
       : settings.longBreakDuration * 60;
-  const progress = totalDuration > 0 ? ((totalDuration - timeRemaining) / totalDuration) * 100 : 0;
+  // Count Up has no target duration, so its progress ring stays empty (0%).
+  const progress = isCountUp ? 0 : totalDuration > 0 ? ((totalDuration - timeRemaining) / totalDuration) * 100 : 0;
 
   const modeLabel = mode === 'focus' ? 'تركيز' : mode === 'break' ? 'استراحة' : 'استراحة طويلة';
   const circumference = 2 * Math.PI * 44;
@@ -322,8 +325,8 @@ function PomodoroPanel() {
             />
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-2xl font-bold text-gray-800 dark:text-gray-100 tabular-nums tracking-tight" aria-live="polite" aria-atomic="true">
-              {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
+            <span className={`font-bold text-gray-800 dark:text-gray-100 tabular-nums tracking-tight ${showHours ? 'text-sm' : 'text-2xl'}`} aria-live="polite" aria-atomic="true">
+              {formatClock(timeRemaining)}
             </span>
           </div>
         </div>
@@ -342,11 +345,11 @@ function PomodoroPanel() {
           <div className="flex items-center gap-2">
             {!isRunning ? (
               <button
-                onClick={timeRemaining > 0 && timeRemaining < totalDuration ? resume : start}
+                onClick={isPaused && timeRemaining > 0 ? resume : start}
                 className="px-4 py-2 rounded-xl bg-primary-600 hover:bg-primary-700 text-white text-xs font-semibold shadow-sm shadow-primary-600/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500 transition-all"
-                aria-label={timeRemaining > 0 && timeRemaining < totalDuration ? 'استئناف' : 'بدء'}
+                aria-label={isPaused && timeRemaining > 0 ? 'استئناف' : 'بدء'}
               >
-                {timeRemaining > 0 && timeRemaining < totalDuration ? 'استئناف' : 'بدء'}
+                {isPaused && timeRemaining > 0 ? 'استئناف' : 'بدء'}
               </button>
             ) : (
               <button

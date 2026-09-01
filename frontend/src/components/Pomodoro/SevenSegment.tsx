@@ -3,11 +3,11 @@ import { useMemo } from 'react';
 // Legacy pure-CSS 7-segment digit used by the SevenSegmentDigit test/export.
 //
 // The main time display (SegmentTimeDisplay) renders plain DSEG7 digits
-// (MM:SS) with no card boxes, no borders, and no flip animation — the
-// numbers simply update normally as the timer ticks. It is a pure
-// presentation layer over the shared Pomodoro timer seconds — it never
-// restarts/resets/pauses/resumes the timer, and derives everything from the
-// passed-in `seconds`.
+// (MM:SS, or HH:MM:SS once the value reaches an hour) with no card boxes, no
+// borders, and no flip animation — the numbers simply update normally as the
+// timer ticks. It is a pure presentation layer over the shared Pomodoro timer
+// seconds — it never restarts/resets/pauses/resumes the timer, and derives
+// everything from the passed-in `seconds`.
 
 const SEGMENT_MAP: Record<string, number[]> = {
   '0': [1, 1, 1, 1, 1, 1, 0],
@@ -172,7 +172,8 @@ interface SegmentTimeDisplayProps {
 }
 
 /**
- * Renders MM:SS as plain DSEG7 digits (no cards, no borders, no flip).
+ * Renders the time as plain DSEG7 digits (no cards, no borders, no flip).
+ * MM:SS normally; HH:MM:SS the moment the value reaches one hour (Count Up).
  *
  * The value is derived purely from the passed-in `seconds` — it holds no
  * timer state. The numbers simply update normally when the timer ticks.
@@ -182,7 +183,8 @@ interface SegmentTimeDisplayProps {
  */
 export function SegmentTimeDisplay({ seconds, size = 60, color, dimColor }: SegmentTimeDisplayProps) {
   const total = Math.max(0, Math.floor(seconds));
-  const mm = Math.floor(total / 60);
+  const h = Math.floor(total / 3600);
+  const mm = Math.floor((total % 3600) / 60);
   const ss = total % 60;
   const c = color ?? '#ffffff';
   void dimColor;
@@ -198,6 +200,13 @@ export function SegmentTimeDisplay({ seconds, size = 60, color, dimColor }: Segm
       }}
     >
       <div className="mflip-row">
+        {h > 0 && (
+          <>
+            <FlipDigit value={Math.floor(h / 10)} />
+            <FlipDigit value={h % 10} />
+            <div className="mflip-colon">:</div>
+          </>
+        )}
         <FlipDigit value={Math.floor(mm / 10)} />
         <FlipDigit value={mm % 10} />
         <div className="mflip-colon">:</div>

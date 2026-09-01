@@ -3,6 +3,7 @@ import { useAppStore } from '@/store/useAppStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useThemeStore } from '@/store/useThemeStore';
 import { usePomodoroStore } from '@/store/usePomodoroStore';
+import { formatClock } from '@/components/Pomodoro/formatTime';
 import { useNavigate, Link } from 'react-router-dom';
 import { HeaderQuranPlayer } from '@/components/quran/HeaderQuranPlayer';
 import { OfflineIndicator } from '@/components/Layout/OfflineIndicator';
@@ -155,8 +156,7 @@ export function Header({ title }: HeaderProps) {
               className="hidden lg:block px-2.5 py-1.5 rounded-xl text-sm font-semibold font-mono tabular-nums text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-500/10 transition-colors"
               title={'مؤقت بومودورو'}
             >
-              {String(Math.floor(pomodoroTimeRemaining / 60)).padStart(2, '0')}:
-              {String(pomodoroTimeRemaining % 60).padStart(2, '0')}
+              {formatClock(pomodoroTimeRemaining)}
             </button>
           )}
 

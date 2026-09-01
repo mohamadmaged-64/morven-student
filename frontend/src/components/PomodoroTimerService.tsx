@@ -1,10 +1,9 @@
 import { useEffect } from 'react';
 import { usePomodoroStore } from '@/store/usePomodoroStore';
+import { formatClock } from '@/components/Pomodoro/formatTime';
 import { usePrayerPauseStore } from '@/features/prayer-pause';
 import { useAuthStore } from '@/store/useAuthStore';
 import { startCompletionPolling, stopCompletionPolling } from '@/services/connectPomodoro';
-
-const formatTime = (seconds: number) => `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
 
 /** Keeps the single application-wide Pomodoro clock alive independently of tool pages. */
 export function PomodoroTimerService() {
@@ -35,7 +34,7 @@ export function PomodoroTimerService() {
 
   useEffect(() => {
     if (prayerPauseStatus !== 'normal') return;
-    if (isRunning) document.title = `${formatTime(timeRemaining)} | Morven for Student`;
+    if (isRunning) document.title = `${formatClock(timeRemaining)} | Morven for Student`;
     else if (completedMessage) document.title = `${completedMessage === 'break' ? 'وقت الراحة' : 'وقت التركيز'}! | Morven for Student`;
     else document.title = 'Morven For Student';
   }, [completedMessage, isRunning, timeRemaining, prayerPauseStatus]);

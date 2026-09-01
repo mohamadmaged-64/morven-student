@@ -4,12 +4,15 @@ export type PomodoroMode = 'focus' | 'break' | 'longBreak';
 
 export type PomodoroTheme = 'classic' | 'digital' | 'nature';
 
+export type TimerMode = 'countdown' | 'countup';
+
 export interface PomodoroSettings {
   focusDuration: number;
   breakDuration: number;
   longBreakDuration: number;
   sessionsUntilLongBreak: number;
   theme: PomodoroTheme;
+  timerMode: TimerMode;
 }
 
 interface PomodoroSnapshot {
@@ -20,6 +23,7 @@ interface PomodoroSnapshot {
   currentSession: number;
   completedSessions: number;
   totalFocusSeconds: number;
+  lastFocusSeconds: number;
   settings: PomodoroSettings;
   endTimestamp: number | null;
 }
@@ -44,6 +48,7 @@ const DEFAULT_POMODORO_SETTINGS: PomodoroSettings = {
   longBreakDuration: 15,
   sessionsUntilLongBreak: 4,
   theme: 'classic',
+  timerMode: 'countdown',
 };
 
 const durationFor = (mode: PomodoroMode, settings: PomodoroSettings) => {
@@ -54,11 +59,33 @@ const durationFor = (mode: PomodoroMode, settings: PomodoroSettings) => {
   }
 };
 
+const isCountUp = (state: PomodoroSnapshot) => state.settings.timerMode === 'countup';
+
+/**
+ * Elapsed seconds for the current position (used by Count Up). When the timer
+ * is running it derives from `endTimestamp`; while paused/fresh it reads the
+ * already-frozen `timeRemaining`.
+ */
+const elapsedSeconds = (state: PomodoroSnapshot, now = Date.now()): number => {
+  if (state.endTimestamp === null) return state.timeRemaining;
+  return Math.max(0, Math.floor((now - state.endTimestamp) / 1000));
+};
+
+/**
+ * Remaining seconds for the current position (used by Countdown). When the
+ * timer is running it derives from `endTimestamp`; while paused/fresh it
+ * reads the already-frozen `timeRemaining`.
+ */
+const remainingSeconds = (state: PomodoroSnapshot, now = Date.now()): number => {
+  if (state.endTimestamp === null) return state.timeRemaining;
+  return Math.max(0, Math.ceil((state.endTimestamp - now) / 1000));
+};
+
 const loadSnapshot = (): PomodoroSnapshot => {
   const fallback: PomodoroSnapshot = {
     mode: 'focus', timeRemaining: DEFAULT_POMODORO_SETTINGS.focusDuration * 60,
     isRunning: false, isPaused: false, currentSession: 0, completedSessions: 0,
-    totalFocusSeconds: 0, settings: DEFAULT_POMODORO_SETTINGS, endTimestamp: null,
+    totalFocusSeconds: 0, lastFocusSeconds: 0, settings: DEFAULT_POMODORO_SETTINGS, endTimestamp: null,
   };
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
@@ -68,14 +95,26 @@ const loadSnapshot = (): PomodoroSnapshot => {
     const mode = parsed.mode === 'break' || parsed.mode === 'longBreak' ? parsed.mode : 'focus';
     const endTimestamp = typeof parsed.endTimestamp === 'number' ? parsed.endTimestamp : null;
     const isRunning = Boolean(parsed.isRunning) && endTimestamp !== null;
+    const now = Date.now();
+    let timeRemaining: number;
+    if (isRunning) {
+      timeRemaining = settings.timerMode === 'countup'
+        ? Math.max(0, Math.floor((now - endTimestamp) / 1000))
+        : Math.max(0, Math.ceil((endTimestamp - now) / 1000));
+    } else if (settings.timerMode === 'countup') {
+      timeRemaining = Math.max(0, Number(parsed.timeRemaining) || 0);
+    } else {
+      timeRemaining = Math.max(0, Number(parsed.timeRemaining) || durationFor(mode, settings));
+    }
     return {
       ...fallback,
       ...parsed,
       mode,
       settings,
-      timeRemaining: isRunning ? Math.max(0, Math.ceil((endTimestamp - Date.now()) / 1000)) : Math.max(0, Number(parsed.timeRemaining) || durationFor(mode, settings)),
+      timeRemaining,
       isRunning,
       isPaused: Boolean(parsed.isPaused),
+      lastFocusSeconds: Math.max(0, Number(parsed.lastFocusSeconds) || 0),
       endTimestamp,
     };
   } catch {
@@ -148,16 +187,20 @@ export const usePomodoroStore = create<PomodoroStore>((set, get) => {
     const isFocus = state.mode === 'focus';
     const reachedLongBreak = isFocus && state.currentSession + 1 >= state.settings.sessionsUntilLongBreak;
     const nextMode: PomodoroMode = isFocus ? (reachedLongBreak ? 'longBreak' : 'break') : 'focus';
+    // Count Up has no fixed duration: a finished focus session is credited with
+    // the actual time counted up. Countdown keeps its configured duration.
+    const focusedSeconds = isCountUp(state) ? elapsedSeconds(state) : state.settings.focusDuration * 60;
     const next: PomodoroSnapshot = {
       ...state,
       mode: nextMode,
-      timeRemaining: durationFor(nextMode, state.settings),
+      timeRemaining: isCountUp(state) ? 0 : durationFor(nextMode, state.settings),
       isRunning: false,
       isPaused: false,
       endTimestamp: null,
       currentSession: isFocus ? (reachedLongBreak ? 0 : state.currentSession + 1) : state.currentSession,
       completedSessions: isFocus ? state.completedSessions + 1 : state.completedSessions,
-      totalFocusSeconds: isFocus ? state.totalFocusSeconds + state.settings.focusDuration * 60 : state.totalFocusSeconds,
+      totalFocusSeconds: isFocus ? state.totalFocusSeconds + focusedSeconds : state.totalFocusSeconds,
+      lastFocusSeconds: isFocus ? focusedSeconds : state.lastFocusSeconds,
     };
     update(next, isFocus ? 'break' : 'focus');
     notifyCompletion(isFocus ? 'break' : 'focus');
@@ -170,13 +213,22 @@ export const usePomodoroStore = create<PomodoroStore>((set, get) => {
       const state = get();
       if (state.isRunning) return;
       requestNotificationPermission();
-      const next: PomodoroSnapshot = { ...state, isRunning: true, isPaused: false, endTimestamp: Date.now() + state.timeRemaining * 1000 };
+      const endTimestamp = isCountUp(state)
+        ? Date.now() - state.timeRemaining * 1000
+        : Date.now() + state.timeRemaining * 1000;
+      const next: PomodoroSnapshot = { ...state, isRunning: true, isPaused: false, endTimestamp };
       update(next);
     },
     pause: () => {
       const state = get();
       if (!state.isRunning) return;
-      const remaining = state.endTimestamp ? Math.max(0, Math.ceil((state.endTimestamp - Date.now()) / 1000)) : state.timeRemaining;
+      if (isCountUp(state)) {
+        // Count Up has no maximum: freezing just captures the elapsed seconds.
+        const next: PomodoroSnapshot = { ...state, timeRemaining: elapsedSeconds(state), isRunning: false, isPaused: true, endTimestamp: null };
+        update(next);
+        return;
+      }
+      const remaining = remainingSeconds(state);
       if (remaining === 0) { finish(); return; }
       const next: PomodoroSnapshot = { ...state, timeRemaining: remaining, isRunning: false, isPaused: true, endTimestamp: null };
       update(next);
@@ -184,29 +236,56 @@ export const usePomodoroStore = create<PomodoroStore>((set, get) => {
     resume: () => get().start(),
     reset: () => {
       const state = get();
-      const next: PomodoroSnapshot = { ...state, timeRemaining: durationFor(state.mode, state.settings), isRunning: false, isPaused: false, endTimestamp: null };
+      const next: PomodoroSnapshot = {
+        ...state,
+        timeRemaining: isCountUp(state) ? 0 : durationFor(state.mode, state.settings),
+        isRunning: false,
+        isPaused: false,
+        endTimestamp: null,
+      };
       update(next);
     },
     skip: () => finish(),
     tick: () => {
       const state = get();
       if (!state.isRunning || !state.endTimestamp) return;
-      const remaining = Math.max(0, Math.ceil((state.endTimestamp - Date.now()) / 1000));
+      if (isCountUp(state)) {
+        // Count Up never finishes automatically — it keeps counting until the
+        // user manually pauses, resets, or skips.
+        const elapsed = elapsedSeconds(state);
+        if (elapsed !== state.timeRemaining) {
+          set({ ...state, timeRemaining: elapsed });
+        }
+        return;
+      }
+      const remaining = remainingSeconds(state);
       if (remaining === 0) { finish(); return; }
       if (remaining !== state.timeRemaining) {
-        const next: PomodoroSnapshot = { ...state, timeRemaining: remaining };
-        set(next);
+        set({ ...state, timeRemaining: remaining });
       }
     },
     setMode: (mode) => {
       const state = get();
       if (state.isRunning) return;
-      const next: PomodoroSnapshot = { ...state, mode, timeRemaining: durationFor(mode, state.settings), isPaused: false, endTimestamp: null };
+      const next: PomodoroSnapshot = { ...state, mode, timeRemaining: isCountUp(state) ? 0 : durationFor(mode, state.settings), isPaused: false, endTimestamp: null };
       update(next);
     },
     setSettings: (settings) => {
       const state = get();
-      const next: PomodoroSnapshot = state.isRunning ? { ...state, settings } : { ...state, settings, timeRemaining: durationFor(state.mode, settings), isPaused: false, endTimestamp: null };
+      if (state.isRunning) {
+        update({ ...state, settings });
+        return;
+      }
+      if (settings.timerMode === 'countup') {
+        // Count Up has no target duration: keep the current position. Switching
+        // into Count Up re-baselines the timer to 00:00.
+        const next: PomodoroSnapshot = state.settings.timerMode !== 'countup'
+          ? { ...state, settings, timeRemaining: 0, isPaused: false, endTimestamp: null }
+          : { ...state, settings };
+        update(next);
+        return;
+      }
+      const next: PomodoroSnapshot = { ...state, settings, timeRemaining: durationFor(state.mode, settings), isPaused: false, endTimestamp: null };
       update(next);
     },
     setTheme: (theme) => {

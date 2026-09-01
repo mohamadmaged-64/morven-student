@@ -41,6 +41,15 @@ describe('SegmentTimeDisplay', () => {
     expect(after).toEqual(['0', '1', '0', '6']);
   });
 
+  it('extends to HH:MM:SS (six cards, two colons) once the time reaches one hour', () => {
+    const { container } = render(<SegmentTimeDisplay seconds={1 * 3600 + 61} size={40} />);
+    // 01:01:01 -> six cards: hours tens/ones, minutes tens/ones, seconds tens/ones
+    const cards = [...container.querySelectorAll('[data-flipcard]')];
+    expect(cards).toHaveLength(6);
+    expect(cards.map(c => c.getAttribute('data-flipcard'))).toEqual(['0', '1', '0', '1', '0', '1']);
+    expect(container.textContent).toContain(':');
+  });
+
   it('reads the same seconds shared by the timer without maintaining its own state', () => {
     const a = render(<SegmentTimeDisplay seconds={1500} size={40} />);
     const aText = a.container.textContent;
