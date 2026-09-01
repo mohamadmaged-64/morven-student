@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Button,
   Card,
@@ -15,7 +16,10 @@ import {
 } from '@/components/UI';
 import { getToolById } from '@/data/tools';
 import { useAppStore } from '@/store/useAppStore';
-import { usePomodoroStore, type PomodoroMode, type PomodoroSettings } from '@/store/usePomodoroStore';
+import { usePomodoroStore, type PomodoroMode, type PomodoroSettings, type PomodoroTheme } from '@/store/usePomodoroStore';
+import { SegmentTimeDisplay } from '@/components/Pomodoro/SevenSegment';
+import { useFullscreen } from '@/components/Pomodoro/useFullscreen';
+import natureBackground from '@/assets/nature-focus.webp';
 import type { Task, ExamCountdown } from '@/types';
 import QuranPage from './Quran';
 import NotesPage from './Notes';
@@ -151,6 +155,8 @@ const modeColors: Record<PomodoroMode, { ring: string; bg: string; text: string;
 
 function PomodoroTimer() {
   const [showSettings, setShowSettings] = useState(false);
+  const [immersive, setImmersive] = useState(false);
+  const fullscreen = useFullscreen();
   const mode = usePomodoroStore((s) => s.mode);
   const timeRemaining = usePomodoroStore((s) => s.timeRemaining);
   const isRunning = usePomodoroStore((s) => s.isRunning);
@@ -165,14 +171,92 @@ function PomodoroTimer() {
   const skip = usePomodoroStore((s) => s.skip);
   const setMode = usePomodoroStore((s) => s.setMode);
   const setSettings = usePomodoroStore((s) => s.setSettings);
+  const setTheme = usePomodoroStore((s) => s.setTheme);
   const addNotification = useAppStore((s) => s.addNotification);
   const currentMode = mode;
+  // Theme is presentation-only: it never touches the timer state machine.
+  const displayTheme: PomodoroTheme = settings.theme ?? 'classic';
   const totalDuration = currentMode === 'focus' ? settings.focusDuration * 60 : currentMode === 'break' ? settings.breakDuration * 60 : settings.longBreakDuration * 60;
 
   const handleSaveSettings = (newSettings: PomodoroSettings) => {
     setSettings(newSettings);
     addNotification('تم الحفظ', 'success');
   };
+
+  const openImmersive = () => {
+    setImmersive(true);
+    // Wait for the overlay to mount so its ref is attached before requesting
+    // the browser fullscreen.
+    requestAnimationFrame(() => fullscreen.enter());
+  };
+
+  const closeImmersive = useCallback(() => {
+    setImmersive(false);
+    fullscreen.exit();
+  }, [fullscreen]);
+
+  // Keyboard shortcuts: F = fullscreen toggle, Esc = exit fullscreen,
+  // Space = start / continue / pause the timer.
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (
+        target &&
+        (target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.tagName === 'SELECT' ||
+          target.isContentEditable)
+      ) {
+        return;
+      }
+      if (showSettings) return;
+
+      if (e.code === 'Space') {
+        e.preventDefault();
+        if (isRunning) pause();
+        else if (timeRemaining > 0 && timeRemaining < totalDuration) resume();
+        else start();
+      } else if (e.code === 'KeyF') {
+        if (immersive) closeImmersive();
+        else openImmersive();
+      } else if (e.code === 'Escape') {
+        if (immersive) closeImmersive();
+      } else if (e.code === 'KeyR') {
+        reset();
+      } else if (e.code === 'KeyS') {
+        skip();
+      }
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [
+    showSettings,
+    isRunning,
+    timeRemaining,
+    totalDuration,
+    immersive,
+    start,
+    pause,
+    resume,
+    reset,
+    skip,
+    closeImmersive,
+    openImmersive,
+  ]);
+
+  // Esc (or the browser's native exit) drops document fullscreen without a
+  // keydown reaching the page. Watch fullscreenchange: any time we lose
+  // fullscreen we had, close the immersive overlay so Esc fully exits.
+  const wasFullscreenRef = useRef(false);
+  useEffect(() => {
+    if (wasFullscreenRef.current && !fullscreen.isFullscreen) {
+      wasFullscreenRef.current = false;
+      setImmersive(false);
+    } else {
+      wasFullscreenRef.current = fullscreen.isFullscreen;
+    }
+  }, [fullscreen.isFullscreen]);
 
   const minutes = Math.floor(timeRemaining / 60);
   const seconds = timeRemaining % 60;
@@ -199,62 +283,194 @@ function PomodoroTimer() {
 
   return (
     <div className="flex flex-col items-center gap-8 py-6">
-      {/* Timer Display */}
-      <motion.div
-        className="relative"
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5, type: 'spring' }}
-      >
-        <div className="relative w-72 h-72 md:w-80 md:h-80">
-          <svg className="w-full h-full -rotate-90" viewBox="0 0 260 260">
-            <circle
-              cx="130" cy="130" r="120"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="8"
-              className="text-gray-200 dark:text-gray-700"
-            />
-            <motion.circle
-              cx="130" cy="130" r="120"
-              fill="none"
-              strokeWidth="8"
-              strokeLinecap="round"
-              className={modeColor.ring}
-              stroke="currentColor"
-              strokeDasharray={circumference}
-              animate={{ strokeDashoffset }}
-              transition={{ duration: 0.5, ease: 'linear' }}
-            />
-          </svg>
+      {/* Timer Display (theme-aware) */}
+      {displayTheme === 'classic' && (
+        <motion.div
+          className="relative"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, type: 'spring' }}
+        >
+          <div className="relative w-72 h-72 md:w-80 md:h-80">
+            <svg className="w-full h-full -rotate-90" viewBox="0 0 260 260">
+              <circle
+                cx="130" cy="130" r="120"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="8"
+                className="text-gray-200 dark:text-gray-700"
+              />
+              <motion.circle
+                cx="130" cy="130" r="120"
+                fill="none"
+                strokeWidth="8"
+                strokeLinecap="round"
+                className={modeColor.ring}
+                stroke="currentColor"
+                strokeDasharray={circumference}
+                animate={{ strokeDashoffset }}
+                transition={{ duration: 0.5, ease: 'linear' }}
+              />
+            </svg>
 
-          <motion.div
-            className={`absolute inset-4 rounded-full flex flex-col items-center justify-center bg-white dark:bg-dark-card shadow-lg ${isRunning ? `shadow-xl ${modeColor.glow}` : ''}`}
-            animate={isRunning ? { boxShadow: [`0 0 20px 0px rgba(0,0,0,0.1)`, `0 0 40px 4px ${currentMode === 'focus' ? 'rgba(59,130,246,0.2)' : currentMode === 'break' ? 'rgba(16,185,129,0.2)' : 'rgba(168,85,247,0.2)'}`, `0 0 20px 0px rgba(0,0,0,0.1)`] } : {}}
-            transition={isRunning ? { duration: 2, repeat: Infinity, ease: 'easeInOut' } : {}}
-          >
+            <motion.div
+              className={`absolute inset-4 rounded-full flex flex-col items-center justify-center bg-white dark:bg-dark-card shadow-lg ${isRunning ? `shadow-xl ${modeColor.glow}` : ''}`}
+              animate={isRunning ? { boxShadow: [`0 0 20px 0px rgba(0,0,0,0.1)`, `0 0 40px 4px ${currentMode === 'focus' ? 'rgba(59,130,246,0.2)' : currentMode === 'break' ? 'rgba(16,185,129,0.2)' : 'rgba(168,85,247,0.2)'}`, `0 0 20px 0px rgba(0,0,0,0.1)`] } : {}}
+              transition={isRunning ? { duration: 2, repeat: Infinity, ease: 'easeInOut' } : {}}
+            >
+              <AnimatePresence mode="wait">
+                <motion.span
+                  key={modeColor.label}
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  className={`text-sm font-semibold uppercase tracking-wider ${modeColor.text} mb-1`}
+                >
+                  {modeLabel}
+                </motion.span>
+              </AnimatePresence>
+
+              <span className="text-5xl md:text-6xl font-bold text-gray-800 dark:text-white font-mono tabular-nums">
+                {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
+              </span>
+
+              <span className="text-xs text-gray-400 dark:text-gray-500 mt-2">
+                {`الجلسة ${Math.min(currentSession + 1, settings.sessionsUntilLongBreak)} من ${settings.sessionsUntilLongBreak}`}
+              </span>
+            </motion.div>
+          </div>
+        </motion.div>
+      )}
+
+      {displayTheme === 'digital' && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.92 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.4, type: 'spring' }}
+          className="w-full max-w-md relative"
+        >
+          <div className="bg-black rounded-3xl shadow-2xl p-8 sm:p-10 flex flex-col items-center select-none">
             <AnimatePresence mode="wait">
               <motion.span
                 key={modeColor.label}
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 10 }}
-                className={`text-sm font-semibold uppercase tracking-wider ${modeColor.text} mb-1`}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="text-sm font-semibold uppercase tracking-[0.3em] mb-6 text-white/60"
               >
                 {modeLabel}
               </motion.span>
             </AnimatePresence>
 
-            <span className="text-5xl md:text-6xl font-bold text-gray-800 dark:text-white font-mono tabular-nums">
-              {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
-            </span>
+            <SegmentTimeDisplay
+              seconds={timeRemaining}
+              size={64}
+              color="#ffffff"
+            />
 
-            <span className="text-xs text-gray-400 dark:text-gray-500 mt-2">
+            <span className="text-xs text-white/45 mt-6 tabular-nums">
               {`الجلسة ${Math.min(currentSession + 1, settings.sessionsUntilLongBreak)} من ${settings.sessionsUntilLongBreak}`}
             </span>
-          </motion.div>
-        </div>
-      </motion.div>
+
+            {isRunning && (
+              <motion.div
+                className="mt-4 h-1 rounded-full bg-white/10 overflow-hidden w-full max-w-[220px]"
+              >
+                <motion.div
+                  className="h-full bg-white/40 rounded-full"
+                  animate={{ width: `${progress}%` }}
+                  transition={{ duration: 0.5, ease: 'linear' }}
+                />
+              </motion.div>
+            )}
+          </div>
+
+          <button
+            type="button"
+            onClick={openImmersive}
+            className="absolute top-3 end-3 p-2 rounded-xl text-white/60 hover:text-white hover:bg-white/10 transition-colors"
+            title="ملء الشاشة"
+            aria-label="ملء الشاشة"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M8 3H5a2 2 0 00-2 2v3" />
+              <path d="M21 8V5a2 2 0 00-2-2h-3" />
+              <path d="M3 16v3a2 2 0 002 2h3" />
+              <path d="M16 21h3a2 2 0 002-2v-3" />
+            </svg>
+          </button>
+        </motion.div>
+      )}
+
+      {displayTheme === 'nature' && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.94 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.4, type: 'spring' }}
+          className="w-full"
+        >
+          <div className="relative w-full max-w-3xl mx-auto rounded-3xl overflow-hidden shadow-2xl border border-white/40 dark:border-white/10">
+            <img
+              src={natureBackground}
+              alt=""
+              className="absolute inset-0 w-full h-full object-cover"
+              draggable={false}
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/60" />
+
+            <div className="relative flex flex-col items-center gap-4 px-4 py-10 sm:px-8 sm:py-14">
+              <div className="relative w-56 h-56 md:w-64 md:h-64">
+                <svg className="w-full h-full -rotate-90" viewBox="0 0 260 260">
+                  <circle cx="130" cy="130" r="120" fill="none" stroke="currentColor" strokeWidth="8" className="text-white/25" />
+                  <motion.circle
+                    cx="130" cy="130" r="120"
+                    fill="none" strokeWidth="8" strokeLinecap="round"
+                    className="text-white"
+                    stroke="currentColor"
+                    strokeDasharray={circumference}
+                    animate={{ strokeDashoffset }}
+                    transition={{ duration: 0.5, ease: 'linear' }}
+                  />
+                </svg>
+                <div className="absolute inset-4 rounded-full bg-black/35 backdrop-blur-sm flex flex-col items-center justify-center">
+                  <AnimatePresence mode="wait">
+                    <motion.span
+                      key={modeColor.label}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="text-sm font-semibold uppercase tracking-wider text-emerald-200 mb-1"
+                    >
+                      {modeLabel}
+                    </motion.span>
+                  </AnimatePresence>
+                  <span className="text-5xl md:text-6xl font-bold text-white font-mono tabular-nums drop-shadow-lg">
+                    {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
+                  </span>
+                  <span className="text-xs text-white/70 mt-2 tabular-nums">
+                    {`الجلسة ${Math.min(currentSession + 1, settings.sessionsUntilLongBreak)} من ${settings.sessionsUntilLongBreak}`}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={openImmersive}
+              className="absolute top-3 end-3 p-2 rounded-xl text-white/80 hover:text-white hover:bg-white/15 bg-black/20 backdrop-blur-sm transition-colors"
+              title="ملء الشاشة"
+              aria-label="ملء الشاشة"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M8 3H5a2 2 0 00-2 2v3" />
+                <path d="M21 8V5a2 2 0 00-2-2h-3" />
+                <path d="M3 16v3a2 2 0 002 2h3" />
+                <path d="M16 21h3a2 2 0 002-2v-3" />
+              </svg>
+            </button>
+          </div>
+        </motion.div>
+      )}
 
       {/* Controls */}
       <motion.div
@@ -340,27 +556,281 @@ function PomodoroTimer() {
         onClose={() => setShowSettings(false)}
         settings={settings}
         onSave={handleSaveSettings}
+        onSaveTheme={setTheme}
       />
+
+      {/* Immersive (fullscreen) view — Digital & Nature: only theme visuals + exit */}
+      {immersive && (displayTheme === 'digital' || displayTheme === 'nature') && (
+        createPortal(
+          <div
+            ref={fullscreen.ref}
+            className="fixed inset-0 z-[100] bg-black text-white font-sans"
+          >
+            {displayTheme === 'digital' && (
+              <div
+                className="w-full h-full flex flex-col items-center justify-center px-6"
+                style={{
+                  background: '#000',
+                  ['--morven-flip-size' as string]: 'min(calc(100vw / 4.0), calc(92vh / 1.1))',
+                }}
+              >
+                <SegmentTimeDisplay
+                  seconds={timeRemaining}
+                  size={120}
+                  color="#ffffff"
+                />
+
+                {/* Small timer controls under the numbers */}
+                <div className="mt-6 flex flex-wrap items-center justify-center gap-2 absolute left-0 right-0 bottom-40">
+                  {!isRunning && timeRemaining === totalDuration && (
+                    <button
+                      type="button"
+                      onClick={start}
+                      className="px-8 py-3 text-[17px] rounded-lg bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white transition-colors"
+                    >
+                      {'ابدأ'}
+                    </button>
+                  )}
+                  {isRunning && (
+                    <button
+                      type="button"
+                      onClick={pause}
+                      className="px-8 py-3 text-[17px] rounded-lg bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white transition-colors"
+                    >
+                      {'إيقاف مؤقت'}
+                    </button>
+                  )}
+                  {!isRunning && timeRemaining < totalDuration && timeRemaining > 0 && (
+                    <button
+                      type="button"
+                      onClick={resume}
+                      className="px-8 py-3 text-[17px] rounded-lg bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white transition-colors"
+                    >
+                      {'استئناف'}
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={reset}
+                    className="px-8 py-3 text-[17px] rounded-lg bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white transition-colors"
+                  >
+                    {'إعادة تعيين'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={skip}
+                    className="px-8 py-3 text-[17px] rounded-lg bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white transition-colors"
+                  >
+                    {'تخطي'}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {displayTheme === 'nature' && (
+              <div className="relative w-full h-full">
+                <img
+                  src={natureBackground}
+                  alt=""
+                  className="absolute inset-0 w-full h-full object-cover"
+                  draggable={false}
+                />
+                <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/35 to-black/65" />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="relative w-64 h-64 md:w-80 md:h-80">
+                    <svg className="w-full h-full -rotate-90" viewBox="0 0 260 260">
+                      <circle cx="130" cy="130" r="120" fill="none" stroke="currentColor" strokeWidth="8" className="text-white/25" />
+                      <motion.circle
+                        cx="130" cy="130" r="120"
+                        fill="none" strokeWidth="8" strokeLinecap="round"
+                        className="text-white"
+                        stroke="currentColor"
+                        strokeDasharray={circumference}
+                        animate={{ strokeDashoffset }}
+                        transition={{ duration: 0.5, ease: 'linear' }}
+                      />
+                    </svg>
+                    <div className="absolute inset-4 rounded-full bg-black/35 backdrop-blur-sm flex items-center justify-center">
+                      <span className="text-6xl md:text-7xl font-bold text-white font-mono tabular-nums drop-shadow-lg">
+                        {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Same small timer controls as the digital mode */}
+                <div className="absolute left-0 right-0 bottom-40 flex flex-wrap items-center justify-center gap-2">
+                  {!isRunning && timeRemaining === totalDuration && (
+                    <button
+                      type="button"
+                      onClick={start}
+                      className="px-8 py-3 text-[17px] rounded-lg bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white transition-colors"
+                    >
+                      {'ابدأ'}
+                    </button>
+                  )}
+                  {isRunning && (
+                    <button
+                      type="button"
+                      onClick={pause}
+                      className="px-8 py-3 text-[17px] rounded-lg bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white transition-colors"
+                    >
+                      {'إيقاف مؤقت'}
+                    </button>
+                  )}
+                  {!isRunning && timeRemaining < totalDuration && timeRemaining > 0 && (
+                    <button
+                      type="button"
+                      onClick={resume}
+                      className="px-8 py-3 text-[17px] rounded-lg bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white transition-colors"
+                    >
+                      {'استئناف'}
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={reset}
+                    className="px-8 py-3 text-[17px] rounded-lg bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white transition-colors"
+                  >
+                    {'إعادة تعيين'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={skip}
+                    className="px-8 py-3 text-[17px] rounded-lg bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white transition-colors"
+                  >
+                    {'تخطي'}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Exit control */}
+            <button
+              type="button"
+              onClick={closeImmersive}
+              className="fixed top-4 end-4 z-10 p-3 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white transition-colors"
+              title="خروج من ملء الشاشة"
+              aria-label="خروج من ملء الشاشة"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M8 3v3a2 2 0 01-2 2H3" />
+                <path d="M21 8h-3a2 2 0 01-2-2V3" />
+                <path d="M3 16h3a2 2 0 012 2v3" />
+                <path d="M16 21v-3a2 2 0 012-2h3" />
+              </svg>
+            </button>
+          </div>,
+          document.body,
+        )
+      )}
     </div>
   );
 }
 
 function PomodoroSettingsModal({
   
-  open, onClose, settings, onSave,
+  open, onClose, settings, onSave, onSaveTheme,
 }: {
   open: boolean;
   onClose: () => void;
   settings: PomodoroSettings;
   onSave: (s: PomodoroSettings) => void;
+  onSaveTheme: (theme: PomodoroTheme) => void;
 }) {
   const [local, setLocal] = useState(settings);
 
   useEffect(() => { setLocal(settings); }, [settings]);
 
+  const themeOptions: { value: PomodoroTheme; label: string; description: string; preview: React.ReactNode }[] = [
+    {
+      value: 'classic',
+      label: 'الأساسية',
+      description: 'المظهر الافتراضي',
+      preview: (
+        <div className="w-full h-full rounded-2xl ring-1 ring-inset ring-gray-300 dark:ring-gray-600 flex items-center justify-center bg-white dark:bg-dark-card overflow-hidden">
+          <div className="relative w-14 h-14">
+            <svg className="w-full h-full -rotate-90" viewBox="0 0 260 260">
+              <circle cx="130" cy="130" r="120" fill="none" stroke="currentColor" strokeWidth="16" className="text-gray-200 dark:text-gray-700" />
+              <circle cx="130" cy="130" r="120" fill="none" stroke="currentColor" strokeWidth="16" strokeDasharray="754" strokeDashoffset="380" className="text-blue-500" />
+            </svg>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="text-[9px] font-mono font-bold text-gray-800 dark:text-white tabular-nums">25</span>
+            </div>
+          </div>
+        </div>
+      ),
+    },
+    {
+      value: 'digital',
+      label: 'رقمية',
+      description: 'ساعة رقمية نظيفة',
+      preview: (
+        <div className="w-full h-full rounded-2xl bg-black flex flex-col items-center justify-center gap-1 overflow-hidden">
+          <span className="text-[7px] uppercase tracking-widest text-white/60">تركيز</span>
+          <span className="text-xl font-mono font-bold text-white tabular-nums leading-none" dir="ltr">25:00</span>
+        </div>
+      ),
+    },
+    {
+      value: 'nature',
+      label: 'طبيعة',
+      description: 'خلفية هادئة وطبيعية',
+      preview: (
+        <div className="w-full h-full rounded-2xl overflow-hidden relative bg-emerald-200 flex items-center justify-center">
+          <img src={natureBackground} alt="" className="absolute inset-0 w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-black/35" />
+          <div className="relative w-10 h-10">
+            <svg className="w-full h-full -rotate-90" viewBox="0 0 260 260">
+              <circle cx="130" cy="130" r="120" fill="none" stroke="currentColor" strokeWidth="22" className="text-white/25" />
+              <circle cx="130" cy="130" r="120" fill="none" stroke="currentColor" strokeWidth="22" strokeDasharray="754" strokeDashoffset="380" className="text-white" />
+            </svg>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="text-[8px] font-mono font-bold text-white tabular-nums drop-shadow">25</span>
+            </div>
+          </div>
+        </div>
+      ),
+    },
+  ];
+
   return (
     <Modal open={open} onClose={onClose} title={'الإعدادات'} size="sm">
       <div className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            {'مظهر المؤقت'}
+          </label>
+          <div className="grid grid-cols-3 gap-2">
+            {themeOptions.map((opt) => {
+              const selected = local.theme === opt.value;
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => {
+                    setLocal(p => ({ ...p, theme: opt.value }));
+                    onSaveTheme(opt.value);
+                  }}
+                  className={`group rounded-2xl p-1.5 transition-all duration-200 border-2 ${
+                    selected
+                      ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
+                      : 'border-transparent hover:border-gray-200 dark:hover:border-dark-border'
+                  }`}
+                >
+                  <div className="h-16 mb-2">{opt.preview}</div>
+                  <p className={`text-xs font-semibold text-center ${selected ? 'text-primary-600 dark:text-primary-400' : 'text-gray-700 dark:text-gray-300'}`}>
+                    {opt.label}
+                  </p>
+                  <p className="text-[10px] text-center text-gray-400 dark:text-gray-500 leading-tight">
+                    {opt.description}
+                  </p>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         <Input
           label={'مدة التركيز (دقائق)'}
           type="text"

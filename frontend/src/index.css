@@ -2,12 +2,58 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: 'DSEG7 Classic';
+  src: url('./assets/fonts/dseg7-classic.woff2') format('woff2'),
+       url('./assets/fonts/dseg7-classic.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 @layer base {
   * { @apply box-border; }
   html { scroll-behavior: smooth; }
   body {
     @apply bg-light-bg dark:bg-dark-bg text-gray-900 dark:text-gray-100 transition-colors duration-300;
   }
+}
+
+/* ---------------------------------------------------------------------
+   Pomodoro DIGITAL theme — plain DSEG7 LED digits
+   No card boxes, no borders, no flip animation: the numbers just update
+   normally. White digits on black, sized via --mflip-w (derived from
+   --morven-flip-size or the `size` prop).
+--------------------------------------------------------------------- */
+.mflip {
+  --mflip-font: 'DSEG7 Classic', monospace;
+  --mflip-font-size: calc(var(--mflip-w) * 0.5);
+  user-select: none;
+}
+
+.mflip-row {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--mflip-w) * 0.04);
+}
+
+.mflip-digit {
+  display: inline-block;
+  font-family: var(--mflip-font);
+  font-size: var(--mflip-font-size);
+  line-height: 1;
+  color: var(--mflip-fg, #ffffff);
+  font-variant-numeric: tabular-nums;
+}
+
+.mflip-colon {
+  font-family: var(--mflip-font);
+  font-size: var(--mflip-font-size);
+  line-height: 1;
+  color: var(--mflip-fg, #ffffff);
+  font-weight: normal;
+  padding: 0 calc(var(--mflip-w) * 0.04);
+  flex-shrink: 0;
 }
 
 /* Custom scrollbar */

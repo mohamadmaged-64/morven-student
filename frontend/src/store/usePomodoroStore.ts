@@ -2,11 +2,14 @@ import { create } from 'zustand';
 
 export type PomodoroMode = 'focus' | 'break' | 'longBreak';
 
+export type PomodoroTheme = 'classic' | 'digital' | 'nature';
+
 export interface PomodoroSettings {
   focusDuration: number;
   breakDuration: number;
   longBreakDuration: number;
   sessionsUntilLongBreak: number;
+  theme: PomodoroTheme;
 }
 
 interface PomodoroSnapshot {
@@ -31,6 +34,7 @@ interface PomodoroStore extends PomodoroSnapshot {
   tick: () => void;
   setMode: (mode: PomodoroMode) => void;
   setSettings: (settings: PomodoroSettings) => void;
+  setTheme: (theme: PomodoroTheme) => void;
 }
 
 const STORAGE_KEY = 'morven-pomodoro';
@@ -39,6 +43,7 @@ const DEFAULT_POMODORO_SETTINGS: PomodoroSettings = {
   breakDuration: 5,
   longBreakDuration: 15,
   sessionsUntilLongBreak: 4,
+  theme: 'classic',
 };
 
 const durationFor = (mode: PomodoroMode, settings: PomodoroSettings) => {
@@ -202,6 +207,13 @@ export const usePomodoroStore = create<PomodoroStore>((set, get) => {
     setSettings: (settings) => {
       const state = get();
       const next: PomodoroSnapshot = state.isRunning ? { ...state, settings } : { ...state, settings, timeRemaining: durationFor(state.mode, settings), isPaused: false, endTimestamp: null };
+      update(next);
+    },
+    setTheme: (theme) => {
+      const state = get();
+      // Theme is presentation-only: persist it but never alter any timer state
+      // (running/paused, timeRemaining, endTimestamp, mode, sessions).
+      const next: PomodoroSnapshot = { ...state, settings: { ...state.settings, theme } };
       update(next);
     },
   };
