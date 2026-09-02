@@ -51,7 +51,7 @@ export default defineConfig({
         globPatterns: ['**/*.{js,mjs,css,html,ico,png,svg,woff2,woff,ttf,otf,eot,webmanifest}'],
         globIgnores: ['**/*.map', '**/*.gz', '**/sw.js'],
         navigateFallback: '/index.html',
-        navigateFallbackDenylist: [/^\/api\//],
+        navigateFallbackDenylist: [/^\/api\//, /\.js$/, /\.mjs$/],
         maximumFileSizeToCacheInBytes: 15 * 1024 * 1024,
         runtimeCaching: [
           {
