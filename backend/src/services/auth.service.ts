@@ -240,6 +240,11 @@ export async function loginUser(input: LoginInput) {
     throw new AuthError("بيانات تسجيل الدخول غير صحيحة", 401);
   }
 
+  // Google-only accounts have no local password; prevent password login.
+  if (!user.passwordHash) {
+    throw new AuthError("بيانات تسجيل الدخول غير صحيحة", 401);
+  }
+
   const valid = await bcrypt.compare(password, user.passwordHash);
   if (!valid) {
     throw new AuthError("بيانات تسجيل الدخول غير صحيحة", 401);
@@ -304,14 +309,17 @@ export async function getUserById(userId: string) {
 
 export class AuthError extends Error {
   status: number;
-  constructor(message: string, status: number) {
+  /** Optional stable machine-readable code for error differentiation by clients. */
+  code?: string;
+  constructor(message: string, status: number, code?: string) {
     super(message);
     this.name = "AuthError";
     this.status = status;
+    this.code = code;
   }
 }
 
-function sanitizeUser(user: any, profile?: { avatarUrl: string | null } | null) {
+export function sanitizeUser(user: any, profile?: { avatarUrl: string | null } | null) {
   const { passwordHash, ...safe } = user;
   return { ...safe, avatarUrl: profile?.avatarUrl ?? null };
 }

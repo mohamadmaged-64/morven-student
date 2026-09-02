@@ -4,6 +4,7 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { Button } from '@/components/UI/Button';
 import { Input } from '@/components/UI/Input';
 import { Card } from '@/components/UI/Card';
+import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -72,7 +73,15 @@ export default function LoginPage() {
           </Button>
         </form>
 
-        <div className="mt-6 text-center">
+        <div className="flex items-center gap-3 my-6">
+          <span className="flex-1 h-px bg-light-border dark:bg-dark-border" />
+          <span className="text-xs text-gray-400 dark:text-gray-500">أو</span>
+          <span className="flex-1 h-px bg-light-border dark:bg-dark-border" />
+        </div>
+
+        <GoogleSignInButton mode="login" onSuccess={() => navigate('/')} />
+
+        <div className="mt-6 text-center space-y-3">
           <p className="text-sm text-gray-500 dark:text-gray-400">
             ليس لديك حساب؟{' '}
             <Link
@@ -82,6 +91,14 @@ export default function LoginPage() {
               إنشاء حساب
             </Link>
           </p>
+          <div className="pt-3 border-t border-light-border dark:border-dark-border">
+            <Link
+              to="/privacy"
+              className="text-xs text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:underline"
+            >
+              سياسة الخصوصية
+            </Link>
+          </div>
         </div>
       </Card>
     </div>

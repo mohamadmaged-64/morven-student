@@ -4,6 +4,7 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { Button } from '@/components/UI/Button';
 import { Input } from '@/components/UI/Input';
 import { Card } from '@/components/UI/Card';
+import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
 
 export default function RegisterPage() {
   const [displayName, setDisplayName] = useState('');
@@ -117,7 +118,26 @@ export default function RegisterPage() {
           >
             إنشاء حساب
           </Button>
+
+          <p className="text-xs text-gray-500 dark:text-gray-400 text-center leading-6">
+            بإنشاء حساب، يمكنك الاطلاع على{' '}
+            <Link
+              to="/privacy"
+              className="text-primary-600 dark:text-primary-400 hover:underline font-medium"
+            >
+              سياسة الخصوصية
+            </Link>
+            .
+          </p>
         </form>
+
+        <div className="flex items-center gap-3 my-6">
+          <span className="flex-1 h-px bg-light-border dark:bg-dark-border" />
+          <span className="text-xs text-gray-400 dark:text-gray-500">أو</span>
+          <span className="flex-1 h-px bg-light-border dark:bg-dark-border" />
+        </div>
+
+        <GoogleSignInButton mode="register" onSuccess={() => navigate('/')} />
 
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-500 dark:text-gray-400">

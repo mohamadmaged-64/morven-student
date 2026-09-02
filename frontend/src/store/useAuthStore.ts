@@ -18,6 +18,7 @@ interface AuthState {
     displayName: string,
   ) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
+  googleLogin: (credential: string) => Promise<void>;
   logout: () => Promise<void>;
   clearError: () => void;
   setAvatarUrl: (url: string | null) => void;
@@ -76,6 +77,26 @@ export const useAuthStore = create<AuthState>((set) => ({
         return;
       }
       const result = await api.login(email, password);
+      set({ user: result.user, loading: false });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'حدث خطأ';
+      set({ loading: false, error: message });
+      throw err;
+    }
+  },
+
+  googleLogin: async (credential) => {
+    set({ loading: true, error: null });
+    try {
+      // Google has no login flow in preview mode; fall back to the shared path
+      // so the store mismatch cannot break the UI.
+      if (isPreviewMode()) {
+        const result = await mockLogin('google@preview.local', 'preview-google');
+        api.setAccessToken(result.accessToken);
+        set({ user: result.user, loading: false });
+        return;
+      }
+      const result = await api.googleLogin(credential);
       set({ user: result.user, loading: false });
     } catch (err) {
       const message = err instanceof Error ? err.message : 'حدث خطأ';

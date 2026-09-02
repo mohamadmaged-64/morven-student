@@ -27,6 +27,7 @@ import QRCodeToolPage from '@/pages/tools/QRCodeTools';
 import FileManagerPage from '@/pages/FileManagerPage';
 import LoginPage from '@/pages/auth/LoginPage';
 import RegisterPage from '@/pages/auth/RegisterPage';
+import PrivacyPolicyPage from '@/pages/PrivacyPolicyPage';
 import ConnectLandingPage from '@/pages/connect/ConnectLandingPage';
 import AccountPage from '@/pages/connect/AccountPage';
 import PublicProfilePage from '@/pages/connect/PublicProfilePage';
@@ -116,6 +117,7 @@ export default function App() {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/privacy" element={<PrivacyPolicyPage />} />
 
         <Route element={<MainLayout />}>
           <Route path="/" element={<Dashboard />} />

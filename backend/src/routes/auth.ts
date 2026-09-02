@@ -15,12 +15,17 @@ import {
   CSRF_COOKIE_OPTIONS,
   generateCsrfToken,
 } from "../services/auth.service";
+import { googleLoginSchema, verifyGoogleIdToken, authenticateWithGoogle } from "../services/google.service";
 import { authenticate } from "../middleware/auth";
 
 const router = Router();
 
 function handleAuthError(err: unknown, res: Response): void {
   if (err instanceof AuthError) {
+    if (err.code) {
+      res.status(err.status).json({ error: err.message, code: err.code });
+      return;
+    }
     res.status(err.status).json({ error: err.message });
     return;
   }
@@ -98,6 +103,37 @@ router.post("/api/auth/login", async (req: Request, res: Response) => {
     res.cookie(REFRESH_COOKIE_NAME, result.refreshToken, REFRESH_COOKIE_OPTIONS);
     res.cookie(CSRF_COOKIE_NAME, csrfToken, CSRF_COOKIE_OPTIONS);
     res.json({
+      user: result.user,
+      accessToken: result.accessToken,
+    });
+  } catch (err) {
+    handleAuthError(err, res);
+  }
+});
+
+// POST /api/auth/google
+router.post("/api/auth/google", async (req: Request, res: Response) => {
+  try {
+    const parsed = googleLoginSchema.safeParse(req.body);
+    if (!parsed.success) {
+      const firstError = parsed.error.issues[0];
+      res.status(400).json({ error: firstError.message });
+      return;
+    }
+
+    const clientId = process.env.GOOGLE_CLIENT_ID?.trim();
+    if (!clientId) {
+      res.status(503).json({ error: "تسجيل الدخول عبر Google غير متاح حالياً" });
+      return;
+    }
+
+    const identity = await verifyGoogleIdToken(parsed.data.credential, clientId);
+    const result = await authenticateWithGoogle(identity);
+
+    const csrfToken = generateCsrfToken();
+    res.cookie(REFRESH_COOKIE_NAME, result.refreshToken, REFRESH_COOKIE_OPTIONS);
+    res.cookie(CSRF_COOKIE_NAME, csrfToken, CSRF_COOKIE_OPTIONS);
+    res.status(201).json({
       user: result.user,
       accessToken: result.accessToken,
     });

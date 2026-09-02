@@ -101,6 +101,7 @@ app.use("/", healthRoutes);
 // Auth routes with rate limiting
 app.use("/api/auth/register", authLimiter);
 app.use("/api/auth/login", authLimiter);
+app.use("/api/auth/google", authLimiter);
 app.use("/api/auth/refresh", refreshLimiter);
 app.use(authRoutes);
 app.use(profileRoutes);

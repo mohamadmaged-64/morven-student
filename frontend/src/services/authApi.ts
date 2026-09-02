@@ -28,7 +28,13 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<{ da
   const data = await res.json();
 
   if (!res.ok) {
-    throw new Error(data.error || 'حدث خطأ غير متوقع');
+    const error = new Error(data.error || 'حدث خطأ غير متوقع') as Error & { code?: string };
+    // Preserve any structured machine-readable code (e.g. GOOGLE_EMAIL_EXISTS)
+    // so callers can map it to contextually clear messages.
+    if (typeof data.code === 'string' && data.code) {
+      error.code = data.code;
+    }
+    throw error;
   }
 
   return { data: data as T, res };
@@ -200,6 +206,22 @@ export async function login(
   const { data, res } = await request<AuthResponse>('/api/auth/login', {
     method: 'POST',
     body: JSON.stringify({ email, password }),
+  });
+  setAccessToken(data.accessToken);
+  const cookies = parseCookies(res);
+  if (cookies['morven_csrf_token']) {
+    csrfToken = cookies['morven_csrf_token'];
+  }
+  return data;
+}
+
+export async function googleLogin(credential: string): Promise<AuthResponse> {
+  // The backend (POST /api/auth/google) verifies the Google ID token, then
+  // issues a Morven session exactly like password login (httpOnly refresh
+  // cookie + CSRF cookie + access token), reusing this same auth system.
+  const { data, res } = await request<AuthResponse>('/api/auth/google', {
+    method: 'POST',
+    body: JSON.stringify({ credential }),
   });
   setAccessToken(data.accessToken);
   const cookies = parseCookies(res);
