@@ -156,6 +156,11 @@ function TasksPanel() {
               </button>
               <div className={`w-2 h-2 rounded-full shrink-0 ${priorityColor(task.priority)}`} />
               <span className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate flex-1">{task.title}</span>
+              {task.taskType === 'daily' && task.dailyTime && (
+                <span className="text-xs font-medium shrink-0 px-2 py-0.5 rounded-full bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400">
+                  {new Date(`1970-01-01T${task.dailyTime}`).toLocaleTimeString(APP_DISPLAY_LOCALE, { hour: 'numeric', minute: '2-digit', hour12: true })}
+                </span>
+              )}
               {task.dueDate && (
                 <span className={`text-xs font-medium shrink-0 px-2 py-0.5 rounded-full ${task.dueDate < today ? 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400' : task.dueDate === today ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400' : 'bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400'}`}>
                   {task.dueDate === today

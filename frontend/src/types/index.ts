@@ -40,6 +40,8 @@ export interface Task {
   completed: boolean;
   priority: 'low' | 'medium' | 'high';
   dueDate?: string;
+  taskType?: 'normal' | 'daily';
+  dailyTime?: string;
   createdAt: number;
   updatedAt: number;
 }

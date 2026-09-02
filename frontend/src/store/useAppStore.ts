@@ -23,7 +23,7 @@ interface AppStore {
 
   // Tasks
   tasks: Task[];
-  addTask: (title: string, description?: string, priority?: Task['priority'], dueDate?: string) => void;
+  addTask: (title: string, description?: string, priority?: Task['priority'], dueDate?: string, taskType?: Task['taskType'], dailyTime?: string) => void;
   updateTask: (id: string, updates: Partial<Task>) => void;
   deleteTask: (id: string) => void;
   toggleTask: (id: string) => void;
@@ -83,7 +83,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
   },
 
   tasks: loadState('tasks', []),
-  addTask: (title, description, priority = 'medium', dueDate) => {
+  addTask: (title, description, priority = 'medium', dueDate, taskType, dailyTime) => {
     const task: Task = {
       id: uuid(),
       title,
@@ -91,6 +91,8 @@ export const useAppStore = create<AppStore>((set, get) => ({
       completed: false,
       priority,
       dueDate,
+      taskType,
+      dailyTime,
       createdAt: Date.now(),
       updatedAt: Date.now(),
     };

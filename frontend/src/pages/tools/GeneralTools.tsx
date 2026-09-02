@@ -934,6 +934,8 @@ function TaskManager() {
   const [newDescription, setNewDescription] = useState('');
   const [newPriority, setNewPriority] = useState<Task['priority']>('medium');
   const [newDueDate, setNewDueDate] = useState('');
+  const [newTaskType, setNewTaskType] = useState<'normal' | 'daily'>('normal');
+  const [newDailyTime, setNewDailyTime] = useState('');
 
   const filteredTasks = tasks
     .filter(task => {
@@ -966,11 +968,20 @@ function TaskManager() {
 
   const handleAddTask = () => {
     if (!newTitle.trim()) return;
-    addTask(newTitle.trim(), newDescription.trim() || undefined, newPriority, newDueDate || undefined);
+    addTask(
+      newTitle.trim(),
+      newDescription.trim() || undefined,
+      newPriority,
+      newDueDate || undefined,
+      newTaskType,
+      newTaskType === 'daily' && newDailyTime ? newDailyTime : undefined,
+    );
     setNewTitle('');
     setNewDescription('');
     setNewPriority('medium');
     setNewDueDate('');
+    setNewTaskType('normal');
+    setNewDailyTime('');
     setShowAddModal(false);
   };
 
@@ -1192,6 +1203,23 @@ function TaskManager() {
                           {task.priority === 'high' ? 'عالية' : task.priority === 'medium' ? 'متوسطة' : 'منخفضة'}
                         </span>
 
+                        {task.taskType === 'daily' && (
+                          <span className={`inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full ${
+                            task.completed ? 'bg-gray-100 text-gray-400 dark:bg-gray-800 dark:text-gray-500' :
+                            'bg-primary-50 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400'
+                          }`}>
+                            {!task.dailyTime && (
+                              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <circle cx="12" cy="12" r="10" />
+                                <polyline points="12 6 12 12 16 14" />
+                              </svg>
+                            )}
+                            {task.dailyTime
+                              ? new Date(`1970-01-01T${task.dailyTime}`).toLocaleTimeString('ar-EG-u-nu-latn', { hour: 'numeric', minute: '2-digit', hour12: true })
+                              : ''}
+                          </span>
+                        )}
+
                         {task.dueDate && (
                           <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${
                             task.completed ? 'bg-gray-100 text-gray-400 dark:bg-gray-800 dark:text-gray-500' :
@@ -1272,6 +1300,27 @@ function TaskManager() {
             placeholder={'وصف اختياري'}
             rows={2}
           />
+          <Select
+            label={'نوع المهمة'}
+            value={newTaskType}
+            onChange={e => {
+              const val = e.target.value as 'normal' | 'daily';
+              setNewTaskType(val);
+              if (val === 'normal') setNewDailyTime('');
+            }}
+            options={[
+              { value: 'normal', label: 'مهمة عادية' },
+              { value: 'daily', label: 'مهمة يومية' },
+            ]}
+          />
+          {newTaskType === 'daily' && (
+            <Input
+              label={'الوقت'}
+              type="time"
+              value={newDailyTime}
+              onChange={e => setNewDailyTime(e.target.value)}
+            />
+          )}
           <Select
             label={'الأولوية'}
             value={newPriority}
