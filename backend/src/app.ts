@@ -61,7 +61,19 @@ app.use("/uploads", express.static(UPLOADS_DIR, { maxAge: "30d", immutable: true
 // ---------------------------------------------------------------------------
 // Security headers
 // ---------------------------------------------------------------------------
-app.use(helmet({ crossOriginResourcePolicy: false }));
+// Google Sign-In renders a cross-origin popup/iframe and relays the ID token
+// back to the page via postMessage. Helmet's default Cross-Origin-Opener-Policy
+// (same-origin) and Cross-Origin-Embedder-Policy block that cross-origin
+// postMessage, so Google SSO fails ("Cross-Origin-Opener-Policy policy would
+// block the window.postMessage call"). Disable just those two for the Google
+// flow while keeping every other helmet protection.
+app.use(
+  helmet({
+    crossOriginResourcePolicy: false,
+    crossOriginOpenerPolicy: false,
+    crossOriginEmbedderPolicy: false,
+  })
+);
 
 // ---------------------------------------------------------------------------
 // CORS

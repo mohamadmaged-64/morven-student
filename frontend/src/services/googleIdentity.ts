@@ -87,6 +87,8 @@ export const GOOGLE_BACKEND_CODES: Record<string, string> = {
     'هذا البريد الإلكتروني مسجل بالفعل بحساب بكلمة مرور. يرجى تسجيل الدخول بكلمة المرور ثم ربط حساب Google من إعدادات الحساب.',
   GOOGLE_EMAIL_UNVERIFIED:
     'البريد الإلكتروني لحساب Google غير موثق. يرجى التحقق من بريدك الإلكتروني في Google ثم المحاولة مجدداً.',
+  GOOGLE_TOKEN_INVALID:
+    'تعذر التحقق من بيانات اعتماد Google. يرجى المحاولة مجدداً.',
 };
 
 type AuthApiError = Error & { code?: string };

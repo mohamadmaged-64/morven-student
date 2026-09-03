@@ -156,7 +156,25 @@ export async function verifyGoogleIdToken(
   if (isMockMode) {
     return verifyWithMock(credential, clientId);
   }
-  return verifyWithGoogleLibrary(credential, clientId);
+  try {
+    return await verifyWithGoogleLibrary(credential, clientId);
+  } catch (err) {
+    // google-auth-library throws a generic Error (GetTokenError / SyntaxError /
+    // network / cert-fetch errors) for anything it cannot verify — it never
+    // throws an AuthError. Convert those into a clear, 4xx AuthError so the
+    // client sees the real problem (bad/expired/mismatched token or Google
+    // unreachable) instead of a vague 500 "server error". The original error is
+    // logged for diagnosis.
+    if (err instanceof AuthError) {
+      throw err;
+    }
+    console.error("Google ID token verification failed:", err);
+    throw new AuthError(
+      "تعذر التحقق من بيانات اعتماد Google. يرجى المحاولة مجدداً",
+      401,
+      "GOOGLE_TOKEN_INVALID"
+    );
+  }
 }
 
 // ---------------------------------------------------------------------------
