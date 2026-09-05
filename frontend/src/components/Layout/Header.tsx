@@ -17,6 +17,7 @@ import {
   Monitor,
   Bell,
   UserCircle,
+  Lightbulb,
   Shield as ShieldIcon,
 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -229,6 +230,17 @@ export function Header({ title }: HeaderProps) {
                         >
                           <UserCircle className="w-4 h-4 text-gray-400 dark:text-gray-500" />
                           الحساب
+                        </button>
+
+                        <button
+                          onClick={() => {
+                            setMenuOpen(false);
+                            navigate('/connect/suggestions');
+                          }}
+                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-dark-hover transition-colors"
+                        >
+                          <Lightbulb className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+                          الاقتراحات
                         </button>
 
                         {user.role === 'ADMIN' && (

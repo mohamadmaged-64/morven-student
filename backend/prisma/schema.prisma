@@ -21,6 +21,7 @@ model User {
   lastLoginAt   DateTime?      @map("last_login_at")
   profile       Profile?
   refreshTokens RefreshToken[]
+  suggestions   Suggestion[]
   ownedGroups   Group[]        @relation("GroupOwner")
   groupMembers  GroupMember[]
   pomodoroSessions PomodoroSession[]
@@ -29,6 +30,19 @@ model User {
   readNotifications UserNotificationRead[]
 
   @@map("users")
+}
+
+model Suggestion {
+  id        String   @id @default(uuid())
+  title     String
+  content   String
+  userId    String   @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("suggestions")
 }
 
 model Profile {

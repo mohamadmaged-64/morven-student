@@ -35,7 +35,9 @@ import GroupsPage from '@/pages/connect/GroupsPage';
 import GroupDetailPage from '@/pages/connect/GroupDetailPage';
 import ResourcesPage from '@/pages/connect/ResourcesPage';
 import ResourceDetailPage from '@/pages/connect/ResourceDetailPage';
+import SuggestionsPage from '@/pages/connect/SuggestionsPage';
 import AdminUsersPage from '@/pages/admin/AdminUsersPage';
+import AdminSuggestionsPage from '@/pages/admin/AdminSuggestionsPage';
 
 
 const toolPageMap: Record<ToolCategory, ComponentType<{ toolId: string }>> = {
@@ -134,9 +136,11 @@ export default function App() {
           <Route path="/connect/groups/:groupId" element={<ProtectedRoute><GroupDetailPage /></ProtectedRoute>} />
           <Route path="/connect/resources" element={<ProtectedRoute><ResourcesPage /></ProtectedRoute>} />
           <Route path="/connect/resources/:resourceId" element={<ProtectedRoute><ResourceDetailPage /></ProtectedRoute>} />
+          <Route path="/connect/suggestions" element={<ProtectedRoute><SuggestionsPage /></ProtectedRoute>} />
 
           {/* Admin (ADMIN role only) */}
           <Route path="/admin/users" element={<AdminRoute><AdminUsersPage /></AdminRoute>} />
+          <Route path="/admin/suggestions" element={<AdminRoute><AdminSuggestionsPage /></AdminRoute>} />
         </Route>
       </Routes>
     </BrowserRouter>
