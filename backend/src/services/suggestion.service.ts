@@ -28,6 +28,7 @@ export const createSuggestionSchema = z.object({
     .max(5000, {
       message: "الموضوع طويل جداً",
     }),
+  anonymous: z.boolean().optional().default(false),
 });
 
 export type CreateSuggestionInput = z.infer<typeof createSuggestionSchema>;
@@ -37,6 +38,7 @@ export async function createSuggestion(userId: string, input: CreateSuggestionIn
     data: {
       title: input.title,
       content: input.content,
+      anonymous: input.anonymous,
       userId,
     },
   });

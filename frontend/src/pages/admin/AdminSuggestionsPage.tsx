@@ -122,6 +122,11 @@ export default function AdminSuggestionsPage() {
                   <p className="text-sm text-gray-600 dark:text-gray-300 whitespace-pre-wrap mb-2">
                     {suggestion.content}
                   </p>
+                  {suggestion.anonymous && (
+                    <Badge variant="warning" size="sm" className="mb-2">
+                      اختار الإرسال بشكل متخفٍ
+                    </Badge>
+                  )}
                   <p className="text-xs text-gray-400 dark:text-gray-500">
                     تاريخ الإرسال: {formatDate(suggestion.createdAt)}
                   </p>

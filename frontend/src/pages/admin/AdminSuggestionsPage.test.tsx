@@ -30,6 +30,7 @@ describe('AdminSuggestionsPage', () => {
     id: 's1',
     title: 'إضافة وضع ليلي',
     content: 'أقترح إضافة وضع ليلي سهل التفعيل',
+    anonymous: false,
     userId: 'u1',
     createdAt: '2026-09-05T00:00:00.000Z',
     updatedAt: '2026-09-05T00:00:00.000Z',
@@ -77,5 +78,31 @@ describe('AdminSuggestionsPage', () => {
     await waitFor(() => {
       expect(screen.getByText('حدث خطأ في الخادم')).toBeInTheDocument();
     });
+  });
+
+  it('shows the hidden-option indicator when anonymous is true', async () => {
+    mockedListSuggestions.mockResolvedValue([
+      { ...suggestion, anonymous: true },
+    ]);
+    renderPage();
+
+    await waitFor(() => {
+      expect(screen.getByText('اختار الإرسال بشكل متخفٍ')).toBeInTheDocument();
+    });
+    expect(screen.getByText('أحمد محمد')).toBeInTheDocument();
+  });
+
+  it('does not show the hidden-option indicator when anonymous is false', async () => {
+    mockedListSuggestions.mockResolvedValue([
+      { ...suggestion, anonymous: false },
+    ]);
+    renderPage();
+
+    await waitFor(() => {
+      expect(screen.getByText('أحمد محمد')).toBeInTheDocument();
+    });
+    expect(
+      screen.queryByText('اختار الإرسال بشكل متخفٍ'),
+    ).not.toBeInTheDocument();
   });
 });

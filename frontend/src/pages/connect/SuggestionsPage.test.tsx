@@ -89,6 +89,7 @@ describe('SuggestionsPage', () => {
       expect(mockedSubmitSuggestion).toHaveBeenCalledWith({
         title: 'اقتراح جيد',
         content: 'تفاصيل كثيرة',
+        anonymous: false,
       });
     });
     expect(addNotification).toHaveBeenCalledWith(
@@ -120,12 +121,13 @@ describe('SuggestionsPage', () => {
     });
   });
 
-  it('toggles the anonymous checkbox without hiding the user association', async () => {
+  it('submits the anonymous value when the checkbox is selected', async () => {
     const user = userEvent.setup();
     mockedSubmitSuggestion.mockResolvedValue({
       id: 's2',
       title: 'عناوين',
       content: 'محتوى',
+      anonymous: true,
       createdAt: '2026-09-05T00:00:00.000Z',
       updatedAt: '2026-09-05T00:00:00.000Z',
     });
@@ -145,11 +147,61 @@ describe('SuggestionsPage', () => {
       expect(mockedSubmitSuggestion).toHaveBeenCalledWith({
         title: 'عناوين',
         content: 'محتوى',
+        anonymous: true,
       });
     });
-    // The UI-only anonymous option is not sent to the API.
-    expect(mockedSubmitSuggestion).not.toHaveBeenCalledWith(
-      expect.objectContaining({ anonymous: true }),
-    );
+  });
+
+  it('submits anonymous=false when the checkbox is not selected', async () => {
+    const user = userEvent.setup();
+    mockedSubmitSuggestion.mockResolvedValue({
+      id: 's3',
+      title: 'عنوان عادي',
+      content: 'محتوى عادي',
+      anonymous: false,
+      createdAt: '2026-09-05T00:00:00.000Z',
+      updatedAt: '2026-09-05T00:00:00.000Z',
+    });
+
+    renderPage();
+    await user.type(screen.getByLabelText(/اسم الاقتراح/), 'عنوان عادي');
+    await user.type(screen.getByLabelText(/الموضوع/), 'محتوى عادي');
+    await user.click(screen.getByRole('button', { name: /إرسال الاقتراح/ }));
+
+    await waitFor(() => {
+      expect(mockedSubmitSuggestion).toHaveBeenCalledWith({
+        title: 'عنوان عادي',
+        content: 'محتوى عادي',
+        anonymous: false,
+      });
+    });
+  });
+
+  it('keeps the checkbox unchecked and cleared after submission', async () => {
+    const user = userEvent.setup();
+    mockedSubmitSuggestion.mockResolvedValue({
+      id: 's4',
+      title: 'عناوين',
+      content: 'محتوى',
+      anonymous: true,
+      createdAt: '2026-09-05T00:00:00.000Z',
+      updatedAt: '2026-09-05T00:00:00.000Z',
+    });
+
+    renderPage();
+    const checkbox = screen.getByRole('checkbox', {
+      name: /إرسال بشكل متخفٍ/,
+    });
+    await user.click(checkbox);
+    expect(checkbox).toBeChecked();
+
+    await user.type(screen.getByLabelText(/اسم الاقتراح/), 'عناوين');
+    await user.type(screen.getByLabelText(/الموضوع/), 'محتوى');
+    await user.click(screen.getByRole('button', { name: /إرسال الاقتراح/ }));
+
+    await waitFor(() => {
+      expect(mockedSubmitSuggestion).toHaveBeenCalled();
+    });
+    expect(checkbox).not.toBeChecked();
   });
 });

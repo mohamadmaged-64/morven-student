@@ -37,10 +37,7 @@ export default function SuggestionsPage() {
 
     setSaving(true);
     try {
-      // The "إرسال بشكل متخفٍ" option is currently a UI-only option. It does
-      // NOT anonymize the submission — the backend always associates the
-      // suggestion with the authenticated user.
-      await submitSuggestion({ title: title.trim(), content: content.trim() });
+      await submitSuggestion({ title: title.trim(), content: content.trim(), anonymous });
       setTitle('');
       setContent('');
       setAnonymous(false);

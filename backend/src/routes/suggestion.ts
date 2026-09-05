@@ -28,7 +28,8 @@ router.post(
       }
 
       // The user identity always comes from the authenticated session, never
-      // from the client body. The UI-only "anonymous/hidden" option is ignored.
+      // from the client body. The "anonymous" flag records the user's choice
+      // but never hides their identity from the admin.
       const suggestion = await createSuggestion(req.user.sub, parsed.data);
       res.status(201).json({ suggestion });
     } catch (err) {

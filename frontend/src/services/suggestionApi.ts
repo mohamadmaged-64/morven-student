@@ -4,6 +4,7 @@ export interface Suggestion {
   id: string;
   title: string;
   content: string;
+  anonymous: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -22,6 +23,7 @@ export interface AdminSuggestion extends Suggestion {
 export interface CreateSuggestionInput {
   title: string;
   content: string;
+  anonymous?: boolean;
 }
 
 export async function submitSuggestion(

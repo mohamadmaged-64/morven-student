@@ -165,8 +165,57 @@ describe("Suggestions API", () => {
     });
     assert.equal(res.status, 201);
     const { suggestion } = await res.json();
+    assert.equal(suggestion.anonymous, true, "anonymous option must be stored");
     assert.equal(suggestion.userId, user.id, "anonymous option must not remove the user association");
-    assert.equal(typeof suggestion.anonymous, "undefined", "no anonymous field should exist");
+
+    const stored = await prisma.suggestion.findUnique({
+      where: { id: suggestion.id },
+      include: { user: true },
+    });
+    assert.equal(stored.anonymous, true, "anonymous must be persisted");
+    assert.equal(stored.userId, user.id, "suggestion must still be related to the user");
+    assert.equal(stored.user.email, user.email);
+  });
+
+  it("stores anonymous=false by default when the option is not selected", async () => {
+    const user = await register(server.baseUrl, "visible");
+    const res = await fetch(`${server.baseUrl}/api/suggestions`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${user.accessToken}`,
+      },
+      body: JSON.stringify({ title: "اقتراح عادي", content: "محتوى عادي" }),
+    });
+    assert.equal(res.status, 201);
+    const { suggestion } = await res.json();
+    assert.equal(suggestion.anonymous, false, "anonymous must default to false");
+    assert.equal(suggestion.userId, user.id);
+
+    const stored = await prisma.suggestion.findUnique({
+      where: { id: suggestion.id },
+    });
+    assert.equal(stored.anonymous, false, "anonymous false must be persisted");
+  });
+
+  it("stores an explicit anonymous=false sent by the client", async () => {
+    const user = await register(server.baseUrl, "explicitfalse");
+    const res = await fetch(`${server.baseUrl}/api/suggestions`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${user.accessToken}`,
+      },
+      body: JSON.stringify({
+        title: "اقتراح بلا تخفي",
+        content: "محتوى",
+        anonymous: false,
+      }),
+    });
+    assert.equal(res.status, 201);
+    const { suggestion } = await res.json();
+    assert.equal(suggestion.anonymous, false);
+    assert.equal(suggestion.userId, user.id);
   });
 
   it("allows an admin to retrieve suggestions with user info, newest first", async () => {
@@ -190,19 +239,39 @@ describe("Suggestions API", () => {
       assert.equal(res.status, 201);
     }
 
+    // One more with the anonymous option selected.
+    const anonymous = await fetch(`${server.baseUrl}/api/suggestions`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${submitter.accessToken}`,
+      },
+      body: JSON.stringify({
+        title: "الأحدث متخفي",
+        content: "محتوى متخفي",
+        anonymous: true,
+      }),
+    });
+    assert.equal(anonymous.status, 201);
+    const anonSuggestion = (await anonymous.json()).suggestion;
+    assert.equal(anonSuggestion.anonymous, true);
+
     const res = await fetch(`${server.baseUrl}/api/admin/suggestions`, {
       headers: { Authorization: `Bearer ${adminToken}` },
     });
     assert.equal(res.status, 200);
     const { suggestions } = await res.json();
     assert.ok(Array.isArray(suggestions));
-    assert.ok(suggestions.length >= 3);
+    assert.ok(suggestions.length >= 4);
 
     // Suggestions for this submitter ordered newest first.
     const mine = suggestions.filter((s) => s.user.email === submitter.email);
-    assert.equal(mine.length, 3);
+    assert.equal(mine.length, 4);
     const titles = mine.map((s) => s.title);
-    assert.deepEqual(titles, ["الأحدث", "الأوسط", "الأقدم"]);
+    assert.deepEqual(titles, ["الأحدث متخفي", "الأحدث", "الأوسط", "الأقدم"]);
+
+    assert.equal(mine[0].anonymous, true, "admin API must return the anonymous value");
+    assert.equal(mine[1].anonymous, false, "anonymous must default to false");
 
     for (const s of mine) {
       assert.equal(s.user.email, submitter.email);
@@ -211,6 +280,7 @@ describe("Suggestions API", () => {
       assert.equal(typeof s.user.avatarUrl, "object"); // null or string
       assert.equal(typeof s.user.id, "string");
       assert.equal(typeof s.user.username, "string");
+      assert.equal(typeof s.anonymous, "boolean");
       // Sensitive fields must not leak.
       assert.equal(s.user.passwordHash, undefined);
       assert.equal(s.user.googleId, undefined);
