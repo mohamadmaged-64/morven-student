@@ -116,9 +116,7 @@ export default function SuggestionsPage() {
                   <span className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                     إرسال بشكل متخفٍ
                   </span>
-                  <span className="block text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                    هذا الخيار تجريبي حالياً ولن يخفي هويتك
-                  </span>
+                  
                 </div>
               </label>
 

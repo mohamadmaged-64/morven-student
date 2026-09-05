@@ -244,6 +244,7 @@ export function Header({ title }: HeaderProps) {
                         </button>
 
                         {user.role === 'ADMIN' && (
+                          <>
                           <button
                             onClick={() => {
                               setMenuOpen(false);
@@ -254,6 +255,18 @@ export function Header({ title }: HeaderProps) {
                             <ShieldIcon className="w-4 h-4 text-primary-500" />
                             إدارة المستخدمين
                           </button>
+
+                          <button
+                            onClick={() => {
+                              setMenuOpen(false);
+                              navigate('/admin/suggestions');
+                            }}
+                            className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-dark-hover transition-colors"
+                          >
+                            <Lightbulb className="w-4 h-4 text-primary-500" />
+                            الاقتراحات
+                          </button>
+                          </>
                         )}
 
                         {/* Theme submenu */}
