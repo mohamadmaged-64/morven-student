@@ -3,11 +3,20 @@ import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import { z } from "zod";
 import prisma from "../lib/prisma";
+import {
+  buildPasswordResetUrl,
+  sendPasswordResetEmail,
+} from "./email.service";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
 const ACCESS_TOKEN_EXPIRY = "15m";
 const REFRESH_TOKEN_DAYS = 7;
+const PASSWORD_RESET_TOKEN_MINUTES = (() => {
+  const raw = process.env.PASSWORD_RESET_TOKEN_TTL_MINUTES;
+  const n = Number(raw);
+  return Number.isFinite(n) && n > 0 ? n : 60;
+})();
 
 if (!JWT_SECRET || !JWT_REFRESH_SECRET) {
   throw new Error(
@@ -46,8 +55,22 @@ export const loginSchema = z.object({
   password: z.string().min(1, "كلمة المرور مطلوبة"),
 });
 
+export const forgotPasswordSchema = z.object({
+  email: z.string().email("البريد الإلكتروني غير صالح").toLowerCase().trim(),
+});
+
+export const resetPasswordSchema = z.object({
+  token: z.string().min(1, "رمز إعادة التعيين مطلوب"),
+  password: z
+    .string()
+    .min(8, "كلمة المرور يجب أن تكون 8 أحرف على الأقل")
+    .max(128, "كلمة المرور طويلة جداً"),
+});
+
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
+export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
+export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
 
 // ---------------------------------------------------------------------------
 // JWT helpers
@@ -120,6 +143,128 @@ export async function revokeAllUserRefreshTokens(
   userId: string
 ): Promise<void> {
   await prisma.refreshToken.deleteMany({ where: { userId } });
+}
+
+// ---------------------------------------------------------------------------
+// Password reset
+// ---------------------------------------------------------------------------
+
+function generatePasswordResetToken(): string {
+  return crypto.randomBytes(32).toString("hex");
+}
+
+/**
+ * Uniform, non-enumerating message used for BOTH an existing and a
+ * non-existent email. Never reveals whether the account exists.
+ */
+const PASSWORD_RESET_UNIFORM_MESSAGE =
+  "إذا كان هذا البريد الإلكتروني مسجلاً، فستصلك رسالة تحتوي على رابط إعادة تعيين كلمة المرور.";
+
+/**
+ * Request a password reset for the given email.
+ *
+ * Security notes:
+ * - The response is IDENTICAL regardless of whether the email exists, so user
+ *   enumeration via this endpoint is not possible.
+ * - Google-only accounts (passwordHash === null) silently take the same path:
+ *   they never receive a reset link (there is no password to reset) and never
+ *   reveal that the account type differs.
+ * - Tokens are 256-bit random values, stored only as SHA-256 hashes, and are
+ *   returned to the caller for emailing only.
+ */
+export async function requestPasswordReset(email: string): Promise<void> {
+  // Always resolve the same message; if the email is unknown we still return
+  // the uniform string without sending anything.
+  const user = await prisma.user.findUnique({ where: { email } });
+
+  // Only issue tokens / send mail for accounts that can actually reset (have a
+  // local password). Google-only accounts and unknown emails behave identically
+  // from the outside.
+  if (user && user.passwordHash) {
+    const rawToken = generatePasswordResetToken();
+    const tokenHash = hashToken(rawToken);
+    const expiresAt = new Date(
+      Date.now() + PASSWORD_RESET_TOKEN_MINUTES * 60 * 1000
+    );
+
+    await prisma.passwordResetToken.create({
+      data: { tokenHash, userId: user.id, expiresAt },
+    });
+
+    const resetUrl = buildPasswordResetUrl(rawToken);
+    await sendPasswordResetEmail({
+      to: user.email,
+      displayName: user.displayName,
+      resetUrl,
+    });
+  }
+
+  // No early return, no branching on account existence to the caller.
+}
+
+/**
+ * Consume a single-use reset token and set a new password.
+ *
+ * Security notes:
+ * - Expired tokens are rejected.
+ * - Each token is single-use: `usedAt` is set and treated as consumed.
+ * - On success ALL outstanding reset tokens AND ALL refresh tokens for the user
+ *   are invalidated, logging the user out of every device.
+ */
+export async function resetPassword(token: string, newPassword: string): Promise<void> {
+  const tokenHash = hashToken(token);
+
+  const record = await prisma.passwordResetToken.findUnique({
+    where: { tokenHash },
+  });
+
+  if (!record) {
+    throw new AuthError("رمز إعادة التعيين غير صالح أو منتهي الصلاحية", 400);
+  }
+
+  if (record.usedAt) {
+    throw new AuthError("رمز إعادة التعيين غير صالح أو منتهي الصلاحية", 400);
+  }
+
+  if (record.expiresAt < new Date()) {
+    // Clean up the expired row and reject.
+    await prisma.passwordResetToken.delete({ where: { id: record.id } });
+    throw new AuthError("رمز إعادة التعيين غير صالح أو منتهي الصلاحية", 400);
+  }
+
+  const user = await prisma.user.findUnique({ where: { id: record.userId } });
+  // Account may have been deleted, or is a Google-only account (no password to
+  // reset). Reject without revealing the cause.
+  if (!user || !user.passwordHash) {
+    throw new AuthError("رمز إعادة التعيين غير صالح أو منتهي الصلاحية", 400);
+  }
+
+  // Reject reusing the current password.
+  const sameAsCurrent = await bcrypt.compare(newPassword, user.passwordHash);
+  if (sameAsCurrent) {
+    throw new AuthError("كلمة المرور الجديدة يجب أن تختلف عن كلمة المرور الحالية", 400);
+  }
+
+  const newPasswordHash = await bcrypt.hash(newPassword, 12);
+
+  // Mark this token used + invalidate every other outstanding reset token.
+  await prisma.passwordResetToken.updateMany({
+    where: { userId: user.id, id: { not: record.id } },
+    data: { usedAt: new Date() },
+  });
+  await prisma.passwordResetToken.update({
+    where: { id: record.id },
+    data: { usedAt: new Date() },
+  });
+
+  // Revoke ALL existing refresh tokens so every current session must
+  // re-authenticate after the password change.
+  await revokeAllUserRefreshTokens(user.id);
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { passwordHash: newPasswordHash },
+  });
 }
 
 // ---------------------------------------------------------------------------

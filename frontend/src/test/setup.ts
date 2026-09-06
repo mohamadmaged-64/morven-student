@@ -45,6 +45,24 @@ if (typeof window !== 'undefined') {
     });
   }
 
+  // jsdom does not implement matchMedia; required by useThemeStore.
+  if (typeof window.matchMedia !== 'function') {
+    Object.defineProperty(window, 'matchMedia', {
+      value: (query: string) => ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addListener: () => {},
+        removeListener: () => {},
+        addEventListener: () => {},
+        removeEventListener: () => {},
+        dispatchEvent: () => false,
+      }),
+      configurable: true,
+      writable: true,
+    });
+  }
+
   // jsdom does not implement the Clipboard API; provide a minimal stub so
   // components that call navigator.clipboard.writeText work in tests.
   if (!navigator.clipboard) {

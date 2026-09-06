@@ -98,7 +98,8 @@ export default function CropTool() {
     let width = Math.abs(p.x - dragStart.current.x);
     let height = Math.abs(p.y - dragStart.current.y);
     if (ratio !== 'free') {
-      const r = eval(ratio.replace('/', '/')); // "16/9" -> 1.777
+      const parts = ratio.split('/');
+      const r = parts.length === 2 ? Number(parts[0]) / Number(parts[1]) : Number(parts[0]);
       height = Math.min(height, width / r);
       width = height * r;
     }

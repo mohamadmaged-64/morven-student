@@ -7,7 +7,7 @@ import { GroupMemberRow } from './GroupMemberRow';
 const baseMember = {
   id: 'u1',
   username: 'ahmed_m',
-  displayName: 'أحمد محمد',
+  displayName: ' محمد',
   avatarUrl: null,
   role: 'MEMBER',
 };

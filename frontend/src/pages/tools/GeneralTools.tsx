@@ -64,6 +64,8 @@ export default function GeneralToolPage({ toolId }: GeneralToolPageProps) {
       content = <CvBuilder />;
       break;
 
+ 
+
     default:
       return (
         <EmptyState

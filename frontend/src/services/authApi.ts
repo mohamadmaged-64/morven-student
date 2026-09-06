@@ -248,6 +248,63 @@ export async function logout(): Promise<void> {
   }
 }
 
+function csrfHeaders(): Record<string, string> {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  const token = resolveCsrfToken();
+  if (token) {
+    headers['X-CSRF-Token'] = token;
+  }
+  return headers;
+}
+
+/**
+ * Bootstraps the CSRF double-submit token for an anonymous visitor.
+ *
+ * Forgot/reset password are CSRF-protected like every other state-changing auth
+ * action, but — unlike login/register/google, which mint the `morven_csrf_token`
+ * cookie in their response — a logged-out user has no session and therefore no
+ * CSRF cookie to echo. This requests a server-minted token from the exact same
+ * single CSRF system (GET /api/auth/csrf) and stores it, mirroring how the
+ * cookie-issuing auth endpoints establish it, so subsequent requests can send
+ * the matching cookie + X-CSRF-Token header.
+ */
+async function bootstrapCsrfTokenIfNeeded(): Promise<void> {
+  if (resolveCsrfToken()) return;
+  const { res } = await request<{ ok: boolean }>('/api/auth/csrf', { method: 'GET' });
+  const cookies = parseCookies(res);
+  if (cookies['morven_csrf_token']) {
+    csrfToken = cookies['morven_csrf_token'];
+  }
+}
+
+export async function requestPasswordReset(email: string): Promise<{ message: string }> {
+  await bootstrapCsrfTokenIfNeeded();
+  const { data, res } = await request<{ message: string }>('/api/auth/forgot-password', {
+    method: 'POST',
+    headers: csrfHeaders(),
+    body: JSON.stringify({ email }),
+  });
+  const cookies = parseCookies(res);
+  if (cookies['morven_csrf_token']) {
+    csrfToken = cookies['morven_csrf_token'];
+  }
+  return data;
+}
+
+export async function resetPassword(token: string, password: string): Promise<{ message: string }> {
+  await bootstrapCsrfTokenIfNeeded();
+  const { data, res } = await request<{ message: string }>('/api/auth/reset-password', {
+    method: 'POST',
+    headers: csrfHeaders(),
+    body: JSON.stringify({ token, password }),
+  });
+  const cookies = parseCookies(res);
+  if (cookies['morven_csrf_token']) {
+    csrfToken = cookies['morven_csrf_token'];
+  }
+  return data;
+}
+
 export async function refresh(): Promise<AuthResponse> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
   const token = resolveCsrfToken();

@@ -106,6 +106,16 @@ const refreshLimiter = rateLimit({
   message: { error: "تم تجاوز الحد المسموح. يرجى المحاولة لاحقاً" },
 });
 
+// Strict limiter for password-reset endpoints. Prevents credential stuffing via
+// reset or mail-bombing via the request endpoint. Configurable, defaults low.
+const resetLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: parseInt(process.env.RESET_RATE_LIMIT_MAX || "5", 10),
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "تم تجاوز الحد المسموح. يرجى المحاولة لاحقاً" },
+});
+
 // ---------------------------------------------------------------------------
 // Routes
 // ---------------------------------------------------------------------------
@@ -116,6 +126,8 @@ app.use("/api/auth/register", authLimiter);
 app.use("/api/auth/login", authLimiter);
 app.use("/api/auth/google", authLimiter);
 app.use("/api/auth/refresh", refreshLimiter);
+app.use("/api/auth/forgot-password", resetLimiter);
+app.use("/api/auth/reset-password", resetLimiter);
 app.use(authRoutes);
 app.use(profileRoutes);
 app.use(groupRoutes);

@@ -38,7 +38,7 @@ export const icon = {
   Minimize2, Trash2, Shuffle, RotateCw, Lock, Unlock, Droplet, PenTool,
   Search, Printer, ArrowLeftRight, FileSearch, ClipboardList,
   Music, Lightbulb, Pen, CheckCircle, Globe, List, Newspaper, Key,
-  HelpCircle, Sparkles, Smartphone, Timer,
+  HelpCircle, Sparkles, Smartphone, Timer, 
   ListTodo, Calendar, ClipboardPlus, FileArchive, ArrowUpDown, Droplets, Signature, ScanSearch, ScanText, GitCompare, Stethoscope, Scale, Pill, FlaskConical, FileHeart,
   Cog, Combine, Archive, Hash, NotebookPen, Book, BookOpenCheck, Type,
   Eraser, Maximize2, Crop, SlidersHorizontal, EyeOff, Stamp, Info, AudioLines, WandSparkles, ScanLine, Camera

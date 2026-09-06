@@ -63,7 +63,7 @@ export default function RegisterPage() {
             onChange={(e) => setDisplayName(e.target.value)}
             required
             autoComplete="name"
-            placeholder="محمد أحمد"
+            placeholder="محمد "
           />
 
           <Input

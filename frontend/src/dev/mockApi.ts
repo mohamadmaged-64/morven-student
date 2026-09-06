@@ -54,6 +54,17 @@ export async function mockLogout(): Promise<void> {
   await mockDelay(undefined, 100);
 }
 
+export function mockRequestPasswordReset(_email: string): Promise<{ message: string }> {
+  return mockDelay(
+    { message: 'إذا كان هذا البريد الإلكتروني مسجلاً، فستصلك رسالة تحتوي على رابط إعادة تعيين كلمة المرور.' },
+    300,
+  );
+}
+
+export function mockResetPassword(_token: string, _password: string): Promise<{ message: string }> {
+  return mockDelay({ message: 'تم إعادة تعيين كلمة المرور بنجاح' }, 300);
+}
+
 // ---------------------------------------------------------------------------
 // Profile mocks
 // ---------------------------------------------------------------------------
