@@ -27,7 +27,6 @@ import {
   type PresenceUser,
 } from '@/services/socketService';
 import { GroupMemberRow } from '@/components/connect/GroupMemberRow';
-import { WeeklyPodium } from '@/components/connect/WeeklyPodium';
 import { setActiveGroupId } from '@/services/connectPomodoro';
 import { usePomodoroStore } from '@/store/usePomodoroStore';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -111,7 +110,7 @@ export default function GroupDetailPage() {
     return () => { cancelled = true; };
   }, [groupId]);
 
-  // Fetch the weekly Top-3 ranking
+  // Fetch the weekly ranking (drives the member list order and rank badges)
   const loadWeeklyRanking = useCallback(async (id: string) => {
     try {
       const { ranking } = await getWeeklyGroupRanking(id);
@@ -140,9 +139,8 @@ export default function GroupDetailPage() {
     onLeaderboard((data) => {
       if (data.groupId === groupId) {
         setLeaderboard(data.leaderboard);
-        // The all-time board and the weekly ranking change on the same events
-        // (session submit/delete), so refresh the podium through the existing
-        // live signal rather than adding a new socket event.
+        // The weekly ranking changes on the same events (session submit/delete)
+        // as the all-time board, so refresh it through the existing live signal.
         loadWeeklyRanking(groupId);
       }
     });
@@ -298,12 +296,13 @@ export default function GroupDetailPage() {
     totalMap.set(entry.userId, entry.totalSeconds);
   }
 
-  // Sort members by leaderboard order (leaderboard is already sorted server-side)
-  // Members not in leaderboard (shouldn't happen but fallback) appear at the end
-  const memberOrder = leaderboard.map((e) => e.userId);
+  // Sort members by the weekly ranking order (weekly ranking is already sorted
+  // server-side by weekly duration, ties broken by userId). Members not present
+  // in the ranking (shouldn't happen but fallback) appear at the end.
+  const weeklyRankOrder = weeklyRanking.map((e) => e.userId);
   const sortedMembers = [...group.members].sort((a, b) => {
-    const ia = memberOrder.indexOf(a.id);
-    const ib = memberOrder.indexOf(b.id);
+    const ia = weeklyRankOrder.indexOf(a.id);
+    const ib = weeklyRankOrder.indexOf(b.id);
     if (ia !== -1 && ib !== -1) return ia - ib;
     if (ia !== -1) return -1;
     if (ib !== -1) return 1;
@@ -409,29 +408,12 @@ export default function GroupDetailPage() {
         </motion.div>
       )}
 
-      {/* Weekly Top-3 podium */}
-      <motion.div {...fadeUp}>
-        <Card padding="lg" className="mb-6">
-          <div className="flex items-center justify-between mb-1">
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white">أبطال هذا الأسبوع</h2>
-            <span className="text-xs text-gray-500 dark:text-gray-400">من السبت إلى الجمعة</span>
-          </div>
-          {weeklyRanking.some((e) => e.weeklySeconds > 0) ? (
-            <WeeklyPodium ranking={weeklyRanking} />
-          ) : (
-            <p className="text-sm text-gray-500 dark:text-gray-400 pb-2 pt-1">
-              لا يوجد نشاط هذا الأسبوع بعد — أكمل جلسات التركيز لتتصدّر الترتيب.
-            </p>
-          )}
-        </Card>
-      </motion.div>
-
       {/* Members card — ranked by focus time */}
       <motion.div {...fadeUp}>
         <Card padding="lg" className="mb-6">
           <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">الطلاب</h2>
           <div className="space-y-2">
-            {sortedMembers.map((m) => {
+            {sortedMembers.map((m, index) => {
               // An ADMIN can remove any other member — including the OWNER and
               // other ADMINS — but never themselves. (Matches backend rule.)
               const canRemove = isAdmin && m.id !== myId;
@@ -440,6 +422,7 @@ export default function GroupDetailPage() {
                 <GroupMemberRow
                   key={m.id}
                   member={m}
+                  rank={index + 1}
                   totalSeconds={totalSeconds}
                   focusing={isFocusing(m.id)}
                   isSelf={m.id === myId}

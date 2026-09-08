@@ -9,9 +9,9 @@ type AvatarProps = {
 };
 
 const sizeClasses = {
-  sm: 'w-8 h-8 text-xs rounded-lg',
-  md: 'w-9 h-9 text-sm rounded-xl',
-  lg: 'w-20 h-20 text-3xl rounded-2xl',
+  sm: 'w-8 h-8 text-xs rounded-full',
+  md: 'w-9 h-9 text-sm rounded-full',
+  lg: 'w-20 h-20 text-3xl rounded-full',
 };
 
 export function Avatar({ src, name, size = 'md', className = '' }: AvatarProps) {

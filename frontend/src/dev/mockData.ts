@@ -73,6 +73,17 @@ export const MOCK_GROUPS = [
     role: 'ADMIN',
     memberCount: 8,
   },
+  {
+    id: 'group-004',
+    name: 'مجموعة المراجعة',
+    description: 'مراجعة المذاكرة الأسبوعية بين الأصدقاء',
+    joinCode: '777888',
+    creatorId: 'preview-user-001',
+    createdAt: '2026-07-10T08:00:00.000Z',
+    updatedAt: '2026-08-25T12:00:00.000Z',
+    role: 'OWNER',
+    memberCount: 7,
+  },
 ];
 
 export const MOCK_GROUP_DETAILS: Record<string, {
@@ -136,6 +147,25 @@ export const MOCK_GROUP_DETAILS: Record<string, {
       { id: 'user-009', username: 'khalid_r', displayName: 'خالد الرشيد', avatarUrl: null, role: 'MEMBER', joinedAt: '2026-07-01T14:00:00.000Z' },
     ],
   },
+  'group-004': {
+    id: 'group-004',
+    name: 'مجموعة المراجعة',
+    description: 'مراجعة المذاكرة الأسبوعية بين الأصدقاء',
+    joinCode: '777888',
+    creatorId: 'preview-user-001',
+    createdAt: '2026-07-10T08:00:00.000Z',
+    updatedAt: '2026-08-25T12:00:00.000Z',
+    role: 'OWNER',
+    members: [
+      { id: 'preview-user-001', username: 'preview_user', displayName: 'معاينة المستخدم', avatarUrl: null, role: 'OWNER', joinedAt: '2026-07-10T08:00:00.000Z' },
+      { id: 'user-002', username: 'ahmed_m', displayName: 'أحمد محمد', avatarUrl: 'https://i.pravatar.cc/150?u=ahmed', role: 'ADMIN', joinedAt: '2026-07-12T10:00:00.000Z' },
+      { id: 'user-004', username: 'sara_k', displayName: 'سارة خالد', avatarUrl: 'https://i.pravatar.cc/150?u=sara', role: 'MEMBER', joinedAt: '2026-07-15T09:00:00.000Z' },
+      { id: 'user-005', username: 'omar_h', displayName: 'عمر حسن', avatarUrl: null, role: 'MEMBER', joinedAt: '2026-07-20T14:00:00.000Z' },
+      { id: 'user-006', username: 'fatima_a', displayName: 'فاطمة العلي', avatarUrl: null, role: 'MEMBER', joinedAt: '2026-08-01T11:00:00.000Z' },
+      { id: 'user-007', username: 'nora_s', displayName: 'نورة السعيد', avatarUrl: null, role: 'MEMBER', joinedAt: '2026-08-05T16:00:00.000Z' },
+      { id: 'user-010', username: 'huda_s', displayName: 'هدى سامي', avatarUrl: null, role: 'MEMBER', joinedAt: '2026-08-10T13:00:00.000Z' },
+    ],
+  },
 };
 
 /** Returns a delayed promise, simulating network latency. */
@@ -175,5 +205,14 @@ export const MOCK_LEADERBOARDS: Record<string, Array<{
     { userId: 'preview-user-001', username: 'preview_user', displayName: 'معاينة المستخدم', avatarUrl: null, totalSeconds: 3600 },
     { userId: 'user-003', username: 'ali_dev', displayName: 'علي المطور', avatarUrl: null, totalSeconds: 1800 },
     { userId: 'user-009', username: 'khalid_r', displayName: 'خالد الرشيد', avatarUrl: null, totalSeconds: 0 },
+  ],
+  'group-004': [
+    { userId: 'user-002', username: 'ahmed_m', displayName: 'أحمد محمد', avatarUrl: 'https://i.pravatar.cc/150?u=ahmed', totalSeconds: 90000 },
+    { userId: 'user-004', username: 'sara_k', displayName: 'سارة خالد', avatarUrl: 'https://i.pravatar.cc/150?u=sara', totalSeconds: 72000 },
+    { userId: 'preview-user-001', username: 'preview_user', displayName: 'معاينة المستخدم', avatarUrl: null, totalSeconds: 36000 },
+    { userId: 'user-005', username: 'omar_h', displayName: 'عمر حسن', avatarUrl: null, totalSeconds: 18000 },
+    { userId: 'user-010', username: 'huda_s', displayName: 'هدى سامي', avatarUrl: null, totalSeconds: 7200 },
+    { userId: 'user-006', username: 'fatima_a', displayName: 'فاطمة العلي', avatarUrl: null, totalSeconds: 1800 },
+    { userId: 'user-007', username: 'nora_s', displayName: 'نورة السعيد', avatarUrl: null, totalSeconds: 0 },
   ],
 };

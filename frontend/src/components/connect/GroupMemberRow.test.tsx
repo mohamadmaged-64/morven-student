@@ -7,7 +7,7 @@ import { GroupMemberRow } from './GroupMemberRow';
 const baseMember = {
   id: 'u1',
   username: 'ahmed_m',
-  displayName: ' محمد',
+  displayName: 'محمد',
   avatarUrl: null,
   role: 'MEMBER',
 };
@@ -17,6 +17,7 @@ function renderRow(props: Partial<Parameters<typeof GroupMemberRow>[0]> = {}) {
     <MemoryRouter>
       <GroupMemberRow
         member={baseMember}
+        rank={1}
         totalSeconds={0}
         focusing={false}
         isSelf={false}
@@ -60,11 +61,11 @@ describe('GroupMemberRow', () => {
     expect(focusing.compareDocumentPosition(hours) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
-  it('places the Remove action on the right side next to the avatar (before the badges)', () => {
+  it('places the Remove action on the right side next to the name (before the badges)', () => {
     renderRow({ focusing: true, totalSeconds: 10800, canRemove: true, onRemove: () => {} });
     const removeBtn = screen.getByRole('button', { name: 'إزالة العضو' });
     const hours = screen.getByText('3 ساعة');
-    // The remove button belongs to the avatar/name cluster (right side in RTL),
+    // The remove button belongs to the name cluster (right side in RTL),
     // so it must come BEFORE the hours badge in document order — i.e. NOT at the
     // far-left edge of the row.
     expect(removeBtn.compareDocumentPosition(hours) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
@@ -101,5 +102,54 @@ describe('GroupMemberRow', () => {
 
     renderRow({ canRemove: false });
     expect(screen.queryByRole('button', { name: 'إزالة العضو' })).not.toBeInTheDocument();
+  });
+
+  it('shows a unified GOLD trophy/cup icon (no circular badge) for 1st place', () => {
+    renderRow({ rank: 1 });
+    const badge = screen.getByLabelText('المركز الأول');
+    expect(badge).toBeInTheDocument();
+    expect(screen.queryByLabelText('المركز الثاني')).not.toBeInTheDocument();
+    // The icon must NOT be framed inside a circle or any container background.
+    expect(badge.className).not.toMatch(/rounded-full/);
+    expect(badge.className).not.toMatch(/\bbg-/);
+  });
+
+  it('shows a SILVER trophy/cup icon for 2nd place', () => {
+    renderRow({ rank: 2 });
+    const badge = screen.getByLabelText('المركز الثاني');
+    expect(badge).toBeInTheDocument();
+    expect(badge.className).not.toMatch(/rounded-full/);
+    expect(badge.className).not.toMatch(/\bbg-/);
+  });
+
+  it('shows a BRONZE trophy/cup icon for 3rd place', () => {
+    renderRow({ rank: 3 });
+    const badge = screen.getByLabelText('المركز الثالث');
+    expect(badge).toBeInTheDocument();
+    expect(badge.className).not.toMatch(/rounded-full/);
+    expect(badge.className).not.toMatch(/\bbg-/);
+  });
+
+  it('shows a plain number badge from 4th place onward', () => {
+    const { unmount } = renderRow({ rank: 4 });
+    expect(screen.getByText('4')).toBeInTheDocument();
+    expect(screen.queryByLabelText('المركز الأول')).not.toBeInTheDocument();
+    unmount();
+
+    renderRow({ rank: 8 });
+    expect(screen.getByText('8')).toBeInTheDocument();
+  });
+
+  it('places the rank badge on the RIGHT side of the picture, picture on the RIGHT of the name', () => {
+    renderRow({ rank: 3, member: { ...baseMember, avatarUrl: 'avatar.png' } });
+    const avatar = screen.getByAltText('محمد');
+    const rankBadge = screen.getByLabelText('المركز الثالث');
+    const name = screen.getByText('محمد');
+    // In an RTL flex row the first DOM child renders rightmost. So the rank
+    // badge must precede the avatar, and the avatar must precede the name, in
+    // document order (rank is right of the picture, picture is right of the
+    // name).
+    expect(rankBadge.compareDocumentPosition(avatar) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(avatar.compareDocumentPosition(name) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 });
