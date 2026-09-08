@@ -1,5 +1,5 @@
 import { Router, Request, Response } from "express";
-import { submitPomodoroSchema, submitPomodoroSession, getGroupLeaderboard, verifyMembership } from "../services/pomodoro.service";
+import { submitPomodoroSchema, submitPomodoroSession, getGroupLeaderboard, getWeeklyGroupRanking, verifyMembership } from "../services/pomodoro.service";
 import { GroupError } from "../services/group.service";
 import { authenticate } from "../middleware/auth";
 import { broadcastLeaderboard } from "../services/presence.service";
@@ -56,6 +56,27 @@ router.get("/api/groups/:groupId/leaderboard", authenticate, async (req: Request
 
     const leaderboard = await getGroupLeaderboard(req.params.groupId);
     res.json({ leaderboard });
+  } catch (err) {
+    handlePomodoroError(err, res);
+  }
+});
+
+// GET /api/groups/:groupId/leaderboard/weekly — current weekly competition
+// ranking (Saturday 00:00 → Friday 23:59:59, configured weekly timezone).
+// The backend derives the active week from the current date/time, so the
+// ranking automatically resets each Saturday without any reset job.
+router.get("/api/groups/:groupId/leaderboard/weekly", authenticate, async (req: Request<{ groupId: string }>, res: Response) => {
+  try {
+    if (!req.user) { res.status(401).json({ error: "غير مصرح" }); return; }
+
+    await verifyMembership(req.user.sub, req.params.groupId, req.user.role);
+
+    const result = await getWeeklyGroupRanking(req.params.groupId);
+    res.json({
+      weekStart: result.weekStart.toISOString(),
+      weekEnd: result.weekEnd.toISOString(),
+      ranking: result.ranking,
+    });
   } catch (err) {
     handlePomodoroError(err, res);
   }

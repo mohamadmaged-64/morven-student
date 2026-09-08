@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, type FormEvent } from 'react';
+import { useState, useEffect, useRef, useCallback, type FormEvent } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Card } from '@/components/UI/Card';
@@ -12,8 +12,10 @@ import {
   removeMember,
   updateGroup,
   getGroupLeaderboard,
+  getWeeklyGroupRanking,
   type GroupDetails,
   type LeaderboardEntry,
+  type WeeklyRankingEntry,
 } from '@/services/groupApi';
 import {
   connectSocket,
@@ -25,6 +27,7 @@ import {
   type PresenceUser,
 } from '@/services/socketService';
 import { GroupMemberRow } from '@/components/connect/GroupMemberRow';
+import { WeeklyPodium } from '@/components/connect/WeeklyPodium';
 import { setActiveGroupId } from '@/services/connectPomodoro';
 import { usePomodoroStore } from '@/store/usePomodoroStore';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -61,6 +64,7 @@ export default function GroupDetailPage() {
   const [copiedCode, setCopiedCode] = useState(false);
   const [presenceUsers, setPresenceUsers] = useState<PresenceUser[]>([]);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [weeklyRanking, setWeeklyRanking] = useState<WeeklyRankingEntry[]>([]);
   // userId -> currently focusing (online + Pomodoro running). Live and cross-group.
   const [focusingMap, setFocusingMap] = useState<Record<string, boolean>>({});
 
@@ -107,6 +111,19 @@ export default function GroupDetailPage() {
     return () => { cancelled = true; };
   }, [groupId]);
 
+  // Fetch the weekly Top-3 ranking
+  const loadWeeklyRanking = useCallback(async (id: string) => {
+    try {
+      const { ranking } = await getWeeklyGroupRanking(id);
+      setWeeklyRanking(ranking);
+    } catch { /* ignore */ }
+  }, []);
+
+  useEffect(() => {
+    if (!groupId) return;
+    loadWeeklyRanking(groupId);
+  }, [groupId, loadWeeklyRanking]);
+
   // Socket.IO group presence + leaderboard
   useEffect(() => {
     if (!groupId) return;
@@ -123,6 +140,10 @@ export default function GroupDetailPage() {
     onLeaderboard((data) => {
       if (data.groupId === groupId) {
         setLeaderboard(data.leaderboard);
+        // The all-time board and the weekly ranking change on the same events
+        // (session submit/delete), so refresh the podium through the existing
+        // live signal rather than adding a new socket event.
+        loadWeeklyRanking(groupId);
       }
     });
     onFocusing((data) => {
@@ -387,6 +408,23 @@ export default function GroupDetailPage() {
           </Card>
         </motion.div>
       )}
+
+      {/* Weekly Top-3 podium */}
+      <motion.div {...fadeUp}>
+        <Card padding="lg" className="mb-6">
+          <div className="flex items-center justify-between mb-1">
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white">أبطال هذا الأسبوع</h2>
+            <span className="text-xs text-gray-500 dark:text-gray-400">من السبت إلى الجمعة</span>
+          </div>
+          {weeklyRanking.some((e) => e.weeklySeconds > 0) ? (
+            <WeeklyPodium ranking={weeklyRanking} />
+          ) : (
+            <p className="text-sm text-gray-500 dark:text-gray-400 pb-2 pt-1">
+              لا يوجد نشاط هذا الأسبوع بعد — أكمل جلسات التركيز لتتصدّر الترتيب.
+            </p>
+          )}
+        </Card>
+      </motion.div>
 
       {/* Members card — ranked by focus time */}
       <motion.div {...fadeUp}>

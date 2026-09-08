@@ -13,6 +13,7 @@ import {
   mockUpdateMemberRole,
   mockSubmitPomodoroSession,
   mockGetGroupLeaderboard,
+  mockGetWeeklyGroupRanking,
 } from '@/dev/mockApi';
 
 export interface Group {
@@ -44,6 +45,15 @@ export interface LeaderboardEntry {
   displayName: string;
   avatarUrl: string | null;
   totalSeconds: number;
+}
+
+export interface WeeklyRankingEntry {
+  rank: number;
+  userId: string;
+  username: string;
+  displayName: string;
+  avatarUrl: string | null;
+  weeklySeconds: number;
 }
 
 export interface GroupDetails extends Group {
@@ -154,4 +164,15 @@ export async function submitPomodoroSession(data: {
 export async function getGroupLeaderboard(groupId: string): Promise<{ leaderboard: LeaderboardEntry[] }> {
   if (isPreviewMode()) return mockGetGroupLeaderboard(groupId);
   return authRequest<{ leaderboard: LeaderboardEntry[] }>(`/api/groups/${groupId}/leaderboard`);
+}
+
+export async function getWeeklyGroupRanking(groupId: string): Promise<{
+  weekStart: string;
+  weekEnd: string;
+  ranking: WeeklyRankingEntry[];
+}> {
+  if (isPreviewMode()) return mockGetWeeklyGroupRanking(groupId);
+  return authRequest<{ weekStart: string; weekEnd: string; ranking: WeeklyRankingEntry[] }>(
+    `/api/groups/${groupId}/leaderboard/weekly`,
+  );
 }

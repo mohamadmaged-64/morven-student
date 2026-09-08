@@ -266,3 +266,52 @@ export function mockGetGroupLeaderboard(groupId: string): Promise<{ leaderboard:
   const leaderboard = MOCK_LEADERBOARDS[groupId] ?? [];
   return mockDelay({ leaderboard: [...leaderboard] }, 150);
 }
+
+/**
+ * Current weekly competition week for preview mode: Saturday 00:00 →
+ * Friday 23:59:59 in Asia/Hebron (same rules as the backend).
+ */
+function mockWeekBounds() {
+  const DAY_MS = 86_400_000;
+  const now = new Date();
+  // Backtrack to the most recent Saturday 00:00 in the app's civil time.
+  const hebron = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Asia/Hebron',
+    weekday: 'short',
+  });
+  const daysBack = WEEKDAY_OFFSET[hebron.format(now)] ?? 0;
+  const saturdayLocalZero = new Date(now.getFullYear(), now.getMonth(), now.getDate() - daysBack, 0, 0, 0, 0);
+  const weekStart = new Date(saturdayLocalZero.getTime() - saturdayLocalZero.getTimezoneOffset() * 60_000);
+  const weekEnd = new Date(weekStart.getTime() + 7 * DAY_MS - 1000);
+  return { weekStart: weekStart.toISOString(), weekEnd: weekEnd.toISOString() };
+}
+
+const WEEKDAY_OFFSET: Record<string, number> = {
+  Sat: 0,
+  Fri: 1,
+  Thu: 2,
+  Wed: 3,
+  Tue: 4,
+  Mon: 5,
+  Sun: 6,
+};
+
+export function mockGetWeeklyGroupRanking(groupId: string): Promise<{
+  weekStart: string;
+  weekEnd: string;
+  ranking: Array<{ rank: number; userId: string; username: string; displayName: string; avatarUrl: string | null; weeklySeconds: number }>;
+}> {
+  const entries = (MOCK_LEADERBOARDS[groupId] ?? [])
+    .map((e) => ({
+      rank: 0,
+      userId: e.userId,
+      username: e.username,
+      displayName: e.displayName,
+      avatarUrl: e.avatarUrl,
+      weeklySeconds: e.totalSeconds,
+    }))
+    .sort((a, b) => b.weeklySeconds - a.weeklySeconds || a.userId.localeCompare(b.userId))
+    .map((e, i) => ({ ...e, rank: i + 1 }));
+  const { weekStart, weekEnd } = mockWeekBounds();
+  return mockDelay({ weekStart, weekEnd, ranking: entries }, 150);
+}

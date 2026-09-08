@@ -193,6 +193,7 @@ model PomodoroSession {
 
   @@index([groupId])
   @@index([userId, groupId])
+  @@index([groupId, completedAt])
   @@map("pomodoro_sessions")
 }
 
