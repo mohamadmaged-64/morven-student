@@ -263,8 +263,11 @@ export function mockSubmitPomodoroSession(data: {
 }
 
 export function mockGetGroupLeaderboard(groupId: string): Promise<{ leaderboard: typeof MOCK_LEADERBOARDS[string] }> {
-  const leaderboard = MOCK_LEADERBOARDS[groupId] ?? [];
-  return mockDelay({ leaderboard: [...leaderboard] }, 150);
+  const leaderboard = [...(MOCK_LEADERBOARDS[groupId] ?? [])].sort((a, b) => {
+    if (b.totalSeconds !== a.totalSeconds) return b.totalSeconds - a.totalSeconds;
+    return a.userId.localeCompare(b.userId);
+  });
+  return mockDelay({ leaderboard }, 150);
 }
 
 /**

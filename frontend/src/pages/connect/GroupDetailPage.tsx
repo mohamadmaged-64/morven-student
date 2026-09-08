@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, type FormEvent } from 'react';
+import { useState, useEffect, useRef, type FormEvent } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Card } from '@/components/UI/Card';
@@ -12,10 +12,8 @@ import {
   removeMember,
   updateGroup,
   getGroupLeaderboard,
-  getWeeklyGroupRanking,
   type GroupDetails,
   type LeaderboardEntry,
-  type WeeklyRankingEntry,
 } from '@/services/groupApi';
 import {
   connectSocket,
@@ -63,7 +61,6 @@ export default function GroupDetailPage() {
   const [copiedCode, setCopiedCode] = useState(false);
   const [presenceUsers, setPresenceUsers] = useState<PresenceUser[]>([]);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
-  const [weeklyRanking, setWeeklyRanking] = useState<WeeklyRankingEntry[]>([]);
   // userId -> currently focusing (online + Pomodoro running). Live and cross-group.
   const [focusingMap, setFocusingMap] = useState<Record<string, boolean>>({});
 
@@ -110,19 +107,6 @@ export default function GroupDetailPage() {
     return () => { cancelled = true; };
   }, [groupId]);
 
-  // Fetch the weekly ranking (drives the member list order and rank badges)
-  const loadWeeklyRanking = useCallback(async (id: string) => {
-    try {
-      const { ranking } = await getWeeklyGroupRanking(id);
-      setWeeklyRanking(ranking);
-    } catch { /* ignore */ }
-  }, []);
-
-  useEffect(() => {
-    if (!groupId) return;
-    loadWeeklyRanking(groupId);
-  }, [groupId, loadWeeklyRanking]);
-
   // Socket.IO group presence + leaderboard
   useEffect(() => {
     if (!groupId) return;
@@ -139,9 +123,6 @@ export default function GroupDetailPage() {
     onLeaderboard((data) => {
       if (data.groupId === groupId) {
         setLeaderboard(data.leaderboard);
-        // The weekly ranking changes on the same events (session submit/delete)
-        // as the all-time board, so refresh it through the existing live signal.
-        loadWeeklyRanking(groupId);
       }
     });
     onFocusing((data) => {
@@ -296,13 +277,14 @@ export default function GroupDetailPage() {
     totalMap.set(entry.userId, entry.totalSeconds);
   }
 
-  // Sort members by the weekly ranking order (weekly ranking is already sorted
-  // server-side by weekly duration, ties broken by userId). Members not present
-  // in the ranking (shouldn't happen but fallback) appear at the end.
-  const weeklyRankOrder = weeklyRanking.map((e) => e.userId);
+  // Sort members by the all-time leaderboard order, which is already sorted
+  // server-side by total study hours descending (ties broken by userId). So the
+  // highest-total-hours user is always first / Rank #1. Members not present in
+  // the leaderboard (shouldn't happen but fallback) appear at the end.
+  const memberOrder = leaderboard.map((e) => e.userId);
   const sortedMembers = [...group.members].sort((a, b) => {
-    const ia = weeklyRankOrder.indexOf(a.id);
-    const ib = weeklyRankOrder.indexOf(b.id);
+    const ia = memberOrder.indexOf(a.id);
+    const ib = memberOrder.indexOf(b.id);
     if (ia !== -1 && ib !== -1) return ia - ib;
     if (ia !== -1) return -1;
     if (ib !== -1) return 1;
