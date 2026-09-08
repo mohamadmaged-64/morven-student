@@ -183,7 +183,7 @@ export default function PrivacyPolicyPage() {
             إذا كان لديك أي أسئلة أو طلبات بخصوص هذه السياسة أو خصوصية بياناتك
             أو حذف حسابك، فيُرجى التواصل معنا عبر العنوان الرسمي للدعم:
           </BodyText>
-          <a href="mailto:info@morven.online" style={{color:"#007bff"}}>iomorven@gmail.com</a>
+          <a href="mailto:info@morven.online" style={{color:"#007bff"}}>info@morven.online</a>
         </SectionCard>
 
      
