@@ -80,12 +80,24 @@ function FileUpload({
         return;
       }
 
+      const matchesAccept = (f: File): boolean =>
+        accept.some((entry) => {
+          const lower = entry.toLowerCase();
+          const type = (f.type || '').toLowerCase();
+          // Wildcard MIME group: 'video/*', 'audio/*', 'image/*', ...
+          if (lower.endsWith('/*')) return type.startsWith(lower.slice(0, -1));
+          // File extension ('.mp4', '.MOV', ...).
+          if (lower.startsWith('.')) return f.name.toLowerCase().endsWith(lower);
+          // Exact MIME type ('video/mp4', ...).
+          return type === lower;
+        });
+
       const validFiles = newFiles.filter((f) => {
         if (maxSize && f.size > maxSize) {
           setError(`حجم الملف "${f.name}" يتجاوز الحد المسموح (${formatSizeAr(maxSize)}).`);
           return false;
         }
-        if (accept.length > 0 && !accept.some((type) => f.type === type || f.name.endsWith(type.replace('*', '')))) {
+        if (accept.length > 0 && !matchesAccept(f)) {
           setError(`نوع الملف "${f.type || f.name}" غير مدعوم.`);
           return false;
         }

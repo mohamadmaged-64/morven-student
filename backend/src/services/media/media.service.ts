@@ -603,4 +603,164 @@ export class MediaService {
       throw err;
     }
   }
+
+  /**
+   * Remove background music from a video using Demucs source separation.
+   *
+   * Pipeline:
+   * 1. Verify the video has an audio track
+   * 2. Extract audio to WAV (44100 Hz stereo)
+   * 3. Run Demucs HTDemucs to separate vocals from music
+   * 4. Remux the original video stream with the processed vocals audio
+   * 5. Also produce an audio-only output
+   *
+   * Returns the processed video; the audio-only file is written alongside it.
+   */
+  static async removeMusic(
+    inputPath: string,
+    ctx?: MediaJobContext
+  ): Promise<MediaJobResult & { audioOutputPath: string }> {
+    const { workDir } = createJobPaths("processed-video.mp4");
+    const extractedAudioPath = path.join(workDir, "extracted-audio.wav");
+    const vocalsPath = path.join(workDir, "vocals.wav");
+    const videoOutputPath = path.join(workDir, "processed-video.mp4");
+    const audioOutputPath = path.join(workDir, "processed-audio.mp3");
+
+    try {
+      await fs.ensureDir(workDir);
+
+      const inputStat = await fs.stat(inputPath);
+      await ensureDiskSpace(inputStat.size * 5);
+
+      const emit = makeProgressEmitter(ctx);
+
+      // Step 1: Check for an audio track
+      emit(0.02);
+      const hasAudio = await detectAudioOrAssume(inputPath);
+      if (!hasAudio) {
+        throw new MediaProcessingError(
+          "NO_AUDIO_TRACK",
+          "This video has no audio track, so there is no music to remove.",
+          400
+        );
+      }
+
+      // Step 2: Extract audio to WAV for Demucs
+      try {
+        await runStep(
+          [
+            "-i", inputPath,
+            "-vn",
+            "-acodec", "pcm_s16le",
+            "-ar", "44100",
+            "-ac", "2",
+            "-y",
+            extractedAudioPath,
+          ],
+          ctx,
+          0.05,
+          0.15
+        );
+      } catch (err) {
+        if (isMissingAudioFailure(err)) {
+          throw new MediaProcessingError(
+            "NO_AUDIO_TRACK",
+            "This video has no audio track, so there is no music to remove.",
+            400
+          );
+        }
+        throw err;
+      }
+
+      // Verify extracted audio exists and has content
+      const audioStat = await fs.stat(extractedAudioPath).catch(() => null);
+      if (!audioStat || audioStat.size === 0) {
+        throw new MediaProcessingError(
+          "PROCESSING_FAILED",
+          "Failed to extract audio from the video.",
+          500
+        );
+      }
+
+      // Step 3: Run Demucs source separation (the heavy step: 0.15 -> 0.75)
+      const { runDemucsSeparation } = await import("./demucs.service");
+      await runDemucsSeparation(extractedAudioPath, vocalsPath, {
+        signal: ctx?.signal,
+        onProgress: (stage) => {
+          // Map Demucs progress into the 0.15..0.75 range.
+          if (stage.includes("Loading")) emit(0.22);
+          else if (stage.includes("Separating")) emit(0.50);
+          else if (stage.includes("Saving")) emit(0.70);
+          else if (stage.includes("complete")) emit(0.72);
+        },
+      });
+
+      // Verify vocals output exists
+      const vocalsStat = await fs.stat(vocalsPath).catch(() => null);
+      if (!vocalsStat || vocalsStat.size === 0) {
+        throw new MediaProcessingError(
+          "PROCESSING_FAILED",
+          "Source separation produced no output.",
+          500
+        );
+      }
+
+      // Clean up intermediate extracted audio.
+      await removeUploadTempFiles([extractedAudioPath]);
+
+      // Step 4: Remux original video stream with processed vocals audio (0.80 -> 0.90)
+      await runStep(
+        [
+          "-i", inputPath,
+          "-i", vocalsPath,
+          "-map", "0:v:0",
+          "-map", "1:a:0",
+          "-c:v", "copy",
+          "-c:a", "aac",
+          "-b:a", "192k",
+          "-shortest",
+          "-y",
+          videoOutputPath,
+        ],
+        ctx,
+        0.80,
+        0.90
+      );
+
+      // Step 5: Generate audio-only output (0.90 -> 0.99)
+      await runStep(
+        [
+          "-i", vocalsPath,
+          "-codec:a", "libmp3lame",
+          "-b:a", "192k",
+          "-y",
+          audioOutputPath,
+        ],
+        ctx,
+        0.90,
+        0.99
+      );
+
+      // Verify outputs
+      const videoStat = await verifyOutput(videoOutputPath);
+      const audioStatFinal = await verifyOutput(audioOutputPath);
+
+      // Clean up the vocals WAV (no longer needed after encoding).
+      await removeUploadTempFiles([vocalsPath]);
+
+      emit(1);
+      ctx?.onProgress?.(1);
+
+      return {
+        outputPath: videoOutputPath,
+        workDir,
+        originalSize: inputStat.size,
+        outputSize: videoStat,
+        audioOutputPath,
+      };
+    } catch (err) {
+      await cleanupJob(workDir);
+      throw err;
+    }
+  }
 }

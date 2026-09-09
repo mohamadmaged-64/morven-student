@@ -598,6 +598,64 @@ export class MediaController {
     });
   }
 
+  /**
+   * POST /api/media/remove-music — Extracts vocals from a video using
+   * Demucs source separation, producing both a processed video (original
+   * video stream + separated vocals audio) and a processed audio file.
+   */
+  static async removeMusic(req: Request, res: Response): Promise<void> {
+    const uploaded = req.file;
+    if (!uploaded) {
+      res.status(400).json({
+        code: "UNSUPPORTED_FILE_TYPE",
+        error: "No file uploaded. Send a video as multipart/form-data with key 'file'.",
+      });
+      return;
+    }
+
+    try {
+      MediaJobsService.assertCapacity();
+      const available = await MediaService.isAvailable();
+      if (!available) {
+        throw new MediaProcessingError(
+          "FFMPEG_NOT_AVAILABLE",
+          "Media processing is not available on the server (FFmpeg missing).",
+          503
+        );
+      }
+
+      const baseName = sanitizeBaseName(uploaded.originalname || "video");
+      const downloadName = `${baseName}-no-music.mp4`;
+      const job = MediaJobsService.createJob(uploaded.path, downloadName);
+      job.audioFileName = `${baseName}-no-music.mp3`;
+      console.log(`[media] job ${job.id} started (remove-music, ${uploaded.size} bytes)`);
+
+      MediaJobsService.start(job, "", (ctx) =>
+        MediaService.removeMusic(uploaded.path, ctx).then((result) => ({
+          outputPath: result.outputPath,
+          workDir: result.workDir,
+          originalSize: result.originalSize,
+          outputSize: result.outputSize,
+          audioOutputPath: result.audioOutputPath,
+        }))
+      );
+
+      res.status(202).json({ jobId: job.id });
+    } catch (err) {
+      await removeTempFile(uploaded.path);
+      if (err instanceof MediaProcessingError) {
+        console.error(`[media] remove-music rejected (${err.code}):`, err.message);
+        res.status(err.status).json({ code: err.code, error: err.message });
+        return;
+      }
+      console.error("[media] remove-music unexpected failure:", err);
+      res.status(500).json({
+        code: "PROCESSING_FAILED",
+        error: "Unexpected media processing error.",
+      });
+    }
+  }
+
   /** GET /api/media/jobs/:id/status */
   static status(req: Request, res: Response): void {
     const job = MediaJobsService.get(String(req.params.id));
@@ -686,5 +744,38 @@ export class MediaController {
       return;
     }
     res.json({ status: "cancelled" });
+  }
+
+  /**
+   * GET /api/media/jobs/:id/download-audio — optional secondary output
+   * download (used by the remove-music tool). Does NOT consume the job's
+   * primary download claim, so clients can fetch both outputs.
+   */
+  static async downloadAudio(req: Request, res: Response): Promise<void> {
+    const job = MediaJobsService.get(String(req.params.id));
+    if (!job) {
+      res.status(404).json({
+        code: "JOB_NOT_FOUND",
+        error: "Unknown or expired processing job.",
+      });
+      return;
+    }
+
+    if (job.status === "processing") {
+      res.status(409).json({ code: "JOB_PROCESSING", error: "The file is still being processed." });
+      return;
+    }
+
+    if (job.status === "error" || !job.audioOutputPath) {
+      res.status(409).json({ code: job.code ?? "PROCESSING_FAILED", error: job.error ?? "Processing failed." });
+      return;
+    }
+
+    const audioName = job.audioFileName || `${sanitizeBaseName(job.fileName || "output")}-no-music.mp3`;
+    res.download(job.audioOutputPath, audioName, (err) => {
+      if (err && !res.headersSent) {
+        res.status(500).json({ error: "Failed to send the processed audio file." });
+      }
+    });
   }
 }

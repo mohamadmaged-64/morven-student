@@ -1,7 +1,7 @@
 FROM node:22-bookworm
 
 RUN apt-get update && \
-    apt-get install -y libreoffice ghostscript qpdf ffmpeg && \
+    apt-get install -y libreoffice ghostscript qpdf ffmpeg python3 python3-pip && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -9,6 +9,17 @@ RUN apt-get update && \
 RUN gs --version
 # Verify FFmpeg is available inside the container
 RUN ffmpeg -version
+# Verify Python is available inside the container
+RUN python3 --version && python3 -m pip --version
+
+# Install PyTorch (CPU-only) + Demucs for music source separation.
+# The CPU-only index keeps the image lean (no CUDA libraries). Demucs also
+# needs TorchAudio; both come from the CPU wheel index.
+RUN python3 -m pip install --no-cache-dir --break-system-packages \
+    torch torchaudio --index-url https://download.pytorch.org/whl/cpu && \
+    python3 -m pip install --no-cache-dir --break-system-packages \
+    demucs && \
+    python3 -m demucs --help > /dev/null
 
 WORKDIR /app
 
@@ -24,6 +35,15 @@ COPY . .
 # COPY and before the TypeScript build so types resolve and the runtime works.
 # `prisma generate` does not require DATABASE_URL to be set (verified).
 RUN npx prisma generate
+
+# Where Demucs/torch keeps the preloaded model. Kept inside the image instead
+# of the ephemeral container home directory so model reuse survives restarts.
+ENV TORCH_HOME=/app/.model-cache/torch
+
+# Preload the Demucs HTDemucs model for the music-removal tool so production
+# containers do not need runtime access to the model registry.
+# Offline builds skip this gracefully; the model is then fetched on first use.
+RUN node scripts/preload-demucs-model.mjs || echo "Demucs model preload skipped"
 
 # Preload the Whisper ONNX model for the speech-to-text tool so production
 # containers do not need runtime access to the Hugging Face registry.

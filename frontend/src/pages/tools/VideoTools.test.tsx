@@ -1,7 +1,7 @@
 ﻿import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { ExtractAudioFromVideo, CompressVideo, ConvertVideoFormats } from './VideoTools';
+import { ExtractAudioFromVideo, CompressVideo, ConvertVideoFormats, RemoveMusicTool } from './VideoTools';
 import { MediaApiError } from '@/services/mediaApi';
 import { saveToLibrary } from '@/services/savedFilesService';
 
@@ -10,6 +10,7 @@ vi.mock('@/services/mediaApi', async (importOriginal) => ({
   extractAudioFromVideo: vi.fn(),
   compressVideoFile: vi.fn(),
   convertVideoFile: vi.fn(),
+  removeMusicFromVideo: vi.fn(),
   cancelMediaJob: vi.fn().mockResolvedValue(true),
 }));
 
@@ -20,10 +21,12 @@ vi.mock('@/services/savedFilesService', () => ({
 import {
   extractAudioFromVideo,
   compressVideoFile,
+  removeMusicFromVideo,
 } from '@/services/mediaApi';
 
 const mockedExtract = vi.mocked(extractAudioFromVideo);
 const mockedCompress = vi.mocked(compressVideoFile);
+const mockedRemoveMusic = vi.mocked(removeMusicFromVideo);
 const mockedSaveToLibrary = vi.mocked(saveToLibrary);
 
 function makeVideoFile(name = 'clip.mp4', sizeBytes = 1024): File {
@@ -153,6 +156,61 @@ describe('CompressVideo', () => {
       await screen.findByText(/لم يتم تقليل حجم هذا الملف/)
     ).toBeInTheDocument();
     expect(screen.queryByText('نسبة التقليل:')).not.toBeInTheDocument();
+  });
+});
+
+describe('RemoveMusicTool', () => {
+  it('separates vocals, then offers both video and audio downloads', async () => {
+    const user = userEvent.setup();
+    mockedRemoveMusic.mockResolvedValue({
+      video: { blob: new Blob(['video-bytes']), filename: 'clip-no-music.mp4' },
+      audio: { blob: new Blob(['audio-bytes']), filename: 'clip-no-music.mp3' },
+    });
+
+    render(<RemoveMusicTool />);
+    await selectFile(makeVideoFile());
+
+    await user.click(
+      screen.getByRole('button', { name: 'إزالة الموسيقى من الفيديو' })
+    );
+
+    await waitFor(() => expect(mockedRemoveMusic).toHaveBeenCalledTimes(1));
+    const [fileArg] = mockedRemoveMusic.mock.calls[0];
+    expect(fileArg.name).toBe('clip.mp4');
+
+    expect(
+      await screen.findByText('تمت إزالة الموسيقى بنجاح')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('الفيديو بعد إزالة الموسيقى')
+    ).toBeInTheDocument();
+    expect(screen.getByText('الصوت الناتج (كلام بدون موسيقى)')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'تنزيل الفيديو' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'تنزيل الصوت' })).toBeInTheDocument();
+    expect(mockedSaveToLibrary).toHaveBeenCalledWith(
+      expect.any(Blob),
+      'clip-no-music.mp4',
+      'video-tools'
+    );
+  });
+
+  it('maps backend separation failures to an Arabic message', async () => {
+    const user = userEvent.setup();
+    mockedRemoveMusic.mockRejectedValue(
+      new MediaApiError('NO_AUDIO_TRACK', 'no audio track')
+    );
+
+    render(<RemoveMusicTool />);
+    await selectFile(makeVideoFile());
+    await user.click(
+      screen.getByRole('button', { name: 'إزالة الموسيقى من الفيديو' })
+    );
+
+    expect(
+      await screen.findByText(
+        /هذا الفيديو لا يحتوي مسارًا صوتيًا.*لا توجد موسيقى لإزالتها/
+      )
+    ).toBeInTheDocument();
   });
 });
 

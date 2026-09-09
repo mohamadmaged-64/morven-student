@@ -262,6 +262,7 @@ router.post("/api/media/edit-video-audio", handleVideoAudioUpload, MediaControll
 router.post("/api/media/merge-videos", handleMultiMediaUpload, MediaController.mergeVideos);
 router.post("/api/media/video-to-gif", handleMediaUpload, MediaController.videoToGif);
 router.post("/api/media/change-speed", handleMediaUpload, MediaController.changeSpeed);
+router.post("/api/media/remove-music", handleMediaUpload, MediaController.removeMusic);
 
 // Image tools (sharp-based; same job lifecycle and download endpoints).
 // The wrapper converts unexpected async rejections into HTTP 500s instead
@@ -291,6 +292,7 @@ router.post("/api/media/audio/merge", handleMultiAudioUpload, asyncHandler(Audio
 // Job tracking / download / cancellation.
 router.get("/api/media/jobs/:id/status", MediaController.status);
 router.get("/api/media/jobs/:id/download", MediaController.download);
+router.get("/api/media/jobs/:id/download-audio", MediaController.downloadAudio);
 router.delete("/api/media/jobs/:id", MediaController.cancel);
 
 export default router;

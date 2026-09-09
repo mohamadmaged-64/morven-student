@@ -313,6 +313,8 @@ export function toArabicMediaError(err: unknown, kind: MediaErrorKind = 'video')
   }
 
   switch (code) {
+    case 'NO_AUDIO_TRACK':
+      return 'هذا الفيديو لا يحتوي مسارًا صوتيًا، لذلك لا توجد موسيقى لإزالتها.';
     case 'UNSUPPORTED_FILE_TYPE':
       if (kind === 'image')
         return 'نوع الملف غير مدعوم. يرجى اختيار صورة بصيغة مدعومة (JPG أو PNG أو WEBP أو GIF أو BMP أو TIFF أو AVIF).';
@@ -501,11 +503,12 @@ async function fetchMediaResult(
   jobId: string,
   fallbackName: string,
   onProgress?: MediaProgressHandler,
-  offlineMessage: string = OFFLINE_MESSAGE_AR
+  offlineMessage: string = OFFLINE_MESSAGE_AR,
+  subPath: '/download' | '/download-audio' = '/download'
 ): Promise<MediaResult> {
   let response: Response;
   try {
-    response = await fetch(`${API_BASE_URL}/api/media/jobs/${encodeURIComponent(jobId)}/download`);
+    response = await fetch(`${API_BASE_URL}/api/media/jobs/${encodeURIComponent(jobId)}${subPath}`);
   } catch (error) {
     throw toNetworkError(offlineMessage, error);
   }
@@ -647,6 +650,62 @@ export async function cutVideoFile(
     onProgress,
     cancelRef
   );
+}
+
+export interface MusicRemovalResult {
+  video: MediaResult;
+  audio: MediaResult;
+}
+
+/**
+ * Remove background music from a video using server-side Demucs
+ * source separation. Returns BOTH the processed video and the
+ * processed audio.
+ *
+ * Ordering matters: the audio output must be fetched BEFORE the video
+ * download, because downloading the primary video output consumes the job
+ * and removes its temporary files.
+ */
+export async function removeMusicFromVideo(
+  file: File,
+  onProgress?: MediaProgressHandler,
+  cancelRef?: { jobId?: string }
+): Promise<MusicRemovalResult> {
+  await startMediaJob(
+    '/api/media/remove-music',
+    singleVideo(file),
+    {},
+    onProgress,
+    cancelRef
+  );
+  onProgress?.({ phase: 'uploading', percent: 100 });
+  onProgress?.({ phase: 'processing', percent: null });
+
+  const done = await pollMediaJob(cancelRef?.jobId || '', onProgress);
+
+  const base = file.name.replace(/\.[^.]+$/, '');
+  const videoName = done.fileName || `${base}-no-music.mp4`;
+  const audioName = `${base}-no-music.mp3`;
+
+  // Fetch the audio output first (this endpoint does not claim the job).
+  const audio = await fetchMediaResult(
+    cancelRef?.jobId || '',
+    audioName,
+    undefined,
+    OFFLINE_MESSAGE_AR,
+    '/download-audio'
+  );
+
+  // Then fetch the primary video output (consumes the job + cleans up).
+  const video = await fetchMediaResult(
+    cancelRef?.jobId || '',
+    videoName,
+    onProgress,
+    OFFLINE_MESSAGE_AR,
+    '/download'
+  );
+
+  return { video, audio };
 }
 
 /** Resize / rotate / flip in one processing job. */

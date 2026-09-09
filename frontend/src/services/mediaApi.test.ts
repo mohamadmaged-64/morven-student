@@ -7,6 +7,7 @@ import {
   compressVideoFile,
   convertVideoFile,
   extractAudioFromVideo,
+  removeMusicFromVideo,
   toArabicMediaError,
 } from './mediaApi';
 
@@ -81,6 +82,7 @@ describe('toArabicMediaError', () => {
   it('maps every known backend code to a clear Arabic message', () => {
     const cases: [string, RegExp][] = [
       ['UNSUPPORTED_FILE_TYPE', /نوع الملف غير مدعوم/],
+      ['NO_AUDIO_TRACK', /لا يحتوي مسارًا صوتيًا/],
       ['FILE_TOO_LARGE', new RegExp(`${MAX_VIDEO_SIZE_MB}`)],
       ['INVALID_CONVERSION', /غير مدعوم/],
       ['PROCESSING_TIMEOUT', /أطول من المسموح/],
@@ -309,6 +311,71 @@ describe('polling behavior', () => {
     // Push fake time well past the 25-minute deadline.
     await vi.advanceTimersByTimeAsync(26 * 60 * 1000);
     await assertion;
+  });
+});
+
+/* ------------------------------------------------------------------ */
+/* remove-music (multi-output job)                                     */
+/* ------------------------------------------------------------------ */
+
+describe('removeMusicFromVideo', () => {
+  it('fetches the audio output BEFORE the video download and returns both', async () => {
+    const fetchMock = vi
+      .fn()
+      // status poll -> done
+      .mockResolvedValueOnce(jsonResponse({ status: 'done', fileName: 'clip-no-music.mp4' }))
+      // audio download
+      .mockResolvedValueOnce(
+        new Response(new Blob(['audio']), {
+          status: 200,
+          headers: { 'Content-Disposition': 'attachment; filename="clip-no-music.mp3"' },
+        })
+      )
+      // video download (consumes the job -> cleanup)
+      .mockResolvedValueOnce(
+        new Response(new Blob(['video']), {
+          status: 200,
+          headers: { 'Content-Disposition': 'attachment; filename="clip-no-music.mp4"' },
+        })
+      );
+    vi.stubGlobal('fetch', fetchMock);
+
+    const promise = removeMusicFromVideo(makeVideoFile('clip.mp4'), undefined, {});
+    await vi.waitFor(() => expect(FakeXHR.instances.length).toBe(1));
+    expect(FakeXHR.last().open).toHaveBeenCalledWith(
+      'POST',
+      `${API_BASE_URL}/api/media/remove-music`
+    );
+    expect(FakeXHR.last().sentBody!.get('file')).toBeInstanceOf(File);
+    FakeXHR.last().respond(202, { jobId: 'rm-1' });
+
+    const result = await promise;
+
+    const urls = fetchMock.mock.calls.map((call) => call[0] as string);
+    expect(urls[0]).toContain('/api/media/jobs/rm-1/status');
+    expect(urls[1]).toContain('/api/media/jobs/rm-1/download-audio');
+    expect(urls[2]).toContain('/api/media/jobs/rm-1/download');
+    // audio must be fetched before the video (which consumes the job)
+    expect(urls.indexOf('http://test-api.local/api/media/jobs/rm-1/download-audio'))
+      .toBeLessThan(urls.indexOf('http://test-api.local/api/media/jobs/rm-1/download'));
+
+    expect(result.audio.filename).toBe('clip-no-music.mp3');
+    expect(result.audio.blob.size).toBeGreaterThan(0);
+    expect(result.video.filename).toBe('clip-no-music.mp4');
+    expect(result.video.blob.size).toBeGreaterThan(0);
+  });
+
+  it('surfaces job errors as the backend code', async () => {
+    const fetchMock = vi.fn(() =>
+      jsonResponse({ status: 'error', code: 'NO_AUDIO_TRACK', error: 'no audio' })
+    );
+    vi.stubGlobal('fetch', fetchMock);
+
+    const promise = removeMusicFromVideo(makeVideoFile(), undefined, {});
+    await vi.waitFor(() => expect(FakeXHR.instances.length).toBe(1));
+    FakeXHR.last().respond(202, { jobId: 'rm-bad' });
+
+    await expect(promise).rejects.toMatchObject({ code: 'NO_AUDIO_TRACK' });
   });
 });
 

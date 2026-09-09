@@ -26,6 +26,8 @@ export interface MediaJobResultPayload {
   workDir?: string;
   originalSize: number;
   outputSize: number;
+  /** Optional secondary output (e.g. processed audio). */
+  audioOutputPath?: string;
 }
 
 export interface MediaJob {
@@ -36,6 +38,10 @@ export interface MediaJob {
   code?: MediaErrorCode;
   error?: string;
   outputPath?: string;
+  /** Optional secondary output path (e.g. processed audio for remove-music). */
+  audioOutputPath?: string;
+  /** Download name for the secondary audio output. */
+  audioFileName?: string;
   workDir?: string;
   /** Primary uploaded input (single-file operations). */
   inputPath?: string;
@@ -140,6 +146,7 @@ export class MediaJobsService {
         job.status = "done";
         job.progress = 1;
         job.outputPath = result.outputPath;
+        if (result.audioOutputPath) job.audioOutputPath = result.audioOutputPath;
         if (result.workDir) job.workDir = result.workDir;
         job.originalSize = result.originalSize;
         job.outputSize = result.outputSize;

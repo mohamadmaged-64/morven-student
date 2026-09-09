@@ -145,6 +145,7 @@ export const tools: Tool[] = [
   { id: 'change-video-speed', name: 'تغيير سرعة الفيديو', description: 'تسريع الفيديو أو إبطاؤه مع الحفاظ على تزامن الصوت.', icon: Gauge, category: 'video' },
   { id: 'extract-audio-video', name: 'استخراج الصوت من فيديو', description: 'استخراج المسار الصوتي من ملفات الفيديو بصيغة MP3.', icon: Music, category: 'video' },
   { id: 'video-to-gif', name: 'تحويل الفيديو إلى GIF', description: 'إنشاء GIF متحركة من مقطع فيديو بإعدادات مرنة.', icon: ImageIcon, category: 'video' },
+  { id: 'remove-music', name: 'إزالة الموسيقى من الفيديو', description: 'فصل الكلام/الصوت البشري عن الموسيقى وإزالة الخلفية الموسيقية مع الحفاظ على الصوت قدر الإمكان.', icon: AudioLines, category: 'video' },
    
   // IMAGES
 { id: 'resize-image', name: 'تغيير حجم الصورة', description: 'تغيير أبعاد الصورة مع الحفاظ على تناسبها', icon: Maximize2, category: 'images' },

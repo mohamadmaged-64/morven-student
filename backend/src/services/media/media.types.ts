@@ -25,7 +25,8 @@ export type MediaErrorCode =
   | "PROCESSING_TIMEOUT"
   | "PROCESSING_FAILED"
   | "CANCELLED"
-  | "STORAGE_ERROR";
+  | "STORAGE_ERROR"
+  | "NO_AUDIO_TRACK";
 
 export class MediaProcessingError extends Error {
   readonly code: MediaErrorCode;

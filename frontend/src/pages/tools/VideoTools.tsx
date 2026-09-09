@@ -34,6 +34,7 @@ import { EditVideoAudioTool } from './video/EditVideoAudioTool';
 import { MergeVideosTool } from './video/MergeVideosTool';
 import { VideoToGifTool } from './video/VideoToGifTool';
 import { ChangeSpeedTool } from './video/ChangeSpeedTool';
+import { RemoveMusicTool } from './video/RemoveMusicTool';
 
 type ToolId =
   | 'extract-audio-video'
@@ -44,6 +45,7 @@ type ToolId =
   | 'merge-videos'
   | 'video-to-gif'
   | 'change-video-speed'
+  | 'remove-music'
   // Legacy route-only tools (kept functional, not listed in tools.ts).
   | 'convert-video'
   | 'convert-video-formats'
@@ -238,6 +240,12 @@ const TOOL_CONFIGS: Record<ToolId, ToolConfig> = {
     icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 19 22 12 13 5 13 19"/><polygon points="2 19 11 12 2 5 2 19"/></svg>,
     component: ChangeSpeedTool,
   },
+  'remove-music': {
+    title: 'إزالة الموسيقى من الفيديو',
+    description: 'فصل الكلام عن الموسيقى وإزالة الخلفية الموسيقية مع الحفاظ على الصوت',
+    icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/><path d="M20 4l-8.5 8.5"/></svg>,
+    component: RemoveMusicTool,
+  },
   'convert-video': {
     title: 'تحويل صيغ الفيديو',
     description: 'التحويل بين MP4 وWebM وMOV وMKV',
@@ -311,5 +319,5 @@ function VideoToolPage({ toolId }: { toolId: string }) {
   );
 }
 
-export { ExtractAudioFromVideo, CompressVideo, ConvertVideoFormats };
+export { ExtractAudioFromVideo, CompressVideo, ConvertVideoFormats, RemoveMusicTool };
 export default VideoToolPage;
