@@ -22,6 +22,11 @@ export type CreateNotificationInput = z.infer<typeof createNotificationSchema>;
 export async function listNotifications(userId: string) {
   const [notifications, reads] = await Promise.all([
     prisma.appNotification.findMany({
+      where: {
+        // Target-scoped notifications (e.g. dhikr rejection) are visible ONLY
+        // to their target user; NULL keeps a notification global/broadcast.
+        OR: [{ targetUserId: null }, { targetUserId: userId }],
+      },
       orderBy: { createdAt: "desc" },
     }),
     prisma.userNotificationRead.findMany({
@@ -63,6 +68,9 @@ export async function markNotificationAsRead(
 
 export async function markAllNotificationsAsRead(userId: string): Promise<void> {
   const notifications = await prisma.appNotification.findMany({
+    where: {
+      OR: [{ targetUserId: null }, { targetUserId: userId }],
+    },
     select: { id: true },
   });
   if (notifications.length === 0) return;

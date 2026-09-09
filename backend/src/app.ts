@@ -19,6 +19,7 @@ import pomodoroRoutes from "./routes/pomodoro";
 import resourceRoutes from "./routes/resource";
 import notificationRoutes from "./routes/notification";
 import suggestionRoutes from "./routes/suggestion";
+import adhkarRoutes from "./routes/adhkar";
 import adminRoutes from "./routes/admin";
 
 const app = express();
@@ -135,6 +136,7 @@ app.use(pomodoroRoutes);
 app.use(resourceRoutes);
 app.use(notificationRoutes);
 app.use(suggestionRoutes);
+app.use(adhkarRoutes);
 app.use(adminRoutes);
 
 // Existing file-processing routes (no auth required)

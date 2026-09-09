@@ -29,6 +29,8 @@ model User {
   resources     Resource[]     @relation("ResourceOwner")
   readNotifications UserNotificationRead[]
   suggestions   Suggestion[]
+  dhikrSubmissions DhikrSubmission[]
+  targetedNotifications AppNotification[] @relation("AppNotificationTarget")
 
   @@map("users")
 }
@@ -112,18 +114,49 @@ enum AppNotificationType {
   update
 }
 
+enum DhikrSubmissionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model AppNotification {
-  id        String              @id @default(uuid())
-  title     String
-  body      String
-  type      AppNotificationType @default(info)
-  createdBy String?             @map("created_by")
-  createdAt DateTime            @default(now()) @map("created_at")
-  updatedAt DateTime            @updatedAt @map("updated_at")
-  userReads UserNotificationRead[]
+  id           String                @id @default(uuid())
+  title        String
+  body         String
+  type         AppNotificationType   @default(info)
+  createdBy    String?               @map("created_by")
+  createdAt    DateTime              @default(now()) @map("created_at")
+  updatedAt    DateTime              @updatedAt @map("updated_at")
+  // When set, the notification is delivered ONLY to this user (used for
+  // per-user messages such as dhikr rejection). NULL keeps the notification
+  // global (broadcast) — the previous behaviour.
+  targetUserId String?               @map("target_user_id")
+  // Cascade so a personal/targeted notification is removed together with its
+  // recipient's account — a SetNull would silently turn it into a broadcast.
+  targetUser   User?                 @relation("AppNotificationTarget", fields: [targetUserId], references: [id], onDelete: Cascade)
+  userReads    UserNotificationRead[]
 
   @@index([createdAt])
+  @@index([targetUserId])
   @@map("app_notifications")
+}
+
+model DhikrSubmission {
+  id         String                @id @default(uuid())
+  userId     String                @map("user_id")
+  categoryId String                @map("category_id")
+  title      String
+  text       String
+  source     String                @default("")
+  status     DhikrSubmissionStatus @default(PENDING)
+  createdAt  DateTime              @default(now()) @map("created_at")
+  updatedAt  DateTime              @updatedAt @map("updated_at")
+  user       User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status, createdAt])
+  @@map("dhikr_submissions")
 }
 
 model UserNotificationRead {

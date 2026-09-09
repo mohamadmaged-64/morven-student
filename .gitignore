@@ -8,3 +8,6 @@ dist/
 
 # Frontend build/dev artifacts
 dev-dist/
+
+# Backend dev-server logs
+backend/backend-dev-*.log

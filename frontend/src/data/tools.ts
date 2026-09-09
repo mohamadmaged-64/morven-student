@@ -29,7 +29,8 @@ import {
   FileCode, Link, Server, Gauge, Route, Database, Box, Boxes, Table2, Grid3x3,
   GitBranch, Terminal, Cloud, AtSign, Columns, Clock, Barcode, Quote, ListChecks,
   CalendarClock, ShieldCheck, BadgeCheck, LockKeyhole, Shield, Book, BookOpenCheck, Type,
-  Eraser, Maximize2, Crop, SlidersHorizontal, EyeOff, Stamp, Info, AudioLines, WandSparkles, ScanLine, Camera
+  Eraser, Maximize2, Crop, SlidersHorizontal, EyeOff, Stamp, Info, AudioLines, WandSparkles, ScanLine, Camera,
+  BookHeart
 } from "lucide-react";
 
 export const icon = {
@@ -41,12 +42,13 @@ export const icon = {
   HelpCircle, Sparkles, Smartphone, Timer, 
   ListTodo, Calendar, ClipboardPlus, FileArchive, ArrowUpDown, Droplets, Signature, ScanSearch, ScanText, GitCompare, Stethoscope, Scale, Pill, FlaskConical, FileHeart,
   Cog, Combine, Archive, Hash, NotebookPen, Book, BookOpenCheck, Type,
-  Eraser, Maximize2, Crop, SlidersHorizontal, EyeOff, Stamp, Info, AudioLines, WandSparkles, ScanLine, Camera
+  Eraser, Maximize2, Crop, SlidersHorizontal, EyeOff, Stamp, Info, AudioLines, WandSparkles, ScanLine, Camera, BookHeart
 }
 
 export const tools: Tool[] = [
   // GENERAL
   { id: 'holy-quran', name: 'القرآن الكريم', description: 'خيرُ ما تُستفتح به دراستك هو كلامُ الله؛ فهو سكينةٌ للروح، وبركةٌ في العلم، وعونٌ على التركيز.', icon: Book, category: 'general' },
+  { id: 'adhkar', name: 'الأذكار', description: 'أذكار الصباح والمساء وأذكار مناسبة للدراسة والامتحانات مع عدّادات للتتبع', icon: BookHeart, category: 'general' },
   { id: 'task-manager', name: 'مدير المهام', description: 'تنظيم وتتبع مهام دراستك', icon: ListTodo, category: 'general' },
   { id: 'notes', name: 'الملاحظات', description: 'أنشئ واحفظ ملاحظاتك بسرعة مع حفظ تلقائي', icon: NotebookPen, category: 'general' },
   { id: 'pomodoro-timer', name: 'مؤقت بومودورو', description: 'تعزيز الإنتاجية بجلسات دراسة محددة الوقت', icon: Timer, category: 'general' },
