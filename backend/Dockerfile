@@ -13,10 +13,17 @@ RUN ffmpeg -version
 RUN python3 --version && python3 -m pip --version
 
 # Install PyTorch (CPU-only) + Demucs for music source separation.
-# The CPU-only index keeps the image lean (no CUDA libraries). Demucs also
-# needs TorchAudio; both come from the CPU wheel index.
+# - The CPU index keeps the image lean (no CUDA libraries).
+# - --extra-index-url (not --index-url) keeps PyPI as the primary index:
+#   with --index-url ALL dependencies resolve from the CPU index, whose
+#   typing-extensions wheel carries mismatched metadata and forces pip to
+#   build from source (flit_core missing there) -> install fails.
+# - The +cpu pins prevent pip from selecting the CUDA build on PyPI (which
+#   ties on the base version) and keep torch inside demucs's <2.8 requirement.
+# - Demucs needs TorchAudio; install both at the same version.
 RUN python3 -m pip install --no-cache-dir --break-system-packages \
-    torch torchaudio --index-url https://download.pytorch.org/whl/cpu && \
+    torch==2.5.1+cpu torchaudio==2.5.1+cpu \
+    --extra-index-url https://download.pytorch.org/whl/cpu && \
     python3 -m pip install --no-cache-dir --break-system-packages \
     demucs && \
     python3 -m demucs --help > /dev/null
