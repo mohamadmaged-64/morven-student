@@ -42,4 +42,6 @@ EXPOSE 3001
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
   CMD node -e "const h=require('http');h.get({host:'127.0.0.1',port:Number(process.env.PORT||3001),path:'/health',timeout:4000},r=>process.exit(r.statusCode>=200&&r.statusCode<300?0:1)).on('error',()=>process.exit(1))"
 
-CMD ["npm", "start"]
+# Apply pending Prisma migrations on every start (the deployed database is
+# provisioned separately, so schema changes must be deployed at runtime).
+CMD ["sh", "-c", "npx prisma migrate deploy && npm start"]
