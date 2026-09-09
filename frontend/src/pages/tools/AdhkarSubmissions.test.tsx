@@ -59,7 +59,11 @@ function approvedFixture(): OfficialApprovedDhikr[] {
 beforeEach(() => {
   localStorage.clear();
   resetStores();
-  mockedFetchApproved.mockResolvedValue([]);
+  mockedFetchApproved.mockResolvedValue({
+    adhkar: [],
+    officialEdits: [],
+    officialDeletions: [],
+  });
   mockedSubmit.mockReset();
 });
 
@@ -218,7 +222,11 @@ describe('Adhkar add-dhikr submissions', () => {
 
 describe('Approved adhkar are appended after the official content', () => {
   it('renders approved submissions at the end of the matching category only', async () => {
-    mockedFetchApproved.mockResolvedValue(approvedFixture());
+    mockedFetchApproved.mockResolvedValue({
+      adhkar: approvedFixture(),
+      officialEdits: [],
+      officialDeletions: [],
+    });
     const user = userEvent.setup();
     render(
       <MemoryRouter>
@@ -249,7 +257,11 @@ describe('Approved adhkar are appended after the official content', () => {
   });
 
   it('shows study approved adhkar under the study category', async () => {
-    mockedFetchApproved.mockResolvedValue(approvedFixture());
+    mockedFetchApproved.mockResolvedValue({
+      adhkar: approvedFixture(),
+      officialEdits: [],
+      officialDeletions: [],
+    });
     const user = userEvent.setup();
     render(
       <MemoryRouter>
@@ -264,7 +276,11 @@ describe('Approved adhkar are appended after the official content', () => {
   });
 
   it('the counter works for approved adhkar (increment + reset)', async () => {
-    mockedFetchApproved.mockResolvedValue(approvedFixture());
+    mockedFetchApproved.mockResolvedValue({
+      adhkar: approvedFixture(),
+      officialEdits: [],
+      officialDeletions: [],
+    });
     const user = userEvent.setup();
     render(
       <MemoryRouter>

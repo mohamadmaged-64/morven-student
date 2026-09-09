@@ -407,4 +407,197 @@ describe("Adhkar submissions API", () => {
       assert.equal(s.user.passwordHash, undefined, "password hash must not leak");
     }
   });
+
+  it("returns official edit/delete mutations in the public list and no duplicates on re-edit", async () => {
+    const admin = await adminUser(server.baseUrl, "editadmin");
+
+    const officialId = "me-ayatul-kursi";
+    const editContent = { title: "آية الكرسي (معدلة)", text: "نص معدّل", source: "مصدر معدّل" };
+
+    const editOnce = await fetch(
+      `${server.baseUrl}/api/admin/adhkar/official/${officialId}`,
+      {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${admin.token}` },
+        body: JSON.stringify(editContent),
+      }
+    );
+    assert.equal(editOnce.status, 200);
+    assert.equal((await editOnce.json()).edit.officialDhikrId, officialId);
+
+    // Editing again must update the SAME override — no duplicates.
+    const editTwice = await fetch(
+      `${server.baseUrl}/api/admin/adhkar/official/${officialId}`,
+      {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${admin.token}` },
+        body: JSON.stringify({ ...editContent, title: "آية الكرسي (معدلة مرتين)" }),
+      }
+    );
+    assert.equal(editTwice.status, 200);
+
+    const res = await fetch(`${server.baseUrl}/api/adhkar/submissions/official`);
+    const body = await res.json();
+    assert.ok(Array.isArray(body.officialEdits));
+    assert.ok(Array.isArray(body.officialDeletions));
+    const matches = body.officialEdits.filter((e) => e.officialDhikrId === officialId);
+    assert.equal(matches.length, 1, "re-editing a dhikr must not create duplicate overrides");
+    assert.equal(matches[0].title, "آية الكرسي (معدلة مرتين)");
+    assert.equal(matches[0].text, "نص معدّل");
+
+    const stored = await prisma.dhikrOfficialEdit.count({ where: { officialDhikrId: officialId } });
+    assert.equal(stored, 1);
+
+    // Clean up so the running app's real content is never altered by tests.
+    await prisma.dhikrOfficialEdit.delete({ where: { officialDhikrId: officialId } });
+  });
+
+  it("deletes an official dhikr via tombstone, idempotently", async () => {
+    const admin = await adminUser(server.baseUrl, "deladmin");
+    const officialId = "me-istighfar";
+
+    const del = () =>
+      fetch(`${server.baseUrl}/api/admin/adhkar/official/${officialId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${admin.token}` },
+      });
+
+    assert.equal((await del()).status, 200);
+    assert.equal((await del()).status, 200, "deleting twice must stay idempotent");
+
+    const rows = await prisma.dhikrOfficialDeletion.count({ where: { officialDhikrId: officialId } });
+    assert.equal(rows, 1, "deleting twice must not create duplicate tombstones");
+
+    const body = await (
+      await fetch(`${server.baseUrl}/api/adhkar/submissions/official`)
+    ).json();
+    assert.ok(body.officialDeletions.includes(officialId));
+
+    // Clean up so the running app's real content is never altered by tests.
+    await prisma.dhikrOfficialDeletion.delete({ where: { officialDhikrId: officialId } });
+  });
+
+  it("blocks non-admin users from editing/deleting official and approved dhikr", async () => {
+    const { data: user } = await register(server.baseUrl, "ebuser");
+    const { data: proposer } = await register(server.baseUrl, "ebprop");
+    const admin = await adminUser(server.baseUrl, "ebadmin");
+
+    const { data } = await submit(server.baseUrl, proposer.accessToken, validPayload());
+    const submissionId = data.submission.id;
+
+    const asUserPatch = fetch(`${server.baseUrl}/api/admin/adhkar/submissions/${submissionId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${user.accessToken}` },
+      body: JSON.stringify({ title: "خداع", text: "نص", source: "" }),
+    });
+    const asUserDeleteSub = fetch(`${server.baseUrl}/api/admin/adhkar/submissions/${submissionId}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${user.accessToken}` },
+    });
+    const asUserEditOfficial = fetch(`${server.baseUrl}/api/admin/adhkar/official/me-ayatul-kursi`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${user.accessToken}` },
+      body: JSON.stringify({ title: "تلاعب", text: "نص", source: "" }),
+    });
+    const asUserDeleteOfficial = fetch(`${server.baseUrl}/api/admin/adhkar/official/me-ayatul-kursi`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${user.accessToken}` },
+    });
+
+    assert.equal((await asUserPatch).status, 403);
+    assert.equal((await asUserDeleteSub).status, 403);
+    assert.equal((await asUserEditOfficial).status, 403);
+    assert.equal((await asUserDeleteOfficial).status, 403);
+
+    // The submission must still be present and untouched, no official mutations added.
+    const stored = await prisma.dhikrSubmission.findUnique({ where: { id: submissionId } });
+    assert.equal(stored.title, data.submission.title);
+    assert.equal(
+      await prisma.dhikrOfficialEdit.count({ where: { officialDhikrId: "me-ayatul-kursi" } }),
+      0,
+      "blocked edit must not create an override"
+    );
+    assert.equal(
+      await prisma.dhikrOfficialDeletion.count({ where: { officialDhikrId: "me-ayatul-kursi" } }),
+      0,
+      "blocked delete must not create a tombstone"
+    );
+  });
+
+  it("requires authentication (401) for official/submission edit and delete", async () => {
+    const check = (path) =>
+      fetch(`${server.baseUrl}/api/admin/adhkar/official/${path}`, {
+        method: "DELETE",
+      }).then((r) => r.status);
+    assert.equal(await check("me-istighfar"), 401);
+    const patch = await fetch(`${server.baseUrl}/api/admin/adhkar/submissions/nope`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: "x", text: "y", source: "" }),
+    });
+    assert.equal(patch.status, 401);
+  });
+
+  it("edits an approved submission's content in place and it is reflected publicly", async () => {
+    const { data: user } = await register(server.baseUrl, "esuser");
+    const admin = await adminUser(server.baseUrl, "esadmin");
+
+    const { data } = await submit(server.baseUrl, user.accessToken, validPayload());
+    const id = data.submission.id;
+    await fetch(`${server.baseUrl}/api/admin/adhkar/submissions/${id}/approve`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${admin.token}` },
+    });
+
+    const patch = await fetch(`${server.baseUrl}/api/admin/adhkar/submissions/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${admin.token}` },
+      body: JSON.stringify({ title: "عنوان معدّل", text: "نص معدّل من المشرف", source: "مصدر معدّل" }),
+    });
+    assert.equal(patch.status, 200);
+    const { submission } = await patch.json();
+    assert.equal(submission.title, "عنوان معدّل");
+    assert.equal(submission.status, "APPROVED", "editing must not change the status");
+
+    const list = await official(server.baseUrl);
+    const visible = list.find((x) => x.id === id);
+    assert.equal(visible.text, "نص معدّل من المشرف");
+  });
+
+  it("deletes an approved submission permanently", async () => {
+    const { data: user } = await register(server.baseUrl, "delsub");
+    const admin = await adminUser(server.baseUrl, "delsubadmin");
+
+    const { data } = await submit(server.baseUrl, user.accessToken, validPayload());
+    const id = data.submission.id;
+    await fetch(`${server.baseUrl}/api/admin/adhkar/submissions/${id}/approve`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${admin.token}` },
+    });
+
+    assert.equal((await official(server.baseUrl)).some((x) => x.id === id), true);
+
+    const del = await fetch(`${server.baseUrl}/api/admin/adhkar/submissions/${id}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${admin.token}` },
+    });
+    assert.equal(del.status, 200);
+
+    assert.equal((await official(server.baseUrl)).some((x) => x.id === id), false);
+    const stored = await prisma.dhikrSubmission.findUnique({ where: { id } });
+    assert.equal(stored, null, "row must be gone from the database");
+  });
+
+  it("returns 404 for unknown submission ids and 400 for invalid edit content", async () => {
+    const admin = await adminUser(server.baseUrl, "emadmin");
+    const patch = (path, body = { title: "x", text: "y", source: "" }) =>
+      fetch(`${server.baseUrl}/api/admin/adhkar/submissions/${path}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${admin.token}` },
+        body: JSON.stringify(body),
+      });
+
+    assert.equal((await patch("does-not-exist")).status, 404);
+    assert.equal((await patch("also-missing", { title: "", text: "y", source: "" })).status, 400);
+  });
 });

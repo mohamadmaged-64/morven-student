@@ -489,8 +489,8 @@ export function searchAdhkar(query: string, dhikrs: Dhikr[]): Dhikr[] {
 export function getCategoryProgress(
   category: DhikrCategory,
   counts: Record<string, number>,
+  items: Dhikr[] = getAdhkarByCategory(category),
 ): { completed: number; total: number } {
-  const items = getAdhkarByCategory(category);
   const completed = items.filter(
     (d) => (counts[d.id] ?? 0) >= d.repeatCount,
   ).length;

@@ -14,7 +14,11 @@ import {
 } from '@/data/adhkar';
 
 vi.mock('@/services/adhkarApi', () => ({
-  fetchApprovedAdhkar: vi.fn().mockResolvedValue([]),
+  fetchApprovedAdhkar: vi.fn().mockResolvedValue({
+    adhkar: [],
+    officialEdits: [],
+    officialDeletions: [],
+  }),
   submitDhikrSubmission: vi.fn(),
   listDhikrSubmissions: vi.fn(),
   approveDhikrSubmission: vi.fn(),

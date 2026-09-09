@@ -1,25 +1,47 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Modal } from '@/components/UI/Modal';
 import { Input, TextArea } from '@/components/UI/Input';
 import { Button } from '@/components/UI/Button';
 import { useAppStore } from '@/store/useAppStore';
 import { useAdhkarApprovedStore } from '@/store/useAdhkarApprovedStore';
-import { submitDhikrSubmission } from '@/services/adhkarApi';
+import {
+  submitDhikrSubmission,
+  updateDhikrSubmission,
+  updateOfficialDhikr,
+} from '@/services/adhkarApi';
 import { isNetworkError } from '@/services/apiError';
 import type { DhikrCategory } from '@/data/adhkar';
 
 const NOT_LOGGED_IN_MESSAGE = 'غير مصرح';
+
+/** A dhikr being edited by an admin. `id` is the API id (official dhikr id or
+ * submission uuid) — for approved content it is the `sub-<uuid>` prefix stripped. */
+export type EditedDhikr = {
+  kind: 'official' | 'approved';
+  id: string;
+  category: DhikrCategory;
+  title: string;
+  text: string;
+  source: string;
+};
 
 type AddDhikrModalProps = {
   open: boolean;
   onClose: () => void;
   categoryId: DhikrCategory;
   categoryTitle: string;
+  editing?: EditedDhikr | null;
 };
 
 type FieldErrors = Partial<Record<'title' | 'text', string>>;
 
-function AddDhikrModal({ open, onClose, categoryId, categoryTitle }: AddDhikrModalProps) {
+function AddDhikrModal({
+  open,
+  onClose,
+  categoryId,
+  categoryTitle,
+  editing = null,
+}: AddDhikrModalProps) {
   const addNotification = useAppStore((s) => s.addNotification);
   const reloadApproved = useAdhkarApprovedStore((s) => s.load);
 
@@ -29,9 +51,24 @@ function AddDhikrModal({ open, onClose, categoryId, categoryTitle }: AddDhikrMod
   const [errors, setErrors] = useState<FieldErrors>({});
   const [submitting, setSubmitting] = useState(false);
 
+  const isEditing = editing !== null;
+
+  // Prefill the form whenever the modal is opened for an existing dhikr.
+  useEffect(() => {
+    if (open && editing) {
+      setTitle(editing.title ?? '');
+      setText(editing.text ?? '');
+      setSource(editing.source ?? '');
+      setErrors({});
+    }
+  }, [open, editing]);
+
   const handleClose = () => {
     if (submitting) return;
     setErrors({});
+    setTitle('');
+    setText('');
+    setSource('');
     onClose();
   };
 
@@ -50,16 +87,25 @@ function AddDhikrModal({ open, onClose, categoryId, categoryTitle }: AddDhikrMod
 
     setSubmitting(true);
     try {
-      await submitDhikrSubmission({
-        categoryId,
+      const content = {
         title: title.trim(),
         text: text.trim(),
         source: source.trim(),
-      });
-      // Approved content may have changed; refresh silently. Also clears any
-      // previous network failure flag so the next submission can retry.
+      };
+      if (editing) {
+        if (editing.kind === 'official') {
+          await updateOfficialDhikr(editing.id, content);
+        } else {
+          await updateDhikrSubmission(editing.id, content);
+        }
+        addNotification('تم حفظ تعديلات الذكر', 'success', 4000);
+      } else {
+        await submitDhikrSubmission({ categoryId, ...content });
+        addNotification('تم إرسال الذكر وسيظهر بعد مراجعة الإدارة', 'success', 4000);
+      }
+      // Approved/edited content may have changed; refresh silently. Also
+      // clears any previous network failure flag so the next submit can retry.
       void reloadApproved();
-      addNotification('تم إرسال الذكر وسيظهر بعد مراجعة الإدارة', 'success', 4000);
       setTitle('');
       setText('');
       setSource('');
@@ -68,12 +114,18 @@ function AddDhikrModal({ open, onClose, categoryId, categoryTitle }: AddDhikrMod
     } catch (err) {
       if (isNetworkError(err)) {
         addNotification(
-          'تعذر إرسال الذكر، تحقق من اتصالك بالإنترنت',
+          editing
+            ? 'تعذر حفظ التعديلات، تحقق من اتصالك بالإنترنت'
+            : 'تعذر إرسال الذكر، تحقق من اتصالك بالإنترنت',
           'error',
           4000,
         );
       } else if (err instanceof Error && err.message === NOT_LOGGED_IN_MESSAGE) {
-        addNotification('يجب تسجيل الدخول لإضافة ذكر', 'warning', 4000);
+        addNotification(
+          editing ? 'يجب تسجيل الدخول لتحرير الأذكار' : 'يجب تسجيل الدخول لإضافة ذكر',
+          'warning',
+          4000,
+        );
       } else {
         addNotification(
           err instanceof Error ? err.message : 'حدث خطأ غير متوقع',
@@ -90,8 +142,12 @@ function AddDhikrModal({ open, onClose, categoryId, categoryTitle }: AddDhikrMod
     <Modal
       open={open}
       onClose={handleClose}
-      title="إضافة ذكر"
-      description={`سيُرسل الذكر للمراجعة ولن يظهر في قسم ${categoryTitle} إلا بعد اعتماده من الإدارة.`}
+      title={editing ? 'تعديل الذكر' : 'إضافة ذكر'}
+      description={
+        editing
+          ? 'سيتم حفظ التعديلات وستظهر مباشرة لجميع المستخدمين.'
+          : `سيُرسل الذكر للمراجعة ولن يظهر في قسم ${categoryTitle} إلا بعد اعتماده من الإدارة.`
+      }
       size="sm"
       closeOnBackdrop={!submitting}
       closeOnEscape={!submitting}
@@ -134,7 +190,7 @@ function AddDhikrModal({ open, onClose, categoryId, categoryTitle }: AddDhikrMod
             إلغاء
           </Button>
           <Button type="submit" variant="primary" loading={submitting}>
-            إرسال للمراجعة
+            {editing ? 'حفظ التعديلات' : 'إرسال للمراجعة'}
           </Button>
         </div>
       </form>

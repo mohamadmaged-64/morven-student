@@ -10,12 +10,21 @@ import {
 } from '@/components/UI';
 import { AdhkarCard } from '@/components/adhkar/AdhkarCard';
 import { CategoryCard } from '@/components/adhkar/CategoryCard';
-import { AddDhikrModal } from '@/components/adhkar/AddDhikrModal';
+import { AddDhikrModal, type EditedDhikr } from '@/components/adhkar/AddDhikrModal';
+import { DeleteDhikrModal } from '@/components/adhkar/DeleteDhikrModal';
 import { useAdhkarStore } from '@/store/useAdhkarStore';
 import {
   useAdhkarApprovedStore,
   getApprovedAdhkarForCategory,
+  applyOfficialMutations,
 } from '@/store/useAdhkarApprovedStore';
+import { useAuthStore } from '@/store/useAuthStore';
+import { useAppStore } from '@/store/useAppStore';
+import {
+  deleteDhikrSubmission,
+  deleteOfficialDhikr,
+} from '@/services/adhkarApi';
+import { isNetworkError } from '@/services/apiError';
 import {
   CATEGORIES,
   CATEGORY_META,
@@ -34,9 +43,100 @@ import {
   BookmarkPlus,
 } from 'lucide-react';
 
+// =============================================================================
+// Admin actions (edit/delete) shared by the overview and category views
+// =============================================================================
+
+function useDhikrAdminActions() {
+  const user = useAuthStore((s) => s.user);
+  const addNotification = useAppStore((s) => s.addNotification);
+  const reloadApproved = useAdhkarApprovedStore((s) => s.load);
+  const [editing, setEditing] = useState<EditedDhikr | null>(null);
+  const [deleting, setDeleting] = useState<Dhikr | null>(null);
+  const [deletingInFlight, setDeletingInFlight] = useState(false);
+
+  const canManage = user?.role === 'ADMIN';
+
+  const toEdited = (dhikr: Dhikr): EditedDhikr => {
+    const isApproved = dhikr.id.startsWith('sub-');
+    return {
+      kind: isApproved ? 'approved' : 'official',
+      id: isApproved ? dhikr.id.slice('sub-'.length) : dhikr.id,
+      category: dhikr.category,
+      title: dhikr.title ?? '',
+      text: dhikr.text,
+      source: dhikr.source,
+    };
+  };
+
+  const startEdit = (dhikr: Dhikr) => {
+    if (!canManage) return;
+    setEditing(toEdited(dhikr));
+  };
+
+  const startDelete = (dhikr: Dhikr) => {
+    if (!canManage) return;
+    setDeleting(dhikr);
+  };
+
+  const cancelEdit = () => setEditing(null);
+
+  const cancelDelete = () => {
+    if (deletingInFlight) return;
+    setDeleting(null);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleting || deletingInFlight) return;
+    setDeletingInFlight(true);
+    try {
+      if (deleting.id.startsWith('sub-')) {
+        await deleteDhikrSubmission(deleting.id.slice('sub-'.length));
+      } else {
+        await deleteOfficialDhikr(deleting.id);
+      }
+      // Approved content and official mutations may have changed; refresh.
+      void reloadApproved();
+      addNotification('تم حذف الذكر نهائياً', 'success', 4000);
+      setDeleting(null);
+    } catch (err) {
+      if (isNetworkError(err)) {
+        addNotification('تعذر حذف الذكر، تحقق من اتصالك بالإنترنت', 'error', 4000);
+      } else {
+        addNotification(
+          err instanceof Error ? err.message : 'حدث خطأ غير متوقع',
+          'error',
+          4000,
+        );
+      }
+    } finally {
+      setDeletingInFlight(false);
+    }
+  };
+
+  return {
+    canManage,
+    editing,
+    deleting,
+    deletingInFlight,
+    startEdit,
+    startDelete,
+    cancelEdit,
+    cancelDelete,
+    confirmDelete,
+  };
+}
+
 export default function AdhkarPage() {
   const currentCategory = useAdhkarStore((s) => s.currentCategory);
   const setCategory = useAdhkarStore((s) => s.setCategory);
+  const admin = useDhikrAdminActions();
+
+  // Pull approved content + official mutations once on mount so the overview
+  // reflects admin edits/deletions too. Idempotent and never throws.
+  useEffect(() => {
+    void useAdhkarApprovedStore.getState().load();
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -52,6 +152,9 @@ export default function AdhkarPage() {
             <CategoryView
               category={currentCategory}
               onBack={() => setCategory(null)}
+              canManage={admin.canManage}
+              onEdit={admin.startEdit}
+              onDelete={admin.startDelete}
             />
           </motion.div>
         ) : (
@@ -62,10 +165,33 @@ export default function AdhkarPage() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
           >
-            <Overview onSelect={setCategory} />
+            <Overview
+              onSelect={setCategory}
+              canManage={admin.canManage}
+              onEdit={admin.startEdit}
+              onDelete={admin.startDelete}
+            />
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Admin edit/delete dialogs (only ever shown for admins). */}
+      <AddDhikrModal
+        open={admin.editing !== null}
+        onClose={admin.cancelEdit}
+        categoryId={admin.editing?.category ?? CATEGORIES[0]}
+        categoryTitle={
+          admin.editing ? CATEGORY_META[admin.editing.category].title : ''
+        }
+        editing={admin.editing}
+      />
+      <DeleteDhikrModal
+        open={admin.deleting !== null}
+        dhikr={admin.deleting}
+        deleting={admin.deletingInFlight}
+        onConfirm={admin.confirmDelete}
+        onClose={admin.cancelDelete}
+      />
     </div>
   );
 }
@@ -74,18 +200,34 @@ export default function AdhkarPage() {
 // Overview
 // =============================================================================
 
-function Overview({ onSelect }: { onSelect: (c: DhikrCategory) => void }) {
+function Overview({
+  onSelect,
+  canManage,
+  onEdit,
+  onDelete,
+}: {
+  onSelect: (c: DhikrCategory) => void;
+  canManage: boolean;
+  onEdit: (dhikr: Dhikr) => void;
+  onDelete: (dhikr: Dhikr) => void;
+}) {
   const counts = useAdhkarStore((s) => s.counts);
   const increment = useAdhkarStore((s) => s.increment);
   const reset = useAdhkarStore((s) => s.reset);
+  const officialEdits = useAdhkarApprovedStore((s) => s.officialEdits);
+  const officialDeletions = useAdhkarApprovedStore((s) => s.officialDeletions);
   const [query, setQuery] = useState('');
 
   const allResults = useMemo(() => {
     const q = query.trim();
     if (!q) return null;
-    const items = CATEGORIES.flatMap((c) => getAdhkarByCategory(c));
+    const items = applyOfficialMutations(
+      CATEGORIES.flatMap((c) => getAdhkarByCategory(c)),
+      officialEdits,
+      officialDeletions,
+    );
     return searchAdhkar(q, items);
-  }, [query]);
+  }, [query, officialEdits, officialDeletions]);
 
   const groupedResults = useMemo(() => {
     if (!allResults || allResults.length === 0) return [];
@@ -135,6 +277,9 @@ function Overview({ onSelect }: { onSelect: (c: DhikrCategory) => void }) {
                       count={counts[dhikr.id] ?? 0}
                       onIncrement={() => increment(dhikr.id, dhikr.repeatCount)}
                       onReset={() => reset(dhikr.id)}
+                      canManage={canManage}
+                      onEdit={onEdit}
+                      onDelete={onDelete}
                     />
                   ))}
                 </div>
@@ -176,9 +321,15 @@ function Overview({ onSelect }: { onSelect: (c: DhikrCategory) => void }) {
 function CategoryView({
   category,
   onBack,
+  canManage,
+  onEdit,
+  onDelete,
 }: {
   category: DhikrCategory;
   onBack: () => void;
+  canManage: boolean;
+  onEdit: (dhikr: Dhikr) => void;
+  onDelete: (dhikr: Dhikr) => void;
 }) {
   const meta = CATEGORY_META[category];
   const counts = useAdhkarStore((s) => s.counts);
@@ -186,6 +337,8 @@ function CategoryView({
   const reset = useAdhkarStore((s) => s.reset);
   const resetCategory = useAdhkarStore((s) => s.resetCategory);
   const approvedCategory = useAdhkarApprovedStore((s) => s.approved);
+  const officialEdits = useAdhkarApprovedStore((s) => s.officialEdits);
+  const officialDeletions = useAdhkarApprovedStore((s) => s.officialDeletions);
   const [addModalOpen, setAddModalOpen] = useState(false);
 
   // Pull approved user-submitted content for this category so the dhikr list
@@ -196,16 +349,27 @@ function CategoryView({
     void useAdhkarApprovedStore.getState().load();
   }, [category]);
 
-  // Official (offline) items first, then APPROVED user submissions appended at
-  // the end of the category — official content and hardcoded order stay intact.
+  // Official (offline) items first — with admin edits/deletions applied — then
+  // APPROVED user submissions appended at the end of the category. Official
+  // content and hardcoded order stay intact except for admin overrides.
   const categoryDhikrs = useMemo(
     () => [
-      ...getAdhkarByCategory(category),
+      ...applyOfficialMutations(
+        getAdhkarByCategory(category),
+        officialEdits,
+        officialDeletions,
+      ),
       ...getApprovedAdhkarForCategory(category, approvedCategory),
     ],
-    [category, approvedCategory],
+    [category, approvedCategory, officialEdits, officialDeletions],
   );
-  const { completed, total } = getCategoryProgress(category, counts);
+  // Progress is computed over the VISIBLE list, so a dhikr deleted by an admin
+  // no longer counts towards the total.
+  const { completed, total } = getCategoryProgress(
+    category,
+    counts,
+    categoryDhikrs,
+  );
   const allDone = total > 0 && completed === total;
 
   const Icon = meta.icon;
@@ -307,6 +471,9 @@ function CategoryView({
             count={counts[dhikr.id] ?? 0}
             onIncrement={() => increment(dhikr.id, dhikr.repeatCount)}
             onReset={() => reset(dhikr.id)}
+            canManage={canManage}
+            onEdit={onEdit}
+            onDelete={onDelete}
           />
         ))}
       </div>

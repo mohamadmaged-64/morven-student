@@ -26,6 +26,20 @@ export interface OfficialApprovedDhikr {
   createdAt: string;
 }
 
+/** An admin override of a bundled official dhikr (title/text/source). */
+export interface OfficialDhikrEdit {
+  officialDhikrId: string;
+  title: string;
+  text: string;
+  source: string;
+}
+
+export interface OfficialApprovedResponse {
+  adhkar: OfficialApprovedDhikr[];
+  officialEdits: OfficialDhikrEdit[];
+  officialDeletions: string[];
+}
+
 export interface AdminDhikrSubmission extends DhikrSubmission {
   user: {
     id: string;
@@ -61,18 +75,26 @@ export async function submitDhikrSubmission(
 }
 
 /**
- * Fetches the approved user-submitted dhikr list (public — works for guests).
- * PENDING/REJECTED rows are never returned by the server, so offline/reserved
- * content is unaffected. Returns an empty list in preview mode and on network
- * failure, so the bundled offline adhkar remain the source of truth.
+ * Fetches the approved user-submitted dhikr list, along with the admin
+ * mutations (edits + tombstone deletions) for official content (public — works
+ * for guests). PENDING/REJECTED rows are never returned by the server, so
+ * offline/reserved content is unaffected. Returns empty collections in preview
+ * mode and on network failure, so the bundled offline adhkar remain the source
+ * of truth.
  */
-export async function fetchApprovedAdhkar(): Promise<OfficialApprovedDhikr[]> {
-  if (isPreviewMode()) return [];
+export async function fetchApprovedAdhkar(): Promise<OfficialApprovedResponse> {
+  if (isPreviewMode()) {
+    return { adhkar: [], officialEdits: [], officialDeletions: [] };
+  }
   try {
-    const data = await authRequest<{ adhkar: OfficialApprovedDhikr[] }>(
+    const data = await authRequest<OfficialApprovedResponse>(
       '/api/adhkar/submissions/official',
     );
-    return data.adhkar;
+    return {
+      adhkar: data.adhkar ?? [],
+      officialEdits: data.officialEdits ?? [],
+      officialDeletions: data.officialDeletions ?? [],
+    };
   } catch (err) {
     if (err instanceof TypeError) {
       throw toNetworkError('تعذر الاتصال بالخادم', err);
@@ -110,4 +132,56 @@ export async function rejectDhikrSubmission(
     { method: 'POST' },
   );
   return data.submission;
+}
+
+export interface UpdateDhikrContentInput {
+  title: string;
+  text: string;
+  source?: string;
+}
+
+/** Edits an existing user submission's content in place (ADMIN only). */
+export async function updateDhikrSubmission(
+  id: string,
+  input: UpdateDhikrContentInput,
+): Promise<DhikrSubmission> {
+  const data = await authRequest<{ submission: DhikrSubmission }>(
+    `/api/admin/adhkar/submissions/${encodeURIComponent(id)}`,
+    {
+      method: 'PATCH',
+      body: JSON.stringify(input),
+    },
+  );
+  return data.submission;
+}
+
+/** Permanently removes a user submission (ADMIN only). */
+export async function deleteDhikrSubmission(id: string): Promise<void> {
+  await authRequest<{ deleted: boolean }>(
+    `/api/admin/adhkar/submissions/${encodeURIComponent(id)}`,
+    { method: 'DELETE' },
+  );
+}
+
+/** Persists an admin edit of a bundled official dhikr (ADMIN only). */
+export async function updateOfficialDhikr(
+  id: string,
+  input: UpdateDhikrContentInput,
+): Promise<OfficialDhikrEdit> {
+  const data = await authRequest<{ edit: OfficialDhikrEdit }>(
+    `/api/admin/adhkar/official/${encodeURIComponent(id)}`,
+    {
+      method: 'PATCH',
+      body: JSON.stringify(input),
+    },
+  );
+  return data.edit;
+}
+
+/** Hides a bundled official dhikr for everyone via a tombstone (ADMIN only). */
+export async function deleteOfficialDhikr(id: string): Promise<void> {
+  await authRequest<{ deleted: boolean }>(
+    `/api/admin/adhkar/official/${encodeURIComponent(id)}`,
+    { method: 'DELETE' },
+  );
 }

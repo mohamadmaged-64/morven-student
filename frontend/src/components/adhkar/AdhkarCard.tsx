@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import { Card } from '@/components/UI/Card';
 import { Badge } from '@/components/UI/Badge';
 import { Tooltip } from '@/components/UI/Tooltip';
-import { CircleCheck, RotateCcw, Hand } from 'lucide-react';
+import { CircleCheck, RotateCcw, Hand, Pencil, Trash2 } from 'lucide-react';
 import type { Dhikr } from '@/data/adhkar';
 
 type AdhkarCardProps = {
@@ -10,9 +10,20 @@ type AdhkarCardProps = {
   count: number;
   onIncrement: () => void;
   onReset: () => void;
+  canManage?: boolean;
+  onEdit?: (dhikr: Dhikr) => void;
+  onDelete?: (dhikr: Dhikr) => void;
 };
 
-function AdhkarCard({ dhikr, count, onIncrement, onReset }: AdhkarCardProps) {
+function AdhkarCard({
+  dhikr,
+  count,
+  onIncrement,
+  onReset,
+  canManage = false,
+  onEdit,
+  onDelete,
+}: AdhkarCardProps) {
   const complete = count >= dhikr.repeatCount;
   const counterLabel = `${count} / ${dhikr.repeatCount}`;
 
@@ -109,7 +120,7 @@ function AdhkarCard({ dhikr, count, onIncrement, onReset }: AdhkarCardProps) {
           </div>
         </div>
 
-        {/* Footer: source + reset */}
+        {/* Footer: source + reset (plus admin edit/delete whenever allowed) */}
         <div className="pt-3 border-t border-light-border dark:border-dark-border flex items-end justify-between gap-3">
           <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1 min-w-0">
             <p>
@@ -120,16 +131,42 @@ function AdhkarCard({ dhikr, count, onIncrement, onReset }: AdhkarCardProps) {
             {dhikr.note && <p className="text-gray-400 dark:text-gray-500">{dhikr.note}</p>}
           </div>
 
-          <Tooltip content="إعادة تعيين العداد">
-            <button
-              type="button"
-              onClick={onReset}
-              aria-label={`إعادة تعيين عداد ${dhikr.title ?? 'الذكر'}`}
-              className="p-2 rounded-xl text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:text-red-400 dark:hover:bg-red-900/20 transition-colors shrink-0"
-            >
-              <RotateCcw className="w-4 h-4" />
-            </button>
-          </Tooltip>
+          <div className="flex items-center gap-1 shrink-0">
+            {canManage && onEdit && (
+              <Tooltip content="تعديل الذكر">
+                <button
+                  type="button"
+                  onClick={() => onEdit(dhikr)}
+                  aria-label={`تعديل ذكر ${dhikr.title ?? 'الذكر'}`}
+                  className="p-2 rounded-xl text-gray-400 hover:text-primary-600 hover:bg-primary-50 dark:hover:text-primary-400 dark:hover:bg-primary-900/20 transition-colors"
+                >
+                  <Pencil className="w-4 h-4" />
+                </button>
+              </Tooltip>
+            )}
+            {canManage && onDelete && (
+              <Tooltip content="حذف الذكر">
+                <button
+                  type="button"
+                  onClick={() => onDelete(dhikr)}
+                  aria-label={`حذف ذكر ${dhikr.title ?? 'الذكر'}`}
+                  className="p-2 rounded-xl text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:text-red-400 dark:hover:bg-red-900/20 transition-colors"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </Tooltip>
+            )}
+            <Tooltip content="إعادة تعيين العداد">
+              <button
+                type="button"
+                onClick={onReset}
+                aria-label={`إعادة تعيين عداد ${dhikr.title ?? 'الذكر'}`}
+                className="p-2 rounded-xl text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:text-red-400 dark:hover:bg-red-900/20 transition-colors shrink-0"
+              >
+                <RotateCcw className="w-4 h-4" />
+              </button>
+            </Tooltip>
+          </div>
         </div>
       </Card>
     </motion.div>

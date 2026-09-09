@@ -159,6 +159,28 @@ model DhikrSubmission {
   @@map("dhikr_submissions")
 }
 
+model DhikrOfficialEdit {
+  id              String   @id @default(uuid())
+  officialDhikrId String   @unique @map("official_dhikr_id")
+  title           String
+  text            String
+  source          String   @default("")
+  editedBy        String   @map("edited_by")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("dhikr_official_edits")
+}
+
+model DhikrOfficialDeletion {
+  id              String   @id @default(uuid())
+  officialDhikrId String   @unique @map("official_dhikr_id")
+  deletedBy       String   @map("deleted_by")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  @@map("dhikr_official_deletions")
+}
+
 model UserNotificationRead {
   id             String          @id @default(uuid())
   userId         String          @map("user_id")

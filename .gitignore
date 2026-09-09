@@ -11,3 +11,4 @@ dev-dist/
 
 # Backend dev-server logs
 backend/backend-dev-*.log
+backend-dev-*.log

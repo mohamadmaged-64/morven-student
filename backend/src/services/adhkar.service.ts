@@ -27,10 +27,9 @@ export class AdhkarError extends Error {
   }
 }
 
-export const createDhikrSubmissionSchema = z.object({
-  categoryId: z.enum(ADHKAR_CATEGORY_IDS, {
-    message: "قسم الأذكار غير صالح",
-  }),
+// Shared validation for dhikr content (title/text/source) — used both when a
+// user submits a proposal and when an admin edits a visible dhikr.
+export const dhikrContentSchema = z.object({
   title: z
     .string()
     .trim()
@@ -47,6 +46,15 @@ export const createDhikrSubmissionSchema = z.object({
     .max(500, { message: "المصدر طويل جداً" })
     .optional()
     .default(""),
+});
+
+export type DhikrContentInput = z.infer<typeof dhikrContentSchema>;
+
+export const createDhikrSubmissionSchema = z.object({
+  categoryId: z.enum(ADHKAR_CATEGORY_IDS, {
+    message: "قسم الأذكار غير صالح",
+  }),
+  ...dhikrContentSchema.shape,
 });
 
 export type CreateDhikrSubmissionInput = z.infer<
@@ -106,30 +114,49 @@ export async function listDhikrSubmissions() {
 }
 
 /**
- * Public list of APPROVED user-submitted dhikr. PENDING and REJECTED rows are
- * never exposed here. Available to guests too (optionalAuth), so approved
- * content behaves like the bundled official adhkar (readable without login)
- * while PENDING/REJECTED stays invisible for everyone.
+ * Public list of APPROVED user-submitted dhikr, plus the admin mutations for
+ * bundled official content (edits + tombstone deletions). PENDING and REJECTED
+ * rows are never exposed here. Available to guests too (optionalAuth), so
+ * approved content behaves like the bundled official adhkar (readable without
+ * login) while PENDING/REJECTED stays invisible for everyone.
  */
 export async function listApprovedAdhkar() {
-  const rows = await prisma.dhikrSubmission.findMany({
-    where: { status: "APPROVED" },
-    orderBy: { createdAt: "asc" },
-    select: {
-      id: true,
-      categoryId: true,
-      title: true,
-      text: true,
-      source: true,
-      createdAt: true,
-    },
-  });
-  return rows.map((r) => ({
-    ...r,
-    // Stable appended ordering: approved content is sorted after the last
-    // official dhikr by the frontend, and among themselves by approval time.
-    approvedAt: r.createdAt,
-  }));
+  const [rows, edits, deletions] = await Promise.all([
+    prisma.dhikrSubmission.findMany({
+      where: { status: "APPROVED" },
+      orderBy: { createdAt: "asc" },
+      select: {
+        id: true,
+        categoryId: true,
+        title: true,
+        text: true,
+        source: true,
+        createdAt: true,
+      },
+    }),
+    prisma.dhikrOfficialEdit.findMany({
+      orderBy: { updatedAt: "asc" },
+      select: {
+        officialDhikrId: true,
+        title: true,
+        text: true,
+        source: true,
+      },
+    }),
+    prisma.dhikrOfficialDeletion.findMany({
+      select: { officialDhikrId: true },
+    }),
+  ]);
+  return {
+    adhkar: rows.map((r) => ({
+      ...r,
+      // Stable appended ordering: approved content is sorted after the last
+      // official dhikr by the frontend, and among themselves by approval time.
+      approvedAt: r.createdAt,
+    })),
+    officialEdits: edits,
+    officialDeletions: deletions.map((d) => d.officialDhikrId),
+  };
 }
 
 /**
@@ -195,4 +222,101 @@ export async function rejectDhikrSubmission(
       },
     }),
   ]).then(([updated]) => updated);
+}
+
+/**
+ * Updates the content (title/text/source) of a user's submission in place.
+ * ADMIN-only. Status is preserved — editing never re-approves or re-publishes
+ * a PENDING/REJECTED submission.
+ */
+export async function updateDhikrSubmissionContent(
+  submissionId: string,
+  input: DhikrContentInput,
+  adminId: string
+) {
+  const existing = await prisma.dhikrSubmission.findUnique({
+    where: { id: submissionId },
+  });
+  if (!existing) {
+    throw new AdhkarError("الطلب غير موجود", 404);
+  }
+  return prisma.dhikrSubmission.update({
+    where: { id: submissionId },
+    data: {
+      title: input.title,
+      text: input.text,
+      source: input.source,
+    },
+  });
+}
+
+/**
+ * Permanently removes a user's submission. ADMIN-only. Used to delete a card
+ * that was previously approved and visible to everyone.
+ */
+export async function deleteDhikrSubmission(
+  submissionId: string,
+  adminId: string
+) {
+  const existing = await prisma.dhikrSubmission.findUnique({
+    where: { id: submissionId },
+  });
+  if (!existing) {
+    throw new AdhkarError("الطلب غير موجود", 404);
+  }
+  return prisma.dhikrSubmission.delete({ where: { id: submissionId } });
+}
+
+/**
+ * Persists an admin edit of a bundled official dhikr. The bundled dataset
+ * (frontend/src/data/adhkar.ts) stays untouched and remains the offline
+ * fallback; this override is merged over it at render time. Idempotent:
+ * re-editing the same official dhikr updates the existing override instead of
+ * creating a duplicate.
+ */
+export async function saveOfficialDhikrEdit(
+  officialDhikrId: string,
+  input: DhikrContentInput,
+  adminId: string
+) {
+  return prisma.dhikrOfficialEdit.upsert({
+    where: { officialDhikrId },
+    update: {
+      title: input.title,
+      text: input.text,
+      source: input.source,
+      editedBy: adminId,
+    },
+    create: {
+      officialDhikrId,
+      title: input.title,
+      text: input.text,
+      source: input.source,
+      editedBy: adminId,
+    },
+  });
+}
+
+/**
+ * Marks a bundled official dhikr as deleted (tombstone) so it stops rendering
+ * for everyone. Idempotent: deleting twice does not create a second record.
+ * Any override edit for the same dhikr is dropped too, so dead entries cannot
+ * accumulate.
+ */
+export async function deleteOfficialDhikr(
+  officialDhikrId: string,
+  adminId: string
+) {
+  const existing = await prisma.dhikrOfficialDeletion.findUnique({
+    where: { officialDhikrId },
+  });
+  if (existing) {
+    return existing;
+  }
+  return prisma.$transaction([
+    prisma.dhikrOfficialEdit.deleteMany({ where: { officialDhikrId } }),
+    prisma.dhikrOfficialDeletion.create({
+      data: { officialDhikrId, deletedBy: adminId },
+    }),
+  ]).then(([, deletion]) => deletion);
 }
