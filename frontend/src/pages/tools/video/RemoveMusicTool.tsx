@@ -122,11 +122,6 @@ export function RemoveMusicTool() {
         <>
           <SelectedFileInfo file={file} onRemove={clearFile} />
           <VideoPreview file={file} videoRef={videoRef} />
-          <Card padding="sm" className="bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800">
-            <p className="text-xs text-amber-700 dark:text-amber-300">
-              قد تستغرق المعالجة عدة دقائق حسب مدة الفيديو وجودته، إذ يتم التحليل جزءًا تلو الآخر على الخادم.
-            </p>
-          </Card>
         </>
       )}
 
