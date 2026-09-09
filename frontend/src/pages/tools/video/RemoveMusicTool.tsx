@@ -19,7 +19,6 @@ import {
   VideoPreview,
   ProcessingPanel,
   ErrorCard,
-  ToolTips,
   downloadResult,
   formatBytes,
   type JobHandle,
@@ -123,18 +122,11 @@ export function RemoveMusicTool() {
         <>
           <SelectedFileInfo file={file} onRemove={clearFile} />
           <VideoPreview file={file} videoRef={videoRef} />
-          <div className="grid sm:grid-cols-2 gap-3">
-            <Card padding="sm" className="bg-sky-50 dark:bg-sky-900/20 border-sky-200 dark:border-sky-800">
-              <p className="text-xs text-sky-700 dark:text-sky-300">
-                سيتم فصل المكون الموسيقي عن الصوت باستخدام نموذج ذكاء اصطناعي للفصل بين الصوت البشري والموسيقى، مع الحفاظ على الكلام قدر الإمكان.
-              </p>
-            </Card>
-            <Card padding="sm" className="bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800">
-              <p className="text-xs text-amber-700 dark:text-amber-300">
-                قد تستغرق المعالجة عدة دقائق حسب مدة الفيديو وجودته، إذ يتم التحليل جزءًا تلو الآخر على الخادم.
-              </p>
-            </Card>
-          </div>
+          <Card padding="sm" className="bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800">
+            <p className="text-xs text-amber-700 dark:text-amber-300">
+              قد تستغرق المعالجة عدة دقائق حسب مدة الفيديو وجودته، إذ يتم التحليل جزءًا تلو الآخر على الخادم.
+            </p>
+          </Card>
         </>
       )}
 
@@ -177,12 +169,7 @@ export function RemoveMusicTool() {
         </Button>
       )}
 
-      <ToolTips items={[
-        'أفضل النتائج عند استخدام فيديو يحتوي كلامًا واضحًا وخلفية موسيقية منفصلة نسبيًا.',
-        'قد يظهر بعض التأثير على الصوت في المقاطع المعقدة (موسيقى قريبة جدًا من الصوت البشري) وهذا أمر طبيعي لفصل المصادر الصوتية.',
-        'يمكنك مقارنة الفيديو الأصلي بالنتيجة قبل التنزيل، واختيار تنزيل الفيديو أو الصوت فقط.',
-      ]} />
-    </ToolBody>
+      </ToolBody>
   );
 }
 
