@@ -196,8 +196,12 @@ async function runSeparationProcess(
 
       if (text.includes("Using") && text.includes("model")) {
         options?.onProgress?.("Loading separation model...");
-      } else if (text.includes("Separating") || text.includes("100%")) {
+      } else if (text.includes("Separating")) {
         options?.onProgress?.("Separating music from voice...");
+      } else if (text.includes("Saving")) {
+        options?.onProgress?.("Saving vocals output...");
+      } else if (text.includes("complete")) {
+        options?.onProgress?.("Separation complete");
       }
     });
 
