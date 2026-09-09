@@ -25,7 +25,7 @@ RUN python3 -m pip install --no-cache-dir --break-system-packages \
     torch==2.5.1+cpu torchaudio==2.5.1+cpu \
     --extra-index-url https://download.pytorch.org/whl/cpu && \
     python3 -m pip install --no-cache-dir --break-system-packages \
-    demucs && \
+    "numpy==1.26.4" "scipy==1.13.1" demucs && \
     python3 -m demucs --help > /dev/null
 
 WORKDIR /app
