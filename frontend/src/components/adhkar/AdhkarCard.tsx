@@ -95,7 +95,7 @@ function AdhkarCard({
 
           <p
             dir="rtl"
-            className={`font-semibold leading-[2.2] text-gray-800 dark:text-gray-100 ${
+            className={`whitespace-pre-line font-semibold leading-[2.2] text-gray-800 dark:text-gray-100 ${
               dhikr.text.length > 80
                 ? 'text-lg sm:text-xl'
                 : 'text-xl sm:text-2xl'
