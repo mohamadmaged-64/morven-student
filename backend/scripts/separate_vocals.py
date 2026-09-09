@@ -60,8 +60,6 @@ def main():
             device="cpu",
             shifts=1,
             split=True,
-            progress=False,
-            verbose=False,
         )
 
         log("Separating music from voice")
