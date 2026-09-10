@@ -8,8 +8,10 @@ import GeneralToolPage from '@/pages/tools/GeneralTools';
 import {
   ADHKARS,
   CATEGORIES,
+  CATEGORY_META,
   getAdhkarByCategory,
   getAdhkarPeriod,
+  getAdhkarHeroText,
   getCategoryProgress,
   filterAdhkarByPeriod,
   searchAdhkar,
@@ -51,9 +53,9 @@ beforeEach(() => {
 
 type U = ReturnType<typeof userEvent.setup>;
 
-async function openCategory(user: U, name: RegExp) {
+async function openCategory(user: U, name: RegExp, headingName?: RegExp) {
   await user.click(screen.getByRole('button', { name }));
-  await screen.findByRole('heading', { level: 2, name });
+  await screen.findByRole('heading', { level: 2, name: headingName ?? name });
 }
 
 async function goBackToOverview(user: U) {
@@ -224,6 +226,18 @@ describe('Adhkar day-period split (local 02:00 / 14:00 rule)', () => {
       }
     }
   });
+
+  it('labels the morning/evening section header only with the active time', () => {
+    const morningHero = getAdhkarHeroText('morning');
+    expect(morningHero.title).toBe('أذكار الصباح');
+    expect(morningHero.description).toContain('الصباح');
+    expect(morningHero.description).not.toContain('المساء');
+
+    const eveningHero = getAdhkarHeroText('evening');
+    expect(eveningHero.title).toBe('أذكار المساء');
+    expect(eveningHero.description).toContain('المساء');
+    expect(eveningHero.description).not.toContain('الصباح');
+  });
 });
 
 describe('AdhkarPage overview', () => {
@@ -333,7 +347,7 @@ describe('AdhkarPage category view', () => {
     // None of the before-study items uses 3 repetitions, so check the
     // morning/evening "سورة الإخلاص والمعوذتان" (3x) for the cap behaviour.
     await goBackToOverview(user);
-    await openCategory(user, /أذكار الصباح والمساء/);
+    await openCategory(user, /أذكار الصباح والمساء/, /أذكار الصباح|أذكار المساء/);
 
     const label = (n: number) => `سورة الإخلاص والمعوذتان، تم العد ${n} من 3`;
     fireEvent.click(screen.getByRole('button', { name: new RegExp(label(0)) }));
@@ -382,7 +396,7 @@ describe('AdhkarPage category view', () => {
   it('renders every dhikr card directly without group headings (morning/evening)', async () => {
     const user = userEvent.setup();
     render(<AdhkarPage />);
-    await openCategory(user, /أذكار الصباح والمساء/);
+    await openCategory(user, /أذكار الصباح والمساء/, /أذكار الصباح|أذكار المساء/);
 
     // No section/group headings above the cards.
     expect(screen.queryByText('آيات من القرآن الكريم')).not.toBeInTheDocument();
@@ -410,6 +424,19 @@ describe('AdhkarPage category view', () => {
       screen.queryByRole('textbox', { name: 'البحث ضمن أذكار قبل الدراسة' }),
     ).not.toBeInTheDocument();
     expect(screen.queryByPlaceholderText(/ابحث ضمن هذا القسم/)).not.toBeInTheDocument();
+  });
+
+  it('shows the morning/evening section header following the active period', async () => {
+    const user = userEvent.setup();
+    render(<AdhkarPage />);
+    await openCategory(user, /أذكار الصباح والمساء/, /أذكار الصباح|أذكار المساء/);
+
+    const hero = getAdhkarHeroText(getAdhkarPeriod());
+    expect(screen.getByRole('heading', { level: 2, name: hero.title })).toBeInTheDocument();
+    // The subtitle is the period-aware one (the static "للصباح والمساء" copy
+    // would not match), and it only mentions the active half of the day.
+    expect(screen.getByText(hero.description)).toBeInTheDocument();
+    expect(screen.queryByText(CATEGORY_META['morning-evening'].description)).not.toBeInTheDocument();
   });
 });
 

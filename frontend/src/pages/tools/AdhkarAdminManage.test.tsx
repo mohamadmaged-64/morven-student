@@ -87,9 +87,9 @@ function toasts() {
   return useAppStore.getState().notifications.map((n) => n.message);
 }
 
-async function openCategory(user: U, name: RegExp) {
+async function openCategory(user: U, name: RegExp, headingName?: RegExp) {
   await user.click(screen.getByRole('button', { name }));
-  await screen.findByRole('heading', { level: 2, name });
+  await screen.findByRole('heading', { level: 2, name: headingName ?? name });
 }
 
 type U = ReturnType<typeof userEvent.setup>;
@@ -102,7 +102,7 @@ describe('Adhkar admin edit/delete (visible only to ADMIN role)', () => {
         <AdhkarPage />
       </MemoryRouter>,
     );
-    await openCategory(user, /أذكار الصباح والمساء/);
+    await openCategory(user, /أذكار الصباح والمساء/, /أذكار الصباح|أذكار المساء/);
 
     expect(
       screen.queryByRole('button', { name: 'تعديل ذكر آية الكرسي' }),
@@ -120,7 +120,7 @@ describe('Adhkar admin edit/delete (visible only to ADMIN role)', () => {
         <AdhkarPage />
       </MemoryRouter>,
     );
-    await openCategory(user, /أذكار الصباح والمساء/);
+    await openCategory(user, /أذكار الصباح والمساء/, /أذكار الصباح|أذكار المساء/);
 
     expect(screen.getByTestId('adhkar-me-ayatul-kursi')).toBeInTheDocument();
     const total = filterAdhkarByPeriod(
@@ -139,7 +139,7 @@ describe('Adhkar admin edit/delete (visible only to ADMIN role)', () => {
         <AdhkarPage />
       </MemoryRouter>,
     );
-    await openCategory(user, /أذكار الصباح والمساء/);
+    await openCategory(user, /أذكار الصباح والمساء/, /أذكار الصباح|أذكار المساء/);
 
     await user.click(screen.getByRole('button', { name: 'تعديل ذكر آية الكرسي' }));
 
@@ -265,7 +265,7 @@ describe('Adhkar admin edit/delete (visible only to ADMIN role)', () => {
         <AdhkarPage />
       </MemoryRouter>,
     );
-    await openCategory(user, /أذكار الصباح والمساء/);
+    await openCategory(user, /أذكار الصباح والمساء/, /أذكار الصباح|أذكار المساء/);
 
     await user.click(screen.getByRole('button', { name: 'حذف ذكر آية الكرسي' }));
 
@@ -342,7 +342,7 @@ describe('Adhkar admin edit/delete (visible only to ADMIN role)', () => {
         <AdhkarPage />
       </MemoryRouter>,
     );
-    await openCategory(user, /أذكار الصباح والمساء/);
+    await openCategory(user, /أذكار الصباح والمساء/, /أذكار الصباح|أذكار المساء/);
 
     await user.click(screen.getByRole('button', { name: 'حذف ذكر آية الكرسي' }));
     await screen.findByRole('dialog');

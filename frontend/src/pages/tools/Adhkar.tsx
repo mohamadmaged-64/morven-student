@@ -25,13 +25,14 @@ import {
   deleteOfficialDhikr,
 } from '@/services/adhkarApi';
 import { isNetworkError } from '@/services/apiError';
+import { useDayPeriod } from '@/hooks/useDayPeriod';
 import {
   CATEGORIES,
   CATEGORY_META,
   getAdhkarByCategory,
-  getAdhkarPeriod,
   getCategoryProgress,
   filterAdhkarByPeriod,
+  getAdhkarHeroText,
   searchAdhkar,
   type Dhikr,
   type DhikrCategory,
@@ -45,56 +46,6 @@ import {
   RotateCcw,
   BookmarkPlus,
 } from 'lucide-react';
-
-// =============================================================================
-// Day-period switching (Morning Azkar 02:00–14:00 local, Evening Azkar the rest)
-// =============================================================================
-
-function getNextPeriodBoundary(from: Date): Date {
-  const next = new Date(from);
-  const hour = from.getHours();
-  if (hour < 2) {
-    next.setHours(2, 0, 0, 0);
-  } else if (hour < 14) {
-    next.setHours(14, 0, 0, 0);
-  } else {
-    next.setDate(next.getDate() + 1);
-    next.setHours(2, 0, 0, 0);
-  }
-  return next;
-}
-
-/**
- * Tracks the current Morning/Evening adhkar period based on the local device
- * clock. Evaluated on mount (so refresh/reopen always picks the right period)
- * and re-scheduled to wake up just past the next 02:00 / 14:00 boundary, so an
- * open app switches category content automatically.
- */
-function useDayPeriod(): AdhkarPeriod {
-  const [period, setPeriod] = useState(() => getAdhkarPeriod(new Date()));
-
-  useEffect(() => {
-    let timer: ReturnType<typeof setTimeout> | undefined;
-
-    const schedule = () => {
-      const now = new Date();
-      setPeriod(getAdhkarPeriod(now));
-      const boundary = getNextPeriodBoundary(now);
-      const delay = Math.min(
-        Math.max(boundary.getTime() - now.getTime() + 1000, 1000),
-        2_147_483_647,
-      );
-      timer = setTimeout(schedule, delay);
-    };
-
-    schedule();
-    return () => {
-      if (timer) clearTimeout(timer);
-    };
-  }, []);
-
-  return period;
-}
 
 // =============================================================================
 // Admin actions (edit/delete) shared by the overview and category views
@@ -441,6 +392,13 @@ function CategoryView({
 
   const Icon = meta.icon;
 
+  // The morning-evening section header follows the active day period so it
+  // shows only the relevant half of the day. Every other category is untouched.
+  const periodHero =
+    category === 'morning-evening' ? getAdhkarHeroText(period) : null;
+  const headerTitle  = periodHero?.title  ?? meta.title;
+  const headerDesc   = periodHero?.description ?? meta.description;
+
   return (
     <div className="space-y-6">
       {/* Back */}
@@ -462,10 +420,10 @@ function CategoryView({
             </div>
             <div className="min-w-0">
               <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">
-                {meta.title}
+                {headerTitle}
               </h2>
               <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-                {meta.description}
+                {headerDesc}
               </p>
             </div>
           </div>

@@ -503,6 +503,28 @@ export function filterAdhkarByPeriod(
   return dhikrs.filter((d) => d.group !== hidden);
 }
 
+/**
+ * Copy for the inner Azkar tool hero. Title and subtitle follow the active day
+ * period via `getAdhkarPeriod`, and the subtitle refers only to the current
+ * half of the day — it never mentions the other time word.
+ */
+export function getAdhkarHeroText(period: AdhkarPeriod): {
+  title: string;
+  description: string;
+} {
+  return period === 'morning'
+    ? {
+        title: 'أذكار الصباح',
+        description:
+          'تكون هذه أذكار صباح بشكل تلقائي حسب التوقيت المحلي لجهازك (2:00am-2:00pm)',
+      }
+    : {
+        title: 'أذكار المساء',
+        description:
+          'تكون هذه أذكار مساء بشكل تلقائي حسب التوقيت المحلي لجهازك (2:00pm-2:00am)',
+      };
+}
+
 export function getAdhkarById(id: string): Dhikr | undefined {
   return ADHKARS.find((d) => d.id === id);
 }

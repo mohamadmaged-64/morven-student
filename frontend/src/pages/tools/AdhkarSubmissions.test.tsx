@@ -71,9 +71,9 @@ function toasts() {
   return useAppStore.getState().notifications.map((n) => n.message);
 }
 
-async function openCategory(user: U, name: RegExp) {
+async function openCategory(user: U, name: RegExp, headingName?: RegExp) {
   await user.click(screen.getByRole('button', { name }));
-  await screen.findByRole('heading', { level: 2, name });
+  await screen.findByRole('heading', { level: 2, name: headingName ?? name });
 }
 
 type U = ReturnType<typeof userEvent.setup>;
@@ -86,7 +86,7 @@ describe('Adhkar add-dhikr submissions', () => {
         <AdhkarPage />
       </MemoryRouter>,
     );
-    await openCategory(user, /أذكار الصباح والمساء/);
+    await openCategory(user, /أذكار الصباح والمساء/, /أذكار الصباح|أذكار المساء/);
 
     const resetButton = screen.getByRole('button', { name: 'تصفير القسم' });
     const addButton = screen.getByRole('button', { name: 'إضافة ذكر' });
@@ -105,7 +105,7 @@ describe('Adhkar add-dhikr submissions', () => {
         <AdhkarPage />
       </MemoryRouter>,
     );
-    await openCategory(user, /أذكار الصباح والمساء/);
+    await openCategory(user, /أذكار الصباح والمساء/, /أذكار الصباح|أذكار المساء/);
 
     await user.click(screen.getByRole('button', { name: 'إضافة ذكر' }));
     expect(screen.getByRole('dialog')).toBeInTheDocument();
@@ -121,7 +121,7 @@ describe('Adhkar add-dhikr submissions', () => {
         <AdhkarPage />
       </MemoryRouter>,
     );
-    await openCategory(user, /أذكار الصباح والمساء/);
+    await openCategory(user, /أذكار الصباح والمساء/, /أذكار الصباح|أذكار المساء/);
     await user.click(screen.getByRole('button', { name: 'إضافة ذكر' }));
 
     await user.click(screen.getByRole('button', { name: 'إرسال للمراجعة' }));
@@ -152,7 +152,7 @@ describe('Adhkar add-dhikr submissions', () => {
         <AdhkarPage />
       </MemoryRouter>,
     );
-    await openCategory(user, /أذكار الصباح والمساء/);
+    await openCategory(user, /أذكار الصباح والمساء/, /أذكار الصباح|أذكار المساء/);
     await user.click(screen.getByRole('button', { name: 'إضافة ذكر' }));
 
     await user.type(screen.getByLabelText('عنوان الذكر'), 'دعاء مقترح');
@@ -183,7 +183,7 @@ describe('Adhkar add-dhikr submissions', () => {
         <AdhkarPage />
       </MemoryRouter>,
     );
-    await openCategory(user, /أذكار الصباح والمساء/);
+    await openCategory(user, /أذكار الصباح والمساء/, /أذكار الصباح|أذكار المساء/);
     await user.click(screen.getByRole('button', { name: 'إضافة ذكر' }));
 
     await user.type(screen.getByLabelText('عنوان الذكر'), 'ذكر');
@@ -206,7 +206,7 @@ describe('Adhkar add-dhikr submissions', () => {
         <AdhkarPage />
       </MemoryRouter>,
     );
-    await openCategory(user, /أذكار الصباح والمساء/);
+    await openCategory(user, /أذكار الصباح والمساء/, /أذكار الصباح|أذكار المساء/);
     await user.click(screen.getByRole('button', { name: 'إضافة ذكر' }));
 
     await user.type(screen.getByLabelText('عنوان الذكر'), 'ذكر');
@@ -234,7 +234,7 @@ describe('Approved adhkar are appended after the official content', () => {
       </MemoryRouter>,
     );
 
-    await openCategory(user, /أذكار الصباح والمساء/);
+    await openCategory(user, /أذكار الصباح والمساء/, /أذكار الصباح|أذكار المساء/);
 
     // Wait until the approved card streamed in, then confirm it is the LAST
     // card in the category — appended after every official dhikr.
@@ -288,7 +288,7 @@ describe('Approved adhkar are appended after the official content', () => {
       </MemoryRouter>,
     );
 
-    await openCategory(user, /أذكار الصباح والمساء/);
+    await openCategory(user, /أذكار الصباح والمساء/, /أذكار الصباح|أذكار المساء/);
     const card = await screen.findByText('النص المستعلم للموافقة');
     const cardZone = card.closest('div[role="button"]') as HTMLElement;
     await user.click(cardZone);
@@ -310,7 +310,7 @@ describe('Approved adhkar are appended after the official content', () => {
       </MemoryRouter>,
     );
 
-    await openCategory(user, /أذكار الصباح والمساء/);
+    await openCategory(user, /أذكار الصباح والمساء/, /أذكار الصباح|أذكار المساء/);
     await waitFor(() => {
       expect(screen.getByRole('button', { name: 'إضافة ذكر' })).toBeInTheDocument();
     });
