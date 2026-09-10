@@ -459,34 +459,9 @@ function CategoryView({
       )}
 
       {/* Progress */}
-      <Card padding="sm">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
-            تم إنجاز {completed} من {total}
-          </span>
-          <span
-            className={`text-sm font-semibold ${
-              allDone
-                ? 'text-emerald-600 dark:text-emerald-400'
-                : 'text-gray-700 dark:text-gray-300'
-            }`}
-          >
-            {total > 0 ? Math.round((completed / total) * 100) : 0}%
-          </span>
-        </div>
-        <ProgressBar
-          value={completed}
-          max={Math.max(1, total)}
-          size="md"
-          color={allDone ? 'success' : 'primary'}
-        />
-        {allDone && (
-          <div className="mt-3 flex items-center gap-2 text-sm font-medium text-emerald-700 dark:text-emerald-400">
-            <CircleCheck className="w-4 h-4" />
-            أتممت جميع أذكار هذا القسم
-          </div>
-        )}
-      </Card>
+     
+     
+      
 
       <div className="space-y-3">
         {categoryDhikrs.map((dhikr: Dhikr) => (

@@ -47,20 +47,14 @@ function AdhkarCard({
         {/* Header */}
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0">
-            <Badge variant="secondary" size="sm">
-              التكرار: {dhikr.repeatCount}
-            </Badge>
+           
             {complete && (
               <Badge variant="success" size="sm" icon={<CircleCheck className="w-3 h-3" />}>
                 تمّ
               </Badge>
             )}
           </div>
-          {!complete && (
-            <span className="text-[11px] text-gray-400 dark:text-gray-500 shrink-0">
-              اضغط للتسبيح
-            </span>
-          )}
+          
         </div>
 
         {/* Main counter zone — clicking increments (keyboard friendly) */}
