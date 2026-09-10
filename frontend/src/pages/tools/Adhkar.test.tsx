@@ -9,8 +9,11 @@ import {
   ADHKARS,
   CATEGORIES,
   getAdhkarByCategory,
+  getAdhkarPeriod,
   getCategoryProgress,
+  filterAdhkarByPeriod,
   searchAdhkar,
+  type AdhkarPeriod,
 } from '@/data/adhkar';
 
 vi.mock('@/services/adhkarApi', () => ({
@@ -179,6 +182,50 @@ describe('useAdhkarStore counter logic', () => {
   });
 });
 
+describe('Adhkar day-period split (local 02:00 / 14:00 rule)', () => {
+  it('treats 02:00 inclusive through 13:59 as Morning Azkar', () => {
+    const at = (hour: number) => new Date(2026, 0, 10, hour, 0, 0, 0);
+    expect(getAdhkarPeriod(at(0))).toBe('evening');
+    expect(getAdhkarPeriod(at(1))).toBe('evening');
+    expect(getAdhkarPeriod(at(2))).toBe('morning');
+    expect(getAdhkarPeriod(at(13))).toBe('morning');
+    expect(getAdhkarPeriod(at(14))).toBe('evening');
+    expect(getAdhkarPeriod(at(23))).toBe('evening');
+  });
+
+  it('shows only the matching time-specific group per period', () => {
+    const morning = filterAdhkarByPeriod(
+      getAdhkarByCategory('morning-evening'),
+      'morning',
+    );
+    expect(morning.some((d) => d.group === 'evening')).toBe(false);
+    expect(morning.some((d) => d.group === 'morning')).toBe(true);
+
+    const evening = filterAdhkarByPeriod(
+      getAdhkarByCategory('morning-evening'),
+      'evening',
+    );
+    expect(evening.some((d) => d.group === 'morning')).toBe(false);
+    expect(evening.some((d) => d.group === 'evening')).toBe(true);
+  });
+
+  it('keeps shared groups and every other category intact in both periods', () => {
+    for (const category of CATEGORIES) {
+      const all = getAdhkarByCategory(category);
+      for (const period of ['morning', 'evening'] as AdhkarPeriod[]) {
+        const visible = filterAdhkarByPeriod(all, period);
+        if (category === 'morning-evening') {
+          // Only the opposite-time group is dropped; the rest stays.
+          expect(visible.length).toBeGreaterThan(0);
+          expect(visible.length).toBeLessThan(all.length);
+        } else {
+          expect(visible.length).toBe(all.length);
+        }
+      }
+    }
+  });
+});
+
 describe('AdhkarPage overview', () => {
   it('renders the four category cards', () => {
     render(<AdhkarPage />);
@@ -193,7 +240,13 @@ describe('AdhkarPage overview', () => {
 
   it('shows the number of adhkar inside each category card', () => {
     render(<AdhkarPage />);
-    expect(screen.getByText(`${getAdhkarByCategory('morning-evening').length} من الأذكار`)).toBeInTheDocument();
+    const visibleMorningEvening = filterAdhkarByPeriod(
+      getAdhkarByCategory('morning-evening'),
+      getAdhkarPeriod(),
+    ).length;
+    expect(
+      screen.getByText(`${visibleMorningEvening} من الأذكار`),
+    ).toBeInTheDocument();
     // Two contextual categories contain 4 items each.
     expect(screen.getAllByText(`${getAdhkarByCategory('before-study').length} من الأذكار`)).toHaveLength(2);
   });
@@ -337,9 +390,12 @@ describe('AdhkarPage category view', () => {
     expect(screen.queryByText('تسبيح وذكر')).not.toBeInTheDocument();
     expect(screen.queryByText('أذكار الحماية والتحصين')).not.toBeInTheDocument();
 
-    // All dhikr cards of the category are present, one after another.
-    const total = getAdhkarByCategory('morning-evening').length;
-    expect(total).toBeGreaterThan(15);
+    // All dhikr cards of the category for the active period are present.
+    const total = filterAdhkarByPeriod(
+      getAdhkarByCategory('morning-evening'),
+      getAdhkarPeriod(),
+    ).length;
+    expect(total).toBeGreaterThan(10);
     expect(screen.getAllByTestId(/^adhkar-me-/)).toHaveLength(total);
     expect(screen.getByTestId('adhkar-me-ayatul-kursi')).toBeInTheDocument();
     expect(screen.getByTestId('adhkar-me-sayyid-istighfar')).toBeInTheDocument();

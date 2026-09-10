@@ -29,10 +29,13 @@ import {
   CATEGORIES,
   CATEGORY_META,
   getAdhkarByCategory,
+  getAdhkarPeriod,
   getCategoryProgress,
+  filterAdhkarByPeriod,
   searchAdhkar,
   type Dhikr,
   type DhikrCategory,
+  type AdhkarPeriod,
 } from '@/data/adhkar';
 import {
   Search,
@@ -42,6 +45,56 @@ import {
   RotateCcw,
   BookmarkPlus,
 } from 'lucide-react';
+
+// =============================================================================
+// Day-period switching (Morning Azkar 02:00–14:00 local, Evening Azkar the rest)
+// =============================================================================
+
+function getNextPeriodBoundary(from: Date): Date {
+  const next = new Date(from);
+  const hour = from.getHours();
+  if (hour < 2) {
+    next.setHours(2, 0, 0, 0);
+  } else if (hour < 14) {
+    next.setHours(14, 0, 0, 0);
+  } else {
+    next.setDate(next.getDate() + 1);
+    next.setHours(2, 0, 0, 0);
+  }
+  return next;
+}
+
+/**
+ * Tracks the current Morning/Evening adhkar period based on the local device
+ * clock. Evaluated on mount (so refresh/reopen always picks the right period)
+ * and re-scheduled to wake up just past the next 02:00 / 14:00 boundary, so an
+ * open app switches category content automatically.
+ */
+function useDayPeriod(): AdhkarPeriod {
+  const [period, setPeriod] = useState(() => getAdhkarPeriod(new Date()));
+
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+
+    const schedule = () => {
+      const now = new Date();
+      setPeriod(getAdhkarPeriod(now));
+      const boundary = getNextPeriodBoundary(now);
+      const delay = Math.min(
+        Math.max(boundary.getTime() - now.getTime() + 1000, 1000),
+        2_147_483_647,
+      );
+      timer = setTimeout(schedule, delay);
+    };
+
+    schedule();
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, []);
+
+  return period;
+}
 
 // =============================================================================
 // Admin actions (edit/delete) shared by the overview and category views
@@ -131,6 +184,7 @@ export default function AdhkarPage() {
   const currentCategory = useAdhkarStore((s) => s.currentCategory);
   const setCategory = useAdhkarStore((s) => s.setCategory);
   const admin = useDhikrAdminActions();
+  const period = useDayPeriod();
 
   // Pull approved content + official mutations once on mount so the overview
   // reflects admin edits/deletions too. Idempotent and never throws.
@@ -155,6 +209,7 @@ export default function AdhkarPage() {
               canManage={admin.canManage}
               onEdit={admin.startEdit}
               onDelete={admin.startDelete}
+              period={period}
             />
           </motion.div>
         ) : (
@@ -170,6 +225,7 @@ export default function AdhkarPage() {
               canManage={admin.canManage}
               onEdit={admin.startEdit}
               onDelete={admin.startDelete}
+              period={period}
             />
           </motion.div>
         )}
@@ -205,11 +261,13 @@ function Overview({
   canManage,
   onEdit,
   onDelete,
+  period,
 }: {
   onSelect: (c: DhikrCategory) => void;
   canManage: boolean;
   onEdit: (dhikr: Dhikr) => void;
   onDelete: (dhikr: Dhikr) => void;
+  period: AdhkarPeriod;
 }) {
   const counts = useAdhkarStore((s) => s.counts);
   const increment = useAdhkarStore((s) => s.increment);
@@ -222,12 +280,15 @@ function Overview({
     const q = query.trim();
     if (!q) return null;
     const items = applyOfficialMutations(
-      CATEGORIES.flatMap((c) => getAdhkarByCategory(c)),
+      filterAdhkarByPeriod(
+        CATEGORIES.flatMap((c) => getAdhkarByCategory(c)),
+        period,
+      ),
       officialEdits,
       officialDeletions,
     );
     return searchAdhkar(q, items);
-  }, [query, officialEdits, officialDeletions]);
+  }, [query, officialEdits, officialDeletions, period]);
 
   const groupedResults = useMemo(() => {
     if (!allResults || allResults.length === 0) return [];
@@ -297,7 +358,11 @@ function Overview({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {CATEGORIES.map((category) => {
             const meta = CATEGORY_META[category];
-            const { completed, total } = getCategoryProgress(category, counts);
+            const { completed, total } = getCategoryProgress(
+              category,
+              counts,
+              filterAdhkarByPeriod(getAdhkarByCategory(category), period),
+            );
             return (
               <CategoryCard
                 key={category}
@@ -324,12 +389,14 @@ function CategoryView({
   canManage,
   onEdit,
   onDelete,
+  period,
 }: {
   category: DhikrCategory;
   onBack: () => void;
   canManage: boolean;
   onEdit: (dhikr: Dhikr) => void;
   onDelete: (dhikr: Dhikr) => void;
+  period: AdhkarPeriod;
 }) {
   const meta = CATEGORY_META[category];
   const counts = useAdhkarStore((s) => s.counts);
@@ -355,13 +422,13 @@ function CategoryView({
   const categoryDhikrs = useMemo(
     () => [
       ...applyOfficialMutations(
-        getAdhkarByCategory(category),
+        filterAdhkarByPeriod(getAdhkarByCategory(category), period),
         officialEdits,
         officialDeletions,
       ),
       ...getApprovedAdhkarForCategory(category, approvedCategory),
     ],
-    [category, approvedCategory, officialEdits, officialDeletions],
+    [category, approvedCategory, officialEdits, officialDeletions, period],
   );
   // Progress is computed over the VISIBLE list, so a dhikr deleted by an admin
   // no longer counts towards the total.

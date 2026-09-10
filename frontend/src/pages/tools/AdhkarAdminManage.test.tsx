@@ -8,7 +8,7 @@ import { useAdhkarApprovedStore } from '@/store/useAdhkarApprovedStore';
 import { useAppStore } from '@/store/useAppStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import { toNetworkError } from '@/services/apiError';
-import { getAdhkarByCategory } from '@/data/adhkar';
+import { getAdhkarByCategory, filterAdhkarByPeriod, getAdhkarPeriod } from '@/data/adhkar';
 import type { AuthUser } from '@/services/authApi';
 import type { OfficialApprovedResponse } from '@/services/adhkarApi';
 
@@ -123,7 +123,10 @@ describe('Adhkar admin edit/delete (visible only to ADMIN role)', () => {
     await openCategory(user, /أذكار الصباح والمساء/);
 
     expect(screen.getByTestId('adhkar-me-ayatul-kursi')).toBeInTheDocument();
-    const total = getAdhkarByCategory('morning-evening').length;
+    const total = filterAdhkarByPeriod(
+      getAdhkarByCategory('morning-evening'),
+      getAdhkarPeriod(),
+    ).length;
     expect(screen.getAllByRole('button', { name: /^تعديل ذكر / })).toHaveLength(total);
     expect(screen.getAllByRole('button', { name: /^حذف ذكر / })).toHaveLength(total);
   });

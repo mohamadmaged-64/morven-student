@@ -29,6 +29,9 @@ export type DhikrGroup =
   | 'protection'
   | 'closing';
 
+/** Which half of the day the morning/evening adhkar target — derived from the user's local device time. */
+export type AdhkarPeriod = 'morning' | 'evening';
+
 export type Dhikr = {
   id: string;
   category: DhikrCategory;
@@ -467,6 +470,37 @@ export const ADHKARS: Dhikr[] = [
 
 export function getAdhkarByCategory(category: DhikrCategory): Dhikr[] {
   return ADHKARS.filter((d) => d.category === category);
+}
+
+const PERIOD_HIDDEN_GROUPS: Record<AdhkarPeriod, DhikrGroup> = {
+  morning: 'evening',
+  evening: 'morning',
+};
+
+/**
+ * Which day period applies at the given local time: Morning Azkar from
+ * 02:00 AM inclusive until 02:00 PM exclusive, and Evening Azkar from
+ * 02:00 PM inclusive until 02:00 AM exclusive. Always evaluated against the
+ * user's local/device time — never UTC.
+ */
+export function getAdhkarPeriod(date: Date = new Date()): AdhkarPeriod {
+  const hour = date.getHours();
+  return hour >= 2 && hour < 14 ? 'morning' : 'evening';
+}
+
+/**
+ * Filters a list of dhikr for the active day period. Only the morning/evening
+ * collection is affected: the time-specific `morning` and `evening` groups swap
+ * (morning period hides the `evening` group and vice-versa), while the shared
+ * groups and every other category — plus approved user submissions, which carry
+ * no group — are returned unchanged.
+ */
+export function filterAdhkarByPeriod(
+  dhikrs: Dhikr[],
+  period: AdhkarPeriod,
+): Dhikr[] {
+  const hidden = PERIOD_HIDDEN_GROUPS[period];
+  return dhikrs.filter((d) => d.group !== hidden);
 }
 
 export function getAdhkarById(id: string): Dhikr | undefined {
