@@ -4,7 +4,7 @@ import { useAppStore } from '@/store/useAppStore';
 import { House, Users, BookOpen, LogIn, UserPlus, Compass, FolderOpen } from 'lucide-react';
 import { SidebarCategory } from './SidebarCategory';
 import { sidebarSections } from './sidebarSections';
-import { useAuthStore } from '@/store/useAuthStore';
+import { useAuthStore } from '@/pages/auth/useAuthStore';
 
 interface SidebarNavigationProps {
   isMobile: boolean;

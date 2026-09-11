@@ -1,10 +1,10 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuthStore } from '@/store/useAuthStore';
+import { useAuthStore } from '@/pages/auth/useAuthStore';
 import { Button } from '@/components/UI/Button';
 import { Input } from '@/components/UI/Input';
 import { Card } from '@/components/UI/Card';
-import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
+import { GoogleSignInButton } from '@/pages/auth/GoogleSignInButton';
 
 export default function RegisterPage() {
   const [displayName, setDisplayName] = useState('');

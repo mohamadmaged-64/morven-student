@@ -12,7 +12,7 @@ import {
   MOCK_LEADERBOARDS,
   mockDelay,
 } from './mockData';
-import type { AuthUser } from '@/services/authApi';
+import type { AuthUser } from '@/pages/auth/authApi';
 import type { OwnProfile, Profile, AchievementCounters, AchievementSync } from '@/services/profileApi';
 import type { Group, GroupDetails } from '@/services/groupApi';
 

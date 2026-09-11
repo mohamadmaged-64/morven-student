@@ -1,10 +1,10 @@
 import { useEffect, useRef } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
-import { Header } from './Header';
+import { Header } from './Header/Header';
 import { Sidebar } from './Sidebar/Sidebar';
-import { PomodoroTimerService } from '@/components/PomodoroTimerService';
-import { ToolErrorBoundary } from '@/components/Tool/ToolErrorBoundary';
-import Footer from './Footer';
+import { PomodoroTimerService } from '@/pages/tools/GeneralTools/Pomodoro/PomodoroTimerService';
+import { ToolErrorBoundary } from '@/pages/tools/ToolErrorBoundary';
+import Footer from './Footer/Footer';
 
 export function MainLayout() {
   const { pathname } = useLocation();

@@ -1,6 +1,6 @@
 import { Sun, Moon } from 'lucide-react';
 import { useThemeStore } from '@/store/useThemeStore';
-import { useAuthStore } from '@/store/useAuthStore';
+import { useAuthStore } from '@/pages/auth/useAuthStore';
 
 interface SidebarFooterProps {
   showText: boolean;

@@ -3,15 +3,15 @@ import { motion } from 'framer-motion';
 import { Card } from '@/components/UI/Card';
 import { Button } from '@/components/UI/Button';
 import { Badge } from '@/components/UI/Badge';
-import { Avatar } from '@/components/connect/Avatar';
+import { Avatar } from '@/pages/connect/Avatar';
 import { useAppStore } from '@/store/useAppStore';
 import {
   listDhikrSubmissions,
   approveDhikrSubmission,
   rejectDhikrSubmission,
   type AdminDhikrSubmission,
-} from '@/services/adhkarApi';
-import { ADHKARS, CATEGORY_META } from '@/data/adhkar';
+} from '@/pages/tools/GeneralTools/Adhkar/adhkarApi';
+import { ADHKARS, CATEGORY_META } from '@/pages/tools/GeneralTools/Adhkar/adhkar';
 import {
   ChevronRight,
   BookmarkPlus,

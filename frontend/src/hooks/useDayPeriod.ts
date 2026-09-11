@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getAdhkarPeriod, type AdhkarPeriod } from '@/data/adhkar';
+import { getAdhkarPeriod, type AdhkarPeriod } from '@/pages/tools/GeneralTools/Adhkar/adhkar';
 
 export function getNextPeriodBoundary(from: Date): Date {
   const next = new Date(from);

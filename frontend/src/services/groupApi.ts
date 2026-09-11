@@ -1,4 +1,4 @@
-import { authRequest, authedFetch } from './authApi';
+import { authRequest, authedFetch } from '@/pages/auth/authApi';
 import { API_BASE } from './apiBase';
 import { isPreviewMode } from '@/dev/previewMode';
 import {

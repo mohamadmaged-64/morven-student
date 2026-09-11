@@ -5,7 +5,7 @@ import { Input } from '@/components/UI/Input';
 import { Card } from '@/components/UI/Card';
 import { isPreviewMode } from '@/dev/previewMode';
 import { mockRequestPasswordReset } from '@/dev/mockApi';
-import { requestPasswordReset } from '@/services/authApi';
+import { requestPasswordReset } from '@/pages/auth/authApi';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');

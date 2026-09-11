@@ -1,4 +1,4 @@
-import { authRequest } from './authApi';
+import { authRequest } from '@/pages/auth/authApi';
 
 export interface Suggestion {
   id: string;

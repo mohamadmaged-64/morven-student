@@ -4,9 +4,9 @@ import { motion } from 'framer-motion';
 import { Card } from '@/components/UI/Card';
 import { Button } from '@/components/UI/Button';
 import { Badge } from '@/components/UI/Badge';
-import { Avatar } from '@/components/connect/Avatar';
-import { listUsers, updateUserRole, type AdminUser } from '@/services/adminApi';
-import { useAuthStore } from '@/store/useAuthStore';
+import { Avatar } from '@/pages/connect/Avatar';
+import { listUsers, updateUserRole, type AdminUser } from '@/pages/admin/adminApi';
+import { useAuthStore } from '@/pages/auth/useAuthStore';
 import { ChevronLeft, Shield, User, RefreshCw } from 'lucide-react';
 
 const fadeUp = {

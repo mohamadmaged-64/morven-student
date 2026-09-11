@@ -4,10 +4,10 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import AdminDhikrSubmissionsPage from '@/pages/admin/AdminDhikrSubmissionsPage';
 import { useAppStore } from '@/store/useAppStore';
-import { ADHKARS } from '@/data/adhkar';
-import type { AdminDhikrSubmission } from '@/services/adhkarApi';
+import { ADHKARS } from '@/pages/tools/GeneralTools/Adhkar/adhkar';
+import type { AdminDhikrSubmission } from '@/pages/tools/GeneralTools/Adhkar/adhkarApi';
 
-vi.mock('@/services/adhkarApi', () => ({
+vi.mock('@/pages/tools/GeneralTools/Adhkar/adhkarApi', () => ({
   listDhikrSubmissions: vi.fn(),
   approveDhikrSubmission: vi.fn(),
   rejectDhikrSubmission: vi.fn(),
@@ -19,7 +19,7 @@ import {
   listDhikrSubmissions,
   approveDhikrSubmission,
   rejectDhikrSubmission,
-} from '@/services/adhkarApi';
+} from '@/pages/tools/GeneralTools/Adhkar/adhkarApi';
 const mockedList = vi.mocked(listDhikrSubmissions);
 const mockedApprove = vi.mocked(approveDhikrSubmission);
 const mockedReject = vi.mocked(rejectDhikrSubmission);

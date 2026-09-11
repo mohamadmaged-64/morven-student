@@ -5,7 +5,7 @@ import { Card } from '@/components/UI/Card';
 import { Button } from '@/components/UI/Button';
 import { Input, TextArea, Select } from '@/components/UI/Input';
 import { getOwnProfile, updateOwnProfile, uploadAvatar, removeAvatar, type OwnProfile } from '@/services/profileApi';
-import { useAuthStore } from '@/store/useAuthStore';
+import { useAuthStore } from '@/pages/auth/useAuthStore';
 import { API_BASE } from '@/services/apiBase';
 import { ChevronLeft, User, Shield, LogOut, Camera, Trash2, Check, X } from 'lucide-react';
 

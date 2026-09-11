@@ -1,5 +1,5 @@
 import { io, Socket } from 'socket.io-client';
-import { getAccessToken, refreshTokenIfNeeded, setTokenRotationHandler } from './authApi';
+import { getAccessToken, refreshTokenIfNeeded, setTokenRotationHandler } from '@/pages/auth/authApi';
 import { isPreviewMode } from '@/dev/previewMode';
 import { API_BASE } from './apiBase';
 

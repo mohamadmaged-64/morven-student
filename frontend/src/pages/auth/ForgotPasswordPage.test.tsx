@@ -3,14 +3,14 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import ForgotPasswordPage from '@/pages/auth/ForgotPasswordPage';
 
-vi.mock('@/services/authApi', () => ({
+vi.mock('@/pages/auth/authApi', () => ({
   requestPasswordReset: vi.fn(),
 }));
 vi.mock('@/dev/previewMode', () => ({
   isPreviewMode: () => false,
 }));
 
-import { requestPasswordReset } from '@/services/authApi';
+import { requestPasswordReset } from '@/pages/auth/authApi';
 
 const mockedRequestPasswordReset = vi.mocked(requestPasswordReset);
 

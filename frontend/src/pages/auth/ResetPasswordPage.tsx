@@ -5,7 +5,7 @@ import { Input } from '@/components/UI/Input';
 import { Card } from '@/components/UI/Card';
 import { isPreviewMode } from '@/dev/previewMode';
 import { mockResetPassword } from '@/dev/mockApi';
-import { resetPassword } from '@/services/authApi';
+import { resetPassword } from '@/pages/auth/authApi';
 
 export default function ResetPasswordPage() {
   const [searchParams] = useSearchParams();

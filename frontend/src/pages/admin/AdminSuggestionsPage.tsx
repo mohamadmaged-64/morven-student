@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { Card } from '@/components/UI/Card';
 import { Button } from '@/components/UI/Button';
 import { Badge } from '@/components/UI/Badge';
-import { Avatar } from '@/components/connect/Avatar';
+import { Avatar } from '@/pages/connect/Avatar';
 import { listSuggestions, type AdminSuggestion } from '@/services/suggestionApi';
 import { ChevronLeft, Lightbulb, RefreshCw, MessageSquareText } from 'lucide-react';
 

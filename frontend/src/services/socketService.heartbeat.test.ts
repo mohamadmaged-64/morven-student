@@ -36,7 +36,7 @@ vi.mock('./apiBase', () => ({
     return state.base;
   },
 }));
-vi.mock('./authApi', () => ({
+vi.mock('@/pages/auth/authApi', () => ({
   getAccessToken: () => state.token,
   setTokenRotationHandler: () => {},
   refreshTokenIfNeeded: () => Promise.resolve(true),
