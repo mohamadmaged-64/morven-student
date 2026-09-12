@@ -127,7 +127,7 @@ export default function ResourcesPage() {
                 icon={<Plus className="w-4 h-4" />}
                 onClick={() => setShowCreate(true)}
                 aria-label="إنشاء مورد جديد"
-                className="shrink-0"
+                className="shrink-0 bg-gradient-to-br from-amber-400 to-orange-500 hover:from-amber-500 hover:to-orange-600 !shadow-amber-500/25 dark:!shadow-amber-500/40"
               >
                 {null}
               </Button>
@@ -138,7 +138,7 @@ export default function ResourcesPage() {
                 icon={<Info className="w-4 h-4" />}
                 onClick={() => setShowInfo(true)}
                 aria-label="حول الموارد"
-                className="shrink-0"
+                className="shrink-0 bg-gradient-to-br from-amber-400 to-orange-500 hover:from-amber-500 hover:to-orange-600 !shadow-amber-500/25 dark:!shadow-amber-500/40"
               >
                 {null}
               </Button>
