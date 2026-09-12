@@ -77,7 +77,6 @@ export function ReciterSelector({
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder="بحث عن قارئ..."
                     className="w-full pl-9 pr-3 py-2 text-sm rounded-lg bg-gray-50 dark:bg-dark-surface border border-light-border dark:border-dark-border text-gray-800 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/50"
-                    autoFocus
                   />
                 </div>
               </div>
