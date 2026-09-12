@@ -1,3 +1,4 @@
+import { CalendarClock } from 'lucide-react';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
@@ -1477,7 +1478,7 @@ function ExamCountdownPage() {
       {/* Exam Cards */}
       {sortedExams.length === 0 ? (
         <EmptyState
-          icon={<span className="text-4xl">📚</span>}
+          icon={<CalendarClock className="w-9 h-9" />}
           title={'لا توجد امتحانات بعد'}
           description={'أضف امتحانك الأول لتبدأ العد التنازلي'}
           action={{ label: 'أضف أول امتحان', onClick: () => setShowAddModal(true) }}
